@@ -1,0 +1,5 @@
+build/*.js
+config/*.js
+test/**/*.js
+src/windy.js
+dist/

@@ -1,0 +1,14 @@
+{
+  "presets": [
+    ["es2015", { "loose": true, "modules": false }],
+    "stage-2"
+  ],
+  "plugins": [
+    "external-helpers",
+    "syntax-dynamic-import"
+  ],
+  "ignore": [
+    "dist/*.js"
+  ],
+  "comments": false
+}
