@@ -36,8 +36,8 @@ import ol3Echarts from 'wind-layer'
 目前可通过 [unpkg.com](https://unpkg.com/wind-layer/dist/windLayer.js) 获取最新版本的资源。
 
 ```bash
-https://unpkg.com/ol3-echarts/dist/windLayer.js
-https://unpkg.com/ol3-echarts/dist/windLayer.min.js
+https://unpkg.com/wind-layer/dist/windLayer.js
+https://unpkg.com/wind-layer/dist/windLayer.min.js
 ```
 
 #### [示例](//sakitam-fdd.github.io/wind-layer/)
