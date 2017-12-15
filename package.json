@@ -31,6 +31,7 @@
     "karma.tdd": "karma start build/karma.tdd.config.js"
   },
   "dependencies": {
+    "axios": "^0.17.1",
     "openlayers": "^4.5.0"
   },
   "devDependencies": {

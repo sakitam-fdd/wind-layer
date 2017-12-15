@@ -1,24 +1,6 @@
 import ol from 'openlayers'
 import Windy from './windy'
 
-/**
- * get parent container
- * @param selector
- */
-const getTarget = (selector) => {
-  let dom = (function () {
-    let found
-    return (document && /^#([\w-]+)$/.test(selector))
-      ? ((found = document.getElementById(RegExp.$1)) ? [found] : [])
-      : Array.prototype.slice.call(/^\.([\w-]+)$/.test(selector)
-        ? document.getElementsByClassName(RegExp.$1)
-        : /^[\w-]+$/.test(selector) ? document.getElementsByTagName(selector)
-          : document.querySelectorAll(selector)
-      )
-  })()
-  return dom
-}
-
 class WindyLayer {
   constructor (data, options = {}) {
     this.$options = options
@@ -41,30 +23,42 @@ class WindyLayer {
 
   setData (data) {
     this.$data = data
-    this.render()
+    this.getCanvasLayer()
     return this
   }
 
-  initLayer () {
-    if (!this.$container) {
-      this._createLayerContainer(this.$Map, this.$options)
-      this._resizeContainer()
+  getCanvasLayer () {
+    if (!this.$canvas) {
+      const layers = this.$Map.getLayers().getArray()
+      const layer = layers.find(element => {
+        return element.get('layerName') === this.$options.layerName
+      })
+      if (layer) {
+        this.layer_ = layer
+        this.layer_.once('postcompose', (event) => {
+          let ctx = event.context
+          this.$canvas = ctx
+          this.render()
+          ctx.restore()
+        }, this)
+      }
     }
   }
 
   render () {
-    if (!this.$canvas) {
-      this.initLayer()
+    if (!this.$canvas) this.getCanvasLayer()
+    if (this.$canvas && !this.$Windy) {
+      const size = this.$Map.getSize()
       this.$Windy = new Windy({
-        canvas: this.$canvas,
+        canvas: this.$canvas['canvas'],
+        width: size[0],
+        height: size[1],
         data: this.getData(),
         onDraw: () => {
-          // this.setCanvasUpdated()
         }
       })
       this.$Windy.start.apply(this.$Windy, this.getExtent())
     } else {
-      // this.prepareCanvas()
       this.$Windy.start.apply(this.$Windy, this.getExtent())
     }
     return this
@@ -77,8 +71,7 @@ class WindyLayer {
   appendTo (map) {
     if (map && map instanceof ol.Map) {
       this.$Map = map
-      this.$Map.once('postrender', this.render, this)
-      this.$Map.renderSync()
+      this.getCanvasLayer()
       this._unRegisterEvents()
       this._registerEvents()
     } else {
@@ -100,8 +93,6 @@ class WindyLayer {
    * handle map resize
    */
   onResize () {
-    this._resizeContainer()
-    this.render()
   }
 
   /**
@@ -172,42 +163,6 @@ class WindyLayer {
 
   _clearWind () {
     if (this.$Windy) this.$Windy.stop()
-  }
-
-  /**
-   * creat eclayer container
-   * @param map
-   * @param options
-   * @private
-   */
-  _createLayerContainer (map, options) {
-    const container = this.$canvas = this.$container = document.createElement('canvas')
-    container.style.position = 'absolute'
-    container.style.top = 0
-    container.style.left = 0
-    container.style.right = 0
-    container.style.bottom = 0
-    let _target = getTarget(options['target'])
-    if (_target && _target[0] && _target[0] instanceof Element) {
-      _target[0].appendChild(container)
-    } else {
-      let _target = getTarget('.ol-overlaycontainer')
-      if (_target && _target[0] && _target[0] instanceof Element) {
-        _target[0].appendChild(container)
-      } else {
-        map.getViewport().appendChild(container)
-      }
-    }
-  }
-
-  /**
-   * Reset the container size
-   * @private
-   */
-  _resizeContainer () {
-    const size = this.$Map.getSize()
-    this.$container.style.height = size[1] + 'px'
-    this.$container.style.width = size[0] + 'px'
   }
 }
 

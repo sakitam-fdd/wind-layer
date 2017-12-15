@@ -23,6 +23,7 @@
     target: 'map',
     layers: [
       new ol.layer.Tile({
+        layerName: 'baseLayer',
         preload: 4,
         source: new ol.source.OSM()
       })
@@ -34,9 +35,11 @@
       zoom: 5
     })
   });
-  axios.get('./out.json').then(function (res) {
+  axios.get('./demo.json').then(function (res) {
     if (res.data) {
-      var wind = new WindLayer(res.data)
+      var wind = new WindLayer(res.data, {
+        layerName: 'baseLayer'
+      })
       wind.appendTo(Maps)
     }
   })
