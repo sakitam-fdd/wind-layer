@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <style type="text/css">
+    #windy {
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+<canvas id="windy"></canvas>
+<script src="./windy.js"></script>
+<script src="../node_modules/axios/dist/axios.js"></script>
+<script type="text/javascript">
+  var canvas = document.getElementById('windy')
+
+  function getExtent () {
+    var size = [canvas.width, canvas.height]
+    return [
+      [[0, 0], [size[0], size[1]]],
+      size[0],
+      size[1],
+      [[-112.14843750000001, 30.44867367928756], [140.97656250000003, 63.860035895395306]]
+    ]
+  }
+
+  axios.get('./out.json').then(function (res) {
+    if (res.data) {
+      var layer = new Windy({
+        canvas: canvas,
+        data: res.data,
+        onDraw: function (event) {
+          console.log(event)
+        }
+      })
+      var extent = getExtent()
+      layer.start(extent[0], extent[1], extent[2], extent[3])
+    }
+  })
+</script>
+</body>
+</html>

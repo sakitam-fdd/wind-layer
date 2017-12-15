@@ -15,6 +15,13 @@ class WindyLayer {
      * windy 数据
      */
     this.$data = data
+
+    /**
+     * timer
+     * @type {null}
+     * @private
+     */
+    this._timer = null
   }
 
   getData () {
@@ -45,21 +52,33 @@ class WindyLayer {
     }
   }
 
+  /**
+   * bounds, width, height, extent
+   * @returns {*[]}
+   */
+  getExtent () {
+    const size = this.$Map.getSize()
+    const extent = this.$Map.getView().calculateExtent(size)
+    return [[[0, 0], [size[0], size[1]]], size[0], size[1], [[extent[0], extent[1]], [extent[2], extent[3]]]]
+  }
+
   render () {
     if (!this.$canvas) this.getCanvasLayer()
     if (this.$canvas && !this.$Windy) {
-      const size = this.$Map.getSize()
       this.$Windy = new Windy({
         canvas: this.$canvas['canvas'],
-        width: size[0],
-        height: size[1],
         data: this.getData(),
         onDraw: () => {
         }
       })
-      this.$Windy.start.apply(this.$Windy, this.getExtent())
-    } else {
-      this.$Windy.start.apply(this.$Windy, this.getExtent())
+      if (this._timer) window.clearTimeout(this._timer)
+      this._timer = window.setTimeout(() => {
+        const extent = this.getExtent()
+        this.$Windy.start(extent[0], extent[1], extent[2], extent[3])
+      }, 750)
+    } else if (this.$canvas && this.$Windy) {
+      const extent = this.getExtent()
+      this.$Windy.start(extent[0], extent[1], extent[2], extent[3])
     }
     return this
   }
@@ -80,70 +99,18 @@ class WindyLayer {
   }
 
   /**
-   * bounds, width, height, extent
-   * @returns {*[]}
-   */
-  getExtent () {
-    const size = this.$Map.getSize()
-    const extent = this.$Map.getView().calculateExtent(size)
-    return [[[0, 0], [size[0], size[1]]], size[0], size[1], [[extent[0], extent[1]], [extent[2], extent[3]]]]
-  }
-
-  /**
-   * handle map resize
-   */
-  onResize () {
-  }
-
-  /**
-   * handle zoom end events
-   */
-  onZoomEnd () {
-    if (!this.$options['hideOnZooming']) {
-    }
-  }
-
-  /**
-   * handle rotate end events
-   */
-  onDragRotateEnd () {
-    if (!this.$options['hideOnRotating']) {
-    }
-  }
-
-  /**
-   * handle move start events
-   */
-  onMoveStart () {
-    if (this.$options['hideOnMoving']) {
-    }
-  }
-
-  /**
-   * handle move end events
-   */
-  onMoveEnd () {
-    if (!this.$options['hideOnMoving']) {
-    }
-  }
-
-  onCenterChange () {
-    //
-  }
-
-  /**
    * register events
    * @private
    */
   _registerEvents () {
     const Map = this.$Map
     const view = Map.getView()
-    Map.on('change:size', this.onResize, this)
-    view.on('change:resolution', this.onZoomEnd, this)
-    view.on('change:center', this.onCenterChange, this)
-    view.on('change:rotation', this.onDragRotateEnd, this)
-    Map.on('movestart', this.onMoveStart, this)
-    Map.on('moveend', this.onMoveEnd, this)
+    Map.on('change:size', this.render, this)
+    Map.on('precompose', this.render, this)
+    view.on('change:center', this.render, this)
+    view.on('change:rotation', this.render, this)
+    Map.on('movestart', this.render, this)
+    Map.on('moveend', this.render, this)
   }
 
   /**
@@ -153,15 +120,16 @@ class WindyLayer {
   _unRegisterEvents () {
     const Map = this.$Map
     const view = Map.getView()
-    Map.un('change:size', this.onResize, this)
-    view.un('change:resolution', this.onZoomEnd, this)
-    view.un('change:center', this.onCenterChange, this)
-    view.un('change:rotation', this.onDragRotateEnd, this)
-    Map.un('movestart', this.onMoveStart, this)
-    Map.un('moveend', this.onMoveEnd, this)
+    Map.un('change:size', this.render, this)
+    Map.un('precompose', this.render, this)
+    view.un('change:center', this.render, this)
+    view.un('change:rotation', this.render, this)
+    Map.un('movestart', this.render, this)
+    Map.un('moveend', this.render, this)
   }
 
   _clearWind () {
+    if (this._timer) window.clearTimeout(this._timer)
     if (this.$Windy) this.$Windy.stop()
   }
 }

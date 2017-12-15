@@ -25,7 +25,11 @@
       new ol.layer.Tile({
         layerName: 'baseLayer',
         preload: 4,
-        source: new ol.source.OSM()
+        source: new ol.source.OSM({
+          url: "http://{a-c}.sm.mapstack.stamen.com/" +
+          "(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/" +
+          "{z}/{x}/{y}.png"
+        })
       })
     ],
     loadTilesWhileAnimating: true,
@@ -35,7 +39,7 @@
       zoom: 5
     })
   });
-  axios.get('./demo.json').then(function (res) {
+  axios.get('./out.json').then(function (res) {
     if (res.data) {
       var wind = new WindLayer(res.data, {
         layerName: 'baseLayer'
