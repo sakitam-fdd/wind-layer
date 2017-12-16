@@ -28,7 +28,7 @@ npm run karma.cover
 
 ```bash
 npm install wind-layer --save
-import ol3Echarts from 'wind-layer'
+import WindLayer from 'wind-layer'
 ```
 
 #### cdn

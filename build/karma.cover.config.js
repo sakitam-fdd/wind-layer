@@ -6,7 +6,7 @@
 const base = require('./karma.base.config.js')
 module.exports = function (config) {
   const options = Object.assign(base, {
-    browsers: ['Chrome'],
+    browsers: ['PhantomJS'],
     reporters: ['mocha', 'coverage'],
     logLevel: config.LOG_INFO,
     coverageReporter: {

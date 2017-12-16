@@ -30,14 +30,15 @@ const genConfig = (opts) => {
         }),
         cjs()
       ],
-      external: ['openlayers']
+      external: ['openlayers', 'd3']
     },
     output: {
       file: opts.file,
       format: opts.format,
       banner,
       globals: {
-        openlayers: 'ol'
+        openlayers: 'ol',
+        d3: 'd3'
       },
       name: _package.namespace
     }

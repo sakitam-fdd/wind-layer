@@ -10,6 +10,7 @@
  interpolation and animation process.
  */
 
+/* istanbul ignore next */
 const Windy = function (params) {
   const VELOCITY_SCALE = 0.005 * (Math.pow(window.devicePixelRatio,1/3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
   const MIN_TEMPERATURE_K = 261.15;                                            // step size of particle intensity color scale

@@ -11,14 +11,13 @@ module.exports = {
 
   // frameworks to use
   // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-  frameworks: ['mocha', 'expect', 'sinon', 'happen'],
+  frameworks: ['mocha', 'expect'],
 
   // list of files / patterns to load in the browser
   files: [
     'node_modules/openlayers/dist/ol.js',
     'src/**/*.js',
-    // _package.unpkg,
-    'test/**/*.js'
+    'test/*.js'
   ],
 
   // list of files to exclude
@@ -28,7 +27,7 @@ module.exports = {
   // preprocess matching files before serving them to the browser
   // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
   preprocessors: {
-    'src/**/*.js': ['rollup', 'coverage']
+    'src/*.js': ['rollup', 'coverage']
   },
 
   rollupPreprocessor: {
