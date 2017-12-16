@@ -42,12 +42,12 @@ https://unpkg.com/wind-layer/dist/windLayer.min.js
 
 ## 如何获取数据
 
-天气数据由[全球预报系统]（http://en.wikipedia.org/wiki/Global_Forecast_System）（GFS）生成，
+天气数据由[全球预报系统](http://en.wikipedia.org/wiki/Global_Forecast_System)（GFS）生成，
 由美国国家气象局管理。 预测每天产生四次，并可用于
-从[NOMADS]下载（http://nomads.ncep.noaa.gov/）。 这些文件位于[GRIB2]（http://en.wikipedia.org/wiki/GRIB）
-格式并包含超过[300条记录]（http://www.nco.ncep.noaa.gov/pmb/products/gfs/gfs.t00z.pgrbf00.grib2.shtml）。
+从[NOMADS](http://nomads.ncep.noaa.gov/)下载。 这些文件位于[GRIB2](http://en.wikipedia.org/wiki/GRIB)
+格式并包含超过[300条记录](http://www.nco.ncep.noaa.gov/pmb/products/gfs/gfs.t00z.pgrbf00.grib2.shtml)。
 我们只需要这些记录中的一小部分就可以在特定的等压线上可视化风资料。 下面的命令下载
-1000 hPa风向量，并使用[grib2json]（https://github.com/cambecc/grib2json）将它们转换为JSON格式。
+1000 hPa风向量，并使用[grib2json](https://github.com/cambecc/grib2json)将它们转换为JSON格式。
 
 ```bash
 YYYYMMDD=<a date, for example: 20140101>
