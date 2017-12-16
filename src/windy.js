@@ -10,7 +10,6 @@
  interpolation and animation process.
  */
 
-/* istanbul ignore next */
 const Windy = function (params) {
   const VELOCITY_SCALE = 0.005 * (Math.pow(window.devicePixelRatio,1/3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
   const MIN_TEMPERATURE_K = 261.15;                                            // step size of particle intensity color scale
@@ -524,8 +523,6 @@ const Windy = function (params) {
 
   return windy;
 };
-
-// shim layer with setTimeout fallback
 window.requestAnimationFrame = (function () {
   return window.requestAnimationFrame ||
     window.webkitRequestAnimationFrame ||
@@ -536,11 +533,9 @@ window.requestAnimationFrame = (function () {
       return window.setTimeout(callback, 1000 / FRAME_RATE);
     };
 })();
-
 if(!window.cancelAnimationFrame) {
   window.cancelAnimationFrame = function (id) {
     clearTimeout(id);
   };
 }
-
 export default Windy

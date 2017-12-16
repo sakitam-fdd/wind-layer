@@ -42,7 +42,4 @@
 git clone https://github.com/sakitam-fdd/wind-layer.git
 npm install
 npm run dev
-npm run build
-npm run karma.test
-npm run karma.cover
 ```

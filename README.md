@@ -3,7 +3,6 @@
 > wind-layer
 
 [![Build Status](https://travis-ci.org/sakitam-fdd/wind-layer.svg?branch=master)](https://www.travis-ci.org/sakitam-fdd/wind-layer)
-[![codecov](https://codecov.io/gh/sakitam-fdd/wind-layer/branch/master/graph/badge.svg)](https://codecov.io/gh/sakitam-fdd/wind-layer)
 [![NPM downloads](https://img.shields.io/npm/dm/wind-layer.svg)](https://npmjs.org/package/wind-layer)
 ![JS gzip size](http://img.badgesize.io/https://unpkg.com/wind-layer/dist/windLayer.js?compression=gzip&label=gzip%20size:%20JS)
 [![Npm package](https://img.shields.io/npm/v/wind-layer.svg)](https://www.npmjs.org/package/wind-layer)
@@ -18,8 +17,6 @@ git clone https://github.com/sakitam-fdd/wind-layer.git
 npm install
 npm run dev
 npm run build
-npm run karma.test
-npm run karma.cover
 ```
 
 ### 安装
@@ -40,6 +37,28 @@ https://unpkg.com/wind-layer/dist/windLayer.js
 https://unpkg.com/wind-layer/dist/windLayer.min.js
 ```
 
-#### [示例](//sakitam-fdd.github.io/wind-layer/)
-#### [文档](//sakitam-fdd.github.io/wind-layer/docs/)
+#### [示例](//sakitam-fdd.github.io/wind-layer/examples)
+#### [文档](//sakitam-fdd.github.io/wind-layer/)
 
+## 如何获取数据
+
+天气数据由[全球预报系统]（http://en.wikipedia.org/wiki/Global_Forecast_System）（GFS）生成，
+由美国国家气象局管理。 预测每天产生四次，并可用于
+从[NOMADS]下载（http://nomads.ncep.noaa.gov/）。 这些文件位于[GRIB2]（http://en.wikipedia.org/wiki/GRIB）
+格式并包含超过[300条记录]（http://www.nco.ncep.noaa.gov/pmb/products/gfs/gfs.t00z.pgrbf00.grib2.shtml）。
+我们只需要这些记录中的一小部分就可以在特定的等压线上可视化风资料。 下面的命令下载
+1000 hPa风向量，并使用[grib2json]（https://github.com/cambecc/grib2json）将它们转换为JSON格式。
+
+```bash
+YYYYMMDD=<a date, for example: 20140101>
+curl "http://nomads.ncep.noaa.gov/cgi-bin/filter_gfs.pl?file=gfs.t00z.pgrb2.1p00.f000&lev_10_m_above_ground=on&var_UGRD=on&var_VGRD=on&dir=%2Fgfs.${YYYYMMDD}00" -o gfs.t00z.pgrb2.1p00.f000
+grib2json -d -n -o current-wind-surface-level-gfs-1.0.json gfs.t00z.pgrb2.1p00.f000
+cp current-wind-surface-level-gfs-1.0.json <earth-git-repository>/public/data/weather/current
+```
+
+## Resources
+
+* https://github.com/cambecc/earth
+* http://earth.nullschool.net
+* https://github.com/Esri/wind-js
+* https://github.com/danwild/wind-js-leaflet

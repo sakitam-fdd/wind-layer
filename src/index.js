@@ -88,13 +88,15 @@ class WindyLayer {
     if (!this.$canvas && !this.layer_) {
       const extent = this.getMapExtent()
       this.layer_ = new ol.layer.Image({
+        layerName: this.$options.layerName,
         minResolution: this.$options.minResolution,
         maxResolution: this.$options.maxResolution,
         zIndex: this.$options.zIndex,
         extent: extent,
         source: new ol.source.ImageCanvas({
           canvasFunction: this.canvasFunction.bind(this),
-          projection: 'EPSG:4326'
+          projection: (this.$options.hasOwnProperty('projection') ? this.$options.ratio : 'EPSG:3857'),
+          ratio: (this.$options.hasOwnProperty('ratio') ? this.$options.ratio : 1.5)
         })
       })
       this.$Map.addLayer(this.layer_)
@@ -107,6 +109,7 @@ class WindyLayer {
    * re render
    */
   reRender () {
+    if (!this.layer_) return
     const extent = this.getMapExtent()
     this.layer_.setExtent(extent)
   }
@@ -135,7 +138,8 @@ class WindyLayer {
    */
   getExtent () {
     const size = this.$Map.getSize()
-    const extent = this.$Map.getView().calculateExtent(size)
+    const _extent = this.$Map.getView().calculateExtent(size)
+    const extent = ol.proj.transformExtent(_extent, 'EPSG:3857', 'EPSG:4326')
     return [[[0, 0], [size[0], size[1]]], size[0], size[1], [[extent[0], extent[1]], [extent[2], extent[3]]]]
   }
 
@@ -169,6 +173,36 @@ class WindyLayer {
   _clearWind () {
     if (this._timer) window.clearTimeout(this._timer)
     if (this.$Windy) this.$Windy.stop()
+  }
+
+  /**
+   * handle move start events
+   */
+  onMoveStart () {
+    if (!this.$Windy) return
+    this.$Windy.stop()
+  }
+
+  /**
+   * handle move end events
+   */
+  onMoveEnd () {
+    if (!this.$Windy) return
+    this.$Windy.start()
+  }
+
+  onEvents () {
+    const map = this.$Map
+    map.on('change:size', this.reRender, this)
+    map.on('movestart', this.onMoveStart, this)
+    map.on('moveend', this.onMoveEnd, this)
+  }
+
+  unEvents () {
+    const map = this.$Map
+    map.un('change:size', this.reRender, this)
+    map.un('movestart', this.onMoveStart, this)
+    map.un('moveend', this.onMoveEnd, this)
   }
 }
 
