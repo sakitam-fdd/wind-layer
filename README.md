@@ -1,6 +1,6 @@
 # wind-layer
 
-> wind-layer
+> a openlayers extension to windjs
 
 [![Build Status](https://travis-ci.org/sakitam-fdd/wind-layer.svg?branch=master)](https://www.travis-ci.org/sakitam-fdd/wind-layer)
 [![NPM downloads](https://img.shields.io/npm/dm/wind-layer.svg)](https://npmjs.org/package/wind-layer)
