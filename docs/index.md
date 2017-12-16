@@ -50,4 +50,4 @@ wind.appendTo(Maps)
 | projection | 投影 | `String` | 现在默认支持且仅支持 `EPSG:3857` |
 | ratio | 画布和地图窗口的比值 | `Number` | 现在默认 `1.5` |
 
-<iframe width="100%" height="430" src="//jsfiddle.net/sakitamfdd/pjz8cuxw/embedded/result,html,js/?bodyColor=fff" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+<iframe width="100%" height="430" src="//jsfiddle.net/sakitamfdd/hgvdu76j/embedded/" allowpaymentrequest allowfullscreen="allowfullscreen" frameborder="0"></iframe>

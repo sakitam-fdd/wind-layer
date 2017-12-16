@@ -37,7 +37,10 @@ https://unpkg.com/wind-layer/dist/windLayer.js
 https://unpkg.com/wind-layer/dist/windLayer.min.js
 ```
 
-#### [示例](//sakitam-fdd.github.io/wind-layer/examples)
+#### ![示例](https://sakitam-fdd.github.io/wind-layer/windy.jpg)
+
+<iframe width="100%" height="430" src="//jsfiddle.net/sakitamfdd/hgvdu76j/embedded/" allowpaymentrequest allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+
 #### [文档](//sakitam-fdd.github.io/wind-layer/)
 
 ## 如何获取数据
