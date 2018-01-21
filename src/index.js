@@ -52,8 +52,15 @@ class WindyLayer {
    * @returns {WindyLayer}
    */
   setData (data) {
+    if (!this.$Map) return this
     this.$data = data
-    this.getCanvasLayer()
+    if (!this.$Windy && this.$canvas) {
+      this.render(this.$canvas)
+      this.$Map.renderSync()
+    } else {
+      const extent = this.getExtent()
+      this.$Windy.update(this.getData(), extent[0], extent[1], extent[2], extent[3])
+    }
     return this
   }
 
@@ -62,18 +69,18 @@ class WindyLayer {
    * @returns {WindyLayer}
    */
   render (canvas) {
+    if (!this.getData()) return this
     if (canvas && !this.$Windy) {
       if (this._timer) window.clearTimeout(this._timer)
       this._timer = window.setTimeout(() => {
         this.$Windy = new Windy({
           canvas: canvas,
-          data: this.getData(),
-          onDraw: () => {
-          }
+          data: this.getData()
         })
         const extent = this.getExtent()
         this.$Windy.start(extent[0], extent[1], extent[2], extent[3])
-      }, 750)
+        this.onEvents()
+      }, 0)
     } else if (canvas && this.$Windy) {
       const extent = this.getExtent()
       this.$Windy.start(extent[0], extent[1], extent[2], extent[3])
@@ -125,8 +132,7 @@ class WindyLayer {
    */
   canvasFunction (extent, resolution, pixelRatio, size, projection) {
     if (!this.$canvas) {
-      const canvas = createCanvas(size[0], size[1])
-      this.$canvas = canvas
+      this.$canvas = createCanvas(size[0], size[1])
     }
     this.render(this.$canvas)
     return this.$canvas
@@ -149,8 +155,7 @@ class WindyLayer {
    */
   getMapExtent () {
     const size = this.$Map.getSize()
-    const extent = this.$Map.getView().calculateExtent(size)
-    return extent
+    return this.$Map.getView().calculateExtent(size)
   }
 
   /**
@@ -170,39 +175,38 @@ class WindyLayer {
    * clear windy layer
    * @private
    */
-  _clearWind () {
+  clearWind () {
+    if (!this.$Map) return
     if (this._timer) window.clearTimeout(this._timer)
     if (this.$Windy) this.$Windy.stop()
+    this.$Map.un('precompose', this.reRender, this)
+    this.$Map.un('change:size', this.onChangeSize, this)
+    this.$Map.removeLayer(this.layer_)
+    delete this.$Map
+    delete this._timer
+    delete this.$Windy
+    delete this.layer_
+    delete this.$canvas
   }
 
   /**
-   * handle move start events
+   * handle map size change
    */
-  onMoveStart () {
+  onChangeSize () {
     if (!this.$Windy) return
-    this.$Windy.stop()
-  }
-
-  /**
-   * handle move end events
-   */
-  onMoveEnd () {
-    if (!this.$Windy) return
-    this.$Windy.start()
+    const extent = this.getExtent()
+    this.$Windy.start(extent[0], extent[1], extent[2], extent[3])
   }
 
   onEvents () {
     const map = this.$Map
-    map.on('change:size', this.reRender, this)
-    map.on('movestart', this.onMoveStart, this)
-    map.on('moveend', this.onMoveEnd, this)
+    this.unEvents()
+    map.on('change:size', this.onChangeSize, this)
   }
 
   unEvents () {
     const map = this.$Map
-    map.un('change:size', this.reRender, this)
-    map.un('movestart', this.onMoveStart, this)
-    map.un('moveend', this.onMoveEnd, this)
+    map.un('change:size', this.onChangeSize, this)
   }
 }
 
