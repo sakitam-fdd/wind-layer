@@ -50,4 +50,18 @@ wind.appendTo(Maps)
 | projection | 投影 | `String` | 现在默认支持且仅支持 `EPSG:3857` |
 | ratio | 画布和地图窗口的比值 | `Number` | 现在默认 `1.5` |
 
+#### methods
+
+##### setData(data)
+
+> 重新设置气象图层数据，会触发重新渲染
+
+##### getData(data)
+
+> 获取当前图层的气象数据
+
+##### clearWind()
+
+> 清除windy图层
+
 <iframe width="100%" height="430" src="//jsfiddle.net/sakitamfdd/hgvdu76j/embedded/" allowpaymentrequest allowfullscreen="allowfullscreen" frameborder="0"></iframe>
