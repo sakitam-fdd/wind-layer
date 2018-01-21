@@ -42,7 +42,7 @@ https://cdn.jsdelivr.net/npm/wind-layer@0.0.2/dist/windLayer.js
 https://cdn.jsdelivr.net/npm/wind-layer@0.0.2/dist/windLayer.min.js
 ```
 
-#### [![示例](//sakitam-fdd.github.io/wind-layer/windy.jpg)](//jsfiddle.net/sakitamfdd/hgvdu76j/?utm_source=website&utm_medium=embed&utm_campaign=hgvdu76j)
+#### [![示例](https://sakitam-fdd.github.io/wind-layer/windy.jpg)](https://jsfiddle.net/sakitamfdd/hgvdu76j/?utm_source=website&utm_medium=embed&utm_campaign=hgvdu76j)
 
 #### [文档](//sakitam-fdd.github.io/wind-layer/)
 
