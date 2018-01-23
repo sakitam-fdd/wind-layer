@@ -11,8 +11,12 @@ router.get('/', async (ctx, next) => {
   }
 })
 
-router.get('/getData', controller.getData)
+router.get('/autofetch', controller.autoFetch)
 
-router.get('/getGribData', controller.getGribData)
+router.get('/stopautofetch', controller.stopAutoFetch)
+
+router.get('/getdata', controller.getData)
+
+router.get('/gribdata', controller.getGribData)
 
 module.exports = router
