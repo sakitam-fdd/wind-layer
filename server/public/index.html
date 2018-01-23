@@ -76,7 +76,7 @@
   var wind, data;
   axios.get('http://localhost:3000/getData', {
     params: {
-      timer: Date.parse(new Date())
+      timer: moment.utc()
     }
   }).then(function (res) {
     if (res.data) {

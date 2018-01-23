@@ -4,15 +4,15 @@ const router = require('koa-router')()
 router.get('/', async (ctx, next) => {
   ctx.status = 200
   ctx.body = {
-    code:0,
+    code: 0,
     success: true,
-    message:'success',
+    message: 'success',
     data: 'success'
   }
 })
 
 router.get('/getData', controller.getData)
 
-router.get('/getGrib2Data', controller.getGribData)
+router.get('/getGribData', controller.getGribData)
 
 module.exports = router
