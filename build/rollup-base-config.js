@@ -19,7 +19,10 @@ const genConfig = (opts) => {
     input: {
       input: resolve('src/index.js'),
       plugins: [
-        eslint((eslintConfig => eslintConfig.formatter = friendlyFormatter)(eslintConfig)),
+        eslint(Object.assign({}, eslintConfig, {
+          formatter: friendlyFormatter,
+          exclude: [resolve('node_modules')]
+        })),
         babel({
           exclude: 'node_modules/**' // only transpile our source code
         }),
@@ -30,15 +33,14 @@ const genConfig = (opts) => {
         }),
         cjs()
       ],
-      external: ['openlayers', 'd3']
+      external: ['openlayers']
     },
     output: {
       file: opts.file,
       format: opts.format,
       banner,
       globals: {
-        openlayers: 'ol',
-        d3: 'd3'
+        openlayers: 'ol'
       },
       name: _package.namespace
     }

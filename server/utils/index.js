@@ -1,7 +1,8 @@
 const fs = require('fs')
+const path = require('path')
 
 const roundHours = (hours, interval) => {
-  if(interval > 0){
+  if (interval > 0) {
     const result = (Math.floor(hours / interval) * interval)
     return result < 10 ? '0' + result.toString() : result
   } else {
@@ -27,7 +28,14 @@ const checkFileExists = (path, mkdir) => {
   }
 }
 
+/**
+ * resolve path
+ * @param _path
+ */
+const resolve = _path => path.resolve(__dirname, '..', _path)
+
 module.exports = {
+  resolve,
   roundHours,
   checkFileExists
 }
