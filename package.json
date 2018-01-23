@@ -35,11 +35,11 @@
   "dependencies": {
     "lodash": "^4.17.4",
     "moment": "^2.20.1",
-    "ol": "^4.6.4",
     "openlayers": "^4.5.0",
     "weacast-grib2json": "^0.2.2"
   },
   "devDependencies": {
+    "pm2": "^2.9.2",
     "axios": "^0.17.1",
     "babel-core": "^6.26.0",
     "babel-eslint": "^7.2.3",

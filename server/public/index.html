@@ -74,9 +74,15 @@
     })
   });
   var wind, data;
-  axios.get('http://localhost:3000/getData', {
+  console.log(moment.utc())
+  // var time = moment(moment.utc()).format('YYYYMMDD')
+  // var hours = moment(moment.utc()).hour()
+  // var result = (Math.floor(hours / 6) * 6)
+  // var data = result < 10 ? '0' + result.toString() : result
+  // console.log(time, data, result)
+  axios.get('http://localhost:3000/getdata', {
     params: {
-      timer: moment.utc()
+      time: moment.utc()
     }
   }).then(function (res) {
     if (res.data) {

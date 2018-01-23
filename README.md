@@ -62,6 +62,24 @@ grib2json -d -n -o current-wind-surface-level-gfs-1.0.json gfs.t00z.pgrb2.1p00.f
 cp current-wind-surface-level-gfs-1.0.json <earth-git-repository>/public/data/weather/current
 ```
 
+## 使用node服务获取数据
+
+> 默认运行在3000端口
+
+```bash
+npm run dev:server // 调试环境启动服务
+npm run prd:server // 部署环境启动服务
+```
+
+### 目前共暴露4个接口
+
+| url | params | desc |
+| :--- | :--- | :---------- |
+| `autofetch` | `null` | 无需参数，开启自动抓取程序，默认30分钟抓取一次数据源 |
+| `stopautofetch` | `null` | 停止自动抓取程序 |
+| `getdata` | `Object` | 获取json数据，存在转换过的直接返回，若只存在元数据则转换后返回，若元数据也不存在则抓取转换后再响应 |
+| `gribdata` | `Object` | 获取grib数据（强制抓取数据） |
+
 ## Resources
 
 * https://github.com/cambecc/earth
