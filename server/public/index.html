@@ -76,7 +76,7 @@
   var wind, data;
   axios.get('http://localhost:3000/gribdata', {
     params: {
-      time: (new Date()).getTime()
+      time: moment.utc()
     }
   }).then(function (res) {
     if (res.data) {

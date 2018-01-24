@@ -2,6 +2,12 @@ const fs = require('fs')
 const path = require('path')
 const moment = require('moment')
 
+/**
+ * 六小时执行一次 （00 || 06 || 12 || 18）
+ * @param hours
+ * @param interval
+ * @returns {*}
+ */
 const roundHours = (hours, interval) => {
   if (interval > 0) {
     const result = (Math.floor(hours / interval) * interval)
