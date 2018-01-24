@@ -6,6 +6,9 @@ const utils = require('../utils/index')
 const config = require('../config/config')
 let fetchTimer = null
 
+utils.checkFolderExist(utils.resolve(config.sourceDataDir), true)
+utils.checkFolderExist(utils.resolve(config.parseDataDir), true)
+
 /**
  * 获取数据源文件
  * @param ctx
@@ -13,58 +16,68 @@ let fetchTimer = null
  * @returns {Promise<void>}
  */
 const getGribData = async (ctx, next) => {
+  const _time = ctx.query.time && parseInt(ctx.query.time)
   try {
-    const hours = utils.roundHours(moment(ctx.query.time).hour(), 6)
-    const stamp = moment(ctx.query.time).format('YYYYMMDD') + hours
-    console.log(stamp)
-    const response = await request({
-      method: 'get',
-      url: 'http://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_1p00.pl',
-      params: {
-        file: 'gfs.t' + hours + 'z.pgrb2.1p00.f000',
-        lev_10_m_above_ground: 'on',
-        lev_surface: 'on',
-        var_TMP: 'on',
-        var_UGRD: 'on',
-        var_VGRD: 'on',
-        leftlon: 0,
-        rightlon: 360,
-        toplat: 90,
-        bottomlat: -90,
-        dir: '/gfs.' + stamp
-      },
-      responseType: 'stream',
-      onUploadProgress: function (progressEvent) {
-        console.log(progressEvent)
+    const isValid = utils.checkTime(_time)
+    if (!isValid) {
+      ctx.status = 400
+      ctx.body = {
+        code: 400,
+        success: false,
+        message: '参数不合法',
+        data: []
       }
-    })
-    // 此时part为返回的流对象
-    const newpath = utils.resolve(config.sourceDataDir + '/' + stamp + '.f000')
-    // 生成存储路径，要注意这里的newpath必须是绝对路径，否则Stream报错
-    const stream = fs.createWriteStream(newpath)
-    // 写入文件流
-    response.data.pipe(stream)
-    ctx.status = 200
-    ctx.body = {
-      code: 200,
-      success: true,
-      data: {
-        time: stamp,
-        name: stamp + '.f000'
+    } else {
+      const hours = utils.roundHours(moment(_time).hour(), 6)
+      const stamp = moment(_time).format('YYYYMMDD') + hours
+      const response = await request({
+        method: 'get',
+        url: config.serviceUrl,
+        params: {
+          file: 'gfs.t' + hours + 'z.pgrb2.1p00.f000',
+          lev_10_m_above_ground: 'on',
+          lev_surface: 'on',
+          var_TMP: 'on',
+          var_UGRD: 'on',
+          var_VGRD: 'on',
+          leftlon: 0,
+          rightlon: 360,
+          toplat: 90,
+          bottomlat: -90,
+          dir: '/gfs.' + stamp
+        },
+        responseType: 'stream',
+        onUploadProgress: function (progressEvent) {
+        }
+      })
+      // 此时part为返回的流对象
+      const newpath = utils.resolve(config.sourceDataDir + '/' + stamp + '.f000')
+      // 生成存储路径，要注意这里的newpath必须是绝对路径，否则Stream报错
+      const stream = fs.createWriteStream(newpath)
+      // 写入文件流
+      response.data.pipe(stream)
+      ctx.status = 200
+      ctx.body = {
+        code: 200,
+        success: true,
+        data: {
+          time: stamp,
+          name: stamp + '.f000'
+        }
       }
+      // stream.on('finish', function () {
+      //   stream.close()
+      //   ctx.status = 200
+      //   ctx.body = {
+      //     code: 200,
+      //     success: true,
+      //     data: {
+      //       time: stamp,
+      //       name: stamp + '.f000'
+      //     }
+      //   }
+      // })
     }
-    // stream.on('finish', function () {
-    //   stream.close()
-    //   ctx.status = 200
-    //   ctx.body = {
-    //     code: 200,
-    //     success: true,
-    //     data: {
-    //       time: stamp,
-    //       name: stamp + '.f000'
-    //     }
-    //   }
-    // })
   } finally {
   }
 }
@@ -91,40 +104,52 @@ const getLocalData = (path) => {
  * @returns {Promise<void>}
  */
 const getData = async (ctx, next) => {
+  const _time = ctx.query.time && parseInt(ctx.query.time)
   try {
-    const hours = utils.roundHours(moment(ctx.query.time).hour(), 6)
-    const stamp = moment(ctx.query.time).format('YYYYMMDD') + hours
-    const _sourcePath = utils.resolve(config.sourceDataDir + stamp + '.f000')
-    const _parsePath = utils.resolve(config.parseDataDir + stamp + '.json')
-    const _sourceExist = utils.checkFileExists(_sourcePath)
-    const _parseExist = utils.checkFileExists(_parsePath)
-    let _json
-    if (_parseExist) {
-      _json = await getLocalData(_parsePath)
-    } else if (_sourceExist) {
-      _json = await grib2json(_sourcePath, {
-        data: true,
-        output: _parsePath
-      })
-    } else {
-      const _source = await fetchGribData({
-        time: ctx.query.time
-      })
+    const isValid = utils.checkTime(_time)
+    if (isValid) {
+      const hours = utils.roundHours(moment(_time).hour(), 6)
+      const stamp = moment(_time).format('YYYYMMDD') + hours
+      const _sourcePath = utils.resolve(config.sourceDataDir + stamp + '.f000')
+      const _parsePath = utils.resolve(config.parseDataDir + stamp + '.json')
+      const _sourceExist = utils.checkFileExists(_sourcePath)
+      const _parseExist = utils.checkFileExists(_parsePath)
+      let _json
+      if (_parseExist) {
+        _json = await getLocalData(_parsePath)
+      } else if (_sourceExist) {
+        _json = await grib2json(_sourcePath, {
+          data: true,
+          output: _parsePath
+        })
+      } else {
+        const _source = await fetchGribData({
+          time: _time
+        })
 
-      _json = await grib2json(utils.resolve(config.sourceDataDir + _source.name), {
-        data: true,
-        output: _parsePath
-      })
-    }
-    ctx.status = 200
-    ctx.body = {
-      code: 0,
-      success: true,
-      message: 'success',
-      data: _json
+        _json = await grib2json(utils.resolve(config.sourceDataDir + _source.name), {
+          data: true,
+          output: _parsePath
+        })
+      }
+      ctx.status = 200
+      ctx.body = {
+        code: 0,
+        success: true,
+        message: 'success',
+        data: _json
+      }
+    } else {
+      ctx.status = 400
+      ctx.body = {
+        code: 400,
+        success: false,
+        message: '参数不合法',
+        data: []
+      }
     }
   } catch (error) {
-    ctx.status = 200
+    ctx.status = 500
     ctx.body = {
       code: 500,
       success: false,
@@ -140,50 +165,63 @@ const getData = async (ctx, next) => {
  * @returns {Promise<any>}
  */
 const fetchGribData = params => {
+  const _time = params.time && parseInt(params.time)
   try {
-    const hours = utils.roundHours(moment(params.time).hour(), 6)
-    const stamp = moment(params.time).format('YYYYMMDD') + hours
-    // const stamp = '2018012206'
-    return new Promise((resolve, reject) => {
-      request({
-        method: 'get',
-        url: 'http://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_1p00.pl',
-        params: {
-          file: 'gfs.t' + hours + 'z.pgrb2.1p00.f000',
-          lev_10_m_above_ground: 'on',
-          lev_surface: 'on',
-          var_TMP: 'on',
-          var_UGRD: 'on',
-          var_VGRD: 'on',
-          leftlon: 0,
-          rightlon: 360,
-          toplat: 90,
-          bottomlat: -90,
-          dir: '/gfs.' + stamp
-        },
-        responseType: 'stream',
-        onUploadProgress: function (progressEvent) {
-          console.log(progressEvent)
-        }
-      }).then(response => {
-        // 此时part为返回的流对象
-        const newpath = utils.resolve(config.sourceDataDir + '/' + stamp + '.f000')
-        // 生成存储路径，要注意这里的newpath必须是绝对路径，否则Stream报错
-        const stream = fs.createWriteStream(newpath)
-        // 写入文件流
-        response.data.pipe(stream)
+    const isValid = utils.checkTime(_time)
+    if (!isValid) {
+      return new Promise((resolve, reject) => {
         resolve({
-          code: 200,
-          success: true,
-          data: {
-            time: stamp,
-            name: stamp + '.f000'
-          }
+          code: 400,
+          success: false,
+          message: '参数不合法',
+          data: []
         })
-      }).catch(error => {
-        reject(error)
       })
-    })
+    } else {
+      const hours = utils.roundHours(moment(_time).hour(), 6)
+      console.log(hours)
+      const stamp = moment(_time).format('YYYYMMDD') + hours
+      return new Promise((resolve, reject) => {
+        request({
+          method: 'get',
+          url: config.serviceUrl,
+          params: {
+            file: 'gfs.t' + hours + 'z.pgrb2.1p00.f000',
+            lev_10_m_above_ground: 'on',
+            lev_surface: 'on',
+            var_TMP: 'on',
+            var_UGRD: 'on',
+            var_VGRD: 'on',
+            leftlon: 0,
+            rightlon: 360,
+            toplat: 90,
+            bottomlat: -90,
+            dir: '/gfs.' + stamp
+          },
+          responseType: 'stream',
+          onUploadProgress: function (progressEvent) {
+            console.log(progressEvent)
+          }
+        }).then(response => {
+          // 此时part为返回的流对象
+          const newpath = utils.resolve(config.sourceDataDir + '/' + stamp + '.f000')
+          // 生成存储路径，要注意这里的newpath必须是绝对路径，否则Stream报错
+          const stream = fs.createWriteStream(newpath)
+          // 写入文件流
+          response.data.pipe(stream)
+          resolve({
+            code: 200,
+            success: true,
+            data: {
+              time: stamp,
+              name: stamp + '.f000'
+            }
+          })
+        }).catch(error => {
+          reject(error)
+        })
+      })
+    }
   } catch (error) {
     console.log(error)
   }
@@ -206,7 +244,7 @@ const autoFetch = async (ctx, next) => {
   } else {
     fetchTimer = setInterval(() => {
       fetchGribData({
-        time: moment.utc()
+        time: moment().format('X')
       })
     }, 1800000)
     ctx.status = 200
