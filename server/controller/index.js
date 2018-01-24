@@ -1,5 +1,5 @@
 const fs = require('fs')
-const request = require('axios')
+const request = require('request')
 const moment = require('moment')
 const grib2json = require('weacast-grib2json')
 const utils = require('../utils/index')
@@ -18,67 +18,25 @@ utils.checkFolderExist(utils.resolve(config.parseDataDir), true)
 const getGribData = async (ctx, next) => {
   const _time = ctx.query.time && parseInt(ctx.query.time)
   try {
-    const isValid = utils.checkTime(_time)
-    if (!isValid) {
-      ctx.status = 400
-      ctx.body = {
-        code: 400,
-        success: false,
-        message: '参数不合法',
-        data: []
+    const _data = await fetchGribData({
+      time: _time
+    })
+    ctx.status = 200
+    ctx.body = {
+      code: 200,
+      success: true,
+      data: {
+        time: _data.time,
+        name: _data.name
       }
-    } else {
-      const hours = utils.roundHours(moment(_time).hour(), 6)
-      const stamp = moment(_time).format('YYYYMMDD') + hours
-      const response = await request({
-        method: 'get',
-        url: config.serviceUrl,
-        params: {
-          file: 'gfs.t' + hours + 'z.pgrb2.1p00.f000',
-          lev_10_m_above_ground: 'on',
-          lev_surface: 'on',
-          var_TMP: 'on',
-          var_UGRD: 'on',
-          var_VGRD: 'on',
-          leftlon: 0,
-          rightlon: 360,
-          toplat: 90,
-          bottomlat: -90,
-          dir: '/gfs.' + stamp
-        },
-        responseType: 'stream',
-        onUploadProgress: function (progressEvent) {
-        }
-      })
-      // 此时part为返回的流对象
-      const newpath = utils.resolve(config.sourceDataDir + '/' + stamp + '.f000')
-      // 生成存储路径，要注意这里的newpath必须是绝对路径，否则Stream报错
-      const stream = fs.createWriteStream(newpath)
-      // 写入文件流
-      response.data.pipe(stream)
-      ctx.status = 200
-      ctx.body = {
-        code: 200,
-        success: true,
-        data: {
-          time: stamp,
-          name: stamp + '.f000'
-        }
-      }
-      // stream.on('finish', function () {
-      //   stream.close()
-      //   ctx.status = 200
-      //   ctx.body = {
-      //     code: 200,
-      //     success: true,
-      //     data: {
-      //       time: stamp,
-      //       name: stamp + '.f000'
-      //     }
-      //   }
-      // })
     }
-  } finally {
+  } catch (error) {
+    ctx.status = 500
+    ctx.body = {
+      code: 500,
+      success: false,
+      data: error
+    }
   }
 }
 
@@ -179,36 +137,11 @@ const fetchGribData = params => {
       })
     } else {
       const hours = utils.roundHours(moment(_time).hour(), 6)
-      console.log(hours)
       const stamp = moment(_time).format('YYYYMMDD') + hours
       return new Promise((resolve, reject) => {
-        request({
-          method: 'get',
-          url: config.serviceUrl,
-          params: {
-            file: 'gfs.t' + hours + 'z.pgrb2.1p00.f000',
-            lev_10_m_above_ground: 'on',
-            lev_surface: 'on',
-            var_TMP: 'on',
-            var_UGRD: 'on',
-            var_VGRD: 'on',
-            leftlon: 0,
-            rightlon: 360,
-            toplat: 90,
-            bottomlat: -90,
-            dir: '/gfs.' + stamp
-          },
-          responseType: 'stream',
-          onUploadProgress: function (progressEvent) {
-            console.log(progressEvent)
-          }
-        }).then(response => {
-          // 此时part为返回的流对象
-          const newpath = utils.resolve(config.sourceDataDir + '/' + stamp + '.f000')
-          // 生成存储路径，要注意这里的newpath必须是绝对路径，否则Stream报错
-          const stream = fs.createWriteStream(newpath)
-          // 写入文件流
-          response.data.pipe(stream)
+        const _sourcePath = utils.resolve(config.sourceDataDir + stamp + '.f000')
+        const _sourceExist = utils.checkFileExists(_sourcePath)
+        if (_sourceExist) {
           resolve({
             code: 200,
             success: true,
@@ -217,9 +150,54 @@ const fetchGribData = params => {
               name: stamp + '.f000'
             }
           })
-        }).catch(error => {
-          reject(error)
-        })
+        } else {
+          console.log(stamp, hours)
+          request.get({
+            url: config.serviceUrl,
+            qs: {
+              file: 'gfs.t' + hours + 'z.pgrb2.1p00.f000',
+              lev_10_m_above_ground: 'on',
+              lev_surface: 'on',
+              var_TMP: 'on',
+              var_UGRD: 'on',
+              var_VGRD: 'on',
+              leftlon: 0,
+              rightlon: 360,
+              toplat: 90,
+              bottomlat: -90,
+              dir: '/gfs.' + stamp
+            }
+          }).on('response', response => {
+            console.log(response)
+            if (response.statusCode !== 200) {
+              fetchGribData({
+                time: moment(_time).subtract(6, 'hours')
+              })
+            } else {
+              // 此时part为返回的流对象
+              const newpath = utils.resolve(config.sourceDataDir + '/' + stamp + '.f000')
+              // 生成存储路径，要注意这里的newpath必须是绝对路径，否则Stream报错
+              const stream = fs.createWriteStream(newpath)
+              // 写入文件流
+              response.pipe(stream)
+              stream.on('finish', function () {
+                resolve({
+                  code: 200,
+                  success: true,
+                  data: {
+                    time: stamp,
+                    name: stamp + '.f000'
+                  }
+                })
+              })
+            }
+          }).on('error', error => {
+            fetchGribData({
+              time: moment(_time).subtract(6, 'hours')
+            })
+            console.log(error)
+          })
+        }
       })
     }
   } catch (error) {
@@ -246,7 +224,7 @@ const autoFetch = async (ctx, next) => {
       fetchGribData({
         time: moment().format('X')
       })
-    }, 1800000)
+    }, 1000 * 10)
     ctx.status = 200
     ctx.body = {
       code: 200,
@@ -266,6 +244,12 @@ const stopAutoFetch = async (ctx, next) => {
   if (fetchTimer) {
     clearInterval(fetchTimer)
     fetchTimer = null
+  }
+  ctx.status = 200
+  ctx.body = {
+    code: 200,
+    success: true,
+    data: 'stop auto fetch success'
   }
 }
 
