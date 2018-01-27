@@ -13,10 +13,10 @@ const index = require('./routes/index')
 // error handler
 onerror(app)
 app.use(convert(cors()))
-app.use(koaBody({ multipart: true }))
+app.use(koaBody({multipart: true}))
 // middlewares
 app.use(bodyparser({
-  enableTypes:['json', 'form', 'text']
+  enableTypes: ['json', 'form', 'text']
 }))
 app.use(json())
 app.use(logger())

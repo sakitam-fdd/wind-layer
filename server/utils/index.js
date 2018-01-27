@@ -12,8 +12,6 @@ const roundHours = (hours, interval) => {
   if (interval > 0) {
     const result = (Math.floor(hours / interval) * interval)
     return result < 10 ? '0' + result.toString() : result
-  } else {
-    return null
   }
 }
 
@@ -59,10 +57,11 @@ const checkFolderExist = (path, mkdir) => {
  */
 const checkTime = _time => {
   try {
-    if (!(typeof _time === 'number')) {
+    moment(_time)
+    if (moment.utc().diff(_time, 'days') > 30) {
+      // 最多获取两周数据
       return false
     } else {
-      moment(_time)
       return true
     }
   } catch (error) {

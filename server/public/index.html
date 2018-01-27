@@ -74,14 +74,14 @@
     })
   });
   var wind, data;
-  axios.get('http://localhost:3000/gribdata', {
+  axios.get('http://localhost:3000/getdata', {
     params: {
-      time: moment.utc()
+      time: Date.parse(new Date())
     }
   }).then(function (res) {
     if (res.data) {
       data = res.data.data
-      wind = new WindLayer('', {
+      wind = new WindLayer(data, {
         layerName: data,
         minResolution: undefined,
         maxResolution: undefined,
