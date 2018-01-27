@@ -1,6 +1,20 @@
 import ol from 'openlayers'
 import Windy from './windy'
+// import $Map from 'ol/map'
+// import $LayerImage from 'ol/layer/image'
+// import $ImageCanvasSource from 'ol/source/imagecanvas'
+// import $Proj from 'ol/proj'
+const $Map = ol.Map
+const $LayerImage = ol.layer.Image
+const $ImageCanvasSource = ol.source.ImageCanvas
+const $Proj = ol.proj
 
+/**
+ * create canvas
+ * @param width
+ * @param height
+ * @returns {HTMLCanvasElement}
+ */
 const createCanvas = (width, height) => {
   let canvas = document.createElement('canvas')
   canvas.width = width
@@ -94,13 +108,13 @@ class WindyLayer {
   getCanvasLayer () {
     if (!this.$canvas && !this.layer_) {
       const extent = this.getMapExtent()
-      this.layer_ = new ol.layer.Image({
+      this.layer_ = new $LayerImage({
         layerName: this.$options.layerName,
         minResolution: this.$options.minResolution,
         maxResolution: this.$options.maxResolution,
         zIndex: this.$options.zIndex,
         extent: extent,
-        source: new ol.source.ImageCanvas({
+        source: new $ImageCanvasSource({
           canvasFunction: this.canvasFunction.bind(this),
           projection: (this.$options.hasOwnProperty('projection') ? this.$options.ratio : 'EPSG:3857'),
           ratio: (this.$options.hasOwnProperty('ratio') ? this.$options.ratio : 1.5)
@@ -145,13 +159,13 @@ class WindyLayer {
   getExtent () {
     const size = this.$Map.getSize()
     const _extent = this.$Map.getView().calculateExtent(size)
-    const extent = ol.proj.transformExtent(_extent, 'EPSG:3857', 'EPSG:4326')
+    const extent = $Proj.transformExtent(_extent, 'EPSG:3857', 'EPSG:4326')
     return [[[0, 0], [size[0], size[1]]], size[0], size[1], [[extent[0], extent[1]], [extent[2], extent[3]]]]
   }
 
   /**
    * get map current extent
-   * @returns {ol.Extent}
+   * @returns {Array}
    */
   getMapExtent () {
     const size = this.$Map.getSize()
@@ -163,7 +177,7 @@ class WindyLayer {
    * @param map
    */
   appendTo (map) {
-    if (map && map instanceof ol.Map) {
+    if (map && map instanceof $Map) {
       this.$Map = map
       this.getCanvasLayer()
     } else {
