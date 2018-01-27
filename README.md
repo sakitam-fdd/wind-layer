@@ -64,7 +64,8 @@ cp current-wind-surface-level-gfs-1.0.json <earth-git-repository>/public/data/we
 
 ## 使用node服务获取数据
 
-> 默认运行在3000端口
+> 默认运行在3000端口, 使用koa2构建。
+  目前仅抓取少量数据, 全部数据数据量过大会造成抓取时间过长和转换失败。
 
 ```bash
 npm run dev:server // 调试环境启动服务
@@ -77,8 +78,8 @@ npm run prd:server // 部署环境启动服务
 | :--- | :--- | :---------- |
 | `autofetch` | `null` | 无需参数，开启自动抓取程序，默认30分钟抓取一次数据源 |
 | `stopautofetch` | `null` | 停止自动抓取程序 |
-| `getdata` | `Object` | 获取json数据，存在转换过的直接返回，若只存在元数据则转换后返回，若元数据也不存在则抓取转换后再响应 |
-| `gribdata` | `Object` | 获取grib数据（强制抓取数据） |
+| `getdata` | `Object` (目前只支持`time` 参数，时间戳) | 获取json数据，存在转换过的直接返回，若只存在元数据则转换后返回，若元数据也不存在则抓取转换后再响应 |
+| `gribdata` | `Object` (目前只支持`time` 参数，时间戳) | 获取grib数据（强制抓取数据） |
 
 ## Resources
 

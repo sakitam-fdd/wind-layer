@@ -6,9 +6,6 @@ const utils = require('../utils/index')
 const config = require('../config/config')
 let fetchTimer = null
 
-utils.checkFolderExist(utils.resolve(config.sourceDataDir), true)
-utils.checkFolderExist(utils.resolve(config.parseDataDir), true)
-
 /**
  * 获取数据源文件
  * @param ctx
@@ -16,7 +13,7 @@ utils.checkFolderExist(utils.resolve(config.parseDataDir), true)
  * @returns {Promise<void>}
  */
 const getGribData = async (ctx, next) => {
-  const _time = ctx.query.time && parseInt(ctx.query.time)
+  const _time = (ctx.query.time && moment.utc(moment(parseInt(ctx.query.time))))
   try {
     const _data = await fetchGribData({
       time: _time
@@ -26,8 +23,9 @@ const getGribData = async (ctx, next) => {
       code: 200,
       success: true,
       data: {
-        time: _data.time,
-        name: _data.name
+        time: _data.data.time,
+        timeStamp: _data.data.timeStamp,
+        name: _data.data.name
       }
     }
   } catch (error) {
@@ -62,12 +60,13 @@ const getLocalData = (path) => {
  * @returns {Promise<void>}
  */
 const getData = async (ctx, next) => {
-  const _time = ctx.query.time && parseInt(ctx.query.time)
+  const _time = (ctx.query.time && moment.utc(moment(parseInt(ctx.query.time))))
   try {
     const isValid = utils.checkTime(_time)
     if (isValid) {
       const hours = utils.roundHours(moment(_time).hour(), 6)
       const stamp = moment(_time).format('YYYYMMDD') + hours
+      utils.checkFolderExist(utils.resolve(config.parseDataDir), true)
       const _sourcePath = utils.resolve(config.sourceDataDir + stamp + '.f000')
       const _parsePath = utils.resolve(config.parseDataDir + stamp + '.json')
       const _sourceExist = utils.checkFileExists(_sourcePath)
@@ -84,11 +83,12 @@ const getData = async (ctx, next) => {
         const _source = await fetchGribData({
           time: _time
         })
-
-        _json = await grib2json(utils.resolve(config.sourceDataDir + _source.name), {
-          data: true,
-          output: _parsePath
-        })
+        if (_source && _source.code === 200) {
+          _json = await grib2json(utils.resolve(config.sourceDataDir + _source.data.name), {
+            data: true,
+            output: _parsePath
+          })
+        }
       }
       ctx.status = 200
       ctx.body = {
@@ -123,7 +123,7 @@ const getData = async (ctx, next) => {
  * @returns {Promise<any>}
  */
 const fetchGribData = params => {
-  const _time = params.time && parseInt(params.time)
+  const _time = params.time
   try {
     const isValid = utils.checkTime(_time)
     if (!isValid) {
@@ -147,6 +147,7 @@ const fetchGribData = params => {
             success: true,
             data: {
               time: stamp,
+              timeStamp: moment(_time).format('X'),
               name: stamp + '.f000'
             }
           })
@@ -168,12 +169,17 @@ const fetchGribData = params => {
               dir: '/gfs.' + stamp
             }
           }).on('response', response => {
-            console.log(response)
             if (response.statusCode !== 200) {
+              console.log('current data not Exist')
               fetchGribData({
                 time: moment(_time).subtract(6, 'hours')
+              }).then(_res => {
+                if (_res && _res.code === 200) {
+                  resolve(_res)
+                }
               })
             } else {
+              utils.checkFolderExist(utils.resolve(config.sourceDataDir), true)
               // 此时part为返回的流对象
               const newpath = utils.resolve(config.sourceDataDir + '/' + stamp + '.f000')
               // 生成存储路径，要注意这里的newpath必须是绝对路径，否则Stream报错
@@ -181,11 +187,13 @@ const fetchGribData = params => {
               // 写入文件流
               response.pipe(stream)
               stream.on('finish', function () {
+                // stream.close()
                 resolve({
                   code: 200,
                   success: true,
                   data: {
                     time: stamp,
+                    timeStamp: moment(_time).format('X'),
                     name: stamp + '.f000'
                   }
                 })
@@ -194,6 +202,10 @@ const fetchGribData = params => {
           }).on('error', error => {
             fetchGribData({
               time: moment(_time).subtract(6, 'hours')
+            }).then(_res => {
+              if (_res && _res.code === 200) {
+                resolve(_res)
+              }
             })
             console.log(error)
           })
@@ -220,11 +232,14 @@ const autoFetch = async (ctx, next) => {
       data: 'already exist auto fetch task'
     }
   } else {
-    fetchTimer = setInterval(() => {
+    fetchGribData({ // first load
+      time: moment.utc()
+    })
+    fetchTimer = setInterval(() => { // interval load | 30min
       fetchGribData({
-        time: moment().format('X')
+        time: moment.utc()
       })
-    }, 1000 * 10)
+    }, 1000 * 60 * 30)
     ctx.status = 200
     ctx.body = {
       code: 200,
