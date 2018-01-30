@@ -58,17 +58,17 @@
       new ol.layer.Tile({
         layerName: 'baseLayer',
         preload: 4,
-        source: new ol.source.OSM(/*{
+        source: new ol.source.OSM({
           url: "http://{a-c}.sm.mapstack.stamen.com/" +
           "(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/" +
           "{z}/{x}/{y}.png"
-        }*/)
+        })
       })
     ],
     loadTilesWhileAnimating: true,
     pixelRatio: 1,
     view: new ol.View({
-      projection: 'EPSG:3857',
+      projection: 'EPSG:4326',
       center: [113.53450137499999, 34.44104525],
       zoom: 5
     })

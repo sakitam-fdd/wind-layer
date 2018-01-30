@@ -89,6 +89,7 @@ class WindyLayer {
       this._timer = window.setTimeout(() => {
         this.$Windy = new Windy({
           canvas: canvas,
+          projection: (this.$options.hasOwnProperty('projection') ? this.$options.projection : 'EPSG:3857'),
           data: this.getData()
         })
         const extent = this.getExtent()
@@ -116,7 +117,7 @@ class WindyLayer {
         extent: extent,
         source: new $ImageCanvasSource({
           canvasFunction: this.canvasFunction.bind(this),
-          projection: (this.$options.hasOwnProperty('projection') ? this.$options.ratio : 'EPSG:3857'),
+          projection: (this.$options.hasOwnProperty('projection') ? this.$options.projection : 'EPSG:3857'),
           ratio: (this.$options.hasOwnProperty('ratio') ? this.$options.ratio : 1.5)
         })
       })
@@ -159,7 +160,8 @@ class WindyLayer {
   getExtent () {
     const size = this.$Map.getSize()
     const _extent = this.$Map.getView().calculateExtent(size)
-    const extent = $Proj.transformExtent(_extent, 'EPSG:3857', 'EPSG:4326')
+    const _projection = (this.$options.hasOwnProperty('projection') ? this.$options.projection : 'EPSG:3857')
+    const extent = $Proj.transformExtent(_extent, _projection, 'EPSG:4326')
     return [[[0, 0], [size[0], size[1]]], size[0], size[1], [[extent[0], extent[1]], [extent[2], extent[3]]]]
   }
 
