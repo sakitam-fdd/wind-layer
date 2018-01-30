@@ -51,51 +51,59 @@
 <script src="../node_modules/axios/dist/axios.js"></script>
 <script src="../dist/windLayer.js"></script>
 <script>
-  var Maps = new ol.Map({
-    target: 'map',
-    layers: [
-      new ol.layer.Tile({
-        layerName: 'baseLayer',
-        preload: 4,
-        source: new ol.source.OSM()
+var Maps = new ol.Map({
+  target: 'map',
+  layers: [
+    new ol.layer.Tile({
+      layerName: 'baseLayer',
+      preload: 4,
+      source: new ol.source.OSM({
+        url: "http://{a-c}.sm.mapstack.stamen.com/" +
+        "(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/" +
+        "{z}/{x}/{y}.png"
       })
-    ],
-    loadTilesWhileAnimating: true,
-    pixelRatio: 1,
-    view: new ol.View({
-      projection: 'EPSG:3857',
-      center: [113.53450137499999, 34.44104525],
-      zoom: 5
     })
-  });
-  var wind, data;
-  axios.get('./out.json').then(function (res) {
-    if (res.data) {
-      data = res.data
-      wind = new WindLayer('', {
-        layerName: data,
-        minResolution: undefined,
-        maxResolution: undefined,
-        zIndex: 0,
-        projection: 'EPSG:3857',
-        ratio: 1
-      })
-      wind.appendTo(Maps)
-    }
-  });
-
-  function getData () {
-    var _data = wind.getData();
-    console.log(_data)
+  ],
+  loadTilesWhileAnimating: true,
+  pixelRatio: 1,
+  view: new ol.View({
+    projection: 'EPSG:4326',
+    center: [113.53450137499999, 34.44104525],
+    zoom: 5
+  })
+});
+var wind, data;
+axios.get('../server/public/parseData/2018012706.json', {
+  params: {
+    time: Date.parse(new Date())
   }
-
-  function setData () {
-    wind.setData(data)
+}).then(function (res) {
+  if (res.data) {
+    data = res.data
+    wind = new WindLayer(data, {
+      layerName: data,
+      minResolution: undefined,
+      maxResolution: undefined,
+      zIndex: 0,
+      projection: 'EPSG:4326',
+      ratio: 1
+    })
+    wind.appendTo(Maps)
   }
+});
 
-  function clearWind () {
-    wind.clearWind()
-  }
+function getData () {
+  var _data = wind.getData();
+  console.log(_data)
+}
+
+function setData () {
+  wind.setData(data)
+}
+
+function clearWind () {
+  wind.clearWind()
+}
 </script>
 </body>
 </html>

@@ -187,7 +187,8 @@ const Windy = function (params) {
 
   var distortion = function (projection, λ, φ, x, y, windy) {
     var τ = 2 * Math.PI;
-    var H = Math.pow(10, -5.2);
+    // var H = Math.pow(10, -5.2);
+    var H = params.projection === 'EPSG:4326' ? 5 : Math.pow(10, -5.2);
     var hλ = λ < 0 ? H : -H;
     var hφ = φ < 0 ? H : -H;
 
@@ -259,17 +260,28 @@ const Windy = function (params) {
     return ang / (Math.PI / 180.0);
   };
 
-  var invert = function (x, y, windy) {
-    var mapLonDelta = windy.east - windy.west;
-    var worldMapRadius = windy.width / rad2deg(mapLonDelta) * 360 / (2 * Math.PI);
-    var mapOffsetY = (worldMapRadius / 2 * Math.log((1 + Math.sin(windy.south)) / (1 - Math.sin(windy.south))));
-    var equatorY = windy.height + mapOffsetY;
-    var a = (equatorY - y) / worldMapRadius;
+  var invert
 
-    var lat = 180 / Math.PI * (2 * Math.atan(Math.exp(a)) - Math.PI / 2);
-    var lon = rad2deg(windy.west) + x / windy.width * rad2deg(mapLonDelta);
-    return [lon, lat];
-  };
+  if (params.projection === 'EPSG:4326') {
+    invert = function (x, y, windy) {
+      var mapLonDelta = windy.east - windy.west;
+      var mapLatDelta = windy.south - windy.north;
+      var lat = rad2deg(windy.north) + y / windy.height * rad2deg(mapLatDelta);
+      var lon = rad2deg(windy.west) + x / windy.width * rad2deg(mapLonDelta);
+      return [lon, lat];
+    };
+  } else {
+    invert = function (x, y, windy) {
+      var mapLonDelta = windy.east - windy.west;
+      var worldMapRadius = windy.width / rad2deg(mapLonDelta) * 360 / (2 * Math.PI);
+      var mapOffsetY = (worldMapRadius / 2 * Math.log((1 + Math.sin(windy.south)) / (1 - Math.sin(windy.south))));
+      var equatorY = windy.height + mapOffsetY;
+      var a = (equatorY - y) / worldMapRadius;
+      var lat = 180 / Math.PI * (2 * Math.atan(Math.exp(a)) - Math.PI / 2);
+      var lon = rad2deg(windy.west) + x / windy.width * rad2deg(mapLonDelta);
+      return [lon, lat];
+    };
+  }
 
   var mercY = function (lat) {
     return Math.log(Math.tan(lat / 2 + Math.PI / 4));
