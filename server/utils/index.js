@@ -75,10 +75,31 @@ const checkTime = _time => {
  */
 const resolve = _path => path.resolve(__dirname, '..', _path)
 
+/**
+ * 获取文件树
+ * @param _path
+ * @returns {Array}
+ */
+const getFileList = _path => {
+  const result = []
+  function finder (path_) {
+    let files = fs.readdirSync(path_)
+    files.forEach((val, index) => {
+      let fPath = path.join(path_, val)
+      let stats = fs.statSync(fPath)
+      if (stats.isDirectory()) finder(fPath)
+      if (stats.isFile()) result.push(val)
+    })
+  }
+  finder(_path)
+  return result
+}
+
 module.exports = {
   checkTime,
   resolve,
   roundHours,
   checkFileExists,
-  checkFolderExist
+  checkFolderExist,
+  getFileList
 }

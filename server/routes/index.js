@@ -19,4 +19,8 @@ router.get('/getdata', controller.getData)
 
 router.get('/gribdata', controller.getGribData)
 
+router.get('/getSourceTree', controller.getSourceTree)
+
+router.get('/getParseTree', controller.getParseTree)
+
 module.exports = router
