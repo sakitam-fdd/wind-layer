@@ -268,9 +268,56 @@ const stopAutoFetch = async (ctx, next) => {
   }
 }
 
+const getDataByFileName = async (ctx, next) => {
+  const _data = await getLocalData(ctx.query.filename)
+  ctx.status = 200
+  ctx.body = {
+    code: 200,
+    success: true,
+    data: _data
+  }
+}
+
+/**
+ * 获取源文件树
+ * @param ctx
+ * @param next
+ * @returns {Promise<void>}
+ */
+const getSourceTree = async (ctx, next) => {
+  let files = utils.getFileList(utils.resolve(config.sourceDataDir))
+  files = files.map(file => 'http://localhost:4000/' + config.parseDataDir + file)
+  ctx.status = 200
+  ctx.body = {
+    code: 200,
+    success: true,
+    data: files
+  }
+}
+
+/**
+ * 获取转换后的json文件树
+ * @param ctx
+ * @param next
+ * @returns {Promise<void>}
+ */
+const getParseTree = async (ctx, next) => {
+  let files = utils.getFileList(utils.resolve(config.parseDataDir))
+  files = files.map(file => 'http://localhost:4000/' + config.parseDataDir + file)
+  ctx.status = 200
+  ctx.body = {
+    code: 200,
+    success: true,
+    data: files
+  }
+}
+
 module.exports = {
   getData,
   autoFetch,
   stopAutoFetch,
-  getGribData
+  getGribData,
+  getSourceTree,
+  getParseTree,
+  getDataByFileName
 }
