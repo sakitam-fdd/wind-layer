@@ -34,17 +34,19 @@ import WindLayer from 'wind-layer'
 目前可通过 [unpkg.com](https://unpkg.com/wind-layer/dist/windLayer.js) / [jsdelivr](https://cdn.jsdelivr.net/npm/wind-layer@0.0.1/dist/windLayer.js) 获取最新版本的资源。
 
 ```bash
+// jsdelivr (jsdelivr由于缓存原因最好锁定版本号，否则可能会出现意料之外的问题)
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.3/dist/windLayer.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.3/dist/windLayer.min.js
 // npm
 https://unpkg.com/wind-layer/dist/windLayer.js
 https://unpkg.com/wind-layer/dist/windLayer.min.js
-// jsdelivr (jsdelivr由于缓存原因最好锁定版本号，否则可能会出现意料之外的问题)
-https://cdn.jsdelivr.net/npm/wind-layer@0.0.2/dist/windLayer.js
-https://cdn.jsdelivr.net/npm/wind-layer@0.0.2/dist/windLayer.min.js
 ```
 
 #### [![示例](https://sakitam-fdd.github.io/wind-layer/windy.jpg)](https://jsfiddle.net/sakitamfdd/hgvdu76j/?utm_source=website&utm_medium=embed&utm_campaign=hgvdu76j)
 
 #### [文档](//sakitam-fdd.github.io/wind-layer/)
+
+#### [点击查看示例](//sakitam-fdd.github.io/wind-layer/examples/index.html)
 
 ## 如何获取数据
 
@@ -72,14 +74,17 @@ npm run dev:server // 调试环境启动服务
 npm run prd:server // 部署环境启动服务
 ```
 
-### 目前共暴露4个接口
+### 目前共暴露7个接口
 
 | url | params | desc |
 | :--- | :--- | :---------- |
 | `autofetch` | `null` | 无需参数，开启自动抓取程序，默认30分钟抓取一次数据源 |
 | `stopautofetch` | `null` | 停止自动抓取程序 |
 | `getdata` | `Object` (目前只支持`time` 参数，时间戳) | 获取json数据，存在转换过的直接返回，若只存在元数据则转换后返回，若元数据也不存在则抓取转换后再响应 |
-| `gribdata` | `Object` (目前只支持`time` 参数，时间戳) | 获取grib数据（强制抓取数据） |
+| `gribdata` | `Object` (目前只支持`time` 参数，时间戳) | 获取grib2数据（强制抓取数据） |
+| `getSourceTree` | `null` | 无需参数，获取抓取的数据源 `grib2` 源数据。返回一个list，包含文件名和服务器地址。 |
+| `getParseTree` | `null` | 无需参数，获取转换后的 `json` 数据。返回一个list，包含文件名和服务器地址。 |
+| `getDataByFileName` | `{ filename }` | 通过文件名请求 `json` 数据，文件名可为源数据文件和json文件名 |
 
 ## Resources
 
