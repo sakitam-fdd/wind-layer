@@ -17,6 +17,8 @@ router.get('/stopautofetch', controller.stopAutoFetch)
 
 router.get('/getdata', controller.getData)
 
+router.get('/getDataByFileName', controller.getDataByFileName)
+
 router.get('/gribdata', controller.getGribData)
 
 router.get('/getSourceTree', controller.getSourceTree)
