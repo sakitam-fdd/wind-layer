@@ -10,7 +10,8 @@ const friendlyFormatter = require("eslint-friendly-formatter");
 const _package = require('../package.json')
 const eslintConfig = require('../.eslintrc')
 const year = new Date().getFullYear();
-const banner = `/*!\n * ${_package.name} v${_package.version}\n * LICENSE : ${_package.license}\n * (c) 2017-${year} ${_package.homepage}\n */`;
+const banner = `/*!\n * author: ${_package.author}\n * ${_package.name} v${_package.version}\n * LICENSE: ${_package.license}\n * (c) 2017-${year} ${_package.homepage}\n */`;
+
 
 const resolve = _path => path.resolve(__dirname, '../', _path)
 

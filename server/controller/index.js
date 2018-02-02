@@ -66,9 +66,9 @@ const getData = async (ctx, next) => {
     if (isValid) {
       const hours = utils.roundHours(moment(_time).hour(), 6)
       const stamp = moment(_time).format('YYYYMMDD') + hours
-      utils.checkFolderExist(utils.resolve(config.parseDataDir), true)
-      const _sourcePath = utils.resolve(config.sourceDataDir + stamp + '.f000')
-      const _parsePath = utils.resolve(config.parseDataDir + stamp + '.json')
+      utils.checkFolderExist(utils.resolve(config.staticDir + config.parseDataDir), true)
+      const _sourcePath = utils.resolve(config.staticDir + config.sourceDataDir + stamp + '.f000')
+      const _parsePath = utils.resolve(config.staticDir + config.parseDataDir + stamp + '.json')
       const _sourceExist = utils.checkFileExists(_sourcePath)
       const _parseExist = utils.checkFileExists(_parsePath)
       let _json
@@ -84,7 +84,7 @@ const getData = async (ctx, next) => {
           time: _time
         })
         if (_source && _source.code === 200) {
-          _json = await grib2json(utils.resolve(config.sourceDataDir + _source.data.name), {
+          _json = await grib2json(utils.resolve(config.staticDir + config.sourceDataDir + _source.data.name), {
             data: true,
             output: _parsePath
           })
@@ -139,7 +139,7 @@ const fetchGribData = params => {
       const hours = utils.roundHours(moment(_time).hour(), 6)
       const stamp = moment(_time).format('YYYYMMDD') + hours
       return new Promise((resolve, reject) => {
-        const _sourcePath = utils.resolve(config.sourceDataDir + stamp + '.f000')
+        const _sourcePath = utils.resolve(config.staticDir + config.sourceDataDir + stamp + '.f000')
         const _sourceExist = utils.checkFileExists(_sourcePath)
         if (_sourceExist) {
           resolve({
@@ -179,9 +179,9 @@ const fetchGribData = params => {
                 }
               })
             } else {
-              utils.checkFolderExist(utils.resolve(config.sourceDataDir), true)
+              utils.checkFolderExist(utils.resolve(config.staticDir + config.sourceDataDir), true)
               // 此时part为返回的流对象
-              const newpath = utils.resolve(config.sourceDataDir + '/' + stamp + '.f000')
+              const newpath = utils.resolve(config.staticDir + config.sourceDataDir + '/' + stamp + '.f000')
               // 生成存储路径，要注意这里的newpath必须是绝对路径，否则Stream报错
               const stream = fs.createWriteStream(newpath)
               // 写入文件流
@@ -268,9 +268,117 @@ const stopAutoFetch = async (ctx, next) => {
   }
 }
 
+/**
+ * 通过文件名获取数据
+ * @param ctx
+ * @param next
+ * @returns {Promise<void>}
+ */
+const getDataByFileName = async (ctx, next) => {
+  const _type = utils.getFileExt(ctx.query.filename)
+  if (_type === 'json') {
+    const _parsePath = utils.resolve(config.staticDir + config.parseDataDir + ctx.query.filename)
+    const _parseExist = utils.checkFileExists(_parsePath)
+    if (_parseExist) {
+      const _data = await getLocalData(_parsePath)
+      ctx.status = 200
+      ctx.body = {
+        code: 200,
+        success: true,
+        data: _data
+      }
+    } else {
+      ctx.status = 200
+      ctx.body = {
+        code: 205,
+        success: false,
+        data: 'file not exist'
+      }
+      next()
+    }
+  } else if (_type === 'f000') {
+    const _sourcePath = utils.resolve(config.staticDir + config.sourceDataDir + ctx.query.filename)
+    const _sourceExist = utils.checkFileExists(_sourcePath)
+    if (_sourceExist) {
+      const _data = await grib2json(_sourcePath, {
+        data: true
+      })
+      ctx.status = 200
+      ctx.body = {
+        code: 200,
+        success: true,
+        data: _data
+      }
+    } else {
+      ctx.status = 200
+      ctx.body = {
+        code: 205,
+        success: false,
+        data: 'file not exist'
+      }
+      next()
+    }
+  } else {
+    ctx.status = 400
+    ctx.body = {
+      code: 400,
+      success: false,
+      data: '缺少查询参数'
+    }
+    next()
+  }
+}
+
+/**
+ * 获取源文件树
+ * @param ctx
+ * @param next
+ * @returns {Promise<void>}
+ */
+const getSourceTree = async (ctx, next) => {
+  let files = utils.getFileList(utils.resolve(config.staticDir + config.sourceDataDir))
+  files = files.map(file => {
+    return {
+      filePath: 'http://' + ctx.request.host + config.sourceDataDir + file,
+      fileName: file
+    }
+  })
+  ctx.status = 200
+  ctx.body = {
+    code: 200,
+    success: true,
+    data: files
+  }
+}
+
+/**
+ * 获取转换后的json文件树
+ * @param ctx
+ * @param next
+ * @returns {Promise<void>}
+ */
+const getParseTree = async (ctx, next) => {
+  let files = utils.getFileList(utils.resolve(config.staticDir + config.parseDataDir))
+  files = files.map(file => {
+    return {
+      filePath: 'http://' + ctx.request.host + config.parseDataDir + file,
+      fileName: file
+    }
+  })
+  ctx.status = 200
+  ctx.body = {
+    code: 200,
+    success: true,
+    data: files
+  }
+}
+
 module.exports = {
   getData,
   autoFetch,
   stopAutoFetch,
-  getGribData
+  getGribData,
+  getSourceTree,
+  getParseTree,
+  getDataByFileName
 }

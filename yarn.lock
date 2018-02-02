@@ -4287,13 +4287,13 @@ rollup-watch@^4.3.1:
     require-relative "0.8.7"
     rollup-pluginutils "^2.0.1"
 
-rollup@0.54.1:
-  version "0.54.1"
-  resolved "http://registry.npm.taobao.org/rollup/download/rollup-0.54.1.tgz#415a5d999421502646cf54b873fc4ce1a7393970"
-
 rollup@^0.52.0:
   version "0.52.3"
   resolved "http://registry.npm.taobao.org/rollup/download/rollup-0.52.3.tgz#020d99fffe9619351e47b3894fd397c26f5e1bf6"
+
+rollup@^0.55.1:
+  version "0.55.1"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-0.55.1.tgz#baf4f23abe3014b29e56dea7d72d9946e56ac7dd"
 
 run-async@^2.2.0:
   version "2.3.0"

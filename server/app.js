@@ -7,7 +7,7 @@ const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
 const cors = require('koa-cors') // 跨域
 const convert = require('koa-convert')
-
+const config = require('./config/config')
 const index = require('./routes/index')
 
 // error handler
@@ -20,7 +20,7 @@ app.use(bodyparser({
 }))
 app.use(json())
 app.use(logger())
-app.use(require('koa-static')(__dirname + '/public'))
+app.use(require('koa-static')(__dirname + '/' + config.staticDir))
 
 // logger
 app.use(async (ctx, next) => {
