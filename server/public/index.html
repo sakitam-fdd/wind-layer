@@ -49,7 +49,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/openlayers/dist/ol.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/wind-layer/dist/windLayer.js"></script>
+<script src="./lib/windLayer.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment@2.20.1/moment.js"></script>"></script>
 <script>
   var Maps = new ol.Map({
@@ -85,8 +85,7 @@
         layerName: data,
         minResolution: undefined,
         maxResolution: undefined,
-        zIndex: 0,
-        projection: 'EPSG:3857',
+        projection: 'EPSG:4326',
         ratio: 1
       })
       wind.appendTo(Maps)

@@ -95,11 +95,26 @@ const getFileList = _path => {
   return result
 }
 
+/**
+ * 获取文件扩展名
+ * @param _string
+ * @returns {*}
+ */
+const getFileExt = _string => {
+  if (_string && _string.split) {
+    const _arr = _string.split('.')
+    return _arr[_arr.length - 1]
+  } else {
+    return false
+  }
+}
+
 module.exports = {
   checkTime,
   resolve,
   roundHours,
   checkFileExists,
   checkFolderExist,
-  getFileList
+  getFileList,
+  getFileExt
 }
