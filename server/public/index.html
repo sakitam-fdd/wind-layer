@@ -68,13 +68,13 @@
     loadTilesWhileAnimating: true,
     pixelRatio: 1,
     view: new ol.View({
-      projection: 'EPSG:4326',
+      projection: 'EPSG:3857',
       center: [113.53450137499999, 34.44104525],
       zoom: 5
     })
   });
   var wind, data;
-  axios.get('http://localhost:4000/getdata', {
+  axios.get('http://localhost:3000/getdata', {
     params: {
       time: Date.parse(new Date())
     }
@@ -85,7 +85,7 @@
         layerName: data,
         minResolution: undefined,
         maxResolution: undefined,
-        projection: 'EPSG:4326',
+        projection: 'EPSG:3857',
         ratio: 1
       })
       wind.appendTo(Maps)
