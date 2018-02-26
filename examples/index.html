@@ -67,13 +67,13 @@ var Maps = new ol.Map({
   loadTilesWhileAnimating: true,
   pixelRatio: 1,
   view: new ol.View({
-    projection: 'EPSG:4326',
+    projection: 'EPSG:3857',
     center: [113.53450137499999, 34.44104525],
     zoom: 5
   })
 });
 var wind, data;
-axios.get('./out.json', {
+axios.get('./china.json', {
   params: {
     time: Date.parse(new Date())
   }
@@ -81,11 +81,11 @@ axios.get('./out.json', {
   if (res.data) {
     data = res.data
     wind = new WindLayer(data, {
-      layerName: data,
+      layerName: 'data',
       minResolution: undefined,
       maxResolution: undefined,
       zIndex: 0,
-      projection: 'EPSG:4326',
+      projection: 'EPSG:3857',
       ratio: 1
     })
     wind.appendTo(Maps)

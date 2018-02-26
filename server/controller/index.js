@@ -162,10 +162,11 @@ const fetchGribData = params => {
               var_TMP: 'on',
               var_UGRD: 'on',
               var_VGRD: 'on',
-              leftlon: 0,
-              rightlon: 360,
-              toplat: 90,
-              bottomlat: -90,
+              subregion: 'on',
+              leftlon: config.extent[0],
+              rightlon: config.extent[2],
+              toplat: config.extent[1],
+              bottomlat: config.extent[3],
               dir: '/gfs.' + stamp
             }
           }).on('response', response => {
