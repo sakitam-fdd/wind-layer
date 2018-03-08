@@ -51,7 +51,7 @@
 <script src="../node_modules/axios/dist/axios.js"></script>
 <script src="../dist/windLayer.js"></script>
 <script>
-var Maps = new ol.Map({
+var map = new ol.Map({
   target: 'map',
   layers: [
     new ol.layer.Tile({
@@ -73,7 +73,7 @@ var Maps = new ol.Map({
   })
 });
 var wind, data;
-axios.get('./china.json', {
+axios.get('./out.json', {
   params: {
     time: Date.parse(new Date())
   }
@@ -86,9 +86,12 @@ axios.get('./china.json', {
       maxResolution: undefined,
       zIndex: 0,
       projection: 'EPSG:3857',
-      ratio: 1
+      ratio: 1,
+      map: map
     })
-    wind.appendTo(Maps)
+    console.log(wind)
+    // map.addLayer(wind)
+    wind.appendTo(map)
   }
 });
 

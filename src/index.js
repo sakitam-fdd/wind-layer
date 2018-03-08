@@ -1,55 +1,62 @@
 import ol from 'openlayers'
 import Windy from './windy'
-// import $Map from 'ol/map'
-// import $LayerImage from 'ol/layer/image'
-// import $ImageCanvasSource from 'ol/source/imagecanvas'
-// import $Proj from 'ol/proj'
-const $Map = ol.Map
-const $LayerImage = ol.layer.Image
-const $ImageCanvasSource = ol.source.ImageCanvas
-const $Proj = ol.proj
 
 /**
  * create canvas
  * @param width
  * @param height
+ * @param Canvas
  * @returns {HTMLCanvasElement}
  */
-const createCanvas = (width, height) => {
-  let canvas = document.createElement('canvas')
-  canvas.width = width
-  canvas.height = height
-  return canvas
+const createCanvas = (width, height, Canvas) => {
+  if (typeof document !== 'undefined') {
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    return canvas
+  } else {
+    // create a new canvas instance in node.js
+    // the canvas class needs to have a default constructor without any parameter
+    return new Canvas(width, height)
+  }
 }
 
-class WindyLayer {
+class WindyLayer extends ol.layer.Image {
   constructor (data, options = {}) {
-    this.$options = options
+    super(options)
 
     /**
      * 矢量图层
      * @type {null}
      */
-    this.$canvas = null
+    this._canvas = null
 
     /**
      * windy 数据
      */
-    this.$data = data
+    this.data = data
 
     /**
-     * timer
+     * windy layer
      * @type {null}
-     * @private
      */
-    this._timer = null
+    this.$Windy = null
 
     /**
-     * 需要渲染的canvas图层
-     * @type {null}
-     * @private
+     * options
+     * @type {{}}
      */
-    this.layer_ = null
+    this.options = options
+    this.setSource(new ol.source.ImageCanvas({
+      logo: options.logo,
+      state: options.state,
+      attributions: options.attributions,
+      resolutions: options.resolutions,
+      canvasFunction: this.canvasFunction.bind(this),
+      projection: (options.hasOwnProperty('projection') ? options.projection : 'EPSG:3857'),
+      ratio: (options.hasOwnProperty('ratio') ? options.ratio : 1)
+    }))
+    this.on('precompose', this.redraw, this)
   }
 
   /**
@@ -57,7 +64,7 @@ class WindyLayer {
    * @returns {*}
    */
   getData () {
-    return this.$data
+    return this.data
   }
 
   /**
@@ -66,13 +73,13 @@ class WindyLayer {
    * @returns {WindyLayer}
    */
   setData (data) {
-    if (!this.$Map) return this
-    this.$data = data
-    if (!this.$Windy && this.$canvas) {
+    if (!this.getMap()) return this
+    this.data = data
+    if (!this.$Windy && this._canvas) {
       this.render(this.$canvas)
-      this.$Map.renderSync()
+      this.getMap().renderSync()
     } else {
-      const extent = this.getExtent()
+      const extent = this._getExtent()
       this.$Windy.update(this.getData(), extent[0], extent[1], extent[2], extent[3])
     }
     return this
@@ -85,55 +92,26 @@ class WindyLayer {
   render (canvas) {
     if (!this.getData()) return this
     if (canvas && !this.$Windy) {
-      if (this._timer) window.clearTimeout(this._timer)
-      this._timer = window.setTimeout(() => {
-        this.$Windy = new Windy({
-          canvas: canvas,
-          projection: (this.$options.hasOwnProperty('projection') ? this.$options.projection : 'EPSG:3857'),
-          data: this.getData()
-        })
-        const extent = this.getExtent()
-        this.$Windy.start(extent[0], extent[1], extent[2], extent[3])
-        this.onEvents()
-      }, 0)
+      this.$Windy = new Windy({
+        canvas: canvas,
+        projection: this.get('projection'),
+        data: this.getData()
+      })
+      const extent = this._getExtent()
+      this.$Windy.start(extent[0], extent[1], extent[2], extent[3])
     } else if (canvas && this.$Windy) {
-      const extent = this.getExtent()
+      const extent = this._getExtent()
       this.$Windy.start(extent[0], extent[1], extent[2], extent[3])
     }
     return this
   }
 
   /**
-   * get canvas layer
+   * re-draw
    */
-  getCanvasLayer () {
-    if (!this.$canvas && !this.layer_) {
-      const extent = this.getMapExtent()
-      this.layer_ = new $LayerImage({
-        layerName: this.$options.layerName,
-        minResolution: this.$options.minResolution,
-        maxResolution: this.$options.maxResolution,
-        zIndex: this.$options.zIndex,
-        extent: extent,
-        source: new $ImageCanvasSource({
-          canvasFunction: this.canvasFunction.bind(this),
-          projection: (this.$options.hasOwnProperty('projection') ? this.$options.projection : 'EPSG:3857'),
-          ratio: (this.$options.hasOwnProperty('ratio') ? this.$options.ratio : 1.5)
-        })
-      })
-      this.$Map.addLayer(this.layer_)
-      this.$Map.un('precompose', this.reRender, this)
-      this.$Map.on('precompose', this.reRender, this)
-    }
-  }
-
-  /**
-   * re render
-   */
-  reRender () {
-    if (!this.layer_) return
-    const extent = this.getMapExtent()
-    this.layer_.setExtent(extent)
+  redraw () {
+    const _extent = this.options.extent || this._getMapExtent()
+    this.setExtent(_extent)
   }
 
   /**
@@ -146,32 +124,52 @@ class WindyLayer {
    * @returns {*}
    */
   canvasFunction (extent, resolution, pixelRatio, size, projection) {
-    if (!this.$canvas) {
-      this.$canvas = createCanvas(size[0], size[1])
+    if (!this._canvas) {
+      this._canvas = createCanvas(size[0], size[1])
+    } else {
+      this._canvas.width = size[0]
+      this._canvas.height = size[1]
     }
-    this.render(this.$canvas)
-    return this.$canvas
+    if (resolution <= this.get('maxResolution')) {
+      this.render(this._canvas)
+    } else {
+      // console.warn('超出所设置最大分辨率！')
+    }
+    return this._canvas
   }
 
   /**
    * bounds, width, height, extent
    * @returns {*[]}
    */
-  getExtent () {
-    const size = this.$Map.getSize()
-    const _extent = this.$Map.getView().calculateExtent(size)
-    const _projection = (this.$options.hasOwnProperty('projection') ? this.$options.projection : 'EPSG:3857')
-    const extent = $Proj.transformExtent(_extent, _projection, 'EPSG:4326')
+  _getExtent () {
+    const size = this._getMapSize()
+    const _extent = this._getMapExtent()
+    const _projection = this.get('projection')
+    const extent = ol.proj.transformExtent(_extent, _projection, 'EPSG:4326')
     return [[[0, 0], [size[0], size[1]]], size[0], size[1], [[extent[0], extent[1]], [extent[2], extent[3]]]]
   }
 
   /**
    * get map current extent
-   * @returns {Array}
+   * @returns {ol.View|*|Array<number>}
+   * @private
    */
-  getMapExtent () {
-    const size = this.$Map.getSize()
-    return this.$Map.getView().calculateExtent(size)
+  _getMapExtent () {
+    if (!this.getMap()) return
+    const size = this._getMapSize()
+    const _view = this.getMap().getView()
+    return _view && _view.calculateExtent(size)
+  }
+
+  /**
+   * get size
+   * @returns {ol.Size|*}
+   * @private
+   */
+  _getMapSize () {
+    if (!this.getMap()) return
+    return this.getMap().getSize()
   }
 
   /**
@@ -179,9 +177,9 @@ class WindyLayer {
    * @param map
    */
   appendTo (map) {
-    if (map && map instanceof $Map) {
-      this.$Map = map
-      this.getCanvasLayer()
+    if (map && map instanceof ol.Map) {
+      this.setMap(map)
+      map.addLayer(this)
     } else {
       throw new Error('not map object')
     }
@@ -192,37 +190,28 @@ class WindyLayer {
    * @private
    */
   clearWind () {
-    if (!this.$Map) return
-    if (this._timer) window.clearTimeout(this._timer)
+    const _map = this.getMap()
+    if (!_map) return
     if (this.$Windy) this.$Windy.stop()
-    this.$Map.un('precompose', this.reRender, this)
-    this.$Map.un('change:size', this.onChangeSize, this)
-    this.$Map.removeLayer(this.layer_)
-    delete this.$Map
-    delete this._timer
+    _map.un('precompose', this.render, this)
+    _map.removeLayer(this)
+    delete this._canvas
     delete this.$Windy
-    delete this.layer_
-    delete this.$canvas
   }
 
   /**
-   * handle map size change
+   * set map
+   * @param map
    */
-  onChangeSize () {
-    if (!this.$Windy) return
-    const extent = this.getExtent()
-    this.$Windy.start(extent[0], extent[1], extent[2], extent[3])
+  setMap (map) {
+    ol.layer.Image.prototype.setMap.call(this, map)
   }
 
-  onEvents () {
-    const map = this.$Map
-    this.unEvents()
-    map.on('change:size', this.onChangeSize, this)
-  }
-
-  unEvents () {
-    const map = this.$Map
-    map.un('change:size', this.onChangeSize, this)
+  /**
+   * get map
+   */
+  getMap () {
+    return this.get('map')
   }
 }
 
