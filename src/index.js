@@ -76,7 +76,7 @@ class WindyLayer extends ol.layer.Image {
     if (!this.getMap()) return this
     this.data = data
     if (!this.$Windy && this._canvas) {
-      this.render(this.$canvas)
+      this.render(this._canvas)
       this.getMap().renderSync()
     } else {
       const extent = this._getExtent()
@@ -90,14 +90,14 @@ class WindyLayer extends ol.layer.Image {
    * @returns {WindyLayer}
    */
   render (canvas) {
-    if (!this.getData()) return this
+    const extent = this._getExtent()
+    if (!this.getData() || !extent) return this
     if (canvas && !this.$Windy) {
       this.$Windy = new Windy({
         canvas: canvas,
         projection: this.get('projection'),
         data: this.getData()
       })
-      const extent = this._getExtent()
       this.$Windy.start(extent[0], extent[1], extent[2], extent[3])
     } else if (canvas && this.$Windy) {
       const extent = this._getExtent()
@@ -140,14 +140,19 @@ class WindyLayer extends ol.layer.Image {
 
   /**
    * bounds, width, height, extent
-   * @returns {*[]}
+   * @returns {*}
+   * @private
    */
   _getExtent () {
     const size = this._getMapSize()
     const _extent = this._getMapExtent()
-    const _projection = this.get('projection')
-    const extent = ol.proj.transformExtent(_extent, _projection, 'EPSG:4326')
-    return [[[0, 0], [size[0], size[1]]], size[0], size[1], [[extent[0], extent[1]], [extent[2], extent[3]]]]
+    if (size && _extent) {
+      const _projection = this.get('projection')
+      const extent = ol.proj.transformExtent(_extent, _projection, 'EPSG:4326')
+      return [[[0, 0], [size[0], size[1]]], size[0], size[1], [[extent[0], extent[1]], [extent[2], extent[3]]]]
+    } else {
+      return false
+    }
   }
 
   /**
@@ -178,7 +183,7 @@ class WindyLayer extends ol.layer.Image {
    */
   appendTo (map) {
     if (map && map instanceof ol.Map) {
-      this.setMap(map)
+      this.set('originMap', map)
       map.addLayer(this)
     } else {
       throw new Error('not map object')
@@ -193,7 +198,7 @@ class WindyLayer extends ol.layer.Image {
     const _map = this.getMap()
     if (!_map) return
     if (this.$Windy) this.$Windy.stop()
-    _map.un('precompose', this.render, this)
+    this.un('precompose', this.redraw, this)
     _map.removeLayer(this)
     delete this._canvas
     delete this.$Windy
@@ -204,14 +209,15 @@ class WindyLayer extends ol.layer.Image {
    * @param map
    */
   setMap (map) {
-    ol.layer.Image.prototype.setMap.call(this, map)
+    this.set('originMap', map)
+    // ol.layer.Image.prototype.setMap.call(this, map)
   }
 
   /**
    * get map
    */
   getMap () {
-    return this.get('map')
+    return this.get('originMap')
   }
 }
 

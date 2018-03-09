@@ -42,9 +42,9 @@
 <body>
 <div id="map">
   <div class="menu">
-    <button class="base-button" onclick="getData()">获取数据</button>
-    <button class="base-button" onclick="setData()">设置数据</button>
-    <button class="base-button" onclick="clearWind()">移除图层</button>
+    <button class="base-button" onclick="getData()">getData</button>
+    <button class="base-button" onclick="setData()">setData</button>
+    <button class="base-button" onclick="clearWind()">removeLayer</button>
   </div>
 </div>
 <script src="../node_modules/openlayers/dist/ol.js"></script>
@@ -80,11 +80,8 @@ axios.get('./out.json', {
 }).then(function (res) {
   if (res.data) {
     data = res.data
-    wind = new WindLayer(data, {
+    wind = new WindLayer('', {
       layerName: 'data',
-      minResolution: undefined,
-      maxResolution: undefined,
-      zIndex: 0,
       projection: 'EPSG:3857',
       ratio: 1,
       map: map
