@@ -1,6 +1,6 @@
 {
   "name": "wind-layer",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "a openlayers extension to windjs",
   "author": "FDD <smileFDD@gmail.com>",
   "homepage": "https://sakitam-fdd.github.io/wind-layer",
