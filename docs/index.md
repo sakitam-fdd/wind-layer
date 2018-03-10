@@ -5,7 +5,7 @@ npm install wind-layer --save
 import WindLayer from 'wind-layer'
 
 // 指定版本安装
-npm install wind-layer@0.0.2 --save
+npm install wind-layer@0.0.4 --save
 import WindLayer from 'wind-layer'
 ```
 
@@ -13,8 +13,8 @@ import WindLayer from 'wind-layer'
 
 ```bash
 // jsdelivr (jsdelivr由于缓存原因最好锁定版本号，否则可能会出现意料之外的问题)
-https://cdn.jsdelivr.net/npm/wind-layer@0.0.2/dist/windLayer.js
-https://cdn.jsdelivr.net/npm/wind-layer@0.0.2/dist/windLayer.min.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.4/dist/windLayer.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.4/dist/windLayer.min.js
 // npm
 https://unpkg.com/wind-layer/dist/windLayer.js
 https://unpkg.com/wind-layer/dist/windLayer.min.js
@@ -28,25 +28,31 @@ https://unpkg.com/wind-layer/dist/windLayer.min.js
 ```javascript
 var wind = new WindLayer(res.data, {
   layerName: '',
-  minResolution: undefined,
-  maxResolution: undefined,
-  zIndex: 0,
   projection: 'EPSG:3857', // EPSG:4326
   ratio: 1
 })
-wind.appendTo(Maps)
+wind.appendTo(map)
+// or 
+map.addLayer(wind) // 此模式下属性必须配置 map 字段
 ```
 
 配置项说明
 
 | 配置项 | 简介 | 类型 | 备注 |
 | --- | --- | --- | --- |
-| layerName | 图层名 | `String` |  |
+| logo | logo | `	string or olx.LogoOptions or undefined` | logo |
+| state | 图层数据源状态 | `	ol.source.State or undefined` | '' |
+| attributions | 版权 | `ol.AttributionLike or undefined` | 版权 |
+| resolutions | 分辨率 | `Array.<number> or undefined` | 指定每一层级对应的分辨率 |
+| layerName | 图层名 | `String` | 图层名称或者其他可观察属性 |
+| visible | 是否可见 | `boolean or undefined` | 默认为`true` |
+| extent | 视图范围 | `Array` | 默认为`undefined`,每次动态获取 |
 | minResolution | 最小分辨率 | `Number` | 默认为 `undefined` |
 | maxResolution | 最大分辨率 | `Number` | 默认为 `undefined` |
 | zIndex | 图层index | `Number` | 默认为 `0` |
 | projection | 投影 | `String` | 现在默认支持 `EPSG:3857`, `EPSG:4326`測試中 |
 | ratio | 画布和地图窗口的比值 | `Number` | 现在默认 `1.5` |
+| map | 地图 | `ol.Map` | 对应的地图实例，调用原生 `addLayer` 时必须配置此字段 |
 
 #### methods
 
