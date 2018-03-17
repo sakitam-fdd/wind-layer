@@ -43,6 +43,12 @@ class WindyLayer extends ol.layer.Image {
     this.$Windy = null
 
     /**
+     * is clear
+     * @type {boolean}
+     */
+    this.isClear = false
+
+    /**
      * options
      * @type {{}}
      */
@@ -73,14 +79,22 @@ class WindyLayer extends ol.layer.Image {
    * @returns {WindyLayer}
    */
   setData (data) {
-    if (!this.getMap()) return this
+    const _map = this.getMap()
+    if (!_map) return this
     this.data = data
+    this.isClear = false
     if (!this.$Windy && this._canvas) {
       this.render(this._canvas)
-      this.getMap().renderSync()
-    } else {
+      _map.renderSync()
+    } else if (this.$Windy && this._canvas) {
+      if (this._cloneLayer) {
+        _map.addLayer(this._cloneLayer)
+        delete this._cloneLayer
+      }
       const extent = this._getExtent()
       this.$Windy.update(this.getData(), extent[0], extent[1], extent[2], extent[3])
+    } else {
+      console.warn('please create new instance')
     }
     return this
   }
@@ -91,7 +105,7 @@ class WindyLayer extends ol.layer.Image {
    */
   render (canvas) {
     const extent = this._getExtent()
-    if (!this.getData() || !extent) return this
+    if (this.isClear || !this.getData() || !extent) return this
     if (canvas && !this.$Windy) {
       this.$Windy = new Windy({
         canvas: canvas,
@@ -110,6 +124,7 @@ class WindyLayer extends ol.layer.Image {
    * re-draw
    */
   redraw () {
+    if (this.isClear) return
     const _extent = this.options.extent || this._getMapExtent()
     this.setExtent(_extent)
   }
@@ -191,10 +206,24 @@ class WindyLayer extends ol.layer.Image {
   }
 
   /**
-   * clear windy layer
+   * clearWind method will retain the instance
    * @private
    */
   clearWind () {
+    const _map = this.getMap()
+    if (!_map) return
+    if (this.$Windy) this.$Windy.stop()
+    this.isClear = true
+    this._cloneLayer = this
+    _map.removeLayer(this)
+    this.changed()
+    this.getMap().renderSync()
+  }
+
+  /**
+   * remove layer this instance will be destroyed after remove
+   */
+  removeLayer () {
     const _map = this.getMap()
     if (!_map) return
     if (this.$Windy) this.$Windy.stop()
@@ -202,6 +231,7 @@ class WindyLayer extends ol.layer.Image {
     _map.removeLayer(this)
     delete this._canvas
     delete this.$Windy
+    delete this._cloneLayer
   }
 
   /**
