@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+  <title>CanvasLayer</title>
+  <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=bxFuXXDt1oKdlgu6mXCCnK51cDgDGBLp"></script>
+  <style type="text/css">
+    body, html,#container {width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";}
+  </style>
+</head>
+<body>
+<div id="container"></div>
+<script src="../node_modules/axios/dist/axios.js"></script>
+<script src="../dist/baiduwindy.js"></script>
+<script type="text/javascript">
+  var map = new BMap.Map("container");
+  map.centerAndZoom(new BMap.Point(116.3964,39.9093), 10);
+  map.enableScrollWheelZoom();
+  // 地图自定义样式
+  map.setMapStyle({
+    styleJson: [{
+      "featureType": "water",
+      "elementType": "all",
+      "stylers": {
+        "color": "#044161"
+      }
+    }, {
+      "featureType": "land",
+      "elementType": "all",
+      "stylers": {
+        "color": "#091934"
+      }
+    }, {
+      "featureType": "boundary",
+      "elementType": "geometry",
+      "stylers": {
+        "color": "#064f85"
+      }
+    }, {
+      "featureType": "railway",
+      "elementType": "all",
+      "stylers": {
+        "visibility": "off"
+      }
+    }, {
+      "featureType": "highway",
+      "elementType": "geometry",
+      "stylers": {
+        "color": "#004981"
+      }
+    }, {
+      "featureType": "highway",
+      "elementType": "geometry.fill",
+      "stylers": {
+        "color": "#005b96",
+        "lightness": 1
+      }
+    }, {
+      "featureType": "highway",
+      "elementType": "labels",
+      "stylers": {
+        "visibility": "on"
+      }
+    }, {
+      "featureType": "arterial",
+      "elementType": "geometry",
+      "stylers": {
+        "color": "#004981",
+        "lightness": -39
+      }
+    }, {
+      "featureType": "arterial",
+      "elementType": "geometry.fill",
+      "stylers": {
+        "color": "#00508b"
+      }
+    }, {
+      "featureType": "poi",
+      "elementType": "all",
+      "stylers": {
+        "visibility": "off"
+      }
+    }, {
+      "featureType": "green",
+      "elementType": "all",
+      "stylers": {
+        "color": "#056197",
+        "visibility": "off"
+      }
+    }, {
+      "featureType": "subway",
+      "elementType": "all",
+      "stylers": {
+        "visibility": "off"
+      }
+    }, {
+      "featureType": "manmade",
+      "elementType": "all",
+      "stylers": {
+        "visibility": "off"
+      }
+    }, {
+      "featureType": "local",
+      "elementType": "all",
+      "stylers": {
+        "visibility": "off"
+      }
+    }, {
+      "featureType": "arterial",
+      "elementType": "labels",
+      "stylers": {
+        "visibility": "off"
+      }
+    }, {
+      "featureType": "boundary",
+      "elementType": "geometry.fill",
+      "stylers": {
+        "color": "#029fd4"
+      }
+    }, {
+      "featureType": "building",
+      "elementType": "all",
+      "stylers": {
+        "color": "#1a5787"
+      }
+    }, {
+      "featureType": "label",
+      "elementType": "all",
+      "stylers": {
+        "visibility": "off"
+      }
+    }, {
+      "featureType": "poi",
+      "elementType": "labels.text.fill",
+      "stylers": {
+        "color": "#ffffff"
+      }
+    }, {
+      "featureType": "poi",
+      "elementType": "labels.text.stroke",
+      "stylers": {
+        "color": "#1e1c1c"
+      }
+    }, {
+      "featureType": "administrative",
+      "elementType": "labels",
+      "stylers": {
+        "visibility": "off"
+      }
+    },{
+      "featureType": "road",
+      "elementType": "labels",
+      "stylers": {
+        "visibility": "off"
+      }
+    }]
+  });
+  axios.get('./out.json').then(function (res) {
+    if (res.data) {
+      var baiduWindy = new BaiduWindy(res.data)
+      map.addOverlay(baiduWindy)
+    }
+  });
+</script>
+</body>
+</html>
