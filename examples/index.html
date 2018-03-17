@@ -44,7 +44,8 @@
   <div class="menu">
     <button class="base-button" onclick="getData()">getData</button>
     <button class="base-button" onclick="setData()">setData</button>
-    <button class="base-button" onclick="clearWind()">removeLayer</button>
+    <button class="base-button" onclick="clearWind()">clearWind</button>
+    <button class="base-button" onclick="removeLayer()">removeLayer</button>
   </div>
 </div>
 <script src="../node_modules/openlayers/dist/ol.js"></script>
@@ -80,7 +81,7 @@ axios.get('./out.json', {
 }).then(function (res) {
   if (res.data) {
     data = res.data
-    wind = new WindLayer('', {
+    wind = new WindLayer(data, {
       layerName: 'data',
       projection: 'EPSG:3857',
       ratio: 1,
@@ -103,6 +104,10 @@ function setData () {
 
 function clearWind () {
   wind.clearWind()
+}
+
+function removeLayer () {
+  wind.removeLayer()
 }
 </script>
 </body>
