@@ -68,7 +68,7 @@ var map = new ol.Map({
   loadTilesWhileAnimating: true,
   pixelRatio: 1,
   view: new ol.View({
-    projection: 'EPSG:3857',
+    projection: 'EPSG:4326',
     center: [113.53450137499999, 34.44104525],
     zoom: 5
   })
@@ -83,7 +83,7 @@ axios.get('./out.json', {
     data = res.data
     wind = new WindLayer(data, {
       layerName: 'data',
-      projection: 'EPSG:3857',
+      projection: 'EPSG:4326',
       ratio: 1,
       map: map
     })
