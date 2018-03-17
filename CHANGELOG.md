@@ -1,3 +1,8 @@
+## 0.0.5 (2018.03.17)
+
+# fix #8
+# test BMap and add example
+
 ## 0.0.4 (2018.03.09)
 
 * 更新 ``CanvasLayer`` 创建方式。
