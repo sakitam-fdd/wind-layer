@@ -36,6 +36,7 @@
     "lodash": "^4.17.4",
     "moment": "^2.20.1",
     "openlayers": "^4.5.0",
+    "rbush": "^2.0.2",
     "request": "^2.83.0",
     "weacast-grib2json": "^0.2.2"
   },
