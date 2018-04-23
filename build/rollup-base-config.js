@@ -13,7 +13,7 @@ const time = new Date();
 const year = time.getFullYear();
 const banner = `/*!\n * author: ${_package.author} 
  * ${_package.name} v${_package.version}
- * build-time: ${year}-${time.getMonth()}-${time.getDay()} ${time.getHours()}:${time.getMinutes()}
+ * build-time: ${year}-${time.getMonth() + 1}-${time.getDate()} ${time.getHours()}:${time.getMinutes()}
  * LICENSE: ${_package.license}
  * (c) 2017-${year} ${_package.homepage}\n */`;
 
