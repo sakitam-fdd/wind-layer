@@ -1,4 +1,4 @@
-import { bind } from '../utils'
+import { bind } from '../helper'
 
 window.requestAnimFrame = function (fn, immediate, context, element) {
   const f = bind(fn, context);

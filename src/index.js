@@ -2,27 +2,8 @@ import './polyfill/assign';
 import './polyfill/requestAnimFrame';
 import ol from 'openlayers';
 import rbush from 'rbush';
-import { isMobile } from './helper';
-
-/**
- * create canvas
- * @param width
- * @param height
- * @param Canvas
- * @returns {HTMLCanvasElement}
- */
-const createCanvas = (width, height, Canvas) => {
-  if (typeof document !== 'undefined') {
-    const canvas = document.createElement('canvas')
-    canvas.width = width
-    canvas.height = height
-    return canvas
-  } else {
-    // create a new canvas instance in node.js
-    // the canvas class needs to have a default constructor without any parameter
-    return new Canvas(width, height)
-  }
-};
+import uuid from 'uuid';
+import { isMobile, createCanvas } from './helper';
 
 const _options = {
   gridPixels: 4, // 用于插值的网格像素边长
@@ -37,7 +18,7 @@ const _options = {
   colors: ['#fff', '#fff', '#fff', '#fff', '#fff'],
   searchSteps: 3, // 插值检索的尝试次数
   interpolateCount: 4, // 插值使用的数据数量
-  frameDuration: 50 // ms
+  frameRate: 15
 };
 
 const NULL_WIND_VECTOR = [NaN, NaN, null];
@@ -72,11 +53,21 @@ class WindyLayer extends ol.layer.Image {
      * @private
      */
     this._columns = [];
-
-    this._idSeq = 0;
-    this._dataPoints = {};
     this._dirty = true;
-    this._builtExtent = [];
+
+    /**
+     * is playing
+     * @type {boolean}
+     * @private
+     */
+    this._playing = false;
+
+    /**
+     * animate
+     * @type {null}
+     * @private
+     */
+    this._animationLoop = null;
 
     /**
      * is clear
@@ -112,21 +103,48 @@ class WindyLayer extends ol.layer.Image {
     const _map = this.getMap();
     if (!_map) return this;
     this.data = data;
-    this.isClear = false;
-    if (!this.$Windy && this._canvas) {
-      this.render(this._canvas)
-      _map.renderSync()
-    } else if (this.$Windy && this._canvas) {
-      if (this._cloneLayer) {
-        _map.addLayer(this._cloneLayer)
-        delete this._cloneLayer
+    let [us, vs] = [this.data[0], this.data[1]];
+    let [cols, rows] = [us.header.nx, us.header.ny];
+    const _projection = this.get('projection')
+    for (let j = 0; j < rows; j++) {
+      const lat = 90 - 180 * j / rows;
+      if (Math.abs(lat) > 85.1) {
+        continue;
       }
-      const extent = this._getExtent()
-      this.$Windy.update(this.getData(), extent[0], extent[1], extent[2], extent[3])
-    } else {
-      console.warn('please create new instance')
+      for (let i = 0; i < cols; i++) {
+        const lon = -180 + 360 * i / cols;
+        const point = ol.proj.transform([lon, lat], _projection, 'EPSG:4326');
+        const idx = cols * j + i;
+        const u = us.data[idx];
+        const v = vs.data[idx];
+        this.addDataPoint(point[0], point[1], u, v);
+      }
     }
     return this
+  }
+
+  /**
+   * add point
+   * @param x
+   * @param y
+   * @param uid
+   * @param value
+   * @param feature
+   */
+  addDataPoint (x, y, uid, value, feature) {
+    uid = uid || 0;
+    value = value || 0;
+    const extent = [x, y, x, y];
+    const data = {
+      x: x,
+      y: y,
+      u: uid,
+      v: value,
+      bbox: extent,
+      id: uuid()
+    };
+    this._tree.insert(extent, data);
+    return data.id;
   }
 
   /**
@@ -136,11 +154,10 @@ class WindyLayer extends ol.layer.Image {
   render (canvas) {
     const extent = this._getExtent();
     if (this.isClear || !this.getData() || !extent) return this
-    if (canvas) {
-      this.start(extent[0], extent[1], extent[2], extent[3])
-    } else if (canvas && this.$Windy) {
-      const extent = this._getExtent()
-      this.start(extent[0], extent[1], extent[2], extent[3])
+    if (!this.getData()) return this
+    if (canvas && !this._playing) {
+      this.start()
+    } else if (canvas && this._playing) {
     }
     return this
   }
@@ -150,7 +167,7 @@ class WindyLayer extends ol.layer.Image {
    */
   redraw () {
     if (this.isClear) return;
-    const _extent = this._options.extent || this._getMapExtent();
+    const _extent = this._options.extent || this._getExtent();
     this.setExtent(_extent)
   }
 
@@ -163,7 +180,7 @@ class WindyLayer extends ol.layer.Image {
       return;
     }
     const _size = map.getSize();
-    const _extent = this._options.extent || this._getMapExtent();
+    const _extent = this._options.extent || this._getExtent();
     const dim = Math.max(_size[0], _size[1]);
     let gridDivs = Math.min(dim / this._options.gridPixels, this._options.gridMaxDivs);
     if (isMobile()) {
@@ -197,6 +214,7 @@ class WindyLayer extends ol.layer.Image {
         grid[j] = row;
       }
     }
+    this._columns = grid;
     this._dirty = false;
   }
 
@@ -272,28 +290,25 @@ class WindyLayer extends ol.layer.Image {
    * @private
    */
   clearWind () {
-    const _map = this.getMap()
-    if (!_map) return
-    if (this.$Windy) this.$Windy.stop()
-    this.isClear = true
-    this._cloneLayer = this
-    _map.removeLayer(this)
-    this.changed()
-    this.getMap().renderSync()
+    const _map = this.getMap();
+    if (!_map) return;
+    this.isClear = true;
+    this._cloneLayer = this;
+    _map.removeLayer(this);
+    this.changed();
+    this.getMap().renderSync();
   }
 
   /**
    * remove layer this instance will be destroyed after remove
    */
   removeLayer () {
-    const _map = this.getMap()
-    if (!_map) return
-    if (this.$Windy) this.$Windy.stop()
-    this.un('precompose', this.redraw, this)
-    _map.removeLayer(this)
-    delete this._canvas
-    delete this.$Windy
-    delete this._cloneLayer
+    const _map = this.getMap();
+    if (!_map) return;
+    this.un('precompose', this.redraw, this);
+    _map.removeLayer(this);
+    delete this._canvas;
+    delete this._cloneLayer;
   }
 
   /**
@@ -312,27 +327,37 @@ class WindyLayer extends ol.layer.Image {
     return this.get('originMap')
   }
 
+  /**
+   * start ani
+   * @returns {WindyLayer}
+   */
   start () {
-    this._buildGrid();
-    this._startAnim();
+    const that = this;
+    this.buildGrid();
+    let then = Date.now();
+    that._playing = true;
+    (function frame () {
+      that._animationLoop = window.requestAnimFrame(frame);
+      const now = Date.now()
+      const delta = now - then;
+      if (delta > 1000 / that._options.frameRate) {
+        then = now - (delta % 1000 / that._options.frameRate);
+        that._evolve();
+        that._draw();
+      }
+    })();
     return this
   }
 
+  /**
+   * stop ani
+   * @returns {WindyLayer}
+   */
   stop () {
-    clearTimeout(this._timer);
-    this._playing = false;
+    this._playing = true
+    if (this._animationLoop) window.cancelAnimFrame(this._animationLoop);
     return this
   }
-
-  isPlaying () {
-    return this._playing;
-  }
-
-  _startAnim () {}
-
-  addDataPoint (x, y, u, v, redrawNow) {}
-
-  removeDataPoint (id, redrawNow) {}
 
   /**
    * clear layer
@@ -344,9 +369,6 @@ class WindyLayer extends ol.layer.Image {
     this.particles = null;
     this._clearContext();
     this._dirty = true;
-    // if (!forbidRedraw && map) {
-    //   map._requestRedraw();
-    // }
     return this;
   }
 
@@ -407,12 +429,11 @@ class WindyLayer extends ol.layer.Image {
         setTimeout(() => {
           this.buildGrid();
           this._particles = null;
-          this._startAnim();
-        }, this._options.frameDuration); // 耗时，防止阻塞绘制
+        }, 1000 / this._options.frameRate); // 耗时，防止阻塞绘制
       }
     }
     if (this._playing) {
-      this._particles = this._getParticles();
+      this._particles = this._getParticles(this._gridColCount * this._gridRowCount * this._options.particleCountFactor);
       this._evolve();
       if (!this._batches) {
         return;
@@ -456,19 +477,16 @@ class WindyLayer extends ol.layer.Image {
 
   /**
    * randomize
-   * @param o
+   * @param age
    * @returns {*}
    * @private
    */
-  _randomize (o) { // UNDONE: this method is terrible
-    let [x, y, safetyNet] = [void (0), void (0), 0];
-    do {
-      x = Math.round(Math.floor(Math.random() * bounds.width) + bounds.x);
-      y = Math.round(Math.floor(Math.random() * bounds.height) + bounds.y)
-    } while (this._getField(x, y)[2] === null && safetyNet++ < 30);
-    o.x = x;
-    o.y = y;
-    return o;
+  _randomize (age) { // UNDONE: this method is terrible
+    return {
+      x: Math.round(Math.random() * this._gridColCount),
+      y: Math.round(Math.random() * this._gridRowCount),
+      age: age === undefined ? Math.floor(Math.random() * this._options.maxParticleAge) : age
+    };
   }
 
   /**
@@ -479,8 +497,9 @@ class WindyLayer extends ol.layer.Image {
     let particles = this._particles || [];
     if (particles.length > particleCount) particles = particles.slice(0, particleCount);
     for (let i = particles.length; i < particleCount; i++) {
-      particles.push(this._randomize({ age: ~~(Math.random() * this._options.maxParticleAge) + 0 }));
+      particles.push(this._randomize(~~(Math.random() * this._options.maxParticleAge) + 0));
     }
+    this._particles = particles;
     return particles;
   }
 
@@ -515,12 +534,12 @@ class WindyLayer extends ol.layer.Image {
     for (let i = 0; i < particles.length; i++) {
       particle = particles[i];
       if (particle.age > this._options.maxParticleAge) {
-        particle = particles[i] = this._getParticles(0);
+        particle = particles[i] = this._randomize(0);
       }
       let [x, y] = [particle.x, particle.y];
       let v = this._getField(x, y)
       if (!v[2]) {
-        particle = particles[i] = this._getParticles(0);
+        particle = particles[i] = this._randomize(0);
       } else {
         particle.xt = x + v[0] * fieldScale;
         particle.yt = y + v[1] * fieldScale;
@@ -542,7 +561,7 @@ class WindyLayer extends ol.layer.Image {
   _interpolate (x, y, searchExtent) {
     const searches = this._tree.search(searchExtent);
     if (!searches) {
-      return this._nullVector;
+      return NULL_WIND_VECTOR;
     }
     let [Σux, Σvx, Σweight] = [0, 0, 0];
     var dx, dy, dd, weight;
@@ -567,7 +586,7 @@ class WindyLayer extends ol.layer.Image {
       v = Σvx / Σweight;
       return [u, v, Math.sqrt(u * u + v * v)];
     }
-    return this._nullVector;
+    return NULL_WIND_VECTOR;
   }
 
   /**
