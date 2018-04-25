@@ -1,8 +1,6 @@
 import './polyfill/assign';
 import './polyfill/requestAnimFrame';
 import ol from 'openlayers';
-import rbush from 'rbush';
-import uuid from 'uuid';
 import { isMobile, createCanvas } from './helper';
 
 const _options = {
@@ -38,22 +36,25 @@ class WindyLayer extends ol.layer.Image {
     /**
      * windy 数据
      */
-    this.data = data;
-
-    /**
-     * btree
-     * @type {rbush|Object}
-     * @private
-     */
-    this._tree = rbush();
+    this.data = [];
+    if (data) {
+      this.setData(data)
+    }
 
     /**
      * columns
      * @type {Array}
      * @private
      */
-    this._columns = [];
+    this._grid = [];
     this._dirty = true;
+
+    /**
+     * color
+     * @type {Array}
+     * @private
+     */
+    this._batches = [];
 
     /**
      * is playing
@@ -102,8 +103,7 @@ class WindyLayer extends ol.layer.Image {
   setData (data) {
     const _map = this.getMap();
     if (!_map) return this;
-    this.data = data;
-    let [us, vs] = [this.data[0], this.data[1]];
+    let [us, vs] = [data[0], data[1]];
     let [cols, rows] = [us.header.nx, us.header.ny];
     const _projection = this.get('projection')
     for (let j = 0; j < rows; j++) {
@@ -113,7 +113,7 @@ class WindyLayer extends ol.layer.Image {
       }
       for (let i = 0; i < cols; i++) {
         const lon = -180 + 360 * i / cols;
-        const point = ol.proj.transform([lon, lat], _projection, 'EPSG:4326');
+        const point = ol.proj.transform([lon, lat], _projection, 'EPSG:3857');
         const idx = cols * j + i;
         const u = us.data[idx];
         const v = vs.data[idx];
@@ -140,11 +140,9 @@ class WindyLayer extends ol.layer.Image {
       y: y,
       u: uid,
       v: value,
-      bbox: extent,
-      id: uuid()
+      bbox: extent
     };
-    this._tree.insert(extent, data);
-    return data.id;
+    this.data.push(data);
   }
 
   /**
@@ -187,34 +185,31 @@ class WindyLayer extends ol.layer.Image {
       gridDivs /= this._options.gridReduceFactor;
     }
     const gridSize = this._gridSize = Math.max(_extent[2] - _extent[0], _extent[3] - _extent[1]) / gridDivs;
-    // 采样范围
-    const searches = this._tree.search(_extent);
-    const count = searches && searches.length;
+    const count = this.data && this.data.length;
     const divCount = Math.sqrt(count) || 1;
     const expand = Math.max((_extent[2] - _extent[0]), (_extent[3] - _extent[1])) / divCount;
-    var tryExpand, tryCount;
     // 构建格网
     this._gridColCount = Math.ceil((_extent[2] - _extent[0]) / gridSize);
     this._gridRowCount = Math.ceil((_extent[3] - _extent[1]) / gridSize);
     const grid = [];
-    for (let j = 0, jLen = this._gridRowCount + 1; j < jLen; j++) {
+    for (let j = 0; j < this._gridRowCount + 1; j++) {
       let y = _extent[1] + j * gridSize;
       if (y >= _extent[1] && y <= _extent[3]) {
         const row = [];
-        for (let i = 0, iLen = this._gridColCount + 1; i < iLen; i++) {
+        for (let i = 0; i < this._gridColCount + 1; i++) {
           let x = _extent[0] + i * gridSize;
           row[i] = this._interpolate(x, y, [x - expand, y - expand, x + expand, y + expand]);
-          tryCount = 1;
-          while (row[i][2] === null && tryCount <= this._options.searchSteps) {
-            tryCount *= 2;
-            tryExpand = tryCount * expand;
-            row[i] = this._interpolate(x, y, [x - tryExpand, y - tryExpand, x + tryExpand, y + tryExpand]);
+          let _count = 1;
+          while (row[i][2] === null && _count <= this._options.searchSteps) {
+            _count *= 2;
+            let _expand = _count * expand;
+            row[i] = this._interpolate(x, y, [x - _expand, y - _expand, x + _expand, y + _expand]);
           }
         }
         grid[j] = row;
       }
     }
-    this._columns = grid;
+    this._grid = grid;
     this._dirty = false;
   }
 
@@ -268,8 +263,8 @@ class WindyLayer extends ol.layer.Image {
    * @private
    */
   _getMapSize () {
-    if (!this.getMap()) return
-    return this.getMap().getSize()
+    if (!this.getMap()) return;
+    return this.getMap().getSize();
   }
 
   /**
@@ -365,38 +360,10 @@ class WindyLayer extends ol.layer.Image {
    * @returns {WindyLayer}
    */
   clear (forbidRedraw) {
-    this._tree.clear();
     this.particles = null;
     this._clearContext();
     this._dirty = true;
     return this;
-  }
-
-  /**
-   * get field from pixel
-   * @param pixel
-   * @returns {*}
-   */
-  calcField (pixel) {
-    const map = this.getMap();
-    const extent = this._getExtent();
-    const all = this._tree.all();
-    const count = all && all.length;
-    const divCount = Math.sqrt(count) || 1;
-    const expand = Math.max((extent[2] - extent[0]), (extent[3] - extent[1])) / divCount;
-    const coordinate = map.getCoordinateFromPixel(pixel);
-    if (count > 0) {
-      let i = 1;
-      let searched, searchedExtent;
-      do {
-        searchedExtent = [coordinate[0] - i * expand, coordinate[1] - i * expand, coordinate[0] + i * expand, coordinate[1] + i * expand];
-        searched = this._tree.search(searchedExtent);
-        i *= 2;
-      } while (!searched || searched.length === 0)
-      return this._interpolate(coordinate[0], coordinate[1], searchedExtent);
-    } else {
-      return NULL_WIND_VECTOR;
-    }
   }
 
   /**
@@ -429,11 +396,17 @@ class WindyLayer extends ol.layer.Image {
         setTimeout(() => {
           this.buildGrid();
           this._particles = null;
-        }, 1000 / this._options.frameRate); // 耗时，防止阻塞绘制
+        }, 1000 / this._options.frameRate);
       }
     }
     if (this._playing) {
-      this._particles = this._getParticles(this._gridColCount * this._gridRowCount * this._options.particleCountFactor);
+      if (!this._particles) {
+        this._particles = [];
+        const particleCount = this._gridColCount * this._gridRowCount * this._options.particleCountFactor;
+        for (let i = 0; i < particleCount; i++) {
+          this._particles.push(this._getParticle());
+        }
+      }
       this._evolve();
       if (!this._batches) {
         return;
@@ -476,31 +449,15 @@ class WindyLayer extends ol.layer.Image {
   }
 
   /**
-   * randomize
+   * get particle
    * @param age
-   * @returns {*}
-   * @private
    */
-  _randomize (age) { // UNDONE: this method is terrible
+  _getParticle (age) {
     return {
       x: Math.round(Math.random() * this._gridColCount),
       y: Math.round(Math.random() * this._gridRowCount),
       age: age === undefined ? Math.floor(Math.random() * this._options.maxParticleAge) : age
-    };
-  }
-
-  /**
-   * get particles
-   * @param particleCount
-   */
-  _getParticles (particleCount) {
-    let particles = this._particles || [];
-    if (particles.length > particleCount) particles = particles.slice(0, particleCount);
-    for (let i = particles.length; i < particleCount; i++) {
-      particles.push(this._randomize(~~(Math.random() * this._options.maxParticleAge) + 0));
     }
-    this._particles = particles;
-    return particles;
   }
 
   /**
@@ -511,10 +468,10 @@ class WindyLayer extends ol.layer.Image {
    * @private
    */
   _getField (x, y) {
-    if (!this._columns) return NULL_WIND_VECTOR;
-    const column = this._columns[Math.round(x)];
+    if (!this._grid) return NULL_WIND_VECTOR;
+    const rows = this._grid[Math.round(y)];
     /* eslint-disable-next-line */
-    return (column && column[Math.round(y)] || NULL_WIND_VECTOR);
+    return (rows && rows[Math.round(x)] || NULL_WIND_VECTOR);
   }
 
   /**
@@ -534,16 +491,19 @@ class WindyLayer extends ol.layer.Image {
     for (let i = 0; i < particles.length; i++) {
       particle = particles[i];
       if (particle.age > this._options.maxParticleAge) {
-        particle = particles[i] = this._randomize(0);
+        particle = this._getParticle(0);
       }
       let [x, y] = [particle.x, particle.y];
-      let v = this._getField(x, y)
+      let v = this._getField(x, y);
       if (!v[2]) {
-        particle = particles[i] = this._randomize(0);
-      } else {
+        particle = this._getParticle(0);
+      } else if (this._getField(x, y)[0] !== null) {
         particle.xt = x + v[0] * fieldScale;
         particle.yt = y + v[1] * fieldScale;
         batches[this._colorIndex(v[2])].push(particle);
+      } else {
+        particle.x = x + v[0] * fieldScale;
+        particle.y = y + v[1] * fieldScale;
       }
       particle.age++;
     }
@@ -559,10 +519,7 @@ class WindyLayer extends ol.layer.Image {
    * @private
    */
   _interpolate (x, y, searchExtent) {
-    const searches = this._tree.search(searchExtent);
-    if (!searches) {
-      return NULL_WIND_VECTOR;
-    }
+    const searches = this.data;
     let [Σux, Σvx, Σweight] = [0, 0, 0];
     var dx, dy, dd, weight;
     var dataPoint, u, v;
