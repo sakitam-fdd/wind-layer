@@ -40,17 +40,10 @@
   </style>
 </head>
 <body>
-<div id="map">
-  <div class="menu">
-    <button class="base-button" onclick="getData()">getData</button>
-    <button class="base-button" onclick="setData()">setData</button>
-    <button class="base-button" onclick="clearWind()">clearWind</button>
-    <button class="base-button" onclick="removeLayer()">removeLayer</button>
-  </div>
-</div>
+<div id="map"></div>
 <script src="../node_modules/openlayers/dist/ol.js"></script>
-<script src="../node_modules/axios/dist/axios.js"></script>
 <script src="../dist/windLayer.js"></script>
+<script src="../node_modules/dat.gui/build/dat.gui.js"></script>
 <script>
 var map = new ol.Map({
   target: 'map',
@@ -73,15 +66,17 @@ var map = new ol.Map({
     zoom: 5
   })
 });
-var wind, data;
-axios.get('./out.json', {
+var wind;
+fetch('./out.json', {
+  method: 'GET',
   params: {
     time: Date.parse(new Date())
   }
-}).then(function (res) {
-  if (res.data) {
-    data = res.data
-    wind = new WindLayer(data, {
+}).then(function(response) {
+  return response.json();
+}).then(function(json) {
+  if (json) {
+    var options = {
       layerName: 'data',
       projection: 'EPSG:3857',
       ratio: 1,
@@ -89,29 +84,22 @@ axios.get('./out.json', {
       maxParticleAge: 1000,
       particleCountFactor: 0.04,
       map: map
-    })
-    console.log(wind)
+    };
+    wind = new WindLayer(json, options);
+    console.log(wind);
     // map.addLayer(wind)
-    wind.appendTo(map)
+    wind.appendTo(map);
+    var gui = new dat.GUI({
+      nameMap: {
+        size: '线条大小',
+        color: '线条颜色'
+      }
+    });
+    gui.add(options, 'maxParticleAge', 1000, 1500).onFinishChange(wind.update())
   }
+}).catch(function (error) {
+  console.error(error)
 });
-
-function getData () {
-  var _data = wind.getData();
-  console.log(_data)
-}
-
-function setData () {
-  wind.setData(data)
-}
-
-function clearWind () {
-  wind.clearWind()
-}
-
-function removeLayer () {
-  wind.removeLayer()
-}
 </script>
 </body>
 </html>
