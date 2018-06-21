@@ -14,17 +14,17 @@ if (!fs.existsSync('dist')) {
  * @param builds
  */
 function build (builds) {
-  let built = 0
-  const total = builds.length
+  let built = 0;
+  const total = builds.length;
   const next = () => {
     buildEntry(builds[built]).then(() => {
-      built++
+      built++;
       if (built < total) {
         next()
       }
     }).catch(logError)
-  }
-  next()
+  };
+  next();
 }
 
 /**
@@ -34,7 +34,7 @@ function build (builds) {
  * @returns {Promise.<TResult>}
  */
 function buildEntry ({ input, output }) {
-  const isProd = /min\.js$/.test(output.file)
+  const isProd = /min\.js$/.test(output.file);
   return rollup.rollup(input)
     .then(bundle => bundle.generate(output))
     .then(({ code }) => {
@@ -46,10 +46,10 @@ function buildEntry ({ input, output }) {
             ascii_only: true
             /* eslint-enable camelcase */
           }
-        }).code
-        return write(output.file, minified, true)
+        }).code;
+        return write(output.file, minified, true);
       } else {
-        return write(output.file, code)
+        return write(output.file, code);
       }
     })
 }
@@ -64,14 +64,14 @@ function buildEntry ({ input, output }) {
 function write (dest, code, zip) {
   return new Promise((resolve, reject) => {
     function report (extra) {
-      console.log(blue(path.relative(process.cwd(), dest)) + ' ' + getSize(code) + (extra || ''))
+      console.log(blue(path.relative(process.cwd(), dest)) + ' ' + getSize(code) + (extra || ''));
       resolve()
     }
     fs.writeFile(dest, code, err => {
-      if (err) return reject(err)
+      if (err) return reject(err);
       if (zip) {
         zlib.gzip(code, (err, zipped) => {
-          if (err) return reject(err)
+          if (err) return reject(err);
           report(' (gzipped: ' + getSize(zipped) + ')')
         })
       } else {
@@ -87,7 +87,7 @@ function write (dest, code, zip) {
  * @returns {string}
  */
 function getSize (code) {
-  return (code.length / 1024).toFixed(2) + 'kb'
+  return (code.length / 1024).toFixed(2) + 'kb';
 }
 
 /**
@@ -95,7 +95,7 @@ function getSize (code) {
  * @param e
  */
 function logError (e) {
-  console.log(e)
+  console.log(e);
 }
 
 /**
@@ -107,4 +107,4 @@ function blue (str) {
   return '\x1b[1m\x1b[34m' + str + '\x1b[39m\x1b[22m'
 }
 
-build(Object.keys(configs).map(key => configs[key]))
+build(Object.keys(configs).map(key => configs[key]));

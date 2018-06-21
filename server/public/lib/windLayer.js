@@ -1,6 +1,7 @@
 /*!
- * author: FDD <smileFDD@gmail.com>
- * wind-layer v0.0.3
+ * author: FDD <smileFDD@gmail.com> 
+ * wind-layer v0.0.5
+ * build-time: 2018-6-21 13:40
  * LICENSE: MIT
  * (c) 2017-2018 https://sakitam-fdd.github.io/wind-layer
  */
@@ -70,7 +71,7 @@ var Windy = function Windy(params) {
         case "0,0":
           temp = record;break;
         default:
-          
+
       }
     });
 
@@ -165,7 +166,13 @@ var Windy = function Windy(params) {
     return wind;
   };
 
-  var distortion = function distortion(projection, λ, φ, x, y, windy) {
+  var distortion = function distortion() {
+    var λ = arguments[1];
+    var φ = arguments[2];
+    var x = arguments[3];
+    var y = arguments[4];
+    var windy = arguments[5];
+
     var τ = 2 * Math.PI;
 
     var H = params.projection === 'EPSG:4326' ? 5 : Math.pow(10, -5.2);
@@ -466,171 +473,206 @@ if (!window.cancelAnimationFrame) {
   };
 }
 
+var createCanvas = function createCanvas(width, height, Canvas) {
+  if (typeof document !== 'undefined') {
+    var canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    return canvas;
+  } else {
+    return new Canvas(width, height);
+  }
+};
+
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
   }
 };
 
-var $Map = ol.Map;
-var $LayerImage = ol.layer.Image;
-var $ImageCanvasSource = ol.source.ImageCanvas;
-var $Proj = ol.proj;
+var inherits = function (subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+  }
 
-var createCanvas = function createCanvas(width, height) {
-  var canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  return canvas;
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 };
 
-var WindyLayer = function () {
+var possibleConstructorReturn = function (self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+};
+
+var WindyLayer = function (_ol$layer$Image) {
+  inherits(WindyLayer, _ol$layer$Image);
+
   function WindyLayer(data) {
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     classCallCheck(this, WindyLayer);
 
-    this.$options = options;
+    var _this = possibleConstructorReturn(this, _ol$layer$Image.call(this, options));
 
-    this.$canvas = null;
+    _this._canvas = null;
 
-    this.$data = data;
+    _this.data = data;
 
-    this._timer = null;
+    _this.$Windy = null;
 
-    this.layer_ = null;
+    _this.isClear = false;
+
+    _this.options = options;
+    _this.setSource(new ol.source.ImageCanvas({
+      logo: options.logo,
+      state: options.state,
+      attributions: options.attributions,
+      resolutions: options.resolutions,
+      canvasFunction: _this.canvasFunction.bind(_this),
+      projection: options.hasOwnProperty('projection') ? options.projection : 'EPSG:3857',
+      ratio: options.hasOwnProperty('ratio') ? options.ratio : 1
+    }));
+    _this.on('precompose', _this.redraw, _this);
+    return _this;
   }
 
   WindyLayer.prototype.getData = function getData() {
-    return this.$data;
+    return this.data;
   };
 
   WindyLayer.prototype.setData = function setData(data) {
-    if (!this.$Map) return this;
-    this.$data = data;
-    if (!this.$Windy && this.$canvas) {
-      this.render(this.$canvas);
-      this.$Map.renderSync();
-    } else {
-      var extent = this.getExtent();
+    var _map = this.getMap();
+    if (!_map) return this;
+    this.data = data;
+    this.isClear = false;
+    if (!this.$Windy && this._canvas) {
+      this.render(this._canvas);
+      _map.renderSync();
+    } else if (this.$Windy && this._canvas) {
+      if (this._cloneLayer) {
+        _map.addLayer(this._cloneLayer);
+        delete this._cloneLayer;
+      }
+      var extent = this._getExtent();
       this.$Windy.update(this.getData(), extent[0], extent[1], extent[2], extent[3]);
+    } else {
+      console.warn('please create new instance');
     }
     return this;
   };
 
   WindyLayer.prototype.render = function render(canvas) {
-    var _this = this;
-
-    if (!this.getData()) return this;
+    var extent = this._getExtent();
+    if (this.isClear || !this.getData() || !extent) return this;
     if (canvas && !this.$Windy) {
-      if (this._timer) window.clearTimeout(this._timer);
-      this._timer = window.setTimeout(function () {
-        _this.$Windy = new Windy({
-          canvas: canvas,
-          projection: _this.$options.hasOwnProperty('projection') ? _this.$options.projection : 'EPSG:3857',
-          data: _this.getData()
-        });
-        var extent = _this.getExtent();
-        _this.$Windy.start(extent[0], extent[1], extent[2], extent[3]);
-        _this.onEvents();
-      }, 0);
-    } else if (canvas && this.$Windy) {
-      var extent = this.getExtent();
+      this.$Windy = new Windy({
+        canvas: canvas,
+        projection: this.get('projection'),
+        data: this.getData()
+      });
       this.$Windy.start(extent[0], extent[1], extent[2], extent[3]);
+    } else if (canvas && this.$Windy) {
+      var _extent2 = this._getExtent();
+      this.$Windy.start(_extent2[0], _extent2[1], _extent2[2], _extent2[3]);
     }
     return this;
   };
 
-  WindyLayer.prototype.getCanvasLayer = function getCanvasLayer() {
-    if (!this.$canvas && !this.layer_) {
-      var extent = this.getMapExtent();
-      this.layer_ = new $LayerImage({
-        layerName: this.$options.layerName,
-        minResolution: this.$options.minResolution,
-        maxResolution: this.$options.maxResolution,
-        zIndex: this.$options.zIndex,
-        extent: extent,
-        source: new $ImageCanvasSource({
-          canvasFunction: this.canvasFunction.bind(this),
-          projection: this.$options.hasOwnProperty('projection') ? this.$options.projection : 'EPSG:3857',
-          ratio: this.$options.hasOwnProperty('ratio') ? this.$options.ratio : 1.5
-        })
-      });
-      this.$Map.addLayer(this.layer_);
-      this.$Map.un('precompose', this.reRender, this);
-      this.$Map.on('precompose', this.reRender, this);
-    }
-  };
-
-  WindyLayer.prototype.reRender = function reRender() {
-    if (!this.layer_) return;
-    var extent = this.getMapExtent();
-    this.layer_.setExtent(extent);
+  WindyLayer.prototype.redraw = function redraw() {
+    if (this.isClear) return;
+    var _extent = this.options.extent || this._getMapExtent();
+    this.setExtent(_extent);
   };
 
   WindyLayer.prototype.canvasFunction = function canvasFunction(extent, resolution, pixelRatio, size, projection) {
-    if (!this.$canvas) {
-      this.$canvas = createCanvas(size[0], size[1]);
+    if (!this._canvas) {
+      this._canvas = createCanvas(size[0], size[1]);
+    } else {
+      this._canvas.width = size[0];
+      this._canvas.height = size[1];
     }
-    this.render(this.$canvas);
-    return this.$canvas;
+    if (resolution <= this.get('maxResolution')) {
+      this.render(this._canvas);
+    } else {}
+    return this._canvas;
   };
 
-  WindyLayer.prototype.getExtent = function getExtent() {
-    var size = this.$Map.getSize();
-    var _extent = this.$Map.getView().calculateExtent(size);
-    var _projection = this.$options.hasOwnProperty('projection') ? this.$options.projection : 'EPSG:3857';
-    var extent = $Proj.transformExtent(_extent, _projection, 'EPSG:4326');
-    return [[[0, 0], [size[0], size[1]]], size[0], size[1], [[extent[0], extent[1]], [extent[2], extent[3]]]];
+  WindyLayer.prototype._getExtent = function _getExtent() {
+    var size = this._getMapSize();
+    var _extent = this._getMapExtent();
+    if (size && _extent) {
+      var _projection = this.get('projection');
+      var extent = ol.proj.transformExtent(_extent, _projection, 'EPSG:4326');
+      return [[[0, 0], [size[0], size[1]]], size[0], size[1], [[extent[0], extent[1]], [extent[2], extent[3]]]];
+    } else {
+      return false;
+    }
   };
 
-  WindyLayer.prototype.getMapExtent = function getMapExtent() {
-    var size = this.$Map.getSize();
-    return this.$Map.getView().calculateExtent(size);
+  WindyLayer.prototype._getMapExtent = function _getMapExtent() {
+    if (!this.getMap()) return;
+    var size = this._getMapSize();
+    var _view = this.getMap().getView();
+    return _view && _view.calculateExtent(size);
+  };
+
+  WindyLayer.prototype._getMapSize = function _getMapSize() {
+    if (!this.getMap()) return;
+    return this.getMap().getSize();
   };
 
   WindyLayer.prototype.appendTo = function appendTo(map) {
-    if (map && map instanceof $Map) {
-      this.$Map = map;
-      this.getCanvasLayer();
+    if (map && map instanceof ol.Map) {
+      this.set('originMap', map);
+      map.addLayer(this);
     } else {
       throw new Error('not map object');
     }
   };
 
   WindyLayer.prototype.clearWind = function clearWind() {
-    if (!this.$Map) return;
-    if (this._timer) window.clearTimeout(this._timer);
+    var _map = this.getMap();
+    if (!_map) return;
     if (this.$Windy) this.$Windy.stop();
-    this.$Map.un('precompose', this.reRender, this);
-    this.$Map.un('change:size', this.onChangeSize, this);
-    this.$Map.removeLayer(this.layer_);
-    delete this.$Map;
-    delete this._timer;
+    this.isClear = true;
+    this._cloneLayer = this;
+    _map.removeLayer(this);
+    this.changed();
+    this.getMap().renderSync();
+  };
+
+  WindyLayer.prototype.removeLayer = function removeLayer() {
+    var _map = this.getMap();
+    if (!_map) return;
+    if (this.$Windy) this.$Windy.stop();
+    this.un('precompose', this.redraw, this);
+    _map.removeLayer(this);
+    delete this._canvas;
     delete this.$Windy;
-    delete this.layer_;
-    delete this.$canvas;
+    delete this._cloneLayer;
   };
 
-  WindyLayer.prototype.onChangeSize = function onChangeSize() {
-    if (!this.$Windy) return;
-    var extent = this.getExtent();
-    this.$Windy.start(extent[0], extent[1], extent[2], extent[3]);
+  WindyLayer.prototype.setMap = function setMap(map) {
+    this.set('originMap', map);
   };
 
-  WindyLayer.prototype.onEvents = function onEvents() {
-    var map = this.$Map;
-    this.unEvents();
-    map.on('change:size', this.onChangeSize, this);
-  };
-
-  WindyLayer.prototype.unEvents = function unEvents() {
-    var map = this.$Map;
-    map.un('change:size', this.onChangeSize, this);
+  WindyLayer.prototype.getMap = function getMap() {
+    return this.get('originMap');
   };
 
   return WindyLayer;
-}();
+}(ol.layer.Image);
 
 return WindyLayer;
 
 })));
+//# sourceMappingURL=windLayer.js.map

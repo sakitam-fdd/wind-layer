@@ -74,24 +74,44 @@ var map = new ol.Map({
   })
 });
 var wind, data;
-axios.get('./out.json', {
-  params: {
-    time: Date.parse(new Date())
-  }
+axios.get('http://localhost:3000/gribdata', {
+  params: ''
 }).then(function (res) {
-  if (res.data) {
-    data = res.data
-    wind = new WindLayer(data, {
-      layerName: 'data',
-      projection: 'EPSG:4326',
-      ratio: 1,
-      map: map
+  if (res.data.success) {
+    axios.get('http://localhost:3000/getDataByFileName', {
+      params: {
+        filename: res.data.data.name
+      }
+    }).then(function (data_) {
+      data = data_.data.data
+      wind = new WindLayer(data, {
+        layerName: 'data',
+        projection: 'EPSG:4326',
+        ratio: 1,
+        map: map
+      })
+      wind.appendTo(map)
     })
-    console.log(wind)
-    // map.addLayer(wind)
-    wind.appendTo(map)
   }
 });
+// axios.get('./out.json', {
+//   params: {
+//     time: Date.parse(new Date())
+//   }
+// }).then(function (res) {
+//   if (res.data) {
+//     data = res.data
+//     wind = new WindLayer(data, {
+//       layerName: 'data',
+//       projection: 'EPSG:4326',
+//       ratio: 1,
+//       map: map
+//     })
+//     console.log(wind)
+//     // map.addLayer(wind)
+//     wind.appendTo(map)
+//   }
+// });
 
 function getData () {
   var _data = wind.getData();

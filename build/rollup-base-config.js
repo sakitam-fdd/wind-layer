@@ -7,22 +7,24 @@ const nodeResolve = require('rollup-plugin-node-resolve');
 const replace = require('rollup-plugin-replace');
 const eslint = require('rollup-plugin-eslint');
 const friendlyFormatter = require("eslint-friendly-formatter");
-const _package = require('../package.json')
-const eslintConfig = require('../.eslintrc')
+const _package = require('../package.json');
+const eslintConfig = require('../.eslintrc');
 const time = new Date();
 const year = time.getFullYear();
 const banner = `/*!\n * author: ${_package.author} 
  * ${_package.name} v${_package.version}
- * build-time: ${year}-${time.getMonth()}-${time.getDay()} ${time.getHours()}:${time.getMinutes()}
+ * build-time: ${year}-${time.getMonth() + 1}-${time.getDate()} ${time.getHours()}:${time.getMinutes()}
  * LICENSE: ${_package.license}
  * (c) 2017-${year} ${_package.homepage}\n */`;
 
-const resolve = _path => path.resolve(__dirname, '../', _path)
+const resolve = _path => path.resolve(__dirname, '../', _path);
+
+const input = process.env.input;
 
 const genConfig = (opts) => {
   const config = {
     input: {
-      input: resolve('src/index.js'),
+      input: resolve(`src/${input}`),
       plugins: [
         eslint(Object.assign({}, eslintConfig, {
           formatter: friendlyFormatter,
@@ -49,7 +51,7 @@ const genConfig = (opts) => {
       },
       name: _package.namespace
     }
-  }
+  };
   if (opts.env) {
     config.input.plugins.unshift(replace({
       'process.env.NODE_ENV': JSON.stringify(opts.env)
@@ -60,17 +62,17 @@ const genConfig = (opts) => {
 
 const handleMinEsm = name => {
   if (typeof name === 'string') {
-    let arr_ = name.split('.')
-    let arrTemp = []
+    let arr_ = name.split('.');
+    let arrTemp = [];
     arr_.forEach((item, index) => {
       if (index < arr_.length - 1) {
         arrTemp.push(item)
       } else {
-        arrTemp.push('min')
+        arrTemp.push('min');
         arrTemp.push(item)
       }
-    })
-    return arrTemp.join('.')
+    });
+    return arrTemp.join('.');
   }
 }
 
@@ -93,4 +95,4 @@ module.exports = [
     file: resolve(_package.module),
     format: 'es'
   }
-].map(genConfig)
+].map(genConfig);

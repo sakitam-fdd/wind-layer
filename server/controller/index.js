@@ -141,6 +141,7 @@ const fetchGribData = params => {
       return new Promise((resolve, reject) => {
         const _sourcePath = utils.resolve(config.staticDir + config.sourceDataDir + stamp + '.f000')
         const _sourceExist = utils.checkFileExists(_sourcePath)
+        console.log(_sourceExist)
         if (_sourceExist) {
           resolve({
             code: 200,
@@ -152,7 +153,6 @@ const fetchGribData = params => {
             }
           })
         } else {
-          console.log(stamp, hours)
           request.get({
             url: config.serviceUrl,
             qs: {
