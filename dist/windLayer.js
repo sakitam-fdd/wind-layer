@@ -1,7 +1,7 @@
 /*!
  * author: FDD <smileFDD@gmail.com> 
  * wind-layer v0.0.5
- * build-time: 2018-6-21 13:40
+ * build-time: 2018-6-21 18:34
  * LICENSE: MIT
  * (c) 2017-2018 https://sakitam-fdd.github.io/wind-layer
  */
@@ -14,6 +14,7 @@
 ol = ol && ol.hasOwnProperty('default') ? ol['default'] : ol;
 
 var Windy = function Windy(params) {
+  if (!params.projection) params.projection = 'EPSG:4326';
   var VELOCITY_SCALE = 0.005 * (Math.pow(window.devicePixelRatio, 1 / 3) || 1);
   var MIN_TEMPERATURE_K = 261.15;
   var MAX_TEMPERATURE_K = 317.15;
@@ -166,13 +167,7 @@ var Windy = function Windy(params) {
     return wind;
   };
 
-  var distortion = function distortion() {
-    var λ = arguments[1];
-    var φ = arguments[2];
-    var x = arguments[3];
-    var y = arguments[4];
-    var windy = arguments[5];
-
+  var distortion = function distortion(projection, λ, φ, x, y, windy) {
     var τ = 2 * Math.PI;
 
     var H = params.projection === 'EPSG:4326' ? 5 : Math.pow(10, -5.2);

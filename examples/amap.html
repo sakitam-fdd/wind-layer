@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>amap-polyline-simple</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css"/>
+  <script src="http://webapi.amap.com/maps?v=1.4.2&key=6cb85da518029607d421917b7ddeb94a"></script>
+  <style>
+    html, body, #map {
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<script src="../node_modules/axios/dist/axios.js"></script>
+<script src="../dist/aMapWindy.js"></script>
+<script>
+
+  var map = new AMap.Map('map', {
+    resizeEnable: true,
+    zoom: 4,
+    center: [113.53450137499999, 34.44104525],
+    mapStyle: 'amap://styles/dark'
+  });
+
+  axios.get('./out.json').then(function (res) {
+    if (res.data) {
+      var layer = new AMapWindy(res.data, {
+        projection: 'EPSG:4326'
+      }).appendTo(map)
+    }
+  });
+
+</script>
+</body>
+</html>

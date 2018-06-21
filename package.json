@@ -26,9 +26,9 @@
     "grib"
   ],
   "scripts": {
-    "dev:ol": "cross-env NODE_ENV=dev input=openlayers/index.js rollup -wm -c build/rollup-dev-config.js",
-    "dev:bmap": "cross-env NODE_ENV=dev input=bmap/index.js rollup -wm -c build/rollup-dev-config.js",
-    "dev:amap": "cross-env NODE_ENV=dev input=amap/index.js rollup -wm -c build/rollup-dev-config.js",
+    "dev:ol": "cross-env NODE_ENV=dev input=openlayers/index.js file=WindLayer rollup -wm -c build/rollup-dev-config.js",
+    "dev:bmap": "cross-env NODE_ENV=dev input=bmap/index.js file=BMapWindy rollup -wm -c build/rollup-dev-config.js",
+    "dev:amap": "cross-env NODE_ENV=dev input=amap/index.js file=AMapWindy rollup -wm -c build/rollup-dev-config.js",
     "build": "node build/rollup-prod-config.js",
     "start": "node serve/bin/www",
     "dev:server": "./node_modules/.bin/nodemon server/bin/www",
