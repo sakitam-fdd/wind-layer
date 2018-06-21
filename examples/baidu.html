@@ -12,7 +12,7 @@
 <body>
 <div id="container"></div>
 <script src="../node_modules/axios/dist/axios.js"></script>
-<script src="../dist/baiduwindy.js"></script>
+<script src="../dist/bMapWindy.js"></script>
 <script type="text/javascript">
   var map = new BMap.Map("container");
   map.centerAndZoom(new BMap.Point(116.3964,39.9093), 10);
@@ -158,7 +158,9 @@
   });
   axios.get('./out.json').then(function (res) {
     if (res.data) {
-      var baiduWindy = new BaiduWindy(res.data)
+      var baiduWindy = new BMapWindy(res.data, {
+        projection: 'EPSG:3857'
+      })
       map.addOverlay(baiduWindy)
     }
   });

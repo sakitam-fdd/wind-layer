@@ -18,8 +18,13 @@ const banner = `/*!\n * author: ${_package.author}
  * (c) 2017-${year} ${_package.homepage}\n */`;
 
 const resolve = _path => path.resolve(__dirname, '../', _path);
+const lowerFirstChart = str => {
+  return (str.replace(/( |^)[A-Z]/g, (L) => L.toLowerCase()))
+}
 
 const input = process.env.input;
+const namespace = process.env.file;
+const file = lowerFirstChart(namespace)
 
 const genConfig = (opts) => {
   const config = {
@@ -49,7 +54,7 @@ const genConfig = (opts) => {
       globals: {
         openlayers: 'ol'
       },
-      name: _package.namespace
+      name: namespace
     }
   };
   if (opts.env) {
@@ -78,7 +83,7 @@ const handleMinEsm = name => {
 
 module.exports = [
   {
-    file: resolve(_package.unpkg),
+    file: resolve(`dist/${file}.js`),
     format: 'umd',
     env: 'development'
   },

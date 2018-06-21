@@ -14,6 +14,7 @@
  */
 
 const Windy = function (params) {
+  if (!params.projection) params.projection = 'EPSG:4326';
   const VELOCITY_SCALE = 0.005 * (Math.pow(window.devicePixelRatio,1/3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
   const MIN_TEMPERATURE_K = 261.15;                                            // step size of particle intensity color scale
   const MAX_TEMPERATURE_K = 317.15;                                            // wind velocity at which particle intensity is maximum (m/s)
@@ -188,7 +189,7 @@ const Windy = function (params) {
     return wind;
   };
 
-  var distortion = function (projection = 'EPSG:4326', λ, φ, x, y, windy) {
+  var distortion = function (projection, λ, φ, x, y, windy) {
     var τ = 2 * Math.PI;
     // var H = Math.pow(10, -5.2);
     var H = params.projection === 'EPSG:4326' ? 5 : Math.pow(10, -5.2);
