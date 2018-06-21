@@ -24,7 +24,7 @@ const roundHours = (hours, interval) => {
 const checkFileExists = (path, mkdir) => {
   try {
     fs.statSync(path)
-    return true
+    return fs.existsSync(path)
   } catch (e) {
     if (mkdir) {
       fs.mkdirSync(path)

@@ -1,7 +1,7 @@
 /*!
  * author: FDD <smileFDD@gmail.com> 
  * wind-layer v0.0.5
- * build-time: 2018-2-6 15:9
+ * build-time: 2018-6-21 13:40
  * LICENSE: MIT
  * (c) 2017-2018 https://sakitam-fdd.github.io/wind-layer
  */
@@ -166,7 +166,13 @@ var Windy = function Windy(params) {
     return wind;
   };
 
-  var distortion = function distortion(projection, λ, φ, x, y, windy) {
+  var distortion = function distortion() {
+    var λ = arguments[1];
+    var φ = arguments[2];
+    var x = arguments[3];
+    var y = arguments[4];
+    var windy = arguments[5];
+
     var τ = 2 * Math.PI;
 
     var H = params.projection === 'EPSG:4326' ? 5 : Math.pow(10, -5.2);
@@ -467,6 +473,17 @@ if (!window.cancelAnimationFrame) {
   };
 }
 
+var createCanvas = function createCanvas(width, height, Canvas) {
+  if (typeof document !== 'undefined') {
+    var canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    return canvas;
+  } else {
+    return new Canvas(width, height);
+  }
+};
+
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -495,17 +512,6 @@ var possibleConstructorReturn = function (self, call) {
   }
 
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
-};
-
-var createCanvas = function createCanvas(width, height, Canvas) {
-  if (typeof document !== 'undefined') {
-    var canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    return canvas;
-  } else {
-    return new Canvas(width, height);
-  }
 };
 
 var WindyLayer = function (_ol$layer$Image) {
@@ -669,3 +675,4 @@ var WindyLayer = function (_ol$layer$Image) {
 return WindyLayer;
 
 })));
+//# sourceMappingURL=windLayer.js.map

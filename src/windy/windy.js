@@ -1,3 +1,6 @@
+/* eslint-disable */
+
+
 /*  Global class for simulating the movement of particle through a 1km wind grid
 
  credit: All the credit for this work goes to: https://github.com/cambecc for creating the repo:
@@ -11,13 +14,13 @@
  */
 
 const Windy = function (params) {
-  const VELOCITY_SCALE = 0.005 * (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
+  const VELOCITY_SCALE = 0.005 * (Math.pow(window.devicePixelRatio,1/3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
   const MIN_TEMPERATURE_K = 261.15;                                            // step size of particle intensity color scale
   const MAX_TEMPERATURE_K = 317.15;                                            // wind velocity at which particle intensity is maximum (m/s)
   const MAX_PARTICLE_AGE = 90;                                                 // max number of frames a particle is drawn before regeneration
   const PARTICLE_LINE_WIDTH = 1;                                               // line width of a drawn particle
   const PARTICLE_MULTIPLIER = 1 / 200;                                         // particle count scalar (completely arbitrary--this values looks nice)
-  const PARTICLE_REDUCTION = (Math.pow(window.devicePixelRatio, 1 / 3) || 1.6);   // multiply particle count for mobiles by this amount
+  const PARTICLE_REDUCTION = (Math.pow(window.devicePixelRatio,1/3) || 1.6);   // multiply particle count for mobiles by this amount
   const FRAME_RATE = 15, FRAME_TIME = 1000 / FRAME_RATE;                       // desired frames per second
 
   var NULL_WIND_VECTOR = [NaN, NaN, null];                                     // singleton for no wind in the form: [u, v, magnitude]
@@ -55,15 +58,9 @@ const Windy = function (params) {
 
     data.forEach(function (record) {
       switch (record.header.parameterCategory + "," + record.header.parameterNumber) {
-        case "2,2":
-          uComp = record;
-          break;
-        case "2,3":
-          vComp = record;
-          break;
-        case "0,0":
-          temp = record;
-          break;
+        case "2,2": uComp = record; break;
+        case "2,3": vComp = record; break;
+        case "0,0": temp = record; break;
         default:
           scalar = record;
       }
@@ -119,9 +116,9 @@ const Windy = function (params) {
    * @param φ {Float} Latitude
    * @returns {Object}
    */
-  var interpolate = function (λ, φ) {
+  var interpolate = function(λ, φ) {
 
-    if (!grid) return null;
+    if(!grid) return null;
 
     var i = floorMod(λ - λ0, 360) / Δλ;  // calculate longitude index in wrapped range [0, 360)
     var j = (φ0 - φ) / Δφ;                 // calculate latitude index in direction +90 to -90
@@ -144,6 +141,7 @@ const Windy = function (params) {
     }
     return null;
   };
+
 
 
   /**
@@ -190,9 +188,10 @@ const Windy = function (params) {
     return wind;
   };
 
-  var distortion = function (projection, λ, φ, x, y, windy) {
+  var distortion = function (projection = 'EPSG:4326', λ, φ, x, y, windy) {
     var τ = 2 * Math.PI;
-    var H = 5;
+    // var H = Math.pow(10, -5.2);
+    var H = params.projection === 'EPSG:4326' ? 5 : Math.pow(10, -5.2);
     var hλ = λ < 0 ? H : -H;
     var hφ = φ < 0 ? H : -H;
 
@@ -216,8 +215,8 @@ const Windy = function (params) {
      * @returns {Array} wind vector [u, v, magnitude] at the point (x, y), or [NaN, NaN, null] if wind
      *          is undefined at that point.
      */
-    function field (x, y) {
-      if (!columns) return [NaN, NaN, null];
+    function field(x, y) {
+      if(!columns) return [NaN, NaN, null];
       var column = columns[Math.round(x)];
       return column && column[Math.round(y)] || NULL_WIND_VECTOR;
     }
@@ -253,7 +252,7 @@ const Windy = function (params) {
     var y = Math.max(Math.floor(upperLeft[1], 0), 0);
     var xMax = Math.min(Math.ceil(lowerRight[0], width), width - 1);
     var yMax = Math.min(Math.ceil(lowerRight[1], height), height - 1);
-    return {x: x, y: y, xMax: width, yMax: yMax, width: width, height: height};
+    return { x: x, y: y, xMax: width, yMax: yMax, width: width, height: height };
   };
 
   var deg2rad = function (deg) {
@@ -264,13 +263,28 @@ const Windy = function (params) {
     return ang / (Math.PI / 180.0);
   };
 
-  var invert = function (x, y, windy) {
-    var mapLonDelta = windy.east - windy.west;
-    var mapLatDelta = windy.south - windy.north;
-    var lat = rad2deg(windy.north) + y / windy.height * rad2deg(mapLatDelta);
-    var lon = rad2deg(windy.west) + x / windy.width * rad2deg(mapLonDelta);
-    return [lon, lat];
-  };
+  var invert
+
+  if (params.projection === 'EPSG:4326') {
+    invert = function (x, y, windy) {
+      var mapLonDelta = windy.east - windy.west;
+      var mapLatDelta = windy.south - windy.north;
+      var lat = rad2deg(windy.north) + y / windy.height * rad2deg(mapLatDelta);
+      var lon = rad2deg(windy.west) + x / windy.width * rad2deg(mapLonDelta);
+      return [lon, lat];
+    };
+  } else {
+    invert = function (x, y, windy) {
+      var mapLonDelta = windy.east - windy.west;
+      var worldMapRadius = windy.width / rad2deg(mapLonDelta) * 360 / (2 * Math.PI);
+      var mapOffsetY = (worldMapRadius / 2 * Math.log((1 + Math.sin(windy.south)) / (1 - Math.sin(windy.south))));
+      var equatorY = windy.height + mapOffsetY;
+      var a = (equatorY - y) / worldMapRadius;
+      var lat = 180 / Math.PI * (2 * Math.atan(Math.exp(a)) - Math.PI / 2);
+      var lon = rad2deg(windy.west) + x / windy.width * rad2deg(mapLonDelta);
+      return [lon, lat];
+    };
+  }
 
   var mercY = function (lat) {
     return Math.log(Math.tan(lat / 2 + Math.PI / 4));
@@ -300,7 +314,7 @@ const Windy = function (params) {
     var columns = [];
     var x = bounds.x;
 
-    function interpolateColumn (x) {
+    function interpolateColumn(x) {
       var column = [];
       for (var y = bounds.y; y <= bounds.yMax; y += 2) {
         var coord = invert(x, y, extent);
@@ -332,7 +346,7 @@ const Windy = function (params) {
     //    createField(columns, bounds, callback);
     //})();
 
-    for (; x < bounds.width; x += 2) {
+    for (; x < bounds.width; x+= 2) {
       interpolateColumn(x);
     }
     createField(columns, bounds, callback);
@@ -341,27 +355,16 @@ const Windy = function (params) {
   var particles, animationLoop;
   var animate = function (bounds, field, extent) {
 
-    function asColorStyle (r, g, b, a) {
+    function asColorStyle(r, g, b, a) {
       return "rgba(" + 243 + ", " + 243 + ", " + 238 + ", " + a + ")";
     }
 
-    function hexToR (h) {
-      return parseInt((cutHex(h)).substring(0, 2), 16)
-    }
+    function hexToR(h) { return parseInt((cutHex(h)).substring(0, 2), 16) }
+    function hexToG(h) { return parseInt((cutHex(h)).substring(2, 4), 16) }
+    function hexToB(h) { return parseInt((cutHex(h)).substring(4, 6), 16) }
+    function cutHex(h) { return (h.charAt(0) == "#") ? h.substring(1, 7) : h }
 
-    function hexToG (h) {
-      return parseInt((cutHex(h)).substring(2, 4), 16)
-    }
-
-    function hexToB (h) {
-      return parseInt((cutHex(h)).substring(4, 6), 16)
-    }
-
-    function cutHex (h) {
-      return (h.charAt(0) == "#") ? h.substring(1, 7) : h
-    }
-
-    function windTemperatureColorScale (minTemp, maxTemp) {
+    function windTemperatureColorScale(minTemp, maxTemp) {
 
       var result = [
         "rgb(36,104, 180)",
@@ -389,9 +392,7 @@ const Windy = function (params) {
     }
 
     var colorStyles = windTemperatureColorScale(MIN_TEMPERATURE_K, MAX_TEMPERATURE_K);
-    var buckets = colorStyles.map(function () {
-      return [];
-    });
+    var buckets = colorStyles.map(function () { return []; });
     var mapArea = ((extent.south - extent.north) * (extent.west - extent.east));
     var particleCount = Math.round(bounds.width * bounds.height * PARTICLE_MULTIPLIER * Math.pow(mapArea, 0.24));
     if (isMobile()) {
@@ -401,13 +402,11 @@ const Windy = function (params) {
     particles = particles || [];
     if (particles.length > particleCount) particles = particles.slice(0, particleCount);
     for (var i = particles.length; i < particleCount; i++) {
-      particles.push(field.randomize({age: ~~(Math.random() * MAX_PARTICLE_AGE) + 0}));
+      particles.push(field.randomize({ age: ~~(Math.random() * MAX_PARTICLE_AGE) + 0 }));
     }
 
-    function evolve () {
-      buckets.forEach(function (bucket) {
-        bucket.length = 0;
-      });
+    function evolve() {
+      buckets.forEach(function (bucket) { bucket.length = 0; });
       particles.forEach(function (particle) {
         if (particle.age > MAX_PARTICLE_AGE) {
           field.randomize(particle).age = ~~(Math.random() * MAX_PARTICLE_AGE / 2);
@@ -441,7 +440,7 @@ const Windy = function (params) {
     var g = params.canvas.getContext("2d");
     g.lineWidth = PARTICLE_LINE_WIDTH;
 
-    function draw () {
+    function draw() {
       // Fade existing particle trails.
       g.save();
       g.globalAlpha = .16;
@@ -467,7 +466,7 @@ const Windy = function (params) {
     }
 
     var then = Date.now();
-    (function frame () {
+    (function frame() {
       animationLoop = requestAnimationFrame(frame);
       var now = Date.now()
       var delta = now - then;
@@ -516,9 +515,7 @@ const Windy = function (params) {
   var shift = function (dx, dy) {
     var canvas = params.canvas, w = canvas.width, h = canvas.height, ctx = canvas.getContext("2d");
     if (w > dx && h > dy) {
-      var clamp = function (high, value) {
-        return Math.max(0, Math.min(high, value));
-      };
+      var clamp = function (high, value) { return Math.max(0, Math.min(high, value)); };
       var imageData = ctx.getImageData(clamp(w, -dx), clamp(h, -dy), clamp(w, w - dx), clamp(h, h - dy));
       ctx.clearRect(0, 0, w, h);
       ctx.putImageData(imageData, clamp(w, dx), clamp(h, dy));
@@ -551,7 +548,7 @@ window.requestAnimationFrame = (function () {
       return window.setTimeout(callback, 1000 / FRAME_RATE);
     };
 })();
-if (!window.cancelAnimationFrame) {
+if(!window.cancelAnimationFrame) {
   window.cancelAnimationFrame = function (id) {
     clearTimeout(id);
   };
