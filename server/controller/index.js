@@ -1,10 +1,13 @@
-const fs = require('fs')
-const request = require('request')
-const moment = require('moment')
-const grib2json = require('weacast-grib2json')
-const utils = require('../utils/index')
-const config = require('../config/config')
-let fetchTimer = null
+const os = require('os');
+const fs = require('fs');
+const axios = require('axios');
+const moment = require('moment');
+const exec = require('child_process').exec;
+const execFile = require('child_process').execFile;
+const utils = require('../utils/index');
+const config = require('../config/config');
+const grib2jsonCommand = process.env.GRIB2JSON || utils.resolve(`bin/${os.platform() === 'win32' ? 'grib2json.cmd' : 'grib2json'}`);
+let fetchTimer = null;
 
 /**
  * 获取数据源文件
@@ -50,6 +53,32 @@ const getLocalData = (path) => {
       bin = bin.slice(3)
     }
     resolve(JSON.parse(bin.toString('utf-8')))
+  })
+};
+
+const grib2json = (path_, options) => {
+  return new Promise((resolve, reject) => {
+    execFile(`${grib2jsonCommand} --data --output ${options.output} --names --compact ${path_}`,
+      {
+        maxBuffer: 8 * 1024 * 1024
+      }, function (error, stdout, stderr) {
+        if (error) {
+          reject(error);
+          return
+        }
+        if (options.output) {
+          fs.readJson(options.output, (error, json) => {
+            if (error) {
+              reject(error);
+              return
+            }
+            resolve(json)
+          })
+        } else {
+          let json = JSON.parse(stdout)
+          resolve(json)
+        }
+      })
   })
 }
 
@@ -141,7 +170,6 @@ const fetchGribData = params => {
       return new Promise((resolve, reject) => {
         const _sourcePath = utils.resolve(config.staticDir + config.sourceDataDir + stamp + '.f000')
         const _sourceExist = utils.checkFileExists(_sourcePath)
-        console.log(_sourceExist)
         if (_sourceExist) {
           resolve({
             code: 200,
@@ -153,9 +181,11 @@ const fetchGribData = params => {
             }
           })
         } else {
-          request.get({
+          axios({
+            method: 'get',
             url: config.serviceUrl,
-            qs: {
+            responseType: 'stream',
+            params: {
               file: 'gfs.t' + hours + 'z.pgrb2.1p00.f000',
               lev_10_m_above_ground: 'on',
               lev_surface: 'on',
@@ -169,7 +199,7 @@ const fetchGribData = params => {
               bottomlat: config.extent[3],
               dir: '/gfs.' + stamp
             }
-          }).on('response', response => {
+          }).then(response => {
             if (response.statusCode !== 200) {
               console.log('current data not Exist')
               fetchGribData({
@@ -186,9 +216,8 @@ const fetchGribData = params => {
               // 生成存储路径，要注意这里的newpath必须是绝对路径，否则Stream报错
               const stream = fs.createWriteStream(newpath)
               // 写入文件流
-              response.pipe(stream)
+              response.data.pipe(stream)
               stream.on('finish', function () {
-                // stream.close()
                 resolve({
                   code: 200,
                   success: true,
@@ -200,7 +229,7 @@ const fetchGribData = params => {
                 })
               })
             }
-          }).on('error', error => {
+          }).catch(() => {
             fetchGribData({
               time: moment(_time).subtract(6, 'hours')
             }).then(_res => {
@@ -208,7 +237,6 @@ const fetchGribData = params => {
                 resolve(_res)
               }
             })
-            console.log(error)
           })
         }
       })
@@ -298,11 +326,13 @@ const getDataByFileName = async (ctx, next) => {
       next()
     }
   } else if (_type === 'f000') {
-    const _sourcePath = utils.resolve(config.staticDir + config.sourceDataDir + ctx.query.filename)
-    const _sourceExist = utils.checkFileExists(_sourcePath)
+    const _sourcePath = utils.resolve(config.staticDir + config.sourceDataDir + ctx.query.filename);
+    const _sourceExist = utils.checkFileExists(_sourcePath);
+    const _parsePath = utils.resolve(config.staticDir + config.parseDataDir + ctx.query.filename.replace('.f000', '.json'))
     if (_sourceExist) {
       const _data = await grib2json(_sourcePath, {
-        data: true
+        data: true,
+        output: _parsePath
       })
       ctx.status = 200
       ctx.body = {

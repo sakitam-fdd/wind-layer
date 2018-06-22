@@ -68,50 +68,46 @@ var map = new ol.Map({
   loadTilesWhileAnimating: true,
   pixelRatio: 1,
   view: new ol.View({
-    projection: 'EPSG:4326',
+    projection: 'EPSG:3857',
     center: [113.53450137499999, 34.44104525],
     zoom: 5
   })
 });
 var wind, data;
-axios.get('http://localhost:3000/gribdata', {
-  params: ''
-}).then(function (res) {
-  if (res.data.success) {
-    axios.get('http://localhost:3000/getDataByFileName', {
-      params: {
-        filename: res.data.data.name
-      }
-    }).then(function (data_) {
-      data = data_.data.data
-      wind = new WindLayer(data, {
-        layerName: 'data',
-        projection: 'EPSG:4326',
-        ratio: 1,
-        map: map
-      })
-      wind.appendTo(map)
-    })
-  }
-});
-// axios.get('./out.json', {
-//   params: {
-//     time: Date.parse(new Date())
-//   }
+// axios.get('http://58.87.95.84:3001/gribdata', {
+//   params: ''
 // }).then(function (res) {
-//   if (res.data) {
-//     data = res.data
-//     wind = new WindLayer(data, {
-//       layerName: 'data',
-//       projection: 'EPSG:4326',
-//       ratio: 1,
-//       map: map
+//   if (res.data.success) {
+//     axios.get('http://58.87.95.84:3001/getDataByFileName', {
+//       params: {
+//         filename: res.data.data.name
+//       }
+//     }).then(function (data_) {
+//       data = data_.data.data
+//       wind = new WindLayer(data, {
+//         layerName: 'data',
+//         projection: 'EPSG:4326',
+//         ratio: 1,
+//         map: map
+//       })
+//       wind.appendTo(map)
 //     })
-//     console.log(wind)
-//     // map.addLayer(wind)
-//     wind.appendTo(map)
 //   }
 // });
+axios.get('../server/public/parseData/2018062100.json').then(function (res) {
+  if (res.data) {
+    data = res.data
+    wind = new WindLayer(data, {
+      layerName: 'data',
+      projection: 'EPSG:3857',
+      ratio: 1,
+      map: map
+    })
+    console.log(wind)
+    // map.addLayer(wind)
+    wind.appendTo(map)
+  }
+});
 
 function getData () {
   var _data = wind.getData();
