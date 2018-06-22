@@ -37,9 +37,7 @@
   "dependencies": {
     "lodash": "^4.17.4",
     "moment": "^2.20.1",
-    "openlayers": "^4.5.0",
-    "request": "^2.83.0",
-    "weacast-grib2json": "^0.2.2"
+    "openlayers": "^4.5.0"
   },
   "devDependencies": {
     "axios": "^0.17.1",
@@ -52,6 +50,7 @@
     "babel-plugin-transform-proto-to-assign": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-2": "^6.24.1",
+    "child_process": "^1.0.2",
     "cross-env": "^5.2.0",
     "debug": "^2.6.3",
     "eslint": "^4.6.1",
