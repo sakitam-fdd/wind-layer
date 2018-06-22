@@ -48,6 +48,7 @@
     <button class="base-button" onclick="removeLayer()">removeLayer</button>
   </div>
 </div>
+<script src="../node_modules/moment/moment.js"></script>">
 <script src="../node_modules/openlayers/dist/ol.js"></script>
 <script src="../node_modules/axios/dist/axios.js"></script>
 <script src="../dist/windLayer.js"></script>
@@ -94,7 +95,11 @@ var wind, data;
 //     })
 //   }
 // });
-axios.get('../server/public/parseData/2018062100.json').then(function (res) {
+axios.get('http://localhost:3000/getdata', {
+  params: {
+    time: moment('20180622')
+  }
+}).then(function (res) {
   if (res.data) {
     data = res.data
     wind = new WindLayer(data, {
