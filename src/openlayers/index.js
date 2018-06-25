@@ -1,8 +1,13 @@
-import ol from 'openlayers';
 import Windy from '../windy/windy';
 import { createCanvas } from '../helper';
 
-class WindyLayer extends ol.layer.Image {
+const global = typeof window === 'undefined' ? {} : window;
+const ol = global.ol || {};
+
+if (!ol.layer) ol.layer = {};
+if (!ol.layer.Image) ol.layer.Image = class {};
+
+class OlWind extends ol.layer.Image {
   constructor (data, options = {}) {
     super(options);
 
@@ -232,4 +237,4 @@ class WindyLayer extends ol.layer.Image {
   }
 }
 
-export default WindyLayer;
+export default OlWind;

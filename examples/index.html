@@ -75,14 +75,14 @@ var map = new ol.Map({
   })
 });
 var wind, data;
-axios.get('./data.json', {
+axios.get('./out.json', {
   params: {
     time: moment('20180622')
   }
 }).then(function (res) {
   if (res.data) {
     data = res.data
-    wind = new WindLayer(data, {
+    wind = new windLayer.OlWind(data, {
       layerName: 'data',
       projection: 'EPSG:3857',
       ratio: 1,
