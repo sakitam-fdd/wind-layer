@@ -2,34 +2,56 @@
 
 
 /*  Global class for simulating the movement of particle through a 1km wind grid
-
  credit: All the credit for this work goes to: https://github.com/cambecc for creating the repo:
  https://github.com/cambecc/earth. The majority of this code is directly take nfrom there, since its awesome.
-
  This class takes a canvas element and an array of data (1km GFS from http://www.emc.ncep.noaa.gov/index.php?branch=GFS)
  and then uses a mercator (forward/reverse) projection to correctly map wind vectors in "map space".
-
  The "start" method takes the bounds of the map at its current extent and starts the whole gridding,
  interpolation and animation process.
  */
 
 const Windy = function (params) {
   if (!params.projection) params.projection = 'EPSG:4326';
-  const VELOCITY_SCALE = 0.005 * (Math.pow(window.devicePixelRatio,1/3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
-  const MIN_TEMPERATURE_K = 261.15;                                            // step size of particle intensity color scale
-  const MAX_TEMPERATURE_K = 317.15;                                            // wind velocity at which particle intensity is maximum (m/s)
-  const MAX_PARTICLE_AGE = 90;                                                 // max number of frames a particle is drawn before regeneration
-  const PARTICLE_LINE_WIDTH = 1;                                               // line width of a drawn particle
-  const PARTICLE_MULTIPLIER = 1 / 200;                                         // particle count scalar (completely arbitrary--this values looks nice)
-  const PARTICLE_REDUCTION = (Math.pow(window.devicePixelRatio,1/3) || 1.6);   // multiply particle count for mobiles by this amount
-  const FRAME_RATE = 15, FRAME_TIME = 1000 / FRAME_RATE;                       // desired frames per second
+  const MIN_VELOCITY_INTENSITY = params.minVelocity || 0;                      // velocity at which particle intensity is minimum (m/s)
+  const MAX_VELOCITY_INTENSITY = params.maxVelocity || 10;                     // velocity at which particle intensity is maximum (m/s)
+  const VELOCITY_SCALE = (params.velocityScale || 0.005) * (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
+  const MAX_PARTICLE_AGE = params.particleAge || 90;                         	 // max number of frames a particle is drawn before regeneration
+  const PARTICLE_LINE_WIDTH = params.lineWidth || 1;                           // line width of a drawn particle
+  const PARTICLE_MULTIPLIER = params.particleMultiplier || 1 / 300;            // particle count scalar (completely arbitrary--this values looks nice)
+  const PARTICLE_REDUCTION = (Math.pow(window.devicePixelRatio, 1 / 3) || 1.6);   // multiply particle count for mobiles by this amount
+  const FRAME_RATE = params.frameRate || 15, FRAME_TIME = 1000 / FRAME_RATE;   // desired frames per second
 
-  var NULL_WIND_VECTOR = [NaN, NaN, null];                                     // singleton for no wind in the form: [u, v, magnitude]
+  var defaulColorScale = [
+    "rgb(36,104, 180)",
+    "rgb(60,157, 194)",
+    "rgb(128,205,193 )",
+    "rgb(151,218,168 )",
+    "rgb(198,231,181)",
+    "rgb(238,247,217)",
+    "rgb(255,238,159)",
+    "rgb(252,217,125)",
+    "rgb(255,182,100)",
+    "rgb(252,150,75)",
+    "rgb(250,112,52)",
+    "rgb(245,64,32)",
+    "rgb(237,45,28)",
+    "rgb(220,24,32)",
+    "rgb(180,0,35)"
+  ];
+
+  const colorScale = params.colorScale || defaulColorScale;
+
+  var NULL_WIND_VECTOR = [NaN, NaN, null];  // singleton for no wind in the form: [u, v, magnitude]
 
   var builder;
   var grid;
+  var gridData = params.data;
   var date;
   var λ0, φ0, Δλ, Δφ, ni, nj;
+
+  var setData = function (data) {
+    gridData = data;
+  };
 
   // interpolation for vectors like wind (u,v,m)
   var bilinearInterpolateVector = function (x, y, g00, g10, g01, g11) {
@@ -38,36 +60,41 @@ const Windy = function (params) {
     var a = rx * ry, b = x * ry, c = rx * y, d = x * y;
     var u = g00[0] * a + g10[0] * b + g01[0] * c + g11[0] * d;
     var v = g00[1] * a + g10[1] * b + g01[1] * c + g11[1] * d;
-    var tmp = g00[2] * a + g10[2] * b + g01[2] * c + g11[2] * d;
-    return [u, v, tmp];
+    return [u, v, Math.sqrt(u * u + v * v)];
   };
 
-  var createWindBuilder = function (uComp, vComp, temp) {
+
+  var createWindBuilder = function (uComp, vComp) {
     var uData = uComp.data, vData = vComp.data;
     return {
       header: uComp.header,
       //recipe: recipeFor("wind-" + uComp.header.surface1Value),
       data: function (i) {
-        return [uData[i], vData[i], temp.data[i]];
+        return [uData[i], vData[i]];
       },
       interpolate: bilinearInterpolateVector
     }
   };
 
   var createBuilder = function (data) {
-    var uComp = null, vComp = null, temp = null, scalar = null;
+    var uComp = null, vComp = null, scalar = null;
 
     data.forEach(function (record) {
       switch (record.header.parameterCategory + "," + record.header.parameterNumber) {
-        case "2,2": uComp = record; break;
-        case "2,3": vComp = record; break;
-        case "0,0": temp = record; break;
+        case "1,2":
+        case "2,2":
+          uComp = record;
+          break;
+        case "1,3":
+        case "2,3":
+          vComp = record;
+          break;
         default:
           scalar = record;
       }
     });
 
-    return createWindBuilder(uComp, vComp, temp);
+    return createWindBuilder(uComp, vComp);
   };
 
   var buildGrid = function (data, callback) {
@@ -117,9 +144,9 @@ const Windy = function (params) {
    * @param φ {Float} Latitude
    * @returns {Object}
    */
-  var interpolate = function(λ, φ) {
+  var interpolate = function (λ, φ) {
 
-    if(!grid) return null;
+    if (!grid) return null;
 
     var i = floorMod(λ - λ0, 360) / Δλ;  // calculate longitude index in wrapped range [0, 360)
     var j = (φ0 - φ) / Δφ;                 // calculate latitude index in direction +90 to -90
@@ -142,8 +169,6 @@ const Windy = function (params) {
     }
     return null;
   };
-
-
 
   /**
    * @returns {Boolean} true if the specified value is not null and not undefined.
@@ -172,7 +197,7 @@ const Windy = function (params) {
    */
   var isMobile = function () {
     return (/android|blackberry|iemobile|ipad|iphone|ipod|opera mini|webos/i).test(navigator.userAgent);
-  }
+  };
 
   /**
    * Calculate distortion of the wind vector caused by the shape of the projection at point (x, y). The wind
@@ -216,8 +241,7 @@ const Windy = function (params) {
      * @returns {Array} wind vector [u, v, magnitude] at the point (x, y), or [NaN, NaN, null] if wind
      *          is undefined at that point.
      */
-    function field(x, y) {
-      if(!columns) return [NaN, NaN, null];
+    function field (x, y) {
       var column = columns[Math.round(x)];
       return column && column[Math.round(y)] || NULL_WIND_VECTOR;
     }
@@ -225,7 +249,6 @@ const Windy = function (params) {
     // Frees the massive "columns" array for GC. Without this, the array is leaked (in Chrome) each time a new
     // field is interpolated because the field closure's context is leaked, for reasons that defy explanation.
     field.release = function () {
-      //delete columns;
       columns = [];
     };
 
@@ -241,8 +264,6 @@ const Windy = function (params) {
       return o;
     };
 
-    //field.overlay = mask.imageData;
-    //return field;
     callback(bounds, field);
   };
 
@@ -253,7 +274,7 @@ const Windy = function (params) {
     var y = Math.max(Math.floor(upperLeft[1], 0), 0);
     var xMax = Math.min(Math.ceil(lowerRight[0], width), width - 1);
     var yMax = Math.min(Math.ceil(lowerRight[1], height), height - 1);
-    return { x: x, y: y, xMax: width, yMax: yMax, width: width, height: height };
+    return {x: x, y: y, xMax: width, yMax: yMax, width: width, height: height};
   };
 
   var deg2rad = function (deg) {
@@ -304,18 +325,16 @@ const Windy = function (params) {
     return [x, y];
   };
 
-
   var interpolateField = function (grid, bounds, extent, callback) {
 
     var projection = {};
-
     var mapArea = ((extent.south - extent.north) * (extent.west - extent.east));
-    var velocityScale = VELOCITY_SCALE * Math.pow(mapArea, 0.3);
+    var velocityScale = VELOCITY_SCALE * Math.pow(mapArea, 0.4);
 
     var columns = [];
     var x = bounds.x;
 
-    function interpolateColumn(x) {
+    function interpolateColumn (x) {
       var column = [];
       for (var y = bounds.y; y <= bounds.yMax; y += 2) {
         var coord = invert(x, y, extent);
@@ -334,83 +353,58 @@ const Windy = function (params) {
       columns[x + 1] = columns[x] = column;
     }
 
-    //(function batchInterpolate() {
-    //    var start = Date.now();
-    //    while (x < bounds.width) {
-    //        interpolateColumn(x);
-    //        x += 2;
-    //        if ((Date.now() - start) > 1000) { //MAX_TASK_TIME) {
-    //            setTimeout(batchInterpolate, 25);
-    //            return;
-    //        }
-    //    }
-    //    createField(columns, bounds, callback);
-    //})();
-
-    for (; x < bounds.width; x+= 2) {
-      interpolateColumn(x);
-    }
-    createField(columns, bounds, callback);
+    (function batchInterpolate () {
+      var start = Date.now();
+      while (x < bounds.width) {
+        interpolateColumn(x);
+        x += 2;
+        if ((Date.now() - start) > 1000) { //MAX_TASK_TIME) {
+          setTimeout(batchInterpolate, 25);
+          return;
+        }
+      }
+      createField(columns, bounds, callback);
+    })();
   };
 
-  var particles, animationLoop;
-  var animate = function (bounds, field, extent) {
+  var animationLoop;
+  var animate = function (bounds, field) {
 
-    function asColorStyle(r, g, b, a) {
-      return "rgba(" + 243 + ", " + 243 + ", " + 238 + ", " + a + ")";
-    }
+    function windIntensityColorScale (min, max) {
 
-    function hexToR(h) { return parseInt((cutHex(h)).substring(0, 2), 16) }
-    function hexToG(h) { return parseInt((cutHex(h)).substring(2, 4), 16) }
-    function hexToB(h) { return parseInt((cutHex(h)).substring(4, 6), 16) }
-    function cutHex(h) { return (h.charAt(0) == "#") ? h.substring(1, 7) : h }
-
-    function windTemperatureColorScale(minTemp, maxTemp) {
-
-      var result = [
-        "rgb(36,104, 180)",
-        "rgb(60,157, 194)",
-        "rgb(128,205,193 )",
-        "rgb(151,218,168 )",
-        "rgb(198,231,181)",
-        "rgb(238,247,217)",
-        "rgb(255,238,159)",
-        "rgb(252,217,125)",
-        "rgb(255,182,100)",
-        "rgb(252,150,75)",
-        "rgb(250,112,52)",
-        "rgb(245,64,32)",
-        "rgb(237,45,28)",
-        "rgb(220,24,32)",
-        "rgb(180,0,35)"
-      ]
-      result.indexFor = function (m) {  // map wind speed to a style
-        return Math.max(0, Math.min((result.length - 1),
-          Math.round((m - minTemp) / (maxTemp - minTemp) * (result.length - 1))));
+      colorScale.indexFor = function (m) {  // map velocity speed to a style
+        return Math.max(0, Math.min((colorScale.length - 1),
+          Math.round((m - min) / (max - min) * (colorScale.length - 1))));
 
       };
-      return result;
+
+      return colorScale;
     }
 
-    var colorStyles = windTemperatureColorScale(MIN_TEMPERATURE_K, MAX_TEMPERATURE_K);
-    var buckets = colorStyles.map(function () { return []; });
-    var mapArea = ((extent.south - extent.north) * (extent.west - extent.east));
-    var particleCount = Math.round(bounds.width * bounds.height * PARTICLE_MULTIPLIER * Math.pow(mapArea, 0.24));
+    var colorStyles = windIntensityColorScale(MIN_VELOCITY_INTENSITY, MAX_VELOCITY_INTENSITY);
+    var buckets = colorStyles.map(function () {
+      return [];
+    });
+
+    var particleCount = Math.round(bounds.width * bounds.height * PARTICLE_MULTIPLIER);
     if (isMobile()) {
-      particleCount /= PARTICLE_REDUCTION;
+      particleCount *= PARTICLE_REDUCTION;
     }
 
-    particles = particles || [];
-    if (particles.length > particleCount) particles = particles.slice(0, particleCount);
-    for (var i = particles.length; i < particleCount; i++) {
-      particles.push(field.randomize({ age: ~~(Math.random() * MAX_PARTICLE_AGE) + 0 }));
+    var fadeFillStyle = "rgba(0, 0, 0, 0.97)";
+
+    var particles = [];
+    for (var i = 0; i < particleCount; i++) {
+      particles.push(field.randomize({age: Math.floor(Math.random() * MAX_PARTICLE_AGE) + 0}));
     }
 
-    function evolve() {
-      buckets.forEach(function (bucket) { bucket.length = 0; });
+    function evolve () {
+      buckets.forEach(function (bucket) {
+        bucket.length = 0;
+      });
       particles.forEach(function (particle) {
         if (particle.age > MAX_PARTICLE_AGE) {
-          field.randomize(particle).age = ~~(Math.random() * MAX_PARTICLE_AGE / 2);
+          field.randomize(particle).age = 0;
         }
         var x = particle.x;
         var y = particle.y;
@@ -422,7 +416,7 @@ const Windy = function (params) {
         else {
           var xt = x + v[0];
           var yt = y + v[1];
-          if (field(xt, yt)[0] !== null) {
+          if (field(xt, yt)[2] !== null) {
             // Path from (x,y) to (xt,yt) is visible, so add this particle to the appropriate draw bucket.
             particle.xt = xt;
             particle.yt = yt;
@@ -440,15 +434,16 @@ const Windy = function (params) {
 
     var g = params.canvas.getContext("2d");
     g.lineWidth = PARTICLE_LINE_WIDTH;
+    g.fillStyle = fadeFillStyle;
+    g.globalAlpha = 0.6;
 
-    function draw() {
+    function draw () {
       // Fade existing particle trails.
-      g.save();
-      g.globalAlpha = .16;
-      g.globalCompositeOperation = 'destination-out';
-      g.fillStyle = '#000';
+      var prev = "lighter";
+      g.globalCompositeOperation = "destination-in";
       g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
-      g.restore();
+      g.globalCompositeOperation = prev;
+      g.globalAlpha = 0.9;
 
       // Draw new particle trails.
       buckets.forEach(function (bucket, i) {
@@ -467,9 +462,9 @@ const Windy = function (params) {
     }
 
     var then = Date.now();
-    (function frame() {
+    (function frame () {
       animationLoop = requestAnimationFrame(frame);
-      var now = Date.now()
+      var now = Date.now();
       var delta = now - then;
       if (delta > FRAME_TIME) {
         then = now - (delta % FRAME_TIME);
@@ -495,14 +490,16 @@ const Windy = function (params) {
       width: width,
       height: height
     };
+
     stop();
+
     // build grid
-    buildGrid(params.data, function (grid) {
+    buildGrid(gridData, function (grid) {
       // interpolateField
       interpolateField(grid, buildBounds(bounds, width, height), mapBounds, function (bounds, field) {
         // animate the canvas with random points
         windy.field = field;
-        animate(bounds, field, mapBounds);
+        animate(bounds, field);
       });
 
     });
@@ -516,7 +513,9 @@ const Windy = function (params) {
   var shift = function (dx, dy) {
     var canvas = params.canvas, w = canvas.width, h = canvas.height, ctx = canvas.getContext("2d");
     if (w > dx && h > dy) {
-      var clamp = function (high, value) { return Math.max(0, Math.min(high, value)); };
+      var clamp = function (high, value) {
+        return Math.max(0, Math.min(high, value));
+      };
       var imageData = ctx.getImageData(clamp(w, -dx), clamp(h, -dy), clamp(w, w - dx), clamp(h, h - dy));
       ctx.clearRect(0, 0, w, h);
       ctx.putImageData(imageData, clamp(w, dx), clamp(h, dy));
@@ -534,11 +533,14 @@ const Windy = function (params) {
     update: updateData,
     shift: shift,
     createField: createField,
-    interpolatePoint: interpolate
+    interpolatePoint: interpolate,
+    setData: setData
   };
 
   return windy;
 };
+
+// polyfill
 window.requestAnimationFrame = (function () {
   return window.requestAnimationFrame ||
     window.webkitRequestAnimationFrame ||
@@ -549,9 +551,11 @@ window.requestAnimationFrame = (function () {
       return window.setTimeout(callback, 1000 / FRAME_RATE);
     };
 })();
-if(!window.cancelAnimationFrame) {
+
+if (!window.cancelAnimationFrame) {
   window.cancelAnimationFrame = function (id) {
     clearTimeout(id);
   };
 }
+
 export default Windy

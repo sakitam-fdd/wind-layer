@@ -1,7 +1,7 @@
 /*!
  * author: FDD <smileFDD@gmail.com> 
  * wind-layer v0.0.5
- * build-time: 2018-6-21 18:34
+ * build-time: 2018-6-25 13:24
  * LICENSE: MIT
  * (c) 2017-2018 https://sakitam-fdd.github.io/wind-layer
  */
@@ -15,22 +15,31 @@ ol = ol && ol.hasOwnProperty('default') ? ol['default'] : ol;
 
 var Windy = function Windy(params) {
   if (!params.projection) params.projection = 'EPSG:4326';
-  var VELOCITY_SCALE = 0.005 * (Math.pow(window.devicePixelRatio, 1 / 3) || 1);
-  var MIN_TEMPERATURE_K = 261.15;
-  var MAX_TEMPERATURE_K = 317.15;
-  var MAX_PARTICLE_AGE = 90;
-  var PARTICLE_LINE_WIDTH = 1;
-  var PARTICLE_MULTIPLIER = 1 / 200;
+  var MIN_VELOCITY_INTENSITY = params.minVelocity || 0;
+  var MAX_VELOCITY_INTENSITY = params.maxVelocity || 10;
+  var VELOCITY_SCALE = (params.velocityScale || 0.005) * (Math.pow(window.devicePixelRatio, 1 / 3) || 1);
+  var MAX_PARTICLE_AGE = params.particleAge || 90;
+  var PARTICLE_LINE_WIDTH = params.lineWidth || 1;
+  var PARTICLE_MULTIPLIER = params.particleMultiplier || 1 / 300;
   var PARTICLE_REDUCTION = Math.pow(window.devicePixelRatio, 1 / 3) || 1.6;
-  var FRAME_RATE = 15,
+  var FRAME_RATE = params.frameRate || 15,
       FRAME_TIME = 1000 / FRAME_RATE;
+
+  var defaulColorScale = ["rgb(36,104, 180)", "rgb(60,157, 194)", "rgb(128,205,193 )", "rgb(151,218,168 )", "rgb(198,231,181)", "rgb(238,247,217)", "rgb(255,238,159)", "rgb(252,217,125)", "rgb(255,182,100)", "rgb(252,150,75)", "rgb(250,112,52)", "rgb(245,64,32)", "rgb(237,45,28)", "rgb(220,24,32)", "rgb(180,0,35)"];
+
+  var colorScale = params.colorScale || defaulColorScale;
 
   var NULL_WIND_VECTOR = [NaN, NaN, null];
 
   var builder;
   var grid;
+  var gridData = params.data;
   var date;
   var λ0, φ0, Δλ, Δφ, ni, nj;
+
+  var setData = function setData(data) {
+    gridData = data;
+  };
 
   var bilinearInterpolateVector = function bilinearInterpolateVector(x, y, g00, g10, g01, g11) {
     var rx = 1 - x;
@@ -41,18 +50,17 @@ var Windy = function Windy(params) {
         d = x * y;
     var u = g00[0] * a + g10[0] * b + g01[0] * c + g11[0] * d;
     var v = g00[1] * a + g10[1] * b + g01[1] * c + g11[1] * d;
-    var tmp = g00[2] * a + g10[2] * b + g01[2] * c + g11[2] * d;
-    return [u, v, tmp];
+    return [u, v, Math.sqrt(u * u + v * v)];
   };
 
-  var createWindBuilder = function createWindBuilder(uComp, vComp, temp) {
+  var createWindBuilder = function createWindBuilder(uComp, vComp) {
     var uData = uComp.data,
         vData = vComp.data;
     return {
       header: uComp.header,
 
       data: function data(i) {
-        return [uData[i], vData[i], temp.data[i]];
+        return [uData[i], vData[i]];
       },
       interpolate: bilinearInterpolateVector
     };
@@ -60,23 +68,24 @@ var Windy = function Windy(params) {
 
   var createBuilder = function createBuilder(data) {
     var uComp = null,
-        vComp = null,
-        temp = null;
+        vComp = null;
 
     data.forEach(function (record) {
       switch (record.header.parameterCategory + "," + record.header.parameterNumber) {
+        case "1,2":
         case "2,2":
-          uComp = record;break;
+          uComp = record;
+          break;
+        case "1,3":
         case "2,3":
-          vComp = record;break;
-        case "0,0":
-          temp = record;break;
+          vComp = record;
+          break;
         default:
 
       }
     });
 
-    return createWindBuilder(uComp, vComp, temp);
+    return createWindBuilder(uComp, vComp);
   };
 
   var buildGrid = function buildGrid(data, callback) {
@@ -183,7 +192,6 @@ var Windy = function Windy(params) {
 
   var createField = function createField(columns, bounds, callback) {
     function field(x, y) {
-      if (!columns) return [NaN, NaN, null];
       var column = columns[Math.round(x)];
       return column && column[Math.round(y)] || NULL_WIND_VECTOR;
     }
@@ -267,9 +275,8 @@ var Windy = function Windy(params) {
   var interpolateField = function interpolateField(grid, bounds, extent, callback) {
 
     var projection = {};
-
     var mapArea = (extent.south - extent.north) * (extent.west - extent.east);
-    var velocityScale = VELOCITY_SCALE * Math.pow(mapArea, 0.3);
+    var velocityScale = VELOCITY_SCALE * Math.pow(mapArea, 0.4);
 
     var columns = [];
     var x = bounds.x;
@@ -293,38 +300,47 @@ var Windy = function Windy(params) {
       columns[x + 1] = columns[x] = column;
     }
 
-    for (; x < bounds.width; x += 2) {
-      interpolateColumn(x);
-    }
-    createField(columns, bounds, callback);
+    (function batchInterpolate() {
+      var start = Date.now();
+      while (x < bounds.width) {
+        interpolateColumn(x);
+        x += 2;
+        if (Date.now() - start > 1000) {
+          setTimeout(batchInterpolate, 25);
+          return;
+        }
+      }
+      createField(columns, bounds, callback);
+    })();
   };
 
-  var particles, animationLoop;
-  var animate = function animate(bounds, field, extent) {
+  var animationLoop;
+  var animate = function animate(bounds, field) {
 
-    function windTemperatureColorScale(minTemp, maxTemp) {
+    function windIntensityColorScale(min, max) {
 
-      var result = ["rgb(36,104, 180)", "rgb(60,157, 194)", "rgb(128,205,193 )", "rgb(151,218,168 )", "rgb(198,231,181)", "rgb(238,247,217)", "rgb(255,238,159)", "rgb(252,217,125)", "rgb(255,182,100)", "rgb(252,150,75)", "rgb(250,112,52)", "rgb(245,64,32)", "rgb(237,45,28)", "rgb(220,24,32)", "rgb(180,0,35)"];
-      result.indexFor = function (m) {
-        return Math.max(0, Math.min(result.length - 1, Math.round((m - minTemp) / (maxTemp - minTemp) * (result.length - 1))));
+      colorScale.indexFor = function (m) {
+        return Math.max(0, Math.min(colorScale.length - 1, Math.round((m - min) / (max - min) * (colorScale.length - 1))));
       };
-      return result;
+
+      return colorScale;
     }
 
-    var colorStyles = windTemperatureColorScale(MIN_TEMPERATURE_K, MAX_TEMPERATURE_K);
+    var colorStyles = windIntensityColorScale(MIN_VELOCITY_INTENSITY, MAX_VELOCITY_INTENSITY);
     var buckets = colorStyles.map(function () {
       return [];
     });
-    var mapArea = (extent.south - extent.north) * (extent.west - extent.east);
-    var particleCount = Math.round(bounds.width * bounds.height * PARTICLE_MULTIPLIER * Math.pow(mapArea, 0.24));
+
+    var particleCount = Math.round(bounds.width * bounds.height * PARTICLE_MULTIPLIER);
     if (isMobile()) {
-      particleCount /= PARTICLE_REDUCTION;
+      particleCount *= PARTICLE_REDUCTION;
     }
 
-    particles = particles || [];
-    if (particles.length > particleCount) particles = particles.slice(0, particleCount);
-    for (var i = particles.length; i < particleCount; i++) {
-      particles.push(field.randomize({ age: ~~(Math.random() * MAX_PARTICLE_AGE) + 0 }));
+    var fadeFillStyle = "rgba(0, 0, 0, 0.97)";
+
+    var particles = [];
+    for (var i = 0; i < particleCount; i++) {
+      particles.push(field.randomize({ age: Math.floor(Math.random() * MAX_PARTICLE_AGE) + 0 }));
     }
 
     function evolve() {
@@ -333,7 +349,7 @@ var Windy = function Windy(params) {
       });
       particles.forEach(function (particle) {
         if (particle.age > MAX_PARTICLE_AGE) {
-          field.randomize(particle).age = ~~(Math.random() * MAX_PARTICLE_AGE / 2);
+          field.randomize(particle).age = 0;
         }
         var x = particle.x;
         var y = particle.y;
@@ -344,7 +360,7 @@ var Windy = function Windy(params) {
         } else {
           var xt = x + v[0];
           var yt = y + v[1];
-          if (field(xt, yt)[0] !== null) {
+          if (field(xt, yt)[2] !== null) {
             particle.xt = xt;
             particle.yt = yt;
             buckets[colorStyles.indexFor(m)].push(particle);
@@ -359,14 +375,15 @@ var Windy = function Windy(params) {
 
     var g = params.canvas.getContext("2d");
     g.lineWidth = PARTICLE_LINE_WIDTH;
+    g.fillStyle = fadeFillStyle;
+    g.globalAlpha = 0.6;
 
     function draw() {
-      g.save();
-      g.globalAlpha = .16;
-      g.globalCompositeOperation = 'destination-out';
-      g.fillStyle = '#000';
+      var prev = "lighter";
+      g.globalCompositeOperation = "destination-in";
       g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
-      g.restore();
+      g.globalCompositeOperation = prev;
+      g.globalAlpha = 0.9;
 
       buckets.forEach(function (bucket, i) {
         if (bucket.length > 0) {
@@ -411,12 +428,13 @@ var Windy = function Windy(params) {
       width: width,
       height: height
     };
+
     stop();
 
-    buildGrid(params.data, function (grid) {
+    buildGrid(gridData, function (grid) {
       interpolateField(grid, buildBounds(bounds, width, height), mapBounds, function (bounds, field) {
         windy.field = field;
-        animate(bounds, field, mapBounds);
+        animate(bounds, field);
       });
     });
   };
@@ -452,16 +470,19 @@ var Windy = function Windy(params) {
     update: updateData,
     shift: shift,
     createField: createField,
-    interpolatePoint: interpolate
+    interpolatePoint: interpolate,
+    setData: setData
   };
 
   return windy;
 };
+
 window.requestAnimationFrame = function () {
   return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function (callback) {
     return window.setTimeout(callback, 1000 / FRAME_RATE);
   };
 }();
+
 if (!window.cancelAnimationFrame) {
   window.cancelAnimationFrame = function (id) {
     clearTimeout(id);
