@@ -75,27 +75,7 @@ var map = new ol.Map({
   })
 });
 var wind, data;
-// axios.get('http://58.87.95.84:3001/gribdata', {
-//   params: ''
-// }).then(function (res) {
-//   if (res.data.success) {
-//     axios.get('http://58.87.95.84:3001/getDataByFileName', {
-//       params: {
-//         filename: res.data.data.name
-//       }
-//     }).then(function (data_) {
-//       data = data_.data.data
-//       wind = new WindLayer(data, {
-//         layerName: 'data',
-//         projection: 'EPSG:4326',
-//         ratio: 1,
-//         map: map
-//       })
-//       wind.appendTo(map)
-//     })
-//   }
-// });
-axios.get('http://localhost:3000/getdata', {
+axios.get('./data.json', {
   params: {
     time: moment('20180622')
   }
