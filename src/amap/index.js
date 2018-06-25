@@ -4,7 +4,7 @@ import { createCanvas } from '../helper';
 const global = typeof window === 'undefined' ? {} : window;
 const AMap = global.AMap || {};
 
-class AMapWindy {
+class AMapWind {
   constructor (data, options = {}) {
     this.options = options;
 
@@ -172,4 +172,4 @@ class AMapWindy {
   }
 }
 
-export default AMapWindy
+export default AMapWind

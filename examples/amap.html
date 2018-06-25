@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>amap-polyline-simple</title>
+  <title>simple</title>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css"/>
@@ -17,7 +17,7 @@
 <body>
 <div id="map"></div>
 <script src="../node_modules/axios/dist/axios.js"></script>
-<script src="../dist/aMapWindy.js"></script>
+<script src="../dist/windLayer.js"></script>
 <script>
 
   var map = new AMap.Map('map', {
@@ -29,7 +29,7 @@
 
   axios.get('./out.json').then(function (res) {
     if (res.data) {
-      var layer = new AMapWindy(res.data, {
+      var layer = new windLayer.AMapWind(res.data, {
         projection: 'EPSG:4326'
       }).appendTo(map)
     }

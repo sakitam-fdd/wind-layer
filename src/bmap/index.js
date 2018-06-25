@@ -2,7 +2,11 @@ import Windy from '../windy/windy';
 
 const global = typeof window === 'undefined' ? {} : window;
 
-class BaiduWindy extends global.BMap.Overlay {
+if (!global.BMap) global.BMap = {};
+
+if (!global.BMap.Overlay) global.BMap.Overlay = class Overlay {};
+
+class BaiduWind extends global.BMap.Overlay {
   constructor (data, options = {}) {
     super(options);
     this.options = options;
@@ -155,4 +159,4 @@ class BaiduWindy extends global.BMap.Overlay {
   }
 }
 
-export default BaiduWindy;
+export default BaiduWind;

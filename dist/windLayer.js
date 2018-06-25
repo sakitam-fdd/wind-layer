@@ -1,17 +1,15 @@
 /*!
  * author: FDD <smileFDD@gmail.com> 
  * wind-layer v0.0.5
- * build-time: 2018-6-25 13:24
+ * build-time: 2018-6-25 15:2
  * LICENSE: MIT
  * (c) 2017-2018 https://sakitam-fdd.github.io/wind-layer
  */
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('openlayers')) :
-	typeof define === 'function' && define.amd ? define(['openlayers'], factory) :
-	(global.WindLayer = factory(global.ol));
-}(this, (function (ol) { 'use strict';
-
-ol = ol && ol.hasOwnProperty('default') ? ol['default'] : ol;
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(global.windLayer = factory());
+}(this, (function () { 'use strict';
 
 var Windy = function Windy(params) {
   if (!params.projection) params.projection = 'EPSG:4326';
@@ -530,12 +528,24 @@ var possibleConstructorReturn = function (self, call) {
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
 
-var WindyLayer = function (_ol$layer$Image) {
-  inherits(WindyLayer, _ol$layer$Image);
+var global$1 = typeof window === 'undefined' ? {} : window;
+var ol = global$1.ol || {};
 
-  function WindyLayer(data) {
+if (!ol.layer) ol.layer = {};
+if (!ol.layer.Image) ol.layer.Image = function () {
+  function _class() {
+    classCallCheck(this, _class);
+  }
+
+  return _class;
+}();
+
+var OlWind = function (_ol$layer$Image) {
+  inherits(OlWind, _ol$layer$Image);
+
+  function OlWind(data) {
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    classCallCheck(this, WindyLayer);
+    classCallCheck(this, OlWind);
 
     var _this = possibleConstructorReturn(this, _ol$layer$Image.call(this, options));
 
@@ -561,11 +571,11 @@ var WindyLayer = function (_ol$layer$Image) {
     return _this;
   }
 
-  WindyLayer.prototype.getData = function getData() {
+  OlWind.prototype.getData = function getData() {
     return this.data;
   };
 
-  WindyLayer.prototype.setData = function setData(data) {
+  OlWind.prototype.setData = function setData(data) {
     var _map = this.getMap();
     if (!_map) return this;
     this.data = data;
@@ -586,7 +596,7 @@ var WindyLayer = function (_ol$layer$Image) {
     return this;
   };
 
-  WindyLayer.prototype.render = function render(canvas) {
+  OlWind.prototype.render = function render(canvas) {
     var extent = this._getExtent();
     if (this.isClear || !this.getData() || !extent) return this;
     if (canvas && !this.$Windy) {
@@ -603,13 +613,13 @@ var WindyLayer = function (_ol$layer$Image) {
     return this;
   };
 
-  WindyLayer.prototype.redraw = function redraw() {
+  OlWind.prototype.redraw = function redraw() {
     if (this.isClear) return;
     var _extent = this.options.extent || this._getMapExtent();
     this.setExtent(_extent);
   };
 
-  WindyLayer.prototype.canvasFunction = function canvasFunction(extent, resolution, pixelRatio, size, projection) {
+  OlWind.prototype.canvasFunction = function canvasFunction(extent, resolution, pixelRatio, size, projection) {
     if (!this._canvas) {
       this._canvas = createCanvas(size[0], size[1]);
     } else {
@@ -622,7 +632,7 @@ var WindyLayer = function (_ol$layer$Image) {
     return this._canvas;
   };
 
-  WindyLayer.prototype._getExtent = function _getExtent() {
+  OlWind.prototype._getExtent = function _getExtent() {
     var size = this._getMapSize();
     var _extent = this._getMapExtent();
     if (size && _extent) {
@@ -634,19 +644,19 @@ var WindyLayer = function (_ol$layer$Image) {
     }
   };
 
-  WindyLayer.prototype._getMapExtent = function _getMapExtent() {
+  OlWind.prototype._getMapExtent = function _getMapExtent() {
     if (!this.getMap()) return;
     var size = this._getMapSize();
     var _view = this.getMap().getView();
     return _view && _view.calculateExtent(size);
   };
 
-  WindyLayer.prototype._getMapSize = function _getMapSize() {
+  OlWind.prototype._getMapSize = function _getMapSize() {
     if (!this.getMap()) return;
     return this.getMap().getSize();
   };
 
-  WindyLayer.prototype.appendTo = function appendTo(map) {
+  OlWind.prototype.appendTo = function appendTo(map) {
     if (map && map instanceof ol.Map) {
       this.set('originMap', map);
       map.addLayer(this);
@@ -655,7 +665,7 @@ var WindyLayer = function (_ol$layer$Image) {
     }
   };
 
-  WindyLayer.prototype.clearWind = function clearWind() {
+  OlWind.prototype.clearWind = function clearWind() {
     var _map = this.getMap();
     if (!_map) return;
     if (this.$Windy) this.$Windy.stop();
@@ -666,7 +676,7 @@ var WindyLayer = function (_ol$layer$Image) {
     this.getMap().renderSync();
   };
 
-  WindyLayer.prototype.removeLayer = function removeLayer() {
+  OlWind.prototype.removeLayer = function removeLayer() {
     var _map = this.getMap();
     if (!_map) return;
     if (this.$Windy) this.$Windy.stop();
@@ -677,18 +687,285 @@ var WindyLayer = function (_ol$layer$Image) {
     delete this._cloneLayer;
   };
 
-  WindyLayer.prototype.setMap = function setMap(map) {
+  OlWind.prototype.setMap = function setMap(map) {
     this.set('originMap', map);
   };
 
-  WindyLayer.prototype.getMap = function getMap() {
+  OlWind.prototype.getMap = function getMap() {
     return this.get('originMap');
   };
 
-  return WindyLayer;
+  return OlWind;
 }(ol.layer.Image);
 
-return WindyLayer;
+var global$2 = typeof window === 'undefined' ? {} : window;
+var AMap = global$2.AMap || {};
+
+var AMapWind = function () {
+  function AMapWind(data) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    classCallCheck(this, AMapWind);
+
+    this.options = options;
+
+    this.canvas = null;
+
+    this.data = data;
+
+    this.layer_ = null;
+
+    this._windy = null;
+
+    if (options.map) {
+      this.appendTo(options.map);
+    }
+  }
+
+  AMapWind.prototype.appendTo = function appendTo(map) {
+    var _this = this;
+
+    if (map) {
+      map.on('complete', function () {
+        _this.init(map);
+      }, this);
+    } else {
+      throw new Error('not map object');
+    }
+  };
+
+  AMapWind.prototype.getData = function getData() {
+    return this.data;
+  };
+
+  AMapWind.prototype.init = function init(map, options) {
+    if (map) {
+      this.map = map;
+      this.context = this.options.context || '2d';
+      this.getCanvasLayer();
+    } else {
+      throw new Error('not map object');
+    }
+  };
+
+  AMapWind.prototype.render = function render(canvas) {
+    if (!canvas) return;
+    var extent = this._getExtent();
+    if (!this.getData() || !extent) return this;
+    if (canvas && !this._windy) {
+      this._windy = new Windy({
+        canvas: canvas,
+        data: this.getData(),
+        'onDraw': function onDraw() {}
+      });
+      this._windy.start(extent[0], extent[1], extent[2], extent[3]);
+    } else if (canvas && this._windy) {
+      this._windy.start(extent[0], extent[1], extent[2], extent[3]);
+    }
+    return this;
+  };
+
+  AMapWind.prototype.getCanvasLayer = function getCanvasLayer() {
+    if (!this.canvas && !this.layer_) {
+      var canvas = this.canvasFunction();
+      var bounds = this.map.getBounds();
+      this.layer_ = new AMap.CanvasLayer({
+        canvas: canvas,
+        bounds: this.options.bounds || bounds,
+        zooms: this.options.zooms || [0, 22]
+      });
+      this.layer_.setMap(this.map);
+      this.map.on('mapmove', this.canvasFunction, this);
+      this.map.on('zoomchange', this.canvasFunction, this);
+    }
+  };
+
+  AMapWind.prototype.canvasFunction = function canvasFunction() {
+    var _ref = [this.map.getSize().width, this.map.getSize().height],
+        width = _ref[0],
+        height = _ref[1];
+
+    if (!this.canvas) {
+      this.canvas = createCanvas(width, height, null);
+    } else {
+      this.canvas.width = width;
+      this.canvas.height = height;
+      var bounds = this.map.getBounds();
+      if (this.layer_) {
+        this.layer_.setBounds(this.options.bounds || bounds);
+      }
+    }
+    this.render(this.canvas);
+    return this.canvas;
+  };
+
+  AMapWind.prototype._getExtent = function _getExtent() {
+    var _ref2 = [this.map.getSize().width, this.map.getSize().height],
+        width = _ref2[0],
+        height = _ref2[1];
+
+    var _ne = this.map.getBounds().getNorthEast();
+    var _sw = this.map.getBounds().getSouthWest();
+    return [[[0, 0], [width, height]], width, height, [[_ne.lng, _ne.lat], [_sw.lng, _sw.lat]]];
+  };
+
+  AMapWind.prototype.removeLayer = function removeLayer() {
+    if (!this.map) return;
+    this.map.removeLayer(this.layer_);
+    delete this.map;
+    delete this.layer_;
+    delete this.canvas;
+  };
+
+  AMapWind.prototype.getContext = function getContext() {
+    return this.canvas.getContext(this.context);
+  };
+
+  return AMapWind;
+}();
+
+var global$3 = typeof window === 'undefined' ? {} : window;
+
+if (!global$3.BMap) global$3.BMap = {};
+
+if (!global$3.BMap.Overlay) global$3.BMap.Overlay = function Overlay() {
+  classCallCheck(this, Overlay);
+};
+
+var BaiduWind = function (_global$BMap$Overlay) {
+  inherits(BaiduWind, _global$BMap$Overlay);
+
+  function BaiduWind(data) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    classCallCheck(this, BaiduWind);
+
+    var _this = possibleConstructorReturn(this, _global$BMap$Overlay.call(this, options));
+
+    _this.options = options;
+    _this.paneName = _this.options.paneName || 'mapPane';
+    _this.context = _this.options.context || '2d';
+    _this.zIndex = _this.options.zIndex || 0;
+    _this.mixBlendMode = _this.options.mixBlendMode || null;
+    _this.enableMassClear = _this.options.enableMassClear;
+    _this._map = options.map;
+    _this._lastDrawTime = null;
+
+    _this.canvas = null;
+
+    _this.data = data;
+
+    _this._windy = null;
+    _this.show();
+    return _this;
+  }
+
+  BaiduWind.prototype.getData = function getData() {
+    return this.data;
+  };
+
+  BaiduWind.prototype._getExtent = function _getExtent() {
+    var size = this._map.getSize();
+    var _ne = this._map.getBounds().getNorthEast();
+    var _sw = this._map.getBounds().getSouthWest();
+    return [[[0, 0], [size.width, size.height]], size.width, size.height, [[_ne.lng, _ne.lat], [_sw.lng, _sw.lat]]];
+  };
+
+  BaiduWind.prototype.appendTo = function appendTo(map) {
+    if (map) {
+      map.addOverlay(this);
+    } else {
+      throw new Error('not map object');
+    }
+  };
+
+  BaiduWind.prototype.initialize = function initialize(map) {
+    var _this2 = this;
+
+    this._map = map;
+    var canvas = this.canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:absolute; left:0; top:0; z-index: ' + this.zIndex + ' ;user-select:none;';
+    canvas.style.mixBlendMode = this.mixBlendMode;
+    this.adjustSize();
+    map.getPanes()[this.paneName].appendChild(canvas);
+    map.addEventListener('resize', function () {
+      _this2.adjustSize();
+      _this2._draw();
+    });
+    return this.canvas;
+  };
+
+  BaiduWind.prototype.adjustSize = function adjustSize() {
+    var size = this._map.getSize();
+    var canvas = this.canvas;
+    var devicePixelRatio = this.devicePixelRatio = global$3.devicePixelRatio || 1;
+    canvas.width = size.width * devicePixelRatio;
+    canvas.height = size.height * devicePixelRatio;
+    if (this.context === '2d') {
+      canvas.getContext(this.context).scale(devicePixelRatio, devicePixelRatio);
+    }
+    canvas.style.width = size.width + 'px';
+    canvas.style.height = size.height + 'px';
+  };
+
+  BaiduWind.prototype.draw = function draw() {
+    var self = this;
+    clearTimeout(self.timeoutID);
+    self.timeoutID = setTimeout(function () {
+      self._draw();
+    }, 15);
+  };
+
+  BaiduWind.prototype._draw = function _draw() {
+    var map = this._map;
+    var size = map.getSize();
+    var center = map.getCenter();
+    if (center) {
+      var pixel = map.pointToOverlayPixel(center);
+      this.canvas.style.left = pixel.x - size.width / 2 + 'px';
+      this.canvas.style.top = pixel.y - size.height / 2 + 'px';
+      this.dispatchEvent('draw');
+      this.options.update && this.options.update.call(this);
+      this.render(this.canvas);
+    }
+  };
+
+  BaiduWind.prototype.render = function render(canvas) {
+    var extent = this._getExtent();
+    if (!this.getData() || !extent) return this;
+    if (canvas && !this._windy) {
+      this._windy = new Windy({
+        canvas: canvas,
+        data: this.getData(),
+        'onDraw': function onDraw() {}
+      });
+      this._windy.start(extent[0], extent[1], extent[2], extent[3]);
+    } else if (canvas && this._windy) {
+      this._windy.start(extent[0], extent[1], extent[2], extent[3]);
+    }
+    return this;
+  };
+
+  BaiduWind.prototype.getContainer = function getContainer() {
+    return this.canvas;
+  };
+
+  BaiduWind.prototype.setZIndex = function setZIndex(zIndex) {
+    this.zIndex = zIndex;
+    this.canvas.style.zIndex = this.zIndex;
+  };
+
+  BaiduWind.prototype.getZIndex = function getZIndex() {
+    return this.zIndex;
+  };
+
+  return BaiduWind;
+}(global$3.BMap.Overlay);
+
+var index = {
+  AMapWind: AMapWind,
+  BMapWind: BaiduWind,
+  OlWind: OlWind
+};
+
+return index;
 
 })));
-//# sourceMappingURL=windLayer.js.map

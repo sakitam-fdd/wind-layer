@@ -8,7 +8,7 @@
   "main": "dist/windLayer.common.js",
   "module": "dist/windLayer.esm.js",
   "unpkg": "dist/windLayer.js",
-  "namespace": "WindLayer",
+  "namespace": "windLayer",
   "repository": {
     "type": "git",
     "url": "https://github.com/sakitam-fdd/wind-layer.git"
@@ -26,18 +26,21 @@
     "grib"
   ],
   "scripts": {
-    "dev:ol": "cross-env NODE_ENV=dev input=openlayers/index.js file=WindLayer rollup -wm -c build/rollup-dev-config.js",
-    "dev:bmap": "cross-env NODE_ENV=dev input=bmap/index.js file=BMapWindy rollup -wm -c build/rollup-dev-config.js",
-    "dev:amap": "cross-env NODE_ENV=dev input=amap/index.js file=AMapWindy rollup -wm -c build/rollup-dev-config.js",
-    "build": "node build/rollup-prod-config.js",
+    "dev": "cross-env NODE_ENV=dev input=index.js file=windLayer rollup -wm -c build/rollup-dev-config.js",
+    "dev:ol": "cross-env NODE_ENV=dev input=openlayers/index.js file=OlWind rollup -wm -c build/rollup-dev-config.js",
+    "dev:bmap": "cross-env NODE_ENV=dev input=bmap/index.js file=BMapWind rollup -wm -c build/rollup-dev-config.js",
+    "dev:amap": "cross-env NODE_ENV=dev input=amap/index.js file=AMapWind rollup -wm -c build/rollup-dev-config.js",
+    "build:ol": "cross-env NODE_ENV=pro input=openlayers/index.js file=OlWind rollup -m -c build/rollup-dev-config.js",
+    "build:amap": "cross-env NODE_ENV=pro input=amap/index.js file=AMapWind rollup -m -c build/rollup-dev-config.js",
+    "build:bmap": "cross-env NODE_ENV=pro input=bmap/index.js file=BMapWind rollup -m -c build/rollup-dev-config.js",
+    "build": "npm run build:ol && npm run build:bmap && npm run build:amap && cross-env NODE_ENV=pro input=index.js file=windLayer node build/rollup-prod-config.js",
     "start": "node serve/bin/www",
     "dev:server": "./node_modules/.bin/nodemon server/bin/www",
     "prd:server": "pm2 start server/bin/www"
   },
   "dependencies": {
     "lodash": "^4.17.4",
-    "moment": "^2.20.1",
-    "openlayers": "^4.5.0"
+    "moment": "^2.20.1"
   },
   "devDependencies": {
     "axios": "^0.17.1",

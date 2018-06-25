@@ -24,10 +24,11 @@ const lowerFirstChart = str => {
 
 const input = process.env.input;
 const namespace = process.env.file;
-const file = lowerFirstChart(namespace)
+const file = namespace === 'windlayer' ? lowerFirstChart(namespace) : namespace;
 
 const genConfig = (opts) => {
   const config = {
+    watch: false,
     input: {
       input: resolve(`src/${input}`),
       plugins: [
@@ -44,16 +45,13 @@ const genConfig = (opts) => {
           browser: true
         }),
         cjs()
-      ],
-      external: ['openlayers']
+      ]
     },
     output: {
       file: opts.file,
       format: opts.format,
       banner,
-      globals: {
-        openlayers: 'ol'
-      },
+      globals: {},
       name: namespace
     }
   };
