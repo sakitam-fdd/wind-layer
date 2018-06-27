@@ -1,4 +1,5 @@
 import Windy from '../windy/windy';
+import {getDirection, getSpeed} from '../helper';
 
 const global = typeof window === 'undefined' ? {} : window;
 
@@ -156,6 +157,21 @@ class BaiduWind extends global.BMap.Overlay {
 
   getZIndex () {
     return this.zIndex;
+  }
+
+  /**
+   * get mouse point data
+   * @param coordinates
+   * @returns {{direction: number, speed: *}}
+   */
+  getPointData (coordinates) {
+    const gridValue = this._windy.interpolatePoint(coordinates[0], coordinates[1]);
+    if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
+      return {
+        direction: getDirection(gridValue[0], gridValue[1], this.options.angleConvention || 'bearingCCW'),
+        speed: getSpeed(gridValue[0], gridValue[1], this.options.speedUnit)
+      }
+    }
   }
 }
 

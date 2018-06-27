@@ -1,5 +1,5 @@
 import Windy from '../windy/windy';
-import { createCanvas } from '../helper';
+import {createCanvas, getDirection, getSpeed} from '../helper';
 
 const global = typeof window === 'undefined' ? {} : window;
 const AMap = global.AMap || {};
@@ -109,9 +109,9 @@ class AMapWind {
         bounds: this.options.bounds || bounds,
         zooms: this.options.zooms || [0, 22]
       });
-      this.layer_.setMap(this.map);
       this.map.on('mapmove', this.canvasFunction, this);
       this.map.on('zoomchange', this.canvasFunction, this);
+      this.layer_.setMap(this.map);
     }
   }
 
@@ -169,6 +169,21 @@ class AMapWind {
    */
   getContext () {
     return this.canvas.getContext(this.context);
+  }
+
+  /**
+   * get mouse point data
+   * @param coordinates
+   * @returns {{direction: number, speed: *}}
+   */
+  getPointData (coordinates) {
+    const gridValue = this._windy.interpolatePoint(coordinates[0], coordinates[1]);
+    if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
+      return {
+        direction: getDirection(gridValue[0], gridValue[1], this.options.angleConvention || 'bearingCCW'),
+        speed: getSpeed(gridValue[0], gridValue[1], this.options.speedUnit)
+      }
+    }
   }
 }
 

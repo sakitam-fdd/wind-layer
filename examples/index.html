@@ -88,9 +88,13 @@ axios.get('./out.json', {
       ratio: 1,
       map: map
     })
-    console.log(wind)
+    console.log(wind);
     // map.addLayer(wind)
-    wind.appendTo(map)
+    wind.appendTo(map);
+    map.on('pointermove', function (event) {
+      var _data = wind.getPointData(ol.proj.transform(event.coordinate, map.getView().getProjection(), 'EPSG:4326'));
+      console.log(_data);
+    });
   }
 });
 
