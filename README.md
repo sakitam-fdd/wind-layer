@@ -55,6 +55,7 @@ https://cdn.jsdelivr.net/npm/wind-layer@0.0.5/dist/OlWind.js // openlayers
 ```
 
 #### [![示例](https://sakitam-fdd.github.io/wind-layer/windy.jpg)](https://jsfiddle.net/sakitamfdd/hgvdu76j/?utm_source=website&utm_medium=embed&utm_campaign=hgvdu76j)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsakitam-fdd%2Fwind-layer.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsakitam-fdd%2Fwind-layer?ref=badge_shield)
 
 #### [文档](//sakitam-fdd.github.io/wind-layer/)
 
@@ -104,3 +105,7 @@ npm run prd:server // 部署环境启动服务
 * http://earth.nullschool.net
 * https://github.com/Esri/wind-js
 * https://github.com/danwild/wind-js-leaflet
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsakitam-fdd%2Fwind-layer.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsakitam-fdd%2Fwind-layer?ref=badge_large)
