@@ -9,6 +9,7 @@
 [![Npm package](https://img.shields.io/npm/v/wind-layer.svg)](https://www.npmjs.org/package/wind-layer)
 [![GitHub stars](https://img.shields.io/github/stars/sakitam-fdd/wind-layer.svg)](https://github.com/sakitam-fdd/wind-layer/stargazers)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/sakitam-fdd/wind-layer/master/LICENSE)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsakitam-fdd%2Fwind-layer.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsakitam-fdd%2Fwind-layer?ref=badge_shield)
 
 ## 下载
 
@@ -104,3 +105,7 @@ npm run prd:server // 部署环境启动服务
 * http://earth.nullschool.net
 * https://github.com/Esri/wind-js
 * https://github.com/danwild/wind-js-leaflet
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsakitam-fdd%2Fwind-layer.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsakitam-fdd%2Fwind-layer?ref=badge_large)
