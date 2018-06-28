@@ -5,16 +5,16 @@ npm install wind-layer --save
 import WindLayer from 'wind-layer'
 
 // 指定版本安装
-npm install wind-layer@0.0.4 --save
-import WindLayer from 'wind-layer'
+npm install wind-layer@0.0.5 --save
+import windLayer from 'wind-layer'
 ```
 
 目前可通过 [unpkg.com](https://unpkg.com/wind-layer/dist/windLayer.js) / [jsdelivr](https://cdn.jsdelivr.net/npm/wind-layer@0.0.1/dist/windLayer.js) 获取最新版本的资源。
 
 ```bash
 // jsdelivr (jsdelivr由于缓存原因最好锁定版本号，否则可能会出现意料之外的问题)
-https://cdn.jsdelivr.net/npm/wind-layer@0.0.4/dist/windLayer.js
-https://cdn.jsdelivr.net/npm/wind-layer@0.0.4/dist/windLayer.min.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.5/dist/windLayer.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.5/dist/windLayer.min.js
 // npm
 https://unpkg.com/wind-layer/dist/windLayer.js
 https://unpkg.com/wind-layer/dist/windLayer.min.js
@@ -23,10 +23,10 @@ https://unpkg.com/wind-layer/dist/windLayer.min.js
 
 ### 如何使用
 
-#### 初始化windLayer图层并添加到地图
+#### openlayers
 
 ```javascript
-var wind = new WindLayer(res.data, {
+var wind = new windLayer.OlWind(res.data, {
   layerName: '',
   projection: 'EPSG:3857', // EPSG:4326
   ratio: 1
@@ -54,6 +54,40 @@ map.addLayer(wind) // 此模式下属性必须配置 map 字段
 | ratio | 画布和地图窗口的比值 | `Number` | 现在默认 `1.5` |
 | map | 地图 | `ol.Map` | 对应的地图实例，调用原生 `addLayer` 时必须配置此字段 |
 
+#### bmap
+
+```javascript
+var baiduWindy = new windLayer.BMapWind(res.data, {
+  projection: 'EPSG:3857'
+})
+map.addOverlay(baiduWindy)
+```
+
+配置项说明
+
+| 配置项 | 简介 | 类型 | 备注 |
+| --- | --- | --- | --- |
+| paneName | overlay paneName | `string` | -- |
+| context | canvas context type | `string` | eg: 2d |
+| zIndex | 图层层级 | `number` | eg: 0 |
+| projection | 图层投影 | `String` | 默认：EPSG:4326 |
+
+#### amap
+
+```javascript
+var layer = new windLayer.AMapWind(res.data, {
+  projection: 'EPSG:4326'
+}).appendTo(map);
+```
+
+配置项说明
+
+| 配置项 | 简介 | 类型 | 备注 |
+| --- | --- | --- | --- |
+| bounds | 图层范围 | `bounds` | map.getBounds() |
+| zooms | 层级范围 | `Array` | 默认：[0, 22] |
+| projection | 图层投影 | `String` | 默认：EPSG:4326 |
+
 #### methods
 
 ##### setData(data)
@@ -65,6 +99,15 @@ map.addLayer(wind) // 此模式下属性必须配置 map 字段
 > 获取当前图层的气象数据
 
 ##### clearWind()
+
+##### getPointData(coordinates)
+
+根据坐标值获取当前位置的风力和风向
+
+eg: {
+      direction: number,
+      speed: number
+    }
 
 > 清除windy图层
 

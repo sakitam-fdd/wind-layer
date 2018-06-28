@@ -8,7 +8,7 @@
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
 	typeof define === 'function' && define.amd ? define(factory) :
-	(global.windLayer = factory());
+	(global.BMapWind = factory());
 }(this, (function () { 'use strict';
 
 var Windy = function Windy(params) {
@@ -487,17 +487,6 @@ if (!window.cancelAnimationFrame) {
   };
 }
 
-var createCanvas = function createCanvas(width, height, Canvas) {
-  if (typeof document !== 'undefined') {
-    var canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    return canvas;
-  } else {
-    return new Canvas(width, height);
-  }
-};
-
 var getDirection = function getDirection(uMs, vMs, angleConvention) {
   if (angleConvention.endsWith('CCW')) {
     vMs = vMs > 0 ? vMs = -vMs : Math.abs(vMs);
@@ -563,336 +552,10 @@ var possibleConstructorReturn = function (self, call) {
 };
 
 var global$1 = typeof window === 'undefined' ? {} : window;
-var ol = global$1.ol || {};
 
-if (!ol.layer) ol.layer = {};
-if (!ol.layer.Image) ol.layer.Image = function () {
-  function _class() {
-    classCallCheck(this, _class);
-  }
+if (!global$1.BMap) global$1.BMap = {};
 
-  return _class;
-}();
-
-var OlWind = function (_ol$layer$Image) {
-  inherits(OlWind, _ol$layer$Image);
-
-  function OlWind(data) {
-    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    classCallCheck(this, OlWind);
-
-    var _this = possibleConstructorReturn(this, _ol$layer$Image.call(this, options));
-
-    _this._canvas = null;
-
-    _this.data = data;
-
-    _this.$Windy = null;
-
-    _this.isClear = false;
-
-    _this.options = options;
-    _this.setSource(new ol.source.ImageCanvas({
-      logo: options.logo,
-      state: options.state,
-      attributions: options.attributions,
-      resolutions: options.resolutions,
-      canvasFunction: _this.canvasFunction.bind(_this),
-      projection: options.hasOwnProperty('projection') ? options.projection : 'EPSG:3857',
-      ratio: options.hasOwnProperty('ratio') ? options.ratio : 1
-    }));
-    _this.on('precompose', _this.redraw, _this);
-    return _this;
-  }
-
-  OlWind.prototype.getData = function getData() {
-    return this.data;
-  };
-
-  OlWind.prototype.setData = function setData(data) {
-    var _map = this.getMap();
-    if (!_map) return this;
-    this.data = data;
-    this.isClear = false;
-    if (!this.$Windy && this._canvas) {
-      this.render(this._canvas);
-      _map.renderSync();
-    } else if (this.$Windy && this._canvas) {
-      if (this._cloneLayer) {
-        _map.addLayer(this._cloneLayer);
-        delete this._cloneLayer;
-      }
-      var extent = this._getExtent();
-      this.$Windy.update(this.getData(), extent[0], extent[1], extent[2], extent[3]);
-    } else {
-      console.warn('please create new instance');
-    }
-    return this;
-  };
-
-  OlWind.prototype.render = function render(canvas) {
-    var extent = this._getExtent();
-    if (this.isClear || !this.getData() || !extent) return this;
-    if (canvas && !this.$Windy) {
-      this.$Windy = new Windy({
-        canvas: canvas,
-        projection: this.get('projection'),
-        data: this.getData()
-      });
-      this.$Windy.start(extent[0], extent[1], extent[2], extent[3]);
-    } else if (canvas && this.$Windy) {
-      var _extent2 = this._getExtent();
-      this.$Windy.start(_extent2[0], _extent2[1], _extent2[2], _extent2[3]);
-    }
-    return this;
-  };
-
-  OlWind.prototype.redraw = function redraw() {
-    if (this.isClear) return;
-    var _extent = this.options.extent || this._getMapExtent();
-    this.setExtent(_extent);
-  };
-
-  OlWind.prototype.canvasFunction = function canvasFunction(extent, resolution, pixelRatio, size, projection) {
-    if (!this._canvas) {
-      this._canvas = createCanvas(size[0], size[1]);
-    } else {
-      this._canvas.width = size[0];
-      this._canvas.height = size[1];
-    }
-    if (resolution <= this.get('maxResolution')) {
-      this.render(this._canvas);
-    } else {}
-    return this._canvas;
-  };
-
-  OlWind.prototype._getExtent = function _getExtent() {
-    var size = this._getMapSize();
-    var _extent = this._getMapExtent();
-    if (size && _extent) {
-      var _projection = this.get('projection');
-      var extent = ol.proj.transformExtent(_extent, _projection, 'EPSG:4326');
-      return [[[0, 0], [size[0], size[1]]], size[0], size[1], [[extent[0], extent[1]], [extent[2], extent[3]]]];
-    } else {
-      return false;
-    }
-  };
-
-  OlWind.prototype._getMapExtent = function _getMapExtent() {
-    if (!this.getMap()) return;
-    var size = this._getMapSize();
-    var _view = this.getMap().getView();
-    return _view && _view.calculateExtent(size);
-  };
-
-  OlWind.prototype._getMapSize = function _getMapSize() {
-    if (!this.getMap()) return;
-    return this.getMap().getSize();
-  };
-
-  OlWind.prototype.appendTo = function appendTo(map) {
-    if (map && map instanceof ol.Map) {
-      this.set('originMap', map);
-      map.addLayer(this);
-    } else {
-      throw new Error('not map object');
-    }
-  };
-
-  OlWind.prototype.getPointData = function getPointData(coordinates) {
-    var gridValue = this.$Windy.interpolatePoint(coordinates[0], coordinates[1]);
-    if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
-      return {
-        direction: getDirection(gridValue[0], gridValue[1], this.options.angleConvention || 'bearingCCW'),
-        speed: getSpeed(gridValue[0], gridValue[1], this.options.speedUnit)
-      };
-    }
-  };
-
-  OlWind.prototype.clearWind = function clearWind() {
-    var _map = this.getMap();
-    if (!_map) return;
-    if (this.$Windy) this.$Windy.stop();
-    this.isClear = true;
-    this._cloneLayer = this;
-    _map.removeLayer(this);
-    this.changed();
-    this.getMap().renderSync();
-  };
-
-  OlWind.prototype.removeLayer = function removeLayer() {
-    var _map = this.getMap();
-    if (!_map) return;
-    if (this.$Windy) this.$Windy.stop();
-    this.un('precompose', this.redraw, this);
-    _map.removeLayer(this);
-    delete this._canvas;
-    delete this.$Windy;
-    delete this._cloneLayer;
-  };
-
-  OlWind.prototype.setMap = function setMap(map) {
-    this.set('originMap', map);
-  };
-
-  OlWind.prototype.getMap = function getMap() {
-    return this.get('originMap');
-  };
-
-  return OlWind;
-}(ol.layer.Image);
-
-var global$2 = typeof window === 'undefined' ? {} : window;
-var AMap = global$2.AMap || {};
-
-var AMapWind = function () {
-  function AMapWind(data) {
-    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    classCallCheck(this, AMapWind);
-
-    this.options = options;
-
-    this.canvas = null;
-
-    this.data = data;
-
-    this.layer_ = null;
-
-    this._windy = null;
-
-    if (options.map) {
-      this.appendTo(options.map);
-    }
-  }
-
-  AMapWind.prototype.appendTo = function appendTo(map) {
-    var _this = this;
-
-    if (map) {
-      map.on('complete', function () {
-        _this.init(map);
-      }, this);
-    } else {
-      throw new Error('not map object');
-    }
-  };
-
-  AMapWind.prototype.getData = function getData() {
-    return this.data;
-  };
-
-  AMapWind.prototype.setData = function setData(data) {
-    this.data = data;
-    if (this.map && this.canvas && this.data) {
-      this.render();
-    }
-  };
-
-  AMapWind.prototype.init = function init(map, options) {
-    if (map) {
-      this.map = map;
-      this.context = this.options.context || '2d';
-      this.getCanvasLayer();
-    } else {
-      throw new Error('not map object');
-    }
-  };
-
-  AMapWind.prototype.render = function render(canvas) {
-    if (!canvas) return;
-    var extent = this._getExtent();
-    if (!this.getData() || !extent) return this;
-    if (canvas && !this._windy) {
-      this._windy = new Windy({
-        canvas: canvas,
-        data: this.getData(),
-        'onDraw': function onDraw() {}
-      });
-      this._windy.start(extent[0], extent[1], extent[2], extent[3]);
-    } else if (canvas && this._windy) {
-      this._windy.start(extent[0], extent[1], extent[2], extent[3]);
-    }
-    return this;
-  };
-
-  AMapWind.prototype.getCanvasLayer = function getCanvasLayer() {
-    if (!this.canvas && !this.layer_) {
-      var canvas = this.canvasFunction();
-      var bounds = this.map.getBounds();
-      this.layer_ = new AMap.CanvasLayer({
-        canvas: canvas,
-        bounds: this.options.bounds || bounds,
-        zooms: this.options.zooms || [0, 22]
-      });
-      this.map.on('mapmove', this.canvasFunction, this);
-      this.map.on('zoomchange', this.canvasFunction, this);
-      this.layer_.setMap(this.map);
-    }
-  };
-
-  AMapWind.prototype.canvasFunction = function canvasFunction() {
-    var _ref = [this.map.getSize().width, this.map.getSize().height],
-        width = _ref[0],
-        height = _ref[1];
-
-    if (!this.canvas) {
-      this.canvas = createCanvas(width, height, null);
-    } else {
-      this.canvas.width = width;
-      this.canvas.height = height;
-      var bounds = this.map.getBounds();
-      if (this.layer_) {
-        this.layer_.setBounds(this.options.bounds || bounds);
-      }
-    }
-    this.render(this.canvas);
-    return this.canvas;
-  };
-
-  AMapWind.prototype._getExtent = function _getExtent() {
-    var _ref2 = [this.map.getSize().width, this.map.getSize().height],
-        width = _ref2[0],
-        height = _ref2[1];
-
-    var _ne = this.map.getBounds().getNorthEast();
-    var _sw = this.map.getBounds().getSouthWest();
-    return [[[0, 0], [width, height]], width, height, [[_ne.lng, _ne.lat], [_sw.lng, _sw.lat]]];
-  };
-
-  AMapWind.prototype.removeLayer = function removeLayer() {
-    if (!this.map) return;
-    this.map.removeLayer(this.layer_);
-    delete this.map;
-    delete this.layer_;
-    delete this.canvas;
-  };
-
-  AMapWind.prototype.getContext = function getContext() {
-    return this.canvas.getContext(this.context);
-  };
-
-  AMapWind.prototype.getPointData = function getPointData(coordinates) {
-    var gridValue = this._windy.interpolatePoint(coordinates[0], coordinates[1]);
-    if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
-      return {
-        direction: getDirection(gridValue[0], gridValue[1], this.options.angleConvention || 'bearingCCW'),
-        speed: getSpeed(gridValue[0], gridValue[1], this.options.speedUnit)
-      };
-    }
-  };
-
-  AMapWind.prototype.clearWind = function clearWind() {
-    if (this._windy) this._windy.stop();
-  };
-
-  return AMapWind;
-}();
-
-var global$3 = typeof window === 'undefined' ? {} : window;
-
-if (!global$3.BMap) global$3.BMap = {};
-
-if (!global$3.BMap.Overlay) global$3.BMap.Overlay = function Overlay() {
+if (!global$1.BMap.Overlay) global$1.BMap.Overlay = function Overlay() {
   classCallCheck(this, Overlay);
 };
 
@@ -968,7 +631,7 @@ var BaiduWind = function (_global$BMap$Overlay) {
   BaiduWind.prototype.adjustSize = function adjustSize() {
     var size = this._map.getSize();
     var canvas = this.canvas;
-    var devicePixelRatio = this.devicePixelRatio = global$3.devicePixelRatio || 1;
+    var devicePixelRatio = this.devicePixelRatio = global$1.devicePixelRatio || 1;
     canvas.width = size.width * devicePixelRatio;
     canvas.height = size.height * devicePixelRatio;
     if (this.context === '2d') {
@@ -1044,14 +707,9 @@ var BaiduWind = function (_global$BMap$Overlay) {
   };
 
   return BaiduWind;
-}(global$3.BMap.Overlay);
+}(global$1.BMap.Overlay);
 
-var index = {
-  AMapWind: AMapWind,
-  BMapWind: BaiduWind,
-  OlWind: OlWind
-};
-
-return index;
+return BaiduWind;
 
 })));
+//# sourceMappingURL=BMapWind.js.map

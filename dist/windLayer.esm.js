@@ -5,12 +5,6 @@
  * LICENSE: MIT
  * (c) 2017-2018 https://sakitam-fdd.github.io/wind-layer
  */
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(global.windLayer = factory());
-}(this, (function () { 'use strict';
-
 var Windy = function Windy(params) {
   if (!params.projection) params.projection = 'EPSG:4326';
   var MIN_VELOCITY_INTENSITY = params.minVelocity || 0;
@@ -1052,6 +1046,4 @@ var index = {
   OlWind: OlWind
 };
 
-return index;
-
-})));
+export default index;
