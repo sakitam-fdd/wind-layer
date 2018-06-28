@@ -1,6 +1,6 @@
 # wind-layer
 
-> a openlayers extension to windjs
+> a [openlayers](http://openlayers.org) | [bmap](https://map.baidu.com/) | [amap](https://ditu.amap.com/) extension to windjs
 
 [![Build Status](https://travis-ci.org/sakitam-fdd/wind-layer.svg?branch=master)](https://www.travis-ci.org/sakitam-fdd/wind-layer)
 [![NPM downloads](https://img.shields.io/npm/dm/wind-layer.svg)](https://npmjs.org/package/wind-layer)
@@ -26,7 +26,14 @@ npm run build
 
 ```bash
 npm install wind-layer --save
-import WindLayer from 'wind-layer'
+import windLayer from 'wind-layer'
+
+// 分模块
+import {
+  AMapWind, // amap
+  BMapWind, // bmap
+  OlWind // openlayers
+} from 'wind-layer'
 ```
 
 #### cdn
@@ -35,11 +42,16 @@ import WindLayer from 'wind-layer'
 
 ```bash
 // jsdelivr (jsdelivr由于缓存原因最好锁定版本号，否则可能会出现意料之外的问题)
-https://cdn.jsdelivr.net/npm/wind-layer@0.0.4/dist/windLayer.js
-https://cdn.jsdelivr.net/npm/wind-layer@0.0.4/dist/windLayer.min.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.5/dist/windLayer.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.5/dist/windLayer.min.js
 // npm
 https://unpkg.com/wind-layer/dist/windLayer.js
 https://unpkg.com/wind-layer/dist/windLayer.min.js
+
+// 分模块
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.5/dist/AMapWind.js // amap
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.5/dist/BMapWind.js // bmap
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.5/dist/OlWind.js // openlayers
 ```
 
 #### [![示例](https://sakitam-fdd.github.io/wind-layer/windy.jpg)](https://jsfiddle.net/sakitamfdd/hgvdu76j/?utm_source=website&utm_medium=embed&utm_campaign=hgvdu76j)

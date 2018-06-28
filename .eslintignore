@@ -1,6 +1,4 @@
 build/*.js
 config/*.js
 test/**/*.js
-src/windy.js
-lib/windy.js
 dist/

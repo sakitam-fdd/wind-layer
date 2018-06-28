@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <title>windy</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/openlayers/dist/ol.css">
   <style>
@@ -11,6 +12,7 @@
       padding: 0;
       margin: 0;
     }
+
     .menu {
       position: absolute;
       width: 100%;
@@ -49,8 +51,10 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/openlayers/dist/ol.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.js"></script>
-<script src="./lib/windLayer.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/moment@2.20.1/moment.js"></script>"></script>
+<!--<script src="./lib/windLayer.js"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/moment@2.20.1/moment.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/wind-layer@0.0.5/dist/windLayer.js"></script>
+">
 <script>
   var Maps = new ol.Map({
     target: 'map',
@@ -74,19 +78,37 @@
     })
   });
   var wind, data;
-  axios.get('http://localhost:3000/getdata', {
-    params: {
-      time: Date.parse(new Date())
-    }
+  // axios.get('http://localhost:3000/gribdata', {
+  //   params: ''
+  // }).then(function (res) {
+  //   if (res.data.success) {
+  //     axios.get('http://localhost:3000/getDataByFileName', {
+  //       params: {
+  //         filename: res.data.data.name
+  //       }
+  //     }).then(function (data_) {
+  //       data = data_.data.data
+  //       wind = new windLayer.OlWind(data, {
+  //         layerName: 'data',
+  //         projection: 'EPSG:4326',
+  //         ratio: 1,
+  //         map: Maps
+  //       })
+  //       wind.appendTo(Maps)
+  //     })
+  //   }
+  // });
+
+  axios.get('http://localhost:3000/parseData/2018062112.json', {
+    params: ''
   }).then(function (res) {
     if (res.data) {
-      data = res.data.data
-      wind = new WindLayer(data, {
-        layerName: data,
-        minResolution: undefined,
-        maxResolution: undefined,
+      data = res.data;
+      wind = new windLayer.OlWind(data, {
+        layerName: 'data',
         projection: 'EPSG:3857',
-        ratio: 1
+        ratio: 1,
+        map: Maps
       })
       wind.appendTo(Maps)
     }
