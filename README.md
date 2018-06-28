@@ -9,6 +9,7 @@
 [![Npm package](https://img.shields.io/npm/v/wind-layer.svg)](https://www.npmjs.org/package/wind-layer)
 [![GitHub stars](https://img.shields.io/github/stars/sakitam-fdd/wind-layer.svg)](https://github.com/sakitam-fdd/wind-layer/stargazers)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/sakitam-fdd/wind-layer/master/LICENSE)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsakitam-fdd%2Fwind-layer.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsakitam-fdd%2Fwind-layer?ref=badge_shield)
 
 ## 下载
 
@@ -55,7 +56,6 @@ https://cdn.jsdelivr.net/npm/wind-layer@0.0.5/dist/OlWind.js // openlayers
 ```
 
 #### [![示例](https://sakitam-fdd.github.io/wind-layer/windy.jpg)](https://jsfiddle.net/sakitamfdd/hgvdu76j/?utm_source=website&utm_medium=embed&utm_campaign=hgvdu76j)
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsakitam-fdd%2Fwind-layer.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsakitam-fdd%2Fwind-layer?ref=badge_shield)
 
 #### [文档](//sakitam-fdd.github.io/wind-layer/)
 
