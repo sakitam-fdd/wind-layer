@@ -22,6 +22,8 @@
     "canvas",
     "windjs",
     "openlayers",
+    "bmap",
+    "amap",
     "node",
     "grib"
   ],

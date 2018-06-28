@@ -60,6 +60,17 @@ class AMapWind {
   }
 
   /**
+   * set data
+   * @param data
+   */
+  setData (data) {
+    this.data = data;
+    if (this.map && this.canvas && this.data) {
+      this.render();
+    }
+  }
+
+  /**
    * init windy layer
    * @param map
    * @param options
@@ -184,6 +195,13 @@ class AMapWind {
         speed: getSpeed(gridValue[0], gridValue[1], this.options.speedUnit)
       }
     }
+  }
+
+  /**
+   * clear wind
+   */
+  clearWind () {
+    if (this._windy) this._windy.stop();
   }
 }
 

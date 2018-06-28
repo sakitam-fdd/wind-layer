@@ -53,7 +53,7 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.js"></script>
 <!--<script src="./lib/windLayer.js"></script>-->
 <script src="https://cdn.jsdelivr.net/npm/moment@2.20.1/moment.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/wind-layer@0.0.3/dist/windLayer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/wind-layer@0.0.5/dist/windLayer.js"></script>
 ">
 <script>
   var Maps = new ol.Map({
@@ -104,7 +104,7 @@
   }).then(function (res) {
     if (res.data) {
       data = res.data;
-      wind = new WindLayer(data, {
+      wind = new windLayer.OlWind(data, {
         layerName: 'data',
         projection: 'EPSG:3857',
         ratio: 1,

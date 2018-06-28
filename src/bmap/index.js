@@ -47,6 +47,17 @@ class BaiduWind extends global.BMap.Overlay {
   }
 
   /**
+   * set data
+   * @param data
+   */
+  setData (data) {
+    this.data = data;
+    if (this._map && this.data) {
+      this._draw();
+    }
+  }
+
+  /**
    * bounds, width, height, extent
    * @returns {*}
    * @private
@@ -127,7 +138,7 @@ class BaiduWind extends global.BMap.Overlay {
   /**
    * render windy layer
    * @param canvas
-   * @returns {BaiduWindy}
+   * @returns {BaiduWind}
    */
   render (canvas) {
     const extent = this._getExtent();
@@ -172,6 +183,13 @@ class BaiduWind extends global.BMap.Overlay {
         speed: getSpeed(gridValue[0], gridValue[1], this.options.speedUnit)
       }
     }
+  }
+
+  /**
+   * clear wind
+   */
+  clearWind () {
+    if (this._windy) this._windy.stop();
   }
 }
 
