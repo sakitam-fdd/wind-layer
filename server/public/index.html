@@ -78,39 +78,20 @@
     })
   });
   var wind, data;
-  // axios.get('http://localhost:3000/gribdata', {
-  //   params: ''
-  // }).then(function (res) {
-  //   if (res.data.success) {
-  //     axios.get('http://localhost:3000/getDataByFileName', {
-  //       params: {
-  //         filename: res.data.data.name
-  //       }
-  //     }).then(function (data_) {
-  //       data = data_.data.data
-  //       wind = new windLayer.OlWind(data, {
-  //         layerName: 'data',
-  //         projection: 'EPSG:4326',
-  //         ratio: 1,
-  //         map: Maps
-  //       })
-  //       wind.appendTo(Maps)
-  //     })
-  //   }
-  // });
-
-  axios.get('http://localhost:3000/parseData/2018062112.json', {
-    params: ''
+  axios.get('http://localhost:3000/getdata', {
+    params: {
+      time: moment.utc().valueOf()
+    }
   }).then(function (res) {
-    if (res.data) {
-      data = res.data;
+    if (res.data.success) {
+      data = res.data.data;
       wind = new windLayer.OlWind(data, {
         layerName: 'data',
-        projection: 'EPSG:3857',
+        projection: 'EPSG:4326',
         ratio: 1,
         map: Maps
-      })
-      wind.appendTo(Maps)
+      });
+      wind.appendTo(Maps);
     }
   });
 

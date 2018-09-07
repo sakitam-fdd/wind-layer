@@ -5,5 +5,13 @@ module.exports = {
   sourceDataDir: '/sourceData/', // 二进制数据源
   parseDataDir: '/parseData/', // 转换后的json数据
   // extent: [73, 54, 136, 3], // [leftlon, toplat, rightlon, bottomlat]
-  extent: [0, 90, 360, -90]
-}
+  extent: [0, 90, 360, -90],
+  requestParams: {
+    lev_10_m_above_ground: 'on',
+    lev_surface: 'on',
+    // var_TMP: 'off',
+    var_UGRD: 'on',
+    var_VGRD: 'on',
+    subregion: 'on'
+  }
+};
