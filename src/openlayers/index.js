@@ -1,5 +1,5 @@
 import Windy from '../windy/windy';
-import {createCanvas, getDirection, getSpeed} from '../helper';
+import { createCanvas, getDirection, getSpeed } from '../helper';
 
 const global = typeof window === 'undefined' ? {} : window;
 const ol = global.ol || {};

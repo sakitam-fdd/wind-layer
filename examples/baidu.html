@@ -156,10 +156,12 @@
       }
     }]
   });
-  axios.get('./out.json').then(function (res) {
+  var realtime = true;
+  // axios.get('./out.json').then(function (res) {
+  axios.get(realtime ? '../server/public/parseData/2018090706.json' : './out.json').then(function (res) {
     if (res.data) {
       var baiduWindy = new windLayer.BMapWind(res.data, {
-        projection: 'EPSG:3857'
+        projection: 'EPSG:4326'
       })
       map.addOverlay(baiduWindy)
     }

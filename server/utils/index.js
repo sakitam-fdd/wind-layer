@@ -1,6 +1,6 @@
-const fs = require('fs')
-const path = require('path')
-const moment = require('moment')
+const fs = require('fs');
+const path = require('path');
+const moment = require('moment');
 
 /**
  * 六小时执行一次 （00 || 06 || 12 || 18）
@@ -10,10 +10,10 @@ const moment = require('moment')
  */
 const roundHours = (hours, interval) => {
   if (interval > 0) {
-    const result = (Math.floor(hours / interval) * interval)
+    const result = (Math.floor(hours / interval) * interval);
     return result < 10 ? '0' + result.toString() : result
   }
-}
+};
 
 /**
  * 检查数据源文件是否存在
@@ -31,7 +31,7 @@ const checkFileExists = (path, mkdir) => {
     }
     return false
   }
-}
+};
 
 /**
  * 判断文件夹是否存在
@@ -48,7 +48,7 @@ const checkFolderExist = (path, mkdir) => {
   } else {
     return true
   }
-}
+};
 
 /**
  * 检查时间是否合法
@@ -67,13 +67,13 @@ const checkTime = _time => {
   } catch (error) {
     return false
   }
-}
+};
 
 /**
  * resolve path
  * @param _path
  */
-const resolve = _path => path.resolve(__dirname, '..', _path)
+const resolve = _path => path.resolve(__dirname, '..', _path);
 
 /**
  * 获取文件树
@@ -83,17 +83,17 @@ const resolve = _path => path.resolve(__dirname, '..', _path)
 const getFileList = _path => {
   const result = []
   function finder (path_) {
-    let files = fs.readdirSync(path_)
+    let files = fs.readdirSync(path_);
     files.forEach((val, index) => {
-      let fPath = path.join(path_, val)
-      let stats = fs.statSync(fPath)
-      if (stats.isDirectory()) finder(fPath)
-      if (stats.isFile()) result.push(val)
+      let fPath = path.join(path_, val);
+      let stats = fs.statSync(fPath);
+      if (stats.isDirectory()) finder(fPath);
+      if (stats.isFile()) result.push(val);
     })
   }
-  finder(_path)
-  return result
-}
+  finder(_path);
+  return result;
+};
 
 /**
  * 获取文件扩展名
@@ -102,12 +102,12 @@ const getFileList = _path => {
  */
 const getFileExt = _string => {
   if (_string && _string.split) {
-    const _arr = _string.split('.')
-    return _arr[_arr.length - 1]
+    const _arr = _string.split('.');
+    return _arr[_arr.length - 1];
   } else {
-    return false
+    return false;
   }
-}
+};
 
 module.exports = {
   checkTime,
@@ -117,4 +117,4 @@ module.exports = {
   checkFolderExist,
   getFileList,
   getFileExt
-}
+};

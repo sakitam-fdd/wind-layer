@@ -103,7 +103,7 @@ const Windy = function (params) {
     var header = builder.header;
 
     λ0 = header.lo1;
-    φ0 = header.la1;  // the grid's origin (e.g., 0.0E, 90.0N)
+    φ0 = Math.max(header.la2, header.la1);  // the grid's origin (e.g., 0.0E, 90.0N)
 
     Δλ = header.dx;
     Δφ = header.dy;    // distance between grid points (e.g., 2.5 deg lon, 2.5 deg lat)
