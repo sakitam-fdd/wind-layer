@@ -193,8 +193,8 @@ const fetchGribData = params => {
               file: 'gfs.t' + hours + 'z.pgrb2.1p00.f000',
               leftlon: config.extent[0], // 经度
               rightlon: config.extent[2],
-              toplat: config.extent[1], // 纬度
-              bottomlat: config.extent[3],
+              toplat: config.extent[3], // 纬度
+              bottomlat: config.extent[1],
               dir: '/gfs.' + stamp
             }, config.requestParams)
           }).then(response => {
