@@ -12,6 +12,36 @@ utils.checkFolderExist(utils.resolve(config.staticDir + config.parseDataDir), tr
 utils.checkFolderExist(utils.resolve(config.staticDir + config.sourceDataDir), true);
 
 /**
+ * walkFetch
+ * @param time
+ * @returns {Promise<any>}
+ */
+const walkFetch = time => {
+  let [subTime, index] = [time, 0];
+  async function walk_ () {
+    if (index > 0) {
+      subTime = moment(subTime).subtract(6, 'hours')
+    }
+    try {
+      const data = await fetchGribData({
+        time: subTime
+      });
+      console.log(data);
+      return data;
+    } catch (e) {
+      console.log('e', e);
+      const data = await walk_();
+      return data;
+    }
+  }
+  return new Promise(resolve => {
+    walk_().then(res => {
+      resolve(res);
+    })
+  });
+};
+
+/**
  * 获取数据源文件
  * @param ctx
  * @param next
@@ -200,13 +230,7 @@ const fetchGribData = params => {
           }).then(response => {
             if (response.status !== 200) {
               console.log('current data not Exist');
-              fetchGribData({
-                time: moment(_time).subtract(6, 'hours')
-              }).then(_res => {
-                if (_res && _res.code === 200) {
-                  resolve(_res)
-                }
-              })
+              reject(response);
             } else {
               utils.checkFolderExist(utils.resolve(config.staticDir + config.sourceDataDir), true);
               // 此时part为返回的流对象
@@ -227,14 +251,8 @@ const fetchGribData = params => {
                 })
               })
             }
-          }).catch(() => {
-            fetchGribData({
-              time: moment(_time).subtract(6, 'hours')
-            }).then(_res => {
-              if (_res && _res.code === 200) {
-                resolve(_res)
-              }
-            })
+          }).catch((error) => {
+            reject(error);
           })
         }
       })
