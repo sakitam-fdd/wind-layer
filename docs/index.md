@@ -5,7 +5,7 @@ npm install wind-layer --save
 import WindLayer from 'wind-layer'
 
 // 指定版本安装
-npm install wind-layer@0.0.5 --save
+npm install wind-layer@0.0.7 --save
 import windLayer from 'wind-layer'
 ```
 
@@ -13,8 +13,8 @@ import windLayer from 'wind-layer'
 
 ```bash
 // jsdelivr (jsdelivr由于缓存原因最好锁定版本号，否则可能会出现意料之外的问题)
-https://cdn.jsdelivr.net/npm/wind-layer@0.0.5/dist/windLayer.js
-https://cdn.jsdelivr.net/npm/wind-layer@0.0.5/dist/windLayer.min.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.7/dist/windLayer.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.7/dist/windLayer.min.js
 // npm
 https://unpkg.com/wind-layer/dist/windLayer.js
 https://unpkg.com/wind-layer/dist/windLayer.min.js
