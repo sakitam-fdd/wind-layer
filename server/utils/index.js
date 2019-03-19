@@ -109,7 +109,14 @@ const getFileExt = _string => {
   }
 };
 
+const waiting = (timer = 500) => {
+  return new Promise(resolve => {
+    setTimeout(resolve, timer)
+  })
+};
+
 module.exports = {
+  waiting,
   checkTime,
   resolve,
   roundHours,

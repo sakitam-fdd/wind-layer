@@ -4,8 +4,8 @@ module.exports = {
   serviceUrl: 'http://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_1p00.pl',
   sourceDataDir: '/sourceData/', // 二进制数据源
   parseDataDir: '/parseData/', // 转换后的json数据
-  // extent: [73, 54, 136, 3], // [leftlon, toplat, rightlon, bottomlat]
-  extent: [0, 90, 360, -90],
+  // extent: [73, 3, 136, 54], // [leftlon, bottomlat, rightlon, toplat]
+  extent: [0, -90, 360, 90],
   requestParams: {
     lev_10_m_above_ground: 'on',
     lev_surface: 'on',
