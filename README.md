@@ -39,20 +39,21 @@ import {
 
 #### cdn
 
-目前可通过 [unpkg.com](https://unpkg.com/wind-layer/dist/windLayer.js) / [jsdelivr](https://cdn.jsdelivr.net/npm/wind-layer@0.0.1/dist/windLayer.js) 获取最新版本的资源。
+目前可通过 [unpkg.com](https://unpkg.com/wind-layer/dist/windLayer.js) /
+ [jsdelivr](https://cdn.jsdelivr.net/npm/wind-layer@0.0.7/dist/windLayer.js) 获取最新版本的资源。
 
 ```bash
 // jsdelivr (jsdelivr由于缓存原因最好锁定版本号，否则可能会出现意料之外的问题)
-https://cdn.jsdelivr.net/npm/wind-layer@0.0.6/dist/windLayer.js
-https://cdn.jsdelivr.net/npm/wind-layer@0.0.6/dist/windLayer.min.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.7/dist/windLayer.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.7/dist/windLayer.min.js
 // npm
 https://unpkg.com/wind-layer/dist/windLayer.js
 https://unpkg.com/wind-layer/dist/windLayer.min.js
 
 // 分模块
-https://cdn.jsdelivr.net/npm/wind-layer@0.0.6/dist/AMapWind.js // amap
-https://cdn.jsdelivr.net/npm/wind-layer@0.0.6/dist/BMapWind.js // bmap
-https://cdn.jsdelivr.net/npm/wind-layer@0.0.6/dist/OlWind.js // openlayers
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.7/dist/AMapWind.js // amap
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.7/dist/BMapWind.js // bmap
+https://cdn.jsdelivr.net/npm/wind-layer@0.0.7/dist/OlWind.js // openlayers
 ```
 
 #### [![示例](https://sakitam-fdd.github.io/wind-layer/windy.jpg)](https://jsfiddle.net/sakitamfdd/hgvdu76j/?utm_source=website&utm_medium=embed&utm_campaign=hgvdu76j)

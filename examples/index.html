@@ -69,23 +69,24 @@ var map = new ol.Map({
   loadTilesWhileAnimating: true,
   pixelRatio: 1,
   view: new ol.View({
-    projection: 'EPSG:3857',
+    projection: 'EPSG:4326',
     center: [113.53450137499999, 34.44104525],
     zoom: 5
   })
 });
 var wind, data;
 var realtime = true;
-axios.get(realtime ? '../server/public/parseData/2018090706.json' : './out.json', {
-  params: {
-    time: moment('20180622')
-  }
-}).then(function (res) {
+// axios.get(realtime ? '../server/public/parseData/2018090706.json' : './out.json', {
+//   params: {
+//     time: moment('20180622')
+//   }
+// })
+  axios.get('http://58.87.95.84:3030/getdata?time=1536985982167').then(function (res) {
   if (res.data) {
-    data = res.data
+    data = res.data.data
     wind = new windLayer.OlWind(data, {
       layerName: 'data',
-      projection: 'EPSG:3857',
+      projection: 'EPSG:4326',
       ratio: 1,
       map: map
     })

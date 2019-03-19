@@ -1,5 +1,5 @@
 import Windy from '../windy/windy';
-import { createCanvas, getDirection, getSpeed } from '../helper';
+import { createCanvas, getDirection, getSpeed, getExtent } from '../helper';
 
 const global = typeof window === 'undefined' ? {} : window;
 const AMap = global.AMap || {};
@@ -35,6 +35,15 @@ class AMapWind {
     if (options.map) {
       this.appendTo(options.map)
     }
+
+    /**
+     * bind context
+     * @type {{new(...args: any[][]): any} | ((...args: any[][]) => any) | ((...args: any[]) => any) | any | {new(...args: any[]): any}}
+     */
+    this.init = this.init.bind(this);
+    this.handleResize = this.handleResize.bind(this);
+    this.canvasFunction = this.canvasFunction.bind(this);
+    this._addReFreshHandle = this._addReFreshHandle.bind(this);
   }
 
   /**
@@ -43,9 +52,7 @@ class AMapWind {
    */
   appendTo (map) {
     if (map) {
-      map.on('complete', () => {
-        this.init(map)
-      }, this);
+      this.init(map)
     } else {
       throw new Error('not map object');
     }
@@ -80,8 +87,15 @@ class AMapWind {
       this.map = map;
       this.context = this.options.context || '2d';
       this.getCanvasLayer();
+      this.map.on('resize', this.handleResize, this)
     } else {
       throw new Error('not map object')
+    }
+  }
+
+  handleResize () {
+    if (this.canvas) {
+      this.canvasFunction()
     }
   }
 
@@ -105,7 +119,21 @@ class AMapWind {
     } else if (canvas && this._windy) {
       this._windy.start(extent[0], extent[1], extent[2], extent[3]);
     }
+    // 2D视图时可以省略
+    this._addReFreshHandle();
     return this;
+  }
+
+  /**
+   * 3D模式下手动刷新
+   * @private
+   */
+  _addReFreshHandle () {
+    const type = this.map.getViewMode_();
+    if (type.toLowerCase() === '3d') {
+      this.layer_ && this.layer_.reFresh();
+      AMap.Util.requestAnimFrame(this._addReFreshHandle);
+    }
   }
 
   /**
@@ -114,11 +142,13 @@ class AMapWind {
   getCanvasLayer () {
     if (!this.canvas && !this.layer_) {
       const canvas = this.canvasFunction();
-      const bounds = this.map.getBounds();
+      const bounds = this._getBounds();
       this.layer_ = new AMap.CanvasLayer({
         canvas: canvas,
         bounds: this.options.bounds || bounds,
-        zooms: this.options.zooms || [0, 22]
+        zooms: this.options.zooms || [0, 22],
+        zIndex: this.options.zIndex || 12,
+        opacity: this.options.opacity || 1
       });
       this.map.on('mapmove', this.canvasFunction, this);
       this.map.on('zoomchange', this.canvasFunction, this);
@@ -137,7 +167,7 @@ class AMapWind {
     } else {
       this.canvas.width = width;
       this.canvas.height = height;
-      const bounds = this.map.getBounds();
+      const bounds = this._getBounds();
       if (this.layer_) {
         this.layer_.setBounds(this.options.bounds || bounds);
       }
@@ -147,14 +177,36 @@ class AMapWind {
   }
 
   /**
+   * fixed viewMode
+   * @private
+   */
+  _getBounds () {
+    const type = this.map.getViewMode_();
+    let [southWest, northEast] = [];
+    const bounds = this.map.getBounds()
+    if (type.toLowerCase() === '2d') {
+      northEast = bounds.getNorthEast(); // xmax ymax
+      southWest = bounds.getSouthWest(); // xmin ymin
+    } else {
+      const arrays = bounds.bounds.map(item => {
+        return [item.getLng(), item.getLat()];
+      });
+      const extent = getExtent(arrays);
+      southWest = new AMap.LngLat(extent[0], extent[1]);
+      northEast = new AMap.LngLat(extent[2], extent[3]);
+    }
+    return new AMap.Bounds(southWest, northEast);
+  }
+
+  /**
    * bounds, width, height, extent
    * @returns {*}
    * @private
    */
   _getExtent () {
     const [width, height] = [this.map.getSize().width, this.map.getSize().height];
-    const _ne = this.map.getBounds().getNorthEast();
-    const _sw = this.map.getBounds().getSouthWest();
+    const _ne = this._getBounds().getNorthEast();
+    const _sw = this._getBounds().getSouthWest();
     return [
       [[0, 0], [width, height]],
       width,
@@ -169,6 +221,9 @@ class AMapWind {
   removeLayer () {
     if (!this.map) return;
     this.map.removeLayer(this.layer_);
+    this.map.off('resize', this.handleResize, this);
+    this.map.off('mapmove', this.canvasFunction, this);
+    this.map.off('zoomchange', this.canvasFunction, this);
     delete this.map;
     delete this.layer_;
     delete this.canvas;

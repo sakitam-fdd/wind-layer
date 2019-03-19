@@ -1,9 +1,9 @@
 /*!
  * author: FDD <smileFDD@gmail.com> 
  * wind-layer v0.0.6
- * build-time: 2018-9-7 15:46
+ * build-time: 2019-3-19 10:37
  * LICENSE: MIT
- * (c) 2017-2018 https://sakitam-fdd.github.io/wind-layer
+ * (c) 2017-2019 https://sakitam-fdd.github.io/wind-layer
  */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
@@ -542,6 +542,13 @@
     return meters * 3.6;
   };
 
+  var getExtent = function getExtent(coords) {
+    var extent = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
+    return coords.reduce(function (prev, coord) {
+      return [Math.min(coord[0], prev[0]), Math.min(coord[1], prev[1]), Math.max(coord[0], prev[2]), Math.max(coord[1], prev[3])];
+    }, extent);
+  };
+
   var global = typeof window === 'undefined' ? {} : window;
   var AMap = global.AMap || {};
 
@@ -560,17 +567,18 @@
       if (options.map) {
         this.appendTo(options.map);
       }
+
+      this.init = this.init.bind(this);
+      this.handleResize = this.handleResize.bind(this);
+      this.canvasFunction = this.canvasFunction.bind(this);
+      this._addReFreshHandle = this._addReFreshHandle.bind(this);
     }
 
     var _proto = AMapWind.prototype;
 
     _proto.appendTo = function appendTo(map) {
-      var _this = this;
-
       if (map) {
-        map.on('complete', function () {
-          _this.init(map);
-        }, this);
+        this.init(map);
       } else {
         throw new Error('not map object');
       }
@@ -593,8 +601,15 @@
         this.map = map;
         this.context = this.options.context || '2d';
         this.getCanvasLayer();
+        this.map.on('resize', this.handleResize, this);
       } else {
         throw new Error('not map object');
+      }
+    };
+
+    _proto.handleResize = function handleResize() {
+      if (this.canvas) {
+        this.canvasFunction();
       }
     };
 
@@ -617,17 +632,32 @@
         this._windy.start(extent[0], extent[1], extent[2], extent[3]);
       }
 
+      this._addReFreshHandle();
+
       return this;
+    };
+
+    _proto._addReFreshHandle = function _addReFreshHandle() {
+      var type = this.map.getViewMode_();
+
+      if (type.toLowerCase() === '3d') {
+        this.layer_ && this.layer_.reFresh();
+        AMap.Util.requestAnimFrame(this._addReFreshHandle);
+      }
     };
 
     _proto.getCanvasLayer = function getCanvasLayer() {
       if (!this.canvas && !this.layer_) {
         var canvas = this.canvasFunction();
-        var bounds = this.map.getBounds();
+
+        var bounds = this._getBounds();
+
         this.layer_ = new AMap.CanvasLayer({
           canvas: canvas,
           bounds: this.options.bounds || bounds,
-          zooms: this.options.zooms || [0, 22]
+          zooms: this.options.zooms || [0, 22],
+          zIndex: this.options.zIndex || 12,
+          opacity: this.options.opacity || 1
         });
         this.map.on('mapmove', this.canvasFunction, this);
         this.map.on('zoomchange', this.canvasFunction, this);
@@ -645,7 +675,8 @@
       } else {
         this.canvas.width = width;
         this.canvas.height = height;
-        var bounds = this.map.getBounds();
+
+        var bounds = this._getBounds();
 
         if (this.layer_) {
           this.layer_.setBounds(this.options.bounds || bounds);
@@ -656,14 +687,36 @@
       return this.canvas;
     };
 
+    _proto._getBounds = function _getBounds() {
+      var type = this.map.getViewMode_();
+      var _ref2 = [],
+          southWest = _ref2[0],
+          northEast = _ref2[1];
+      var bounds = this.map.getBounds();
+
+      if (type.toLowerCase() === '2d') {
+        northEast = bounds.getNorthEast();
+        southWest = bounds.getSouthWest();
+      } else {
+        var arrays = bounds.bounds.map(function (item) {
+          return [item.getLng(), item.getLat()];
+        });
+        var extent = getExtent(arrays);
+        southWest = new AMap.LngLat(extent[0], extent[1]);
+        northEast = new AMap.LngLat(extent[2], extent[3]);
+      }
+
+      return new AMap.Bounds(southWest, northEast);
+    };
+
     _proto._getExtent = function _getExtent() {
-      var _ref2 = [this.map.getSize().width, this.map.getSize().height],
-          width = _ref2[0],
-          height = _ref2[1];
+      var _ref3 = [this.map.getSize().width, this.map.getSize().height],
+          width = _ref3[0],
+          height = _ref3[1];
 
-      var _ne = this.map.getBounds().getNorthEast();
+      var _ne = this._getBounds().getNorthEast();
 
-      var _sw = this.map.getBounds().getSouthWest();
+      var _sw = this._getBounds().getSouthWest();
 
       return [[[0, 0], [width, height]], width, height, [[_ne.lng, _ne.lat], [_sw.lng, _sw.lat]]];
     };
@@ -671,6 +724,9 @@
     _proto.removeLayer = function removeLayer() {
       if (!this.map) return;
       this.map.removeLayer(this.layer_);
+      this.map.off('resize', this.handleResize, this);
+      this.map.off('mapmove', this.canvasFunction, this);
+      this.map.off('zoomchange', this.canvasFunction, this);
       delete this.map;
       delete this.layer_;
       delete this.canvas;
