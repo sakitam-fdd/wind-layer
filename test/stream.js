@@ -1,14 +1,37 @@
-const fs = require('fs-extra');
-const writer = fs.createWriteStream('test.txt');
+// const fs = require('fs-extra');
+// const writer = fs.createWriteStream('test.txt');
+//
+// const reader = fs.createReadStream('package.json');
+// reader.pipe(writer);
+//
+// writer.on('finish', () => {
+//   console.error('写入已完成');
+// });
+//
+//
+// writer.on('end', function () {
+//   console.error('写入结束');
+// });
 
-const reader = fs.createReadStream('package.json');
-reader.pipe(writer);
+const getP = function () {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject(111);
+    }, 500);
+  })
+}
 
-writer.on('finish', () => {
-  console.error('写入已完成');
-});
 
+const getT = async () => {
+  try {
+    const a = await getP();
+    console.log(a);
+    return a;
+  } catch (e) {
+    console.log('e', e);
+  }
+};
 
-writer.on('end', function () {
-  console.error('写入结束');
+getT().then(res => {
+  console.log(res);
 });
