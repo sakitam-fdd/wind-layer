@@ -45,7 +45,7 @@ class OlWind extends ol.layer.Image {
       attributions: options.attributions,
       resolutions: options.resolutions,
       canvasFunction: this.canvasFunction.bind(this),
-      projection: (options.hasOwnProperty('projection') ? options.projection : 'EPSG:3857'),
+      // projection: (options.hasOwnProperty('projection') ? options.projection : 'EPSG:3857'),
       ratio: (options.hasOwnProperty('ratio') ? options.ratio : 1)
     }));
     this.on('precompose', this.redraw, this);
@@ -95,7 +95,7 @@ class OlWind extends ol.layer.Image {
     if (canvas && !this.$Windy) {
       this.$Windy = new Windy({
         canvas: canvas,
-        projection: this.get('projection'),
+        projection: this._getProjectionCode(),
         data: this.getData()
       });
       this.$Windy.start(extent[0], extent[1], extent[2], extent[3]);
@@ -148,7 +148,7 @@ class OlWind extends ol.layer.Image {
     const size = this._getMapSize();
     const _extent = this._getMapExtent();
     if (size && _extent) {
-      const _projection = this.get('projection');
+      const _projection = this._getProjectionCode();
       const extent = ol.proj.transformExtent(_extent, _projection, 'EPSG:4326');
       return [[[0, 0], [size[0], size[1]]], size[0], size[1], [[extent[0], extent[1]], [extent[2], extent[3]]]];
     } else {
@@ -185,6 +185,7 @@ class OlWind extends ol.layer.Image {
   appendTo (map) {
     if (map && map instanceof ol.Map) {
       this.set('originMap', map);
+      this.getSource().projection_ = this._getProjectionCode();
       map.addLayer(this);
     } else {
       throw new Error('not map object');
@@ -249,6 +250,22 @@ class OlWind extends ol.layer.Image {
    */
   getMap () {
     return this.get('originMap');
+  }
+
+  _getProjectionCode () {
+    let code = '';
+    const map = this.getMap();
+    if (map) {
+      code =
+        map.getView() &&
+        map
+          .getView()
+          .getProjection()
+          .getCode();
+    } else {
+      code = 'EPSG:3857';
+    }
+    return code;
   }
 }
 
