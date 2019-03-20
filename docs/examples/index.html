@@ -49,7 +49,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/openlayers/dist/ol.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/wind-layer@0.0.4/dist/windLayer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/wind-layer/dist/windLayer.js"></script>
 <script>
   var map = new ol.Map({
     target: 'map',
@@ -77,7 +77,6 @@
     if (res.data) {
       data = res.data
       wind = new WindLayer(data, {
-        projection: 'EPSG:3857',
         ratio: 1
       })
       wind.appendTo(map)

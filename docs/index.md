@@ -23,12 +23,11 @@ https://unpkg.com/wind-layer/dist/windLayer.min.js
 
 ### 如何使用
 
-#### openlayers
+#### openlayers 【默认支持 EPSG:4236 和 EPSG:3857投影】
 
 ```javascript
 var wind = new windLayer.OlWind(res.data, {
   layerName: '',
-  projection: 'EPSG:3857', // EPSG:4326
   ratio: 1
 })
 wind.appendTo(map)
@@ -50,7 +49,6 @@ map.addLayer(wind) // 此模式下属性必须配置 map 字段
 | minResolution | 最小分辨率 | `Number` | 默认为 `undefined` |
 | maxResolution | 最大分辨率 | `Number` | 默认为 `undefined` |
 | zIndex | 图层index | `Number` | 默认为 `0` |
-| projection | 投影 | `String` | 现在默认支持 `EPSG:3857`, `EPSG:4326`測試中 |
 | ratio | 画布和地图窗口的比值 | `Number` | 现在默认 `1.5` |
 | map | 地图 | `ol.Map` | 对应的地图实例，调用原生 `addLayer` 时必须配置此字段 |
 

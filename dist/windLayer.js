@@ -1,7 +1,7 @@
 /*!
  * author: FDD <smileFDD@gmail.com> 
  * wind-layer v0.0.6
- * build-time: 2019-3-19 11:1
+ * build-time: 2019-3-20 16:43
  * LICENSE: MIT
  * (c) 2017-2019 https://sakitam-fdd.github.io/wind-layer
  */
@@ -595,7 +595,6 @@
         attributions: options.attributions,
         resolutions: options.resolutions,
         canvasFunction: _this.canvasFunction.bind(_assertThisInitialized(_assertThisInitialized(_this))),
-        projection: options.hasOwnProperty('projection') ? options.projection : 'EPSG:3857',
         ratio: options.hasOwnProperty('ratio') ? options.ratio : 1
       }));
 
@@ -646,7 +645,7 @@
       if (canvas && !this.$Windy) {
         this.$Windy = new Windy({
           canvas: canvas,
-          projection: this.get('projection'),
+          projection: this._getProjectionCode(),
           data: this.getData()
         });
         this.$Windy.start(extent[0], extent[1], extent[2], extent[3]);
@@ -688,7 +687,7 @@
       var _extent = this._getMapExtent();
 
       if (size && _extent) {
-        var _projection = this.get('projection');
+        var _projection = this._getProjectionCode();
 
         var extent = ol.proj.transformExtent(_extent, _projection, 'EPSG:4326');
         return [[[0, 0], [size[0], size[1]]], size[0], size[1], [[extent[0], extent[1]], [extent[2], extent[3]]]];
@@ -715,6 +714,7 @@
     _proto.appendTo = function appendTo(map) {
       if (map && map instanceof ol.Map) {
         this.set('originMap', map);
+        this.getSource().projection_ = this._getProjectionCode();
         map.addLayer(this);
       } else {
         throw new Error('not map object');
@@ -766,6 +766,19 @@
 
     _proto.getMap = function getMap() {
       return this.get('originMap');
+    };
+
+    _proto._getProjectionCode = function _getProjectionCode() {
+      var code = '';
+      var map = this.getMap();
+
+      if (map) {
+        code = map.getView() && map.getView().getProjection().getCode();
+      } else {
+        code = 'EPSG:3857';
+      }
+
+      return code;
     };
 
     return OlWind;
@@ -1156,4 +1169,3 @@
   return index;
 
 })));
-//# sourceMappingURL=windLayer.js.map

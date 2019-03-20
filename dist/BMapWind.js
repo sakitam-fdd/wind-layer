@@ -1,9 +1,9 @@
 /*!
  * author: FDD <smileFDD@gmail.com> 
  * wind-layer v0.0.6
- * build-time: 2018-9-7 15:46
+ * build-time: 2019-3-20 16:42
  * LICENSE: MIT
- * (c) 2017-2018 https://sakitam-fdd.github.io/wind-layer
+ * (c) 2017-2019 https://sakitam-fdd.github.io/wind-layer
  */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
