@@ -58,7 +58,7 @@
         layerName: 'baseLayer',
         preload: 4,
         source: new ol.source.OSM({
-          url: "http://{a-c}.sm.mapstack.stamen.com/" +
+          url: "//{a-c}.sm.mapstack.stamen.com/" +
           "(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/" +
           "{z}/{x}/{y}.png"
         })
@@ -76,7 +76,7 @@
   axios.get('./out.json').then(function (res) {
     if (res.data) {
       data = res.data
-      wind = new WindLayer(data, {
+      wind = new windLayer.OlWind(data, {
         ratio: 1
       })
       wind.appendTo(map)
