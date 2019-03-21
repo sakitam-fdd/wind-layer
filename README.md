@@ -2,6 +2,8 @@
 
 > a [openlayers](http://openlayers.org) | [bmap](https://map.baidu.com/) | [amap](https://ditu.amap.com/) extension to windjs
 
+> 示例：[openlayers](//sakitam-fdd.github.io/wind-layer/examples/index.html) | [bmap](//sakitam-fdd.github.io/wind-layer/examples/baidu.html) | [amap](//sakitam-fdd.github.io/wind-layer/examples/amap.html)
+
 [![Build Status](https://travis-ci.org/sakitam-fdd/wind-layer.svg?branch=master)](https://www.travis-ci.org/sakitam-fdd/wind-layer)
 [![NPM downloads](https://img.shields.io/npm/dm/wind-layer.svg)](https://npmjs.org/package/wind-layer)
 [![](https://data.jsdelivr.com/v1/package/npm/wind-layer/badge)](https://www.jsdelivr.com/package/npm/wind-layer)
@@ -12,7 +14,6 @@
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsakitam-fdd%2Fwind-layer.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsakitam-fdd%2Fwind-layer?ref=badge_shield)
 
 ## 下载
-
 
 ```bash
 git clone https://github.com/sakitam-fdd/wind-layer.git
@@ -84,7 +85,7 @@ cp current-wind-surface-level-gfs-1.0.json <earth-git-repository>/public/data/we
   目前仅抓取少量数据, 全部数据数据量过大会造成抓取时间过长和转换失败。
 
 ```bash
-npm run dev:server // 调试环境启动服务
+npm run start // 调试环境启动服务
 npm run prd:server // 部署环境启动服务
 ```
 
