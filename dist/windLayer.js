@@ -1,7 +1,7 @@
 /*!
  * author: FDD <smileFDD@gmail.com> 
- * wind-layer v0.0.6
- * build-time: 2019-3-20 16:43
+ * wind-layer v0.0.7
+ * build-time: 2019-3-21 10:59
  * LICENSE: MIT
  * (c) 2017-2019 https://sakitam-fdd.github.io/wind-layer
  */
