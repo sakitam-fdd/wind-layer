@@ -101,6 +101,64 @@ npm run prd:server // 部署环境启动服务
 | `getParseTree` | `null` | 无需参数，获取转换后的 `json` 数据。返回一个list，包含文件名和服务器地址。 |
 | `getDataByFileName` | `{ filename }` | 通过文件名请求 `json` 数据，文件名可为源数据文件和json文件名 |
 
+## 使用Docker
+
+### 简单运行
+
+> 如果想简单的运行一下看看，可以执行这个命令：
+
+```bash
+docker run -d -p 8080:3333 sakitamclone/wind-server:0.0.1
+```
+
+启动后就可以通过主机的 8080 端口看到运行结果了，比如用的是本机 Docker 的话，访问：http://localhost:3000 即可。
+
+测试结束后，彻底清除容器可以用命令：
+
+```bash
+docker rm -fv <容器ID>
+```
+
+这样可以停止、删除容器，并清除数据。
+
+### 使用 DockerCompose
+
+新建文件 ``docker-compose.yml``, 内容如下：
+
+```yaml
+version: '3'
+
+services:
+  wind-server:
+    image: wind-server
+    build:
+      context: ./
+      args:
+        NODE_ENV: development
+    hostname: wind-server
+    depends_on:
+      - java
+    environment:
+      - CORS_ORIGIN=****
+    ports:
+      - "8080:3333"
+#    volumes:
+#      - ./src:/app/src
+#      - ./src:/app/server
+#      - ./package.json:/app/package.json
+#      - ./yarn.lock:/app/yarn.lock
+
+  java:
+    image: openjdk:8-jdk-slim
+    read_only: true
+
+volumes:
+  yarn:
+
+```
+
+然后使用命令 docker-compose up -d 来启动，停止服务使用 docker-compose down。
+
 ## Resources
 
 * https://github.com/cambecc/earth
