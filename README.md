@@ -130,27 +130,16 @@ version: '3'
 
 services:
   wind-server:
-    image: wind-server
+    image: sakitamclone/wind-server:0.0.1
     build:
       context: ./
       args:
         NODE_ENV: development
     hostname: wind-server
-    depends_on:
-      - java
     environment:
       - CORS_ORIGIN=****
     ports:
       - "8080:3333"
-#    volumes:
-#      - ./src:/app/src
-#      - ./src:/app/server
-#      - ./package.json:/app/package.json
-#      - ./yarn.lock:/app/yarn.lock
-
-  java:
-    image: openjdk:8-jdk-slim
-    read_only: true
 
 volumes:
   yarn:
