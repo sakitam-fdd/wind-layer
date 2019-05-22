@@ -4,6 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
   <title>CanvasLayer</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.css">
   <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=bxFuXXDt1oKdlgu6mXCCnK51cDgDGBLp"></script>
   <style type="text/css">
     body, html,#container {width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";}
@@ -11,6 +12,7 @@
 </head>
 <body>
 <div id="container"></div>
+<script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
 <script src="../node_modules/axios/dist/axios.js"></script>
 <script src="../dist/windLayer.js"></script>
 <script type="text/javascript">
@@ -157,13 +159,13 @@
     }]
   });
   var realtime = true;
-  // axios.get('./out.json').then(function (res) {
-  axios.get(realtime ? '../server/public/parseData/2018090706.json' : './out.json').then(function (res) {
+  axios.get('./out.json').then(function (res) {
+  // axios.get(realtime ? '../server/public/parseData/2018090706.json' : './out.json').then(function (res) {
     if (res.data) {
       var baiduWindy = new windLayer.BMapWind(res.data, {
         projection: 'EPSG:4326'
       })
-      map.addOverlay(baiduWindy)
+      map.addOverlay(baiduWindy);
     }
   });
 </script>

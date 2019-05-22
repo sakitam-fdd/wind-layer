@@ -19,7 +19,8 @@ const Windy = function (params) {
   const PARTICLE_LINE_WIDTH = params.lineWidth || 1;                           // line width of a drawn particle
   const PARTICLE_MULTIPLIER = params.particleMultiplier || 1 / 300;            // particle count scalar (completely arbitrary--this values looks nice)
   const PARTICLE_REDUCTION = (Math.pow(window.devicePixelRatio, 1 / 3) || 1.6);   // multiply particle count for mobiles by this amount
-  const FRAME_RATE = params.frameRate || 15, FRAME_TIME = 1000 / FRAME_RATE;   // desired frames per second
+  const FRAME_RATE = params.frameRate || 15;
+  window.FRAME_TIME = 1000 / FRAME_RATE;   // desired frames per second
 
   var defaulColorScale = [
     "rgb(36,104, 180)",
@@ -548,7 +549,7 @@ window.requestAnimationFrame = (function () {
     window.oRequestAnimationFrame ||
     window.msRequestAnimationFrame ||
     function (callback) {
-      return window.setTimeout(callback, 1000 / FRAME_RATE);
+      return window.setTimeout(callback, 1000 / window.FRAME_RATE);
     };
 })();
 

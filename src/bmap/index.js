@@ -67,10 +67,15 @@ class BaiduWind extends global.BMap.Overlay {
     const _ne = this._map.getBounds().getNorthEast();
     const _sw = this._map.getBounds().getSouthWest();
     return [
-      [[0, 0], [size.width, size.height]],
+      [
+        [0, 0], [size.width, size.height]
+      ],
       size.width,
       size.height,
-      [[_ne.lng, _ne.lat], [_sw.lng, _sw.lat]]
+      [
+        // [_ne.lng, _ne.lat], [_sw.lng, _sw.lat]
+        [_sw.lng, _sw.lat], [_ne.lng, _ne.lat] // [xmin, ymin, xmax, ymax]: 西南 和 东北
+      ]
     ]
   }
 
