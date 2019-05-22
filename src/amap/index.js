@@ -4,6 +4,16 @@ import { createCanvas, getDirection, getSpeed, getExtent } from '../helper';
 const global = typeof window === 'undefined' ? {} : window;
 const AMap = global.AMap || {};
 
+const defaultConfig = {
+  minVelocity: 0, // 粒子强度最小的速度 (m/s)
+  maxVelocity: 10, // 粒子强度最大的速度 (m/s)
+  velocityScale: 0.05, // 风速的比例
+  particleAge: 90, // 重绘之前生成的离子数量的最大帧数
+  lineWidth: 1, // 绘制粒子的线宽
+  particleMultiplier: 1 / 300, // 离子数量
+  colorScale: undefined,
+};
+
 class AMapWind {
   constructor (data, options = {}) {
     this.options = options;
@@ -208,10 +218,14 @@ class AMapWind {
     const _ne = this._getBounds().getNorthEast();
     const _sw = this._getBounds().getSouthWest();
     return [
-      [[0, 0], [width, height]],
+      [
+        [0, 0], [width, height]
+      ],
       width,
       height,
-      [[_ne.lng, _ne.lat], [_sw.lng, _sw.lat]]
+      [
+        [_sw.lng, _sw.lat], [_ne.lng, _ne.lat] // [xmin, ymin, xmax, ymax]: 西南 和 东北
+      ]
     ]
   }
 
@@ -257,6 +271,44 @@ class AMapWind {
    */
   clearWind () {
     if (this._windy) this._windy.stop();
+  }
+
+  updateParams (params) {
+    this.options = Object.assign(this.options, params);
+    if (this._windy) {
+      const {
+        minVelocity, // 粒子强度最小的速度 (m/s)
+        maxVelocity, // 粒子强度最大的速度 (m/s)
+        velocityScale, // 风速的比例
+        particleAge, // 重绘之前生成的离子数量的最大帧数
+        lineWidth, // 绘制粒子的线宽
+        particleMultiplier, // 离子数量
+        colorScale
+      } = this.options;
+      console.log(this._windy);
+    }
+    return this;
+  }
+
+  getParams () {
+    const {
+      minVelocity,
+      maxVelocity,
+      velocityScale,
+      particleAge,
+      lineWidth,
+      particleMultiplier,
+      colorScale
+    } = this.options;
+    return {
+      minVelocity,
+      maxVelocity,
+      velocityScale,
+      particleAge,
+      lineWidth,
+      particleMultiplier,
+      colorScale
+    };
   }
 }
 

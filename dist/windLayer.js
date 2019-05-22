@@ -1,7 +1,7 @@
 /*!
  * author: FDD <smileFDD@gmail.com> 
  * wind-layer v0.0.7
- * build-time: 2019-3-21 10:59
+ * build-time: 2019-5-22 22:33
  * LICENSE: MIT
  * (c) 2017-2019 https://sakitam-fdd.github.io/wind-layer
  */
@@ -34,8 +34,8 @@
     var PARTICLE_LINE_WIDTH = params.lineWidth || 1;
     var PARTICLE_MULTIPLIER = params.particleMultiplier || 1 / 300;
     var PARTICLE_REDUCTION = Math.pow(window.devicePixelRatio, 1 / 3) || 1.6;
-    var FRAME_RATE = params.frameRate || 15,
-        FRAME_TIME = 1000 / FRAME_RATE;
+    var FRAME_RATE = params.frameRate || 15;
+    window.FRAME_TIME = 1000 / FRAME_RATE;
     var defaulColorScale = ["rgb(36,104, 180)", "rgb(60,157, 194)", "rgb(128,205,193 )", "rgb(151,218,168 )", "rgb(198,231,181)", "rgb(238,247,217)", "rgb(255,238,159)", "rgb(252,217,125)", "rgb(255,182,100)", "rgb(252,150,75)", "rgb(250,112,52)", "rgb(245,64,32)", "rgb(237,45,28)", "rgb(220,24,32)", "rgb(180,0,35)"];
     var colorScale = params.colorScale || defaulColorScale;
     var NULL_WIND_VECTOR = [NaN, NaN, null];
@@ -498,7 +498,7 @@
 
   window.requestAnimationFrame = function () {
     return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function (callback) {
-      return window.setTimeout(callback, 1000 / FRAME_RATE);
+      return window.setTimeout(callback, 1000 / window.FRAME_RATE);
     };
   }();
 
@@ -953,7 +953,7 @@
 
       var _sw = this._getBounds().getSouthWest();
 
-      return [[[0, 0], [width, height]], width, height, [[_ne.lng, _ne.lat], [_sw.lng, _sw.lat]]];
+      return [[[0, 0], [width, height]], width, height, [[_sw.lng, _sw.lat], [_ne.lng, _ne.lat]]];
     };
 
     _proto.removeLayer = function removeLayer() {
@@ -984,6 +984,44 @@
 
     _proto.clearWind = function clearWind() {
       if (this._windy) this._windy.stop();
+    };
+
+    _proto.updateParams = function updateParams(params) {
+      this.options = Object.assign(this.options, params);
+
+      if (this._windy) {
+        var _this$options = this.options,
+            minVelocity = _this$options.minVelocity,
+            maxVelocity = _this$options.maxVelocity,
+            velocityScale = _this$options.velocityScale,
+            particleAge = _this$options.particleAge,
+            lineWidth = _this$options.lineWidth,
+            particleMultiplier = _this$options.particleMultiplier,
+            colorScale = _this$options.colorScale;
+        console.log(this._windy);
+      }
+
+      return this;
+    };
+
+    _proto.getParams = function getParams() {
+      var _this$options2 = this.options,
+          minVelocity = _this$options2.minVelocity,
+          maxVelocity = _this$options2.maxVelocity,
+          velocityScale = _this$options2.velocityScale,
+          particleAge = _this$options2.particleAge,
+          lineWidth = _this$options2.lineWidth,
+          particleMultiplier = _this$options2.particleMultiplier,
+          colorScale = _this$options2.colorScale;
+      return {
+        minVelocity: minVelocity,
+        maxVelocity: maxVelocity,
+        velocityScale: velocityScale,
+        particleAge: particleAge,
+        lineWidth: lineWidth,
+        particleMultiplier: particleMultiplier,
+        colorScale: colorScale
+      };
     };
 
     return AMapWind;
@@ -1042,7 +1080,7 @@
 
       var _sw = this._map.getBounds().getSouthWest();
 
-      return [[[0, 0], [size.width, size.height]], size.width, size.height, [[_ne.lng, _ne.lat], [_sw.lng, _sw.lat]]];
+      return [[[0, 0], [size.width, size.height]], size.width, size.height, [[_sw.lng, _sw.lat], [_ne.lng, _ne.lat]]];
     };
 
     _proto.appendTo = function appendTo(map) {
@@ -1169,3 +1207,4 @@
   return index;
 
 })));
+//# sourceMappingURL=windLayer.js.map
