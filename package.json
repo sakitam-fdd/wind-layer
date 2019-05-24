@@ -39,6 +39,9 @@
     "start": "node server/bin/www",
     "prd:server": "pm2 start server/bin/www"
   },
+  "peerDependencies": {
+    "ol": "^5.0.2"
+  },
   "dependencies": {
     "lodash": "^4.17.4",
     "moment": "^2.20.1"

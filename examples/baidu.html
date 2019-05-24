@@ -14,7 +14,7 @@
 <div id="container"></div>
 <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
 <script src="../node_modules/axios/dist/axios.js"></script>
-<script src="../dist/windLayer.js"></script>
+<script src="../dist/BMapWind.js"></script>
 <script type="text/javascript">
   var map = new BMap.Map("container");
   map.centerAndZoom(new BMap.Point(116.3964,39.9093), 10);
@@ -162,9 +162,9 @@
   axios.get('./out.json').then(function (res) {
   // axios.get(realtime ? '../server/public/parseData/2018090706.json' : './out.json').then(function (res) {
     if (res.data) {
-      var baiduWindy = new windLayer.BMapWind(res.data, {
+      var baiduWindy = new BMapWind(res.data, {
         projection: 'EPSG:4326'
-      })
+      });
       map.addOverlay(baiduWindy);
     }
   });

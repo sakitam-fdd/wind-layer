@@ -4,16 +4,6 @@ import { createCanvas, getDirection, getSpeed, getExtent } from '../helper';
 const global = typeof window === 'undefined' ? {} : window;
 const AMap = global.AMap || {};
 
-const defaultConfig = {
-  minVelocity: 0, // 粒子强度最小的速度 (m/s)
-  maxVelocity: 10, // 粒子强度最大的速度 (m/s)
-  velocityScale: 0.05, // 风速的比例
-  particleAge: 90, // 重绘之前生成的离子数量的最大帧数
-  lineWidth: 1, // 绘制粒子的线宽
-  particleMultiplier: 1 / 300, // 离子数量
-  colorScale: undefined,
-};
-
 class AMapWind {
   constructor (data, options = {}) {
     this.options = options;
@@ -285,30 +275,27 @@ class AMapWind {
         particleMultiplier, // 离子数量
         colorScale
       } = this.options;
-      console.log(this._windy);
+      if (this._windy) {
+        this._windy.stop();
+        this._windy.updateParams({
+          minVelocity,
+          maxVelocity,
+          velocityScale,
+          particleAge,
+          lineWidth,
+          particleMultiplier,
+          colorScale
+        });
+        if (this.map && this.canvas && this.data) {
+          this.render();
+        }
+      }
     }
     return this;
   }
 
   getParams () {
-    const {
-      minVelocity,
-      maxVelocity,
-      velocityScale,
-      particleAge,
-      lineWidth,
-      particleMultiplier,
-      colorScale
-    } = this.options;
-    return {
-      minVelocity,
-      maxVelocity,
-      velocityScale,
-      particleAge,
-      lineWidth,
-      particleMultiplier,
-      colorScale
-    };
+    return this._windy && this._windy.getParams();
   }
 }
 
