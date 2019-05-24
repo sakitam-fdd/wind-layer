@@ -5,6 +5,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.css">
   <script src="http://webapi.amap.com/maps?v=1.4.2&key=6cb85da518029607d421917b7ddeb94a"></script>
   <style>
     html, body, #map {
@@ -17,7 +18,8 @@
 <body>
 <div id="map"></div>
 <script src="../node_modules/axios/dist/axios.js"></script>
-<script src="../dist/windLayer.js"></script>
+<script src="../dist/AMapWind.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
 <script>
 
   var map = new AMap.Map('map', {
@@ -30,10 +32,43 @@
   var realtime = false;
   axios.get(realtime ? '../server/public/parseData/2018090706.json' : './out.json').then(function (res) {
     if (res.data) {
-      var layer = new windLayer.AMapWind(res.data, {
+      var config = {
+        minVelocity: 0, // 粒子强度最小的速度 (m/s)
+        maxVelocity: 10, // 粒子强度最大的速度 (m/s)
+        velocityScale: 0.05, // 风速的比例
+        particleAge: 90, // 重绘之前生成的离子数量的最大帧数
+        lineWidth: 1, // 绘制粒子的线宽
+        particleMultiplier: 0.01, // 离子数量
+      };
+
+      var layer = new AMapWind(res.data, {
         projection: 'EPSG:4326',
         zIndex: 20
-      }).appendTo(map)
+      });
+
+      console.log(layer);
+
+      const gui = new dat.GUI();
+      gui.add(config, 'minVelocity', 0, 10).onChange(function (value) {
+        layer.updateParams(config);
+      });
+      gui.add(config, 'maxVelocity', 1, 15).onChange(function (value) {
+        layer.updateParams(config);
+      });
+      gui.add(config, 'velocityScale', 0.05, 0.1).step(0.01).onChange(function (value) {
+        layer.updateParams(config);
+      });
+      gui.add(config, 'particleAge', 0, 180).onChange(function (value) {
+        layer.updateParams(config);
+      });
+      gui.add(config, 'lineWidth', 1, 10).onChange(function (value) {
+        layer.updateParams(config);
+      });
+      gui.add(config, 'particleMultiplier', 0.01, 0.05).step(0.01).onFinishChange(function (value) {
+        layer.updateParams(config);
+      });
+
+      layer.appendTo(map);
     }
   });
 
