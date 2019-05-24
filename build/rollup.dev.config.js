@@ -1,34 +1,57 @@
-const { banner } = require('../../../scripts/utils');
-const baseConfig = require('../../../rollup/rollup-base');
-
-const _package = require('../package.json');
-const bannerString = banner(_package);
+const serve = require('rollup-plugin-serve');
+const {
+  resolve, banner, lowerFirstChart,
+} = require('./utils');
+const baseConfig = require('./rollup.base.config');
+const ol = require('./ol/globals');
 
 const common = {
-  banner: bannerString,
-  extend: true,
+  banner: banner,
+  extend: false,
   globals: {
-    'maptalks': 'maptalks'
+    ...ol,
   },
 };
 
-module.exports = Object.assign(baseConfig, {
+const namespace = process.env.file;
+const file = namespace === 'windlayer' ? lowerFirstChart(namespace) : namespace;
+
+const config = Object.assign(baseConfig, {
   output: [
     {
-      file: _package.main,
+      file: resolve(`dist/${file}.js`),
       format: 'umd',
-      name: _package.namespace,
+      name: namespace,
       ...common,
     },
     {
-      file: _package.commonjs,
+      file: `dist/${file}.common.js`,
       format: 'cjs',
       ...common,
     },
     {
-      file: _package.module,
+      file: `dist/${file}.esm.js`,
       format: 'es',
       ...common,
     }
   ]
 });
+
+if (process.env.NODE_ENV === 'development') {
+  config.plugins.push(// Default options
+    serve({
+      open: true,
+      contentBase: [
+        'examples',
+        'dist',
+      ],
+      host: '127.0.0.1',
+      port: 2334,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      }
+    })
+  );
+}
+
+module.exports = config;
