@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map - Display a map</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.css">
+<style type="text/css">
+  html, body {
+    margin: 0px;
+    height: 100%;
+    width: 100%
+  }
+
+  .container {
+    width: 100%;
+    height: 100%
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm//axios/dist/axios.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
+<body>
+
+<div id="map" class="container"></div>
+<script src="https://cdn.jsdelivr.net/npm/wind-layer/dist/MaptalksWindy.js"></script>
+<script>
+  var map = new maptalks.Map('map', {
+    center: [113.53450137499999, 34.44104525],
+    zoom: 5,
+    baseLayer: new maptalks.TileLayer('base', {
+      urlTemplate: 'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+      subdomains: ['a', 'b', 'c', 'd'],
+      attribution: '&copy; <a href="http://osm.org">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/">CARTO</a>'
+    })
+  });
+
+  var realtime = false;
+  axios.get(realtime ? '../server/public/parseData/2018090706.json' : './out.json').then(function (res) {
+    if (res.data) {
+      var config = {
+        minVelocity: 0, // 粒子强度最小的速度 (m/s)
+        maxVelocity: 10, // 粒子强度最大的速度 (m/s)
+        velocityScale: 0.05, // 风速的比例
+        particleAge: 90, // 重绘之前生成的离子数量的最大帧数
+        lineWidth: 1, // 绘制粒子的线宽
+        particleMultiplier: 0.005, // 离子数量
+      };
+
+      var layer = new MaptalksWindy('windy', res.data, {
+        colorScale: [
+          "rgb(36,104, 180)",
+          "rgb(60,157, 194)",
+          "rgb(128,205,193 )",
+          "rgb(151,218,168 )",
+          "rgb(198,231,181)",
+          "rgb(238,247,217)",
+          "rgb(255,238,159)",
+          "rgb(252,217,125)",
+          "rgb(255,182,100)",
+          "rgb(252,150,75)",
+          "rgb(250,112,52)",
+          "rgb(245,64,32)",
+          "rgb(237,45,28)",
+          "rgb(220,24,32)",
+          "rgb(180,0,35)"
+        ],
+        minVelocity: 0,
+        maxVelocity: 10,
+        velocityScale: 0.005,
+        particleAge: 90,
+        lineWidth: 1,
+        particleMultiplier: 1 / 300,
+      });
+
+      const gui = new dat.GUI();
+      gui.add(config, 'minVelocity', 0, 10).onChange(function (value) {
+        layer.updateParams(config);
+      });
+      gui.add(config, 'maxVelocity', 1, 15).onChange(function (value) {
+        layer.updateParams(config);
+      });
+      gui.add(config, 'velocityScale', 0.05, 0.1).step(0.01).onChange(function (value) {
+        layer.updateParams(config);
+      });
+      gui.add(config, 'particleAge', 0, 180).onChange(function (value) {
+        layer.updateParams(config);
+      });
+      gui.add(config, 'lineWidth', 1, 10).onChange(function (value) {
+        layer.updateParams(config);
+      });
+      gui.add(config, 'particleMultiplier', 0.01, 0.05).step(0.01).onFinishChange(function (value) {
+        layer.updateParams(config);
+      });
+
+      map.addLayer(layer);
+    }
+  });
+
+</script>
+</body>
+</html>
