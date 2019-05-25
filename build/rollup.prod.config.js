@@ -11,6 +11,7 @@ const common = {
   extend: false,
   globals: {
     ...ol,
+    'maptalks': 'maptalks',
   },
 };
 

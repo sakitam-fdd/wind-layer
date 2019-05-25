@@ -6,10 +6,10 @@
  * (c) 2017-2019 https://sakitam-fdd.github.io/wind-layer
  */
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global = global || self, global.OlWind = factory());
-}(this, function () { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('maptalks')) :
+  typeof define === 'function' && define.amd ? define(['maptalks'], factory) :
+  (global = global || self, global.MaptalksWindy = factory(global.maptalks));
+}(this, function (maptalks) { 'use strict';
 
   /* eslint-disable */
 
@@ -588,361 +588,161 @@
     };
   }
 
-  /**
-   * create canvas
-   * @param width
-   * @param height
-   * @param Canvas
-   * @returns {HTMLCanvasElement}
-   */
-  var createCanvas = function (width, height, Canvas) {
-    if (typeof document !== 'undefined') {
-      var canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      return canvas
-    } else {
-      // create a new canvas instance in node.js
-      // the canvas class needs to have a default constructor without any parameter
-      return new Canvas(width, height);
-    }
+  var defaultConfig = {
+    minVelocity: 0, // 粒子强度最小的速度 (m/s)
+    maxVelocity: 10, // 粒子强度最大的速度 (m/s)
+    velocityScale: 0.05, // 风速的比例
+    particleAge: 90, // 重绘之前生成的离子数量的最大帧数
+    lineWidth: 1, // 绘制粒子的线宽
+    particleMultiplier: 1 / 300, // 离子数量
+    colorScale: undefined,
+    animate: true
   };
 
-  var getDirection = function (uMs, vMs, angleConvention) {
-    // Default angle convention is CW
-    if (angleConvention.endsWith('CCW')) {
-      // vMs comes out upside-down..
-      vMs = vMs > 0 ? vMs = -vMs : Math.abs(vMs);
-    }
-    var velocityAbs = Math.sqrt(Math.pow(uMs, 2) + Math.pow(vMs, 2));
-    var velocityDir = Math.atan2(uMs / velocityAbs, vMs / velocityAbs);
-    var velocityDirToDegrees = velocityDir * 180 / Math.PI + 180;
-    if (angleConvention === 'bearingCW' || angleConvention === 'meteoCCW') {
-      velocityDirToDegrees += 180;
-      if (velocityDirToDegrees >= 360) { velocityDirToDegrees -= 360; }
-    }
-    return velocityDirToDegrees;
-  };
-
-  var getSpeed = function (uMs, vMs, unit) {
-    var velocityAbs = Math.sqrt(Math.pow(uMs, 2) + Math.pow(vMs, 2));
-    // Default is m/s
-    if (unit === 'k/h') {
-      return meterSec2kilometerHour(velocityAbs);
-    } else if (unit === 'kt') {
-      return meterSec2Knots(velocityAbs);
-    } else {
-      return velocityAbs;
-    }
-  };
-
-  var meterSec2Knots = function (meters) {
-    return meters / 0.514
-  };
-
-  var meterSec2kilometerHour = function (meters) {
-    return meters * 3.6
-  };
-
-  var global = typeof window === 'undefined' ? {} : window;
-  var ol = global.ol || {};
-
-  if (!ol.layer) { ol.layer = {}; }
-  if (!ol.layer.Image) { ol.layer.Image = /*@__PURE__*/(function () {
-      function Image () {}
-
-      return Image;
-    }()); }
-
-  var OlWind = /*@__PURE__*/(function (superclass) {
-    function OlWind (data, options) {
-      if ( options === void 0 ) options = {};
-
-      superclass.call(this, options);
-
-      /**
-       * 矢量图层
-       * @type {null}
-       */
-      this._canvas = null;
-
-      /**
-       * windy 数据
-       */
-      this.data = data;
-
-      /**
-       * windy layer
-       * @type {null}
-       */
-      this.$Windy = null;
-
-      /**
-       * is clear
-       * @type {boolean}
-       */
-      this.isClear = false;
-
-      /**
-       * options
-       * @type {{}}
-       */
-      this.options = options;
-      this.setSource(new ol.source.ImageCanvas({
-        logo: options.logo,
-        state: options.state,
-        attributions: options.attributions,
-        resolutions: options.resolutions,
-        canvasFunction: this.canvasFunction.bind(this),
-        // projection: (options.hasOwnProperty('projection') ? options.projection : 'EPSG:3857'),
-        ratio: (options.hasOwnProperty('ratio') ? options.ratio : 1)
-      }));
-      this.on('precompose', this.redraw, this);
+  var Renderer = /*@__PURE__*/(function (superclass) {
+    function Renderer () {
+      superclass.apply(this, arguments);
     }
 
-    if ( superclass ) OlWind.__proto__ = superclass;
-    OlWind.prototype = Object.create( superclass && superclass.prototype );
-    OlWind.prototype.constructor = OlWind;
+    if ( superclass ) Renderer.__proto__ = superclass;
+    Renderer.prototype = Object.create( superclass && superclass.prototype );
+    Renderer.prototype.constructor = Renderer;
+
+    Renderer.prototype._initialize = function _initialize () {
+      var this$1 = this;
+
+      var map = this.getMap();
+      var params = this.layer.getParams();
+      var sr = this.layer.getSpatialReference();
+      if (!sr) {
+        sr = map.getSpatialReference();
+      }
+      var proj = sr.getProjection();
+      this._windy = new Windy(Object.assign({}, {canvas: this.canvas,
+        data: this.layer.getData(),
+        projection: proj.code || 'EPSG:4326',
+        onDraw: function () {
+          this$1.setCanvasUpdated();
+        }},
+        params));
+    };
+
+    Renderer.prototype.draw = function draw () {
+      var ref;
+
+      var extent = this._getWindExtents();
+      this.prepareCanvas();
+      if (!this._windy) {
+        this._initialize();
+      }
+      this._windy && (ref = this._windy).start.apply(ref, extent);
+    };
+
+    Renderer.prototype._redraw = function _redraw () {
+      this.prepareRender();
+      this.draw();
+    };
+
+    Renderer.prototype.drawOnInteracting = function drawOnInteracting () {
+      // nothing to draw when interacting
+    };
+
+    Renderer.prototype._getWindExtents = function _getWindExtents () {
+      var map = this.getMap();
+      if (!map) { return null; }
+      var extent = map.getExtent();
+      var xmin = extent.xmin;
+      var xmax = extent.xmax > 0 ? extent.xmax : 360 + extent.xmax;
+      var ymin = extent.ymin;
+      var ymax = extent.ymax;
+      return [
+        [[0, 0], [map.width, map.height]],
+        map.width,
+        map.height,
+        [[
+          xmin,
+          ymin
+        ], [
+          xmax,
+          ymax
+        ]]
+      ];
+    };
+
+    Renderer.prototype._updateParams = function _updateParams () {
+      if (this._windy) {
+        var params = this.layer.getParams();
+        this._windy.updateParams(params);
+        this.draw();
+      }
+    };
 
     /**
-     * get layer data
+     * tell layer redraw
      * @returns {*}
      */
-    OlWind.prototype.getData = function getData () {
-      return this.data;
-    };
-
-    /**
-     * set layer data
-     * @param data
-     * @returns {OlWind}
-     */
-    OlWind.prototype.setData = function setData (data) {
-      var _map = this.getMap();
-      if (!_map) { return this; }
-      this.data = data;
-      this.isClear = false;
-      if (!this.$Windy && this._canvas) {
-        this.render(this._canvas);
-        _map.renderSync();
-      } else if (this.$Windy && this._canvas) {
-        if (this._cloneLayer) {
-          _map.addLayer(this._cloneLayer);
-          delete this._cloneLayer;
-        }
-        var extent = this._getExtent();
-        this.$Windy.update(this.getData(), extent[0], extent[1], extent[2], extent[3]);
-      } else {
-        console.warn('please create new instance');
-      }
-      return this;
-    };
-
-    /**
-     * render windy layer
-     * @returns {OlWind}
-     */
-    OlWind.prototype.render = function render (canvas) {
-      var extent = this._getExtent();
-      if (this.isClear || !this.getData() || !extent) { return this; }
-      if (canvas && !this.$Windy) {
-        var ref = this.options;
-        var minVelocity = ref.minVelocity;
-        var maxVelocity = ref.maxVelocity;
-        var velocityScale = ref.velocityScale;
-        var particleAge = ref.particleAge;
-        var lineWidth = ref.lineWidth;
-        var particleMultiplier = ref.particleMultiplier;
-        var colorScale = ref.colorScale;
-        this.$Windy = new Windy({
-          canvas: canvas,
-          projection: this._getProjectionCode(),
-          data: this.getData(),
-          minVelocity: minVelocity,
-          maxVelocity: maxVelocity,
-          velocityScale: velocityScale,
-          particleAge: particleAge,
-          lineWidth: lineWidth,
-          particleMultiplier: particleMultiplier,
-          colorScale: colorScale
-        });
-        this.$Windy.start(extent[0], extent[1], extent[2], extent[3]);
-      } else if (canvas && this.$Windy) {
-        var extent$1 = this._getExtent();
-        this.$Windy.start(extent$1[0], extent$1[1], extent$1[2], extent$1[3]);
-      }
-      return this
-    };
-
-    /**
-     * re-draw
-     */
-    OlWind.prototype.redraw = function redraw () {
-      if (this.isClear) { return; }
-      var _extent = this.options.extent || this._getMapExtent();
-      this.setExtent(_extent);
-    };
-
-    /**
-     * canvas constructor
-     * @param extent
-     * @param resolution
-     * @param pixelRatio
-     * @param size
-     * @param projection
-     * @returns {*}
-     */
-    OlWind.prototype.canvasFunction = function canvasFunction (extent, resolution, pixelRatio, size, projection) {
-      if (!this._canvas) {
-        this._canvas = createCanvas(size[0], size[1]);
-      } else {
-        this._canvas.width = size[0];
-        this._canvas.height = size[1];
-      }
-      if (resolution <= this.get('maxResolution')) {
-        this.render(this._canvas);
-      }
-      return this._canvas;
-    };
-
-    /**
-     * bounds, width, height, extent
-     * @returns {*}
-     * @private
-     */
-    OlWind.prototype._getExtent = function _getExtent () {
-      var size = this._getMapSize();
-      var _extent = this._getMapExtent();
-      if (size && _extent) {
-        var _projection = this._getProjectionCode();
-        var extent = ol.proj.transformExtent(_extent, _projection, 'EPSG:4326');
-        return [[[0, 0], [size[0], size[1]]], size[0], size[1], [[extent[0], extent[1]], [extent[2], extent[3]]]];
-      } else {
+    Renderer.prototype.needToRedraw = function needToRedraw () {
+      var map = this.getMap();
+      if (map.isZooming() && !map.getPitch()) {
         return false;
       }
+      return superclass.prototype.needToRedraw.call(this);
     };
 
-    /**
-     * get map current extent
-     * @returns {ol.View|*|Array<number>}
-     * @private
-     */
-    OlWind.prototype._getMapExtent = function _getMapExtent () {
-      if (!this.getMap()) { return; }
-      var size = this._getMapSize();
-      var _view = this.getMap().getView();
-      return _view && _view.calculateExtent(size);
+    Renderer.prototype.onZoomStart = function onZoomStart () {
+      // this._windy && this._windy.stop();
+      // eslint-disable-next-line prefer-rest-params
+      superclass.prototype.onZoomStart.apply(this, arguments);
     };
 
-    /**
-     * get size
-     * @returns {ol.Size|*}
-     * @private
-     */
-    OlWind.prototype._getMapSize = function _getMapSize () {
-      if (!this.getMap()) { return; }
-      return this.getMap().getSize();
+    Renderer.prototype.onZoomEnd = function onZoomEnd () {
+      // eslint-disable-next-line prefer-rest-params
+      superclass.prototype.onZoomEnd.apply(this, arguments);
     };
 
-    /**
-     * append layer to map
-     * @param map
-     */
-    OlWind.prototype.appendTo = function appendTo (map) {
-      if (map && map instanceof ol.Map) {
-        this.set('originMap', map);
-        this.getSource().projection_ = this._getProjectionCode();
-        map.addLayer(this);
-      } else {
-        throw new Error('not map object');
+    Renderer.prototype.onDragRotateStart = function onDragRotateStart () {
+      // this._windy && this._windy.stop();
+    };
+
+    Renderer.prototype.onMoveStart = function onMoveStart () {
+      // this._windy && this._windy.stop();
+    };
+
+    Renderer.prototype.remove = function remove () {
+      if (this._windy) {
+        this._windy.stop();
+        delete this._windy;
       }
+      superclass.prototype.remove.call(this);
     };
 
-    /**
-     * get mouse point data
-     * @param coordinates
-     * @returns {null|{speed: (*|number), direction}}
-     */
-    OlWind.prototype.getPointData = function getPointData (coordinates) {
-      if (!this.$Windy) { return null; }
-      var gridValue = this.$Windy.interpolatePoint(coordinates[0], coordinates[1]);
-      if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
-        return {
-          direction: getDirection(gridValue[0], gridValue[1], this.options.angleConvention || 'bearingCCW'),
-          speed: getSpeed(gridValue[0], gridValue[1], this.options.speedUnit)
-        }
-      }
+    return Renderer;
+  }(maptalks.renderer.CanvasRenderer));
+
+  var MaptalksWindy = /*@__PURE__*/(function (Layer) {
+    function MaptalksWindy (id, data, options) {
+      Layer.call(this, id, Object.assign(defaultConfig, options));
+      this._data = data;
+    }
+
+    if ( Layer ) MaptalksWindy.__proto__ = Layer;
+    MaptalksWindy.prototype = Object.create( Layer && Layer.prototype );
+    MaptalksWindy.prototype.constructor = MaptalksWindy;
+
+    MaptalksWindy.prototype.getData = function getData () {
+      return this._data;
     };
 
-    /**
-     * clearWind method will retain the instance
-     * @private
-     */
-    OlWind.prototype.clearWind = function clearWind () {
-      var _map = this.getMap();
-      if (!_map) { return; }
-      if (this.$Windy) { this.$Windy.stop(); }
-      this.isClear = true;
-      this._cloneLayer = this;
-      _map.removeLayer(this);
-      this.changed();
-      this.getMap().renderSync();
+    MaptalksWindy.prototype.setData = function setData (data) {
+      this._data = data;
+      this.redraw();
+      return this;
     };
 
-    /**
-     * remove layer this instance will be destroyed after remove
-     */
-    OlWind.prototype.removeLayer = function removeLayer () {
-      var _map = this.getMap();
-      if (!_map) { return; }
-      if (this.$Windy) { this.$Windy.stop(); }
-      this.un('precompose', this.redraw, this);
-      _map.removeLayer(this);
-      delete this._canvas;
-      delete this.$Windy;
-      delete this._cloneLayer;
-    };
-
-    /**
-     * set map
-     * @param map
-     */
-    OlWind.prototype.setMap = function setMap (map) {
-      this.set('originMap', map);
-      // ol.layer.Image.prototype.setMap.call(this, map)
-    };
-
-    /**
-     * get map
-     */
-    OlWind.prototype.getMap = function getMap () {
-      return this.get('originMap');
-    };
-
-    OlWind.prototype._getProjectionCode = function _getProjectionCode () {
-      var code = '';
-      var map = this.getMap();
-      if (map) {
-        code =
-          map.getView() &&
-          map
-            .getView()
-            .getProjection()
-            .getCode();
-      } else {
-        code = 'EPSG:3857';
-      }
-      return code;
-    };
-
-    /**
-     * update windy config
-     * @param params
-     * @returns {OlWind}
-     */
-    OlWind.prototype.updateParams = function updateParams (params) {
+    MaptalksWindy.prototype.updateParams = function updateParams (params) {
+      var renderer = this._getRenderer();
       this.options = Object.assign(this.options, params);
-      if (this.$Windy) {
+      if (renderer) {
         var ref = this.options;
         var minVelocity = ref.minVelocity;
         var maxVelocity = ref.maxVelocity;
@@ -951,36 +751,92 @@
         var lineWidth = ref.lineWidth;
         var particleMultiplier = ref.particleMultiplier;
         var colorScale = ref.colorScale;
-        if (this.$Windy) {
-          this.$Windy.updateParams({
-            minVelocity: minVelocity,
-            maxVelocity: maxVelocity,
-            velocityScale: velocityScale,
-            particleAge: particleAge,
-            lineWidth: lineWidth,
-            particleMultiplier: particleMultiplier,
-            colorScale: colorScale
-          });
-          if (this.getMap() && this._canvas && this.data) {
-            this.render(this._canvas);
-          }
-        }
+        renderer._updateParams({
+          minVelocity: minVelocity, // 粒子强度最小的速度 (m/s)
+          maxVelocity: maxVelocity, // 粒子强度最大的速度 (m/s)
+          velocityScale: velocityScale, // 风速的比例
+          particleAge: particleAge, // 重绘之前生成的离子数量的最大帧数
+          lineWidth: lineWidth, // 绘制粒子的线宽
+          particleMultiplier: particleMultiplier, // 离子数量
+          colorScale: colorScale
+        });
       }
       return this;
     };
 
-    /**
-     * get windy config
-     * @returns {null|*|Windy.params|{velocityScale, minVelocity, maxVelocity, colorScale, particleAge, lineWidth, particleMultiplier}}
-     */
-    OlWind.prototype.getParams = function getParams () {
-      return this.$Windy && this.$Windy.getParams();
+    MaptalksWindy.prototype.getParams = function getParams () {
+      var ref = this.options;
+      var minVelocity = ref.minVelocity;
+      var maxVelocity = ref.maxVelocity;
+      var velocityScale = ref.velocityScale;
+      var particleAge = ref.particleAge;
+      var lineWidth = ref.lineWidth;
+      var particleMultiplier = ref.particleMultiplier;
+      var colorScale = ref.colorScale;
+      return {
+        minVelocity: minVelocity,
+        maxVelocity: maxVelocity,
+        velocityScale: velocityScale,
+        particleAge: particleAge,
+        lineWidth: lineWidth,
+        particleMultiplier: particleMultiplier,
+        colorScale: colorScale
+      };
     };
 
-    return OlWind;
-  }(ol.layer.Image));
+    MaptalksWindy.prototype.onResize = function onResize () {};
 
-  return OlWind;
+    MaptalksWindy.prototype.onZoomStart = function onZoomStart () {};
+
+    MaptalksWindy.prototype.onZooming = function onZooming () {};
+
+    MaptalksWindy.prototype.onZoomEnd = function onZoomEnd () {};
+
+    MaptalksWindy.prototype.onMoveStart = function onMoveStart () {};
+
+    MaptalksWindy.prototype.onMoving = function onMoving () {};
+
+    MaptalksWindy.prototype.onMoveEnd = function onMoveEnd () {};
+
+    MaptalksWindy.prototype.redraw = function redraw () {
+      var renderer = this._getRenderer();
+      if (renderer) {
+        renderer._redraw();
+      }
+      return this;
+    };
+
+    MaptalksWindy.prototype.toJSON = function toJSON () {
+      return {
+        type: 'MaptalksWindy',
+        id: this.getId(),
+        options: this.config(),
+        data: this.getData()
+      };
+    };
+
+    MaptalksWindy.prototype.getSpatialReference = function getSpatialReference () {
+      var map = this.getMap();
+      if (map && (!this.options.spatialReference || maptalks.SpatialReference.equals(this.options.spatialReference, map.options.spatialReference))) {
+        return map.getSpatialReference();
+      }
+      this._sr = this._sr || new maptalks.SpatialReference(this.options.spatialReference);
+      return this._sr;
+    };
+
+    MaptalksWindy.fromJSON = function fromJSON (json) {
+      if (!json || json.type !== 'MaptalksWindy') { return null; }
+      // eslint-disable-next-line new-cap
+      var layer = new MaptalksWindy(json.id, json.data, json.options);
+      return layer;
+    };
+
+    return MaptalksWindy;
+  }(maptalks.Layer));
+
+  MaptalksWindy.registerRenderer('canvas', Renderer);
+
+  return MaptalksWindy;
 
 }));
-//# sourceMappingURL=OlWind.js.map
+//# sourceMappingURL=MaptalksWindy.js.map

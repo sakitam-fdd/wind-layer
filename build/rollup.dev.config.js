@@ -10,6 +10,7 @@ const common = {
   extend: false,
   globals: {
     ...ol,
+    'maptalks': 'maptalks',
   },
 };
 
@@ -37,21 +38,21 @@ const config = Object.assign(baseConfig, {
   ]
 });
 
-if (process.env.NODE_ENV === 'development') {
-  config.plugins.push(// Default options
-    serve({
-      open: true,
-      contentBase: [
-        'examples',
-        'dist',
-      ],
-      host: '127.0.0.1',
-      port: 2334,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      }
-    })
-  );
-}
+// if (process.env.NODE_ENV === 'development') {
+//   config.plugins.push(// Default options
+//     serve({
+//       open: true,
+//       contentBase: [
+//         'examples',
+//         'dist',
+//       ],
+//       host: '127.0.0.1',
+//       port: 2334,
+//       headers: {
+//         'Access-Control-Allow-Origin': '*',
+//       }
+//     })
+//   );
+// }
 
 module.exports = config;

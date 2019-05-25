@@ -1,34 +1,40 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>simple</title>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.css">
-  <script src="http://webapi.amap.com/maps?v=1.4.2&key=6cb85da518029607d421917b7ddeb94a"></script>
-  <style>
-    html, body, #map {
-      height: 100%;
-      padding: 0;
-      margin: 0;
-    }
-  </style>
-</head>
-<body>
-<div id="map"></div>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/wind-layer/dist/AMapWind.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
-<script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map - Display a map</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.css">
+<style type="text/css">
+  html, body {
+    margin: 0px;
+    height: 100%;
+    width: 100%
+  }
 
-  var map = new AMap.Map('map', {
-    viewMode: '3D',
-    resizeEnable: true,
-    zoom: 5,
+  .container {
+    width: 100%;
+    height: 100%
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm//axios/dist/axios.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
+<body>
+
+<div id="map" class="container"></div>
+<script src="../dist/MaptalksWindy.js"></script>
+<script>
+  var map = new maptalks.Map('map', {
     center: [113.53450137499999, 34.44104525],
-    mapStyle: 'amap://styles/dark'
+    zoom: 5,
+    baseLayer: new maptalks.TileLayer('base', {
+      urlTemplate: 'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+      subdomains: ['a', 'b', 'c', 'd'],
+      attribution: '&copy; <a href="http://osm.org">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/">CARTO</a>'
+    })
   });
+
   var realtime = false;
   axios.get(realtime ? '../server/public/parseData/2018090706.json' : './out.json').then(function (res) {
     if (res.data) {
@@ -38,12 +44,10 @@
         velocityScale: 0.05, // 风速的比例
         particleAge: 90, // 重绘之前生成的离子数量的最大帧数
         lineWidth: 1, // 绘制粒子的线宽
-        particleMultiplier: 0.01, // 离子数量
+        particleMultiplier: 0.005, // 离子数量
       };
 
-      var layer = new AMapWind(res.data, {
-        projection: 'EPSG:4326',
-        zIndex: 20,
+      var layer = new MaptalksWindy('windy', res.data, {
         colorScale: [
           "rgb(36,104, 180)",
           "rgb(60,157, 194)",
@@ -63,10 +67,10 @@
         ],
         minVelocity: 0,
         maxVelocity: 10,
-        velocityScale: 0.05,
+        velocityScale: 0.005,
         particleAge: 90,
         lineWidth: 1,
-        particleMultiplier: 0.01,
+        particleMultiplier: 1 / 300,
       });
 
       const gui = new dat.GUI();
@@ -89,7 +93,7 @@
         layer.updateParams(config);
       });
 
-      layer.appendTo(map);
+      map.addLayer(layer);
 
       setTimeout(() => {
         // layer.removeLayer();

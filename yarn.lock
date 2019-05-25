@@ -619,6 +619,14 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
+"@maptalks/feature-filter@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.npm.taobao.org/@maptalks/feature-filter/download/@maptalks/feature-filter-1.0.0.tgz#bfcc7f705e6de5c6c3d3802a3b5081272c877fc8"
+
+"@maptalks/function-type@^1.1.0":
+  version "1.1.1"
+  resolved "https://registry.npm.taobao.org/@maptalks/function-type/download/@maptalks/function-type-1.1.1.tgz#22d8abf762ac68e18a2e0929712753a083703de1"
+
 "@types/estree@0.0.39":
   version "0.0.39"
   resolved "http://registry.npm.taobao.org/@types/estree/download/@types/estree-0.0.39.tgz#e177e699ee1b8c22d23174caaa7422644389509f"
@@ -3498,6 +3506,15 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
+maptalks@^0.44.0:
+  version "0.44.0"
+  resolved "https://registry.npm.taobao.org/maptalks/download/maptalks-0.44.0.tgz#6e26774e92fa3c792e02cff74cfa13a8b02be2b0"
+  dependencies:
+    "@maptalks/feature-filter" "^1.0.0"
+    "@maptalks/function-type" "^1.1.0"
+    simplify-js "^1.2.1"
+    zousan "^2.3.3"
+
 marked@~0.3.6:
   version "0.3.19"
   resolved "https://registry.npm.taobao.org/marked/download/marked-0.3.19.tgz#5d47f709c4c9fc3c216b6d46127280f40b39d790"
@@ -4924,6 +4941,10 @@ signal-exit@^3.0.0, signal-exit@^3.0.2:
   version "3.0.2"
   resolved "http://registry.npm.taobao.org/signal-exit/download/signal-exit-3.0.2.tgz#b5fdc08f1287ea1178628e415e25132b73646c6d"
 
+simplify-js@^1.2.1:
+  version "1.2.3"
+  resolved "https://registry.npm.taobao.org/simplify-js/download/simplify-js-1.2.3.tgz#a3422c1b9884d60421345eb44d2b872662df27f5"
+
 slice-ansi@1.0.0:
   version "1.0.0"
   resolved "http://registry.npm.taobao.org/slice-ansi/download/slice-ansi-1.0.0.tgz#044f1a49d8842ff307aad6b505ed178bd950134d"
@@ -5771,3 +5792,7 @@ yargs@~3.5.4:
 yeast@0.1.2:
   version "0.1.2"
   resolved "https://registry.npm.taobao.org/yeast/download/yeast-0.1.2.tgz#008e06d8094320c372dbc2f8ed76a0ca6c8ac419"
+
+zousan@^2.3.3:
+  version "2.5.1"
+  resolved "https://registry.npm.taobao.org/zousan/download/zousan-2.5.1.tgz#514a8aad3cbba412fb59a4e0ebaffdd72e2dd4c6"

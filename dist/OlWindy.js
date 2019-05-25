@@ -6,10 +6,10 @@
  * (c) 2017-2019 https://sakitam-fdd.github.io/wind-layer
  */
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global = global || self, global.OlWind = factory());
-}(this, function () { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('ol'), require('ol/layer'), require('ol/source'), require('ol/proj')) :
+  typeof define === 'function' && define.amd ? define(['ol', 'ol/layer', 'ol/source', 'ol/proj'], factory) :
+  (global = global || self, global.OlWindy = factory(global.ol, global.ol.layer, global.ol.source, global.ol.proj));
+}(this, function (ol, layer, source, proj) { 'use strict';
 
   /* eslint-disable */
 
@@ -644,21 +644,11 @@
     return meters * 3.6
   };
 
-  var global = typeof window === 'undefined' ? {} : window;
-  var ol = global.ol || {};
-
-  if (!ol.layer) { ol.layer = {}; }
-  if (!ol.layer.Image) { ol.layer.Image = /*@__PURE__*/(function () {
-      function Image () {}
-
-      return Image;
-    }()); }
-
-  var OlWind = /*@__PURE__*/(function (superclass) {
-    function OlWind (data, options) {
+  var OlWindy = /*@__PURE__*/(function (ImageLayer) {
+    function OlWindy (data, options) {
       if ( options === void 0 ) options = {};
 
-      superclass.call(this, options);
+      ImageLayer.call(this, options);
 
       /**
        * 矢量图层
@@ -688,7 +678,7 @@
        * @type {{}}
        */
       this.options = options;
-      this.setSource(new ol.source.ImageCanvas({
+      this.setSource(new source.ImageCanvas({
         logo: options.logo,
         state: options.state,
         attributions: options.attributions,
@@ -700,15 +690,15 @@
       this.on('precompose', this.redraw, this);
     }
 
-    if ( superclass ) OlWind.__proto__ = superclass;
-    OlWind.prototype = Object.create( superclass && superclass.prototype );
-    OlWind.prototype.constructor = OlWind;
+    if ( ImageLayer ) OlWindy.__proto__ = ImageLayer;
+    OlWindy.prototype = Object.create( ImageLayer && ImageLayer.prototype );
+    OlWindy.prototype.constructor = OlWindy;
 
     /**
      * get layer data
      * @returns {*}
      */
-    OlWind.prototype.getData = function getData () {
+    OlWindy.prototype.getData = function getData () {
       return this.data;
     };
 
@@ -717,7 +707,7 @@
      * @param data
      * @returns {OlWind}
      */
-    OlWind.prototype.setData = function setData (data) {
+    OlWindy.prototype.setData = function setData (data) {
       var _map = this.getMap();
       if (!_map) { return this; }
       this.data = data;
@@ -742,7 +732,7 @@
      * render windy layer
      * @returns {OlWind}
      */
-    OlWind.prototype.render = function render (canvas) {
+    OlWindy.prototype.render = function render (canvas) {
       var extent = this._getExtent();
       if (this.isClear || !this.getData() || !extent) { return this; }
       if (canvas && !this.$Windy) {
@@ -777,7 +767,7 @@
     /**
      * re-draw
      */
-    OlWind.prototype.redraw = function redraw () {
+    OlWindy.prototype.redraw = function redraw () {
       if (this.isClear) { return; }
       var _extent = this.options.extent || this._getMapExtent();
       this.setExtent(_extent);
@@ -792,7 +782,7 @@
      * @param projection
      * @returns {*}
      */
-    OlWind.prototype.canvasFunction = function canvasFunction (extent, resolution, pixelRatio, size, projection) {
+    OlWindy.prototype.canvasFunction = function canvasFunction (extent, resolution, pixelRatio, size, projection) {
       if (!this._canvas) {
         this._canvas = createCanvas(size[0], size[1]);
       } else {
@@ -810,12 +800,12 @@
      * @returns {*}
      * @private
      */
-    OlWind.prototype._getExtent = function _getExtent () {
+    OlWindy.prototype._getExtent = function _getExtent () {
       var size = this._getMapSize();
       var _extent = this._getMapExtent();
       if (size && _extent) {
         var _projection = this._getProjectionCode();
-        var extent = ol.proj.transformExtent(_extent, _projection, 'EPSG:4326');
+        var extent = proj.transformExtent(_extent, _projection, 'EPSG:4326');
         return [[[0, 0], [size[0], size[1]]], size[0], size[1], [[extent[0], extent[1]], [extent[2], extent[3]]]];
       } else {
         return false;
@@ -827,7 +817,7 @@
      * @returns {ol.View|*|Array<number>}
      * @private
      */
-    OlWind.prototype._getMapExtent = function _getMapExtent () {
+    OlWindy.prototype._getMapExtent = function _getMapExtent () {
       if (!this.getMap()) { return; }
       var size = this._getMapSize();
       var _view = this.getMap().getView();
@@ -839,7 +829,7 @@
      * @returns {ol.Size|*}
      * @private
      */
-    OlWind.prototype._getMapSize = function _getMapSize () {
+    OlWindy.prototype._getMapSize = function _getMapSize () {
       if (!this.getMap()) { return; }
       return this.getMap().getSize();
     };
@@ -848,7 +838,7 @@
      * append layer to map
      * @param map
      */
-    OlWind.prototype.appendTo = function appendTo (map) {
+    OlWindy.prototype.appendTo = function appendTo (map) {
       if (map && map instanceof ol.Map) {
         this.set('originMap', map);
         this.getSource().projection_ = this._getProjectionCode();
@@ -863,7 +853,7 @@
      * @param coordinates
      * @returns {null|{speed: (*|number), direction}}
      */
-    OlWind.prototype.getPointData = function getPointData (coordinates) {
+    OlWindy.prototype.getPointData = function getPointData (coordinates) {
       if (!this.$Windy) { return null; }
       var gridValue = this.$Windy.interpolatePoint(coordinates[0], coordinates[1]);
       if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
@@ -878,7 +868,7 @@
      * clearWind method will retain the instance
      * @private
      */
-    OlWind.prototype.clearWind = function clearWind () {
+    OlWindy.prototype.clearWind = function clearWind () {
       var _map = this.getMap();
       if (!_map) { return; }
       if (this.$Windy) { this.$Windy.stop(); }
@@ -892,7 +882,7 @@
     /**
      * remove layer this instance will be destroyed after remove
      */
-    OlWind.prototype.removeLayer = function removeLayer () {
+    OlWindy.prototype.removeLayer = function removeLayer () {
       var _map = this.getMap();
       if (!_map) { return; }
       if (this.$Windy) { this.$Windy.stop(); }
@@ -907,7 +897,7 @@
      * set map
      * @param map
      */
-    OlWind.prototype.setMap = function setMap (map) {
+    OlWindy.prototype.setMap = function setMap (map) {
       this.set('originMap', map);
       // ol.layer.Image.prototype.setMap.call(this, map)
     };
@@ -915,11 +905,11 @@
     /**
      * get map
      */
-    OlWind.prototype.getMap = function getMap () {
+    OlWindy.prototype.getMap = function getMap () {
       return this.get('originMap');
     };
 
-    OlWind.prototype._getProjectionCode = function _getProjectionCode () {
+    OlWindy.prototype._getProjectionCode = function _getProjectionCode () {
       var code = '';
       var map = this.getMap();
       if (map) {
@@ -940,7 +930,7 @@
      * @param params
      * @returns {OlWind}
      */
-    OlWind.prototype.updateParams = function updateParams (params) {
+    OlWindy.prototype.updateParams = function updateParams (params) {
       this.options = Object.assign(this.options, params);
       if (this.$Windy) {
         var ref = this.options;
@@ -973,14 +963,14 @@
      * get windy config
      * @returns {null|*|Windy.params|{velocityScale, minVelocity, maxVelocity, colorScale, particleAge, lineWidth, particleMultiplier}}
      */
-    OlWind.prototype.getParams = function getParams () {
+    OlWindy.prototype.getParams = function getParams () {
       return this.$Windy && this.$Windy.getParams();
     };
 
-    return OlWind;
-  }(ol.layer.Image));
+    return OlWindy;
+  }(layer.Image));
 
-  return OlWind;
+  return OlWindy;
 
 }));
-//# sourceMappingURL=OlWind.js.map
+//# sourceMappingURL=OlWindy.js.map

@@ -1,7 +1,7 @@
 /*!
  * author: sakitam-fdd <smilefdd@gmail.com> 
- * wind-layer v0.0.7
- * build-time: 2019-5-25 16:26
+ * wind-layer v0.1.0
+ * build-time: 2019-5-25 22:8
  * LICENSE: MIT
  * (c) 2017-2019 https://sakitam-fdd.github.io/wind-layer
  */
@@ -487,6 +487,7 @@
           then = now - (delta % FRAME_TIME);
           evolve();
           draw();
+          params.onDraw && params.onDraw();
         }
       })();
     };
