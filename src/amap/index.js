@@ -73,7 +73,7 @@ class AMapWind {
   setData (data) {
     this.data = data;
     if (this.map && this.canvas && this.data) {
-      this.render();
+      this.render(this.canvas);
     }
   }
 
@@ -109,11 +109,27 @@ class AMapWind {
     const extent = this._getExtent();
     if (!this.getData() || !extent) return this;
     if (canvas && !this._windy) {
+      const {
+        minVelocity,
+        maxVelocity,
+        velocityScale,
+        particleAge,
+        lineWidth,
+        particleMultiplier,
+        colorScale
+      } = this.options;
       this._windy = new Windy({
         canvas: canvas,
         data: this.getData(),
         'onDraw': () => {
-        }
+        },
+        minVelocity,
+        maxVelocity,
+        velocityScale,
+        particleAge,
+        lineWidth,
+        particleMultiplier,
+        colorScale
       });
       this._windy.start(extent[0], extent[1], extent[2], extent[3]);
     } else if (canvas && this._windy) {
@@ -129,6 +145,7 @@ class AMapWind {
    * @private
    */
   _addReFreshHandle () {
+    if (!this.map) return;
     const type = this.map.getViewMode_();
     if (type.toLowerCase() === '3d') {
       this.layer_ && this.layer_.reFresh();
@@ -224,7 +241,7 @@ class AMapWind {
    */
   removeLayer () {
     if (!this.map) return;
-    this.map.removeLayer(this.layer_);
+    this.layer_.setMap(null);
     this.map.off('resize', this.handleResize, this);
     this.map.off('mapmove', this.canvasFunction, this);
     this.map.off('zoomchange', this.canvasFunction, this);
@@ -263,6 +280,11 @@ class AMapWind {
     if (this._windy) this._windy.stop();
   }
 
+  /**
+   * update windy config
+   * @param params
+   * @returns {AMapWind}
+   */
   updateParams (params) {
     this.options = Object.assign(this.options, params);
     if (this._windy) {
@@ -276,7 +298,7 @@ class AMapWind {
         colorScale
       } = this.options;
       if (this._windy) {
-        this._windy.stop();
+        // this._windy.stop();
         this._windy.updateParams({
           minVelocity,
           maxVelocity,
@@ -287,13 +309,17 @@ class AMapWind {
           colorScale
         });
         if (this.map && this.canvas && this.data) {
-          this.render();
+          this.render(this.canvas);
         }
       }
     }
     return this;
   }
 
+  /**
+   * get windy config
+   * @returns {null|*|Windy.params|{velocityScale, minVelocity, maxVelocity, colorScale, particleAge, lineWidth, particleMultiplier}}
+   */
   getParams () {
     return this._windy && this._windy.getParams();
   }

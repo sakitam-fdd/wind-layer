@@ -12,8 +12,8 @@
 const Windy = function (params = {}) {
   this.params = params;
   const that = this;
-  that.buildParams(params);
-  window.FRAME_TIME = 1000 / that.FRAME_RATE;   // desired frames per second
+
+  that.canvas = params.canvas;
 
   var defaulColorScale = [
     "rgb(36,104, 180)",
@@ -33,7 +33,22 @@ const Windy = function (params = {}) {
     "rgb(180,0,35)"
   ];
 
-  const colorScale = that.params.colorScale || defaulColorScale;
+  var buildParams = function(params) {
+    if (!params.projection) params.projection = 'EPSG:4326';
+    that.MIN_VELOCITY_INTENSITY = params.minVelocity || 0;                      // velocity at which particle intensity is minimum (m/s)
+    that.MAX_VELOCITY_INTENSITY = params.maxVelocity || 10;                     // velocity at which particle intensity is maximum (m/s)
+    that.VELOCITY_SCALE = (params.velocityScale || 0.005) * (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
+    that.MAX_PARTICLE_AGE = params.particleAge || 90;                         	 // max number of frames a particle is drawn before regeneration
+    that.PARTICLE_LINE_WIDTH = params.lineWidth || 1;                           // line width of a drawn particle
+    that.PARTICLE_MULTIPLIER = params.particleMultiplier || 1 / 300;            // particle count scalar (completely arbitrary--this values looks nice)
+    that.PARTICLE_REDUCTION = (Math.pow(window.devicePixelRatio, 1 / 3) || 1.6);   // multiply particle count for mobiles by this amount
+    that.FRAME_RATE = params.frameRate || 16;
+    that.COLOR_SCALE = params.colorScale || defaulColorScale;
+  };
+
+  buildParams(params);
+
+  window.FRAME_TIME = 1000 / that.FRAME_RATE;   // desired frames per second
 
   var NULL_WIND_VECTOR = [NaN, NaN, null];  // singleton for no wind in the form: [u, v, magnitude]
 
@@ -366,13 +381,13 @@ const Windy = function (params = {}) {
 
     function windIntensityColorScale (min, max) {
 
-      colorScale.indexFor = function (m) {  // map velocity speed to a style
-        return Math.max(0, Math.min((colorScale.length - 1),
-          Math.round((m - min) / (max - min) * (colorScale.length - 1))));
+      that.COLOR_SCALE.indexFor = function (m) {  // map velocity speed to a style
+        return Math.max(0, Math.min((that.COLOR_SCALE.length - 1),
+          Math.round((m - min) / (max - min) * (that.COLOR_SCALE.length - 1))));
 
       };
 
-      return colorScale;
+      return that.COLOR_SCALE;
     }
 
     var colorStyles = windIntensityColorScale(that.MIN_VELOCITY_INTENSITY, that.MAX_VELOCITY_INTENSITY);
@@ -426,7 +441,7 @@ const Windy = function (params = {}) {
       });
     }
 
-    var g = that.params.canvas.getContext("2d");
+    var g = that.canvas.getContext("2d");
     g.lineWidth = that.PARTICLE_LINE_WIDTH;
     g.fillStyle = fadeFillStyle;
     g.globalAlpha = 0.6;
@@ -505,7 +520,7 @@ const Windy = function (params = {}) {
   };
 
   var shift = function (dx, dy) {
-    var canvas = that.params.canvas, w = canvas.width, h = canvas.height, ctx = canvas.getContext("2d");
+    var canvas = that.canvas, w = canvas.width, h = canvas.height, ctx = canvas.getContext("2d");
     if (w > dx && h > dy) {
       var clamp = function (high, value) {
         return Math.max(0, Math.min(high, value));
@@ -520,6 +535,15 @@ const Windy = function (params = {}) {
     }
   };
 
+  var updateParams = function(params) {
+    that.params = params;
+    buildParams(that.params);
+  };
+
+  var getParams = function() {
+    return that.params;
+  };
+
   var windy = {
     params: that.params,
     start: start,
@@ -529,31 +553,12 @@ const Windy = function (params = {}) {
     createField: createField,
     interpolatePoint: interpolate,
     setData: setData,
+    updateParams: updateParams,
+    getParams: getParams,
+    buildParams: buildParams,
   };
 
   return windy;
-};
-
-Windy.prototype.updateParams = function(params) {
-  this.params = params;
-};
-
-Windy.prototype.getParams = function() {
-  console.log(this);
-  return this.params;
-};
-
-Windy.prototype.buildParams = function(params) {
-  const that = this;
-  if (!params.projection) params.projection = 'EPSG:4326';
-  that.MIN_VELOCITY_INTENSITY = params.minVelocity || 0;                      // velocity at which particle intensity is minimum (m/s)
-  that.MAX_VELOCITY_INTENSITY = params.maxVelocity || 10;                     // velocity at which particle intensity is maximum (m/s)
-  that.VELOCITY_SCALE = (params.velocityScale || 0.005) * (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
-  that.MAX_PARTICLE_AGE = params.particleAge || 90;                         	 // max number of frames a particle is drawn before regeneration
-  that.PARTICLE_LINE_WIDTH = params.lineWidth || 1;                           // line width of a drawn particle
-  that.PARTICLE_MULTIPLIER = params.particleMultiplier || 1 / 300;            // particle count scalar (completely arbitrary--this values looks nice)
-  that.PARTICLE_REDUCTION = (Math.pow(window.devicePixelRatio, 1 / 3) || 1.6);   // multiply particle count for mobiles by this amount
-  that.FRAME_RATE = params.frameRate || 16;
 };
 
 // polyfill
