@@ -1,6 +1,5 @@
 /* eslint-disable */
 
-
 /*  Global class for simulating the movement of particle through a 1km wind grid
  credit: All the credit for this work goes to: https://github.com/cambecc for creating the repo:
  https://github.com/cambecc/earth. The majority of this code is directly take nfrom there, since its awesome.
@@ -10,16 +9,11 @@
  interpolation and animation process.
  */
 
-const Windy = function (params) {
-  if (!params.projection) params.projection = 'EPSG:4326';
-  const MIN_VELOCITY_INTENSITY = params.minVelocity || 0;                      // velocity at which particle intensity is minimum (m/s)
-  const MAX_VELOCITY_INTENSITY = params.maxVelocity || 10;                     // velocity at which particle intensity is maximum (m/s)
-  const VELOCITY_SCALE = (params.velocityScale || 0.005) * (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
-  const MAX_PARTICLE_AGE = params.particleAge || 90;                         	 // max number of frames a particle is drawn before regeneration
-  const PARTICLE_LINE_WIDTH = params.lineWidth || 1;                           // line width of a drawn particle
-  const PARTICLE_MULTIPLIER = params.particleMultiplier || 1 / 300;            // particle count scalar (completely arbitrary--this values looks nice)
-  const PARTICLE_REDUCTION = (Math.pow(window.devicePixelRatio, 1 / 3) || 1.6);   // multiply particle count for mobiles by this amount
-  const FRAME_RATE = params.frameRate || 15, FRAME_TIME = 1000 / FRAME_RATE;   // desired frames per second
+const Windy = function (params = {}) {
+  this.params = params;
+  const that = this;
+
+  that.canvas = params.canvas;
 
   var defaulColorScale = [
     "rgb(36,104, 180)",
@@ -39,13 +33,28 @@ const Windy = function (params) {
     "rgb(180,0,35)"
   ];
 
-  const colorScale = params.colorScale || defaulColorScale;
+  var buildParams = function(params) {
+    if (!params.projection) params.projection = 'EPSG:4326';
+    that.MIN_VELOCITY_INTENSITY = params.minVelocity || 0;                      // velocity at which particle intensity is minimum (m/s)
+    that.MAX_VELOCITY_INTENSITY = params.maxVelocity || 10;                     // velocity at which particle intensity is maximum (m/s)
+    that.VELOCITY_SCALE = (params.velocityScale || 0.005) * (Math.pow(window.devicePixelRatio, 1 / 3) || 1); // scale for wind velocity (completely arbitrary--this value looks nice)
+    that.MAX_PARTICLE_AGE = params.particleAge || 90;                         	 // max number of frames a particle is drawn before regeneration
+    that.PARTICLE_LINE_WIDTH = params.lineWidth || 1;                           // line width of a drawn particle
+    that.PARTICLE_MULTIPLIER = params.particleMultiplier || 1 / 300;            // particle count scalar (completely arbitrary--this values looks nice)
+    that.PARTICLE_REDUCTION = (Math.pow(window.devicePixelRatio, 1 / 3) || 1.6);   // multiply particle count for mobiles by this amount
+    that.FRAME_RATE = params.frameRate || 16;
+    that.COLOR_SCALE = params.colorScale || defaulColorScale;
+  };
+
+  buildParams(params);
+
+  window.FRAME_TIME = 1000 / that.FRAME_RATE;   // desired frames per second
 
   var NULL_WIND_VECTOR = [NaN, NaN, null];  // singleton for no wind in the form: [u, v, magnitude]
 
   var builder;
   var grid;
-  var gridData = params.data;
+  var gridData = that.params.data;
   var date;
   var λ0, φ0, Δλ, Δφ, ni, nj;
 
@@ -217,7 +226,7 @@ const Windy = function (params) {
   var distortion = function (projection, λ, φ, x, y, windy) {
     var τ = 2 * Math.PI;
     // var H = Math.pow(10, -5.2);
-    var H = params.projection === 'EPSG:4326' ? 5 : Math.pow(10, -5.2);
+    var H = that.params.projection === 'EPSG:4326' ? 5 : Math.pow(10, -5.2);
     var hλ = λ < 0 ? H : -H;
     var hφ = φ < 0 ? H : -H;
 
@@ -287,7 +296,7 @@ const Windy = function (params) {
 
   var invert
 
-  if (params.projection === 'EPSG:4326') {
+  if (that.params.projection === 'EPSG:4326') {
     invert = function (x, y, windy) {
       var mapLonDelta = windy.east - windy.west;
       var mapLatDelta = windy.south - windy.north;
@@ -329,7 +338,7 @@ const Windy = function (params) {
 
     var projection = {};
     var mapArea = ((extent.south - extent.north) * (extent.west - extent.east));
-    var velocityScale = VELOCITY_SCALE * Math.pow(mapArea, 0.4);
+    var velocityScale = that.VELOCITY_SCALE * Math.pow(mapArea, 0.4);
 
     var columns = [];
     var x = bounds.x;
@@ -372,30 +381,30 @@ const Windy = function (params) {
 
     function windIntensityColorScale (min, max) {
 
-      colorScale.indexFor = function (m) {  // map velocity speed to a style
-        return Math.max(0, Math.min((colorScale.length - 1),
-          Math.round((m - min) / (max - min) * (colorScale.length - 1))));
+      that.COLOR_SCALE.indexFor = function (m) {  // map velocity speed to a style
+        return Math.max(0, Math.min((that.COLOR_SCALE.length - 1),
+          Math.round((m - min) / (max - min) * (that.COLOR_SCALE.length - 1))));
 
       };
 
-      return colorScale;
+      return that.COLOR_SCALE;
     }
 
-    var colorStyles = windIntensityColorScale(MIN_VELOCITY_INTENSITY, MAX_VELOCITY_INTENSITY);
+    var colorStyles = windIntensityColorScale(that.MIN_VELOCITY_INTENSITY, that.MAX_VELOCITY_INTENSITY);
     var buckets = colorStyles.map(function () {
       return [];
     });
 
-    var particleCount = Math.round(bounds.width * bounds.height * PARTICLE_MULTIPLIER);
+    var particleCount = Math.round(bounds.width * bounds.height * that.PARTICLE_MULTIPLIER);
     if (isMobile()) {
-      particleCount *= PARTICLE_REDUCTION;
+      particleCount *= that.PARTICLE_REDUCTION;
     }
 
     var fadeFillStyle = "rgba(0, 0, 0, 0.97)";
 
     var particles = [];
     for (var i = 0; i < particleCount; i++) {
-      particles.push(field.randomize({age: Math.floor(Math.random() * MAX_PARTICLE_AGE) + 0}));
+      particles.push(field.randomize({age: Math.floor(Math.random() * that.MAX_PARTICLE_AGE) + 0}));
     }
 
     function evolve () {
@@ -403,7 +412,7 @@ const Windy = function (params) {
         bucket.length = 0;
       });
       particles.forEach(function (particle) {
-        if (particle.age > MAX_PARTICLE_AGE) {
+        if (particle.age > that.MAX_PARTICLE_AGE) {
           field.randomize(particle).age = 0;
         }
         var x = particle.x;
@@ -411,7 +420,7 @@ const Windy = function (params) {
         var v = field(x, y);  // vector at current position
         var m = v[2];
         if (m === null) {
-          particle.age = MAX_PARTICLE_AGE;  // particle has escaped the grid, never to return...
+          particle.age = that.MAX_PARTICLE_AGE;  // particle has escaped the grid, never to return...
         }
         else {
           var xt = x + v[0];
@@ -432,8 +441,8 @@ const Windy = function (params) {
       });
     }
 
-    var g = params.canvas.getContext("2d");
-    g.lineWidth = PARTICLE_LINE_WIDTH;
+    var g = that.canvas.getContext("2d");
+    g.lineWidth = that.PARTICLE_LINE_WIDTH;
     g.fillStyle = fadeFillStyle;
     g.globalAlpha = 0.6;
 
@@ -470,13 +479,14 @@ const Windy = function (params) {
         then = now - (delta % FRAME_TIME);
         evolve();
         draw();
+        params.onDraw && params.onDraw();
       }
     })();
   };
 
   var updateData = function (data, bounds, width, height, extent) {
-    delete params.data;
-    params.data = data;
+    delete that.params.data;
+    that.params.data = data;
     if (extent)
       start(bounds, width, height, extent);
   };
@@ -511,7 +521,7 @@ const Windy = function (params) {
   };
 
   var shift = function (dx, dy) {
-    var canvas = params.canvas, w = canvas.width, h = canvas.height, ctx = canvas.getContext("2d");
+    var canvas = that.canvas, w = canvas.width, h = canvas.height, ctx = canvas.getContext("2d");
     if (w > dx && h > dy) {
       var clamp = function (high, value) {
         return Math.max(0, Math.min(high, value));
@@ -526,15 +536,27 @@ const Windy = function (params) {
     }
   };
 
+  var updateParams = function(params) {
+    that.params = params;
+    buildParams(that.params);
+  };
+
+  var getParams = function() {
+    return that.params;
+  };
+
   var windy = {
-    params: params,
+    params: that.params,
     start: start,
     stop: stop,
     update: updateData,
     shift: shift,
     createField: createField,
     interpolatePoint: interpolate,
-    setData: setData
+    setData: setData,
+    updateParams: updateParams,
+    getParams: getParams,
+    buildParams: buildParams,
   };
 
   return windy;
@@ -548,7 +570,7 @@ window.requestAnimationFrame = (function () {
     window.oRequestAnimationFrame ||
     window.msRequestAnimationFrame ||
     function (callback) {
-      return window.setTimeout(callback, 1000 / FRAME_RATE);
+      return window.setTimeout(callback, 1000 / window.FRAME_RATE);
     };
 })();
 

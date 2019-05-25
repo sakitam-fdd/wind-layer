@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <title>windy</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/openlayers/dist/ol.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.css">
   <style>
     html, body, #map {
       height: 100%;
@@ -42,59 +43,133 @@
 <body>
 <div id="map">
   <div class="menu">
-    <button class="base-button" onclick="getData()">获取数据</button>
-    <button class="base-button" onclick="setData()">设置数据</button>
-    <button class="base-button" onclick="clearWind()">移除图层</button>
+    <button class="base-button" onclick="getData()">getData</button>
+    <button class="base-button" onclick="setData()">setData</button>
+    <button class="base-button" onclick="clearWind()">clearWind</button>
+    <button class="base-button" onclick="removeLayer()">removeLayer</button>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/openlayers/dist/ol.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment/moment.js"></script>">
+<script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/openlayers@4.6.5/dist/ol.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/wind-layer/dist/windLayer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/wind-layer/dist/OlWind.js"></script>
 <script>
-  var map = new ol.Map({
-    target: 'map',
-    layers: [
-      new ol.layer.Tile({
-        layerName: 'baseLayer',
-        preload: 4,
-        source: new ol.source.OSM({
-          url: "//{a-c}.sm.mapstack.stamen.com/" +
-          "(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/" +
-          "{z}/{x}/{y}.png"
-        })
+var map = new ol.Map({
+  target: 'map',
+  layers: [
+    new ol.layer.Tile({
+      layerName: 'baseLayer',
+      preload: 4,
+      source: new ol.source.OSM({
+        url: "http://{a-c}.sm.mapstack.stamen.com/" +
+        "(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/" +
+        "{z}/{x}/{y}.png"
       })
-    ],
-    loadTilesWhileAnimating: true,
-    pixelRatio: 1,
-    view: new ol.View({
-      projection: 'EPSG:3857',
-      center: [113.53450137499999, 34.44104525],
-      zoom: 5
     })
-  });
-  var wind, data;
-  axios.get('./out.json').then(function (res) {
-    if (res.data) {
-      data = res.data
-      wind = new windLayer.OlWind(data, {
-        ratio: 1
-      })
-      wind.appendTo(map)
-    }
-  });
-
-  function getData () {
-    var _data = wind.getData();
-    console.log(_data)
+  ],
+  loadTilesWhileAnimating: true,
+  pixelRatio: 1,
+  view: new ol.View({
+    projection: 'EPSG:4326',
+    center: [113.53450137499999, 34.44104525],
+    zoom: 5
+  })
+});
+var wind, data;
+var realtime = false;
+axios.get(realtime ? '../server/public/parseData/2018090706.json' : './out.json', {
+  params: {
+    time: moment('20180622')
   }
+}).then(function (res) {
+  if (res.data) {
+    data = res.data;
 
-  function setData () {
-    wind.setData(data)
-  }
+    var config = {
+      minVelocity: 0, // 粒子强度最小的速度 (m/s)
+      maxVelocity: 10, // 粒子强度最大的速度 (m/s)
+      velocityScale: 0.05, // 风速的比例
+      particleAge: 90, // 重绘之前生成的离子数量的最大帧数
+      lineWidth: 1, // 绘制粒子的线宽
+      particleMultiplier: 0.01, // 离子数量
+    };
 
-  function clearWind () {
-    wind.clearWind()
+    wind = new OlWind(data, {
+      layerName: 'data',
+      projection: 'EPSG:4326',
+      ratio: 1,
+      map: map,
+      colorScale: [
+        "rgb(36,104, 180)",
+        "rgb(60,157, 194)",
+        "rgb(128,205,193 )",
+        "rgb(151,218,168 )",
+        "rgb(198,231,181)",
+        "rgb(238,247,217)",
+        "rgb(255,238,159)",
+        "rgb(252,217,125)",
+        "rgb(255,182,100)",
+        "rgb(252,150,75)",
+        "rgb(250,112,52)",
+        "rgb(245,64,32)",
+        "rgb(237,45,28)",
+        "rgb(220,24,32)",
+        "rgb(180,0,35)"
+      ],
+      minVelocity: 0,
+      maxVelocity: 10,
+      velocityScale: 0.05,
+      particleAge: 90,
+      lineWidth: 1,
+      particleMultiplier: 0.01,
+    });
+
+    const gui = new dat.GUI();
+    gui.add(config, 'minVelocity', 0, 10).onChange(function (value) {
+      wind.updateParams(config);
+    });
+    gui.add(config, 'maxVelocity', 1, 15).onChange(function (value) {
+      wind.updateParams(config);
+    });
+    gui.add(config, 'velocityScale', 0.05, 0.1).step(0.01).onChange(function (value) {
+      wind.updateParams(config);
+    });
+    gui.add(config, 'particleAge', 0, 180).onChange(function (value) {
+      wind.updateParams(config);
+    });
+    gui.add(config, 'lineWidth', 1, 10).onChange(function (value) {
+      wind.updateParams(config);
+    });
+    gui.add(config, 'particleMultiplier', 0.01, 0.05).step(0.01).onFinishChange(function (value) {
+      wind.updateParams(config);
+    });
+
+    map.on('pointermove', function (event) {
+      var _data = wind.getPointData(ol.proj.transform(event.coordinate, map.getView().getProjection(), 'EPSG:4326'));
+      // console.log(_data);
+    });
+
+    wind.appendTo(map);
   }
+});
+
+function getData () {
+  var _data = wind.getData();
+  console.log(_data)
+}
+
+function setData () {
+  wind.setData(data)
+}
+
+function clearWind () {
+  wind.clearWind()
+}
+
+function removeLayer () {
+  wind.removeLayer()
+}
 </script>
 </body>
 </html>
