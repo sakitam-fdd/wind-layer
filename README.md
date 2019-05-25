@@ -124,7 +124,7 @@ npm run prd:server // 部署环境启动服务
 docker run -d -p 8080:3333 sakitamclone/wind-server:0.0.1
 ```
 
-启动后就可以通过主机的 8080 端口看到运行结果了，比如用的是本机 Docker 的话，访问：http://localhost:3000 即可。
+启动后就可以通过主机的 8080 端口看到运行结果了，比如用的是本机 Docker 的话，访问：http://localhost:8080 即可。
 
 测试结束后，彻底清除容器可以用命令：
 
