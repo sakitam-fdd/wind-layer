@@ -5,6 +5,11 @@
  * LICENSE: MIT
  * (c) 2017-2019 https://sakitam-fdd.github.io/wind-layer
  */
+import { Map } from 'ol';
+import { Image } from 'ol/layer';
+import { ImageCanvas } from 'ol/source';
+import { transformExtent } from 'ol/proj';
+
 /* eslint-disable */
 
 /*  Global class for simulating the movement of particle through a 1km wind grid
@@ -638,36 +643,11 @@ var meterSec2kilometerHour = function (meters) {
   return meters * 3.6
 };
 
-var getExtent = function (coords) {
-  var extent = [
-    Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY,
-    Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY
-  ];
-  return coords.reduce(function (prev, coord) {
-    return [
-      Math.min(coord[0], prev[0]),
-      Math.min(coord[1], prev[1]),
-      Math.max(coord[0], prev[2]),
-      Math.max(coord[1], prev[3])
-    ];
-  }, extent);
-};
-
-var global = typeof window === 'undefined' ? {} : window;
-var ol = global.ol || {};
-
-if (!ol.layer) { ol.layer = {}; }
-if (!ol.layer.Image) { ol.layer.Image = /*@__PURE__*/(function () {
-    function Image () {}
-
-    return Image;
-  }()); }
-
-var OlWind = /*@__PURE__*/(function (superclass) {
-  function OlWind (data, options) {
+var OlWindy = /*@__PURE__*/(function (ImageLayer) {
+  function OlWindy (data, options) {
     if ( options === void 0 ) options = {};
 
-    superclass.call(this, options);
+    ImageLayer.call(this, options);
 
     /**
      * 矢量图层
@@ -697,7 +677,7 @@ var OlWind = /*@__PURE__*/(function (superclass) {
      * @type {{}}
      */
     this.options = options;
-    this.setSource(new ol.source.ImageCanvas({
+    this.setSource(new ImageCanvas({
       logo: options.logo,
       state: options.state,
       attributions: options.attributions,
@@ -709,15 +689,15 @@ var OlWind = /*@__PURE__*/(function (superclass) {
     this.on('precompose', this.redraw, this);
   }
 
-  if ( superclass ) OlWind.__proto__ = superclass;
-  OlWind.prototype = Object.create( superclass && superclass.prototype );
-  OlWind.prototype.constructor = OlWind;
+  if ( ImageLayer ) OlWindy.__proto__ = ImageLayer;
+  OlWindy.prototype = Object.create( ImageLayer && ImageLayer.prototype );
+  OlWindy.prototype.constructor = OlWindy;
 
   /**
    * get layer data
    * @returns {*}
    */
-  OlWind.prototype.getData = function getData () {
+  OlWindy.prototype.getData = function getData () {
     return this.data;
   };
 
@@ -726,7 +706,7 @@ var OlWind = /*@__PURE__*/(function (superclass) {
    * @param data
    * @returns {OlWind}
    */
-  OlWind.prototype.setData = function setData (data) {
+  OlWindy.prototype.setData = function setData (data) {
     var _map = this.getMap();
     if (!_map) { return this; }
     this.data = data;
@@ -751,7 +731,7 @@ var OlWind = /*@__PURE__*/(function (superclass) {
    * render windy layer
    * @returns {OlWind}
    */
-  OlWind.prototype.render = function render (canvas) {
+  OlWindy.prototype.render = function render (canvas) {
     var extent = this._getExtent();
     if (this.isClear || !this.getData() || !extent) { return this; }
     if (canvas && !this.$Windy) {
@@ -786,7 +766,7 @@ var OlWind = /*@__PURE__*/(function (superclass) {
   /**
    * re-draw
    */
-  OlWind.prototype.redraw = function redraw () {
+  OlWindy.prototype.redraw = function redraw () {
     if (this.isClear) { return; }
     var _extent = this.options.extent || this._getMapExtent();
     this.setExtent(_extent);
@@ -801,7 +781,7 @@ var OlWind = /*@__PURE__*/(function (superclass) {
    * @param projection
    * @returns {*}
    */
-  OlWind.prototype.canvasFunction = function canvasFunction (extent, resolution, pixelRatio, size, projection) {
+  OlWindy.prototype.canvasFunction = function canvasFunction (extent, resolution, pixelRatio, size, projection) {
     if (!this._canvas) {
       this._canvas = createCanvas(size[0], size[1]);
     } else {
@@ -819,12 +799,12 @@ var OlWind = /*@__PURE__*/(function (superclass) {
    * @returns {*}
    * @private
    */
-  OlWind.prototype._getExtent = function _getExtent () {
+  OlWindy.prototype._getExtent = function _getExtent () {
     var size = this._getMapSize();
     var _extent = this._getMapExtent();
     if (size && _extent) {
       var _projection = this._getProjectionCode();
-      var extent = ol.proj.transformExtent(_extent, _projection, 'EPSG:4326');
+      var extent = transformExtent(_extent, _projection, 'EPSG:4326');
       return [[[0, 0], [size[0], size[1]]], size[0], size[1], [[extent[0], extent[1]], [extent[2], extent[3]]]];
     } else {
       return false;
@@ -836,7 +816,7 @@ var OlWind = /*@__PURE__*/(function (superclass) {
    * @returns {ol.View|*|Array<number>}
    * @private
    */
-  OlWind.prototype._getMapExtent = function _getMapExtent () {
+  OlWindy.prototype._getMapExtent = function _getMapExtent () {
     if (!this.getMap()) { return; }
     var size = this._getMapSize();
     var _view = this.getMap().getView();
@@ -848,7 +828,7 @@ var OlWind = /*@__PURE__*/(function (superclass) {
    * @returns {ol.Size|*}
    * @private
    */
-  OlWind.prototype._getMapSize = function _getMapSize () {
+  OlWindy.prototype._getMapSize = function _getMapSize () {
     if (!this.getMap()) { return; }
     return this.getMap().getSize();
   };
@@ -857,8 +837,8 @@ var OlWind = /*@__PURE__*/(function (superclass) {
    * append layer to map
    * @param map
    */
-  OlWind.prototype.appendTo = function appendTo (map) {
-    if (map && map instanceof ol.Map) {
+  OlWindy.prototype.appendTo = function appendTo (map) {
+    if (map && map instanceof Map) {
       this.set('originMap', map);
       this.getSource().projection_ = this._getProjectionCode();
       map.addLayer(this);
@@ -872,7 +852,7 @@ var OlWind = /*@__PURE__*/(function (superclass) {
    * @param coordinates
    * @returns {null|{speed: (*|number), direction}}
    */
-  OlWind.prototype.getPointData = function getPointData (coordinates) {
+  OlWindy.prototype.getPointData = function getPointData (coordinates) {
     if (!this.$Windy) { return null; }
     var gridValue = this.$Windy.interpolatePoint(coordinates[0], coordinates[1]);
     if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
@@ -887,7 +867,7 @@ var OlWind = /*@__PURE__*/(function (superclass) {
    * clearWind method will retain the instance
    * @private
    */
-  OlWind.prototype.clearWind = function clearWind () {
+  OlWindy.prototype.clearWind = function clearWind () {
     var _map = this.getMap();
     if (!_map) { return; }
     if (this.$Windy) { this.$Windy.stop(); }
@@ -901,7 +881,7 @@ var OlWind = /*@__PURE__*/(function (superclass) {
   /**
    * remove layer this instance will be destroyed after remove
    */
-  OlWind.prototype.removeLayer = function removeLayer () {
+  OlWindy.prototype.removeLayer = function removeLayer () {
     var _map = this.getMap();
     if (!_map) { return; }
     if (this.$Windy) { this.$Windy.stop(); }
@@ -916,7 +896,7 @@ var OlWind = /*@__PURE__*/(function (superclass) {
    * set map
    * @param map
    */
-  OlWind.prototype.setMap = function setMap (map) {
+  OlWindy.prototype.setMap = function setMap (map) {
     this.set('originMap', map);
     // ol.layer.Image.prototype.setMap.call(this, map)
   };
@@ -924,11 +904,11 @@ var OlWind = /*@__PURE__*/(function (superclass) {
   /**
    * get map
    */
-  OlWind.prototype.getMap = function getMap () {
+  OlWindy.prototype.getMap = function getMap () {
     return this.get('originMap');
   };
 
-  OlWind.prototype._getProjectionCode = function _getProjectionCode () {
+  OlWindy.prototype._getProjectionCode = function _getProjectionCode () {
     var code = '';
     var map = this.getMap();
     if (map) {
@@ -949,7 +929,7 @@ var OlWind = /*@__PURE__*/(function (superclass) {
    * @param params
    * @returns {OlWind}
    */
-  OlWind.prototype.updateParams = function updateParams (params) {
+  OlWindy.prototype.updateParams = function updateParams (params) {
     this.options = Object.assign(this.options, params);
     if (this.$Windy) {
       var ref = this.options;
@@ -982,613 +962,12 @@ var OlWind = /*@__PURE__*/(function (superclass) {
    * get windy config
    * @returns {null|*|Windy.params|{velocityScale, minVelocity, maxVelocity, colorScale, particleAge, lineWidth, particleMultiplier}}
    */
-  OlWind.prototype.getParams = function getParams () {
+  OlWindy.prototype.getParams = function getParams () {
     return this.$Windy && this.$Windy.getParams();
   };
 
-  return OlWind;
-}(ol.layer.Image));
+  return OlWindy;
+}(Image));
 
-var global$1 = typeof window === 'undefined' ? {} : window;
-var AMap = global$1.AMap || {};
-
-var AMapWind = function AMapWind (data, options) {
-  if ( options === void 0 ) options = {};
-
-  this.options = options;
-
-  /**
-   * internal
-   * @type {null}
-   */
-  this.canvas = null;
-
-  /**
-   * windy 数据
-   */
-  this.data = data;
-
-  /**
-   * canvas layer
-   * @type {null}
-   * @private
-   */
-  this.layer_ = null;
-
-  /**
-   * windy layer
-   * @type {null}
-   */
-  this._windy = null;
-
-  if (options.map) {
-    this.appendTo(options.map);
-  }
-
-  /**
-   * bind context
-   * @type {{new(...args: any[][]): any} | ((...args: any[][]) => any) | ((...args: any[]) => any) | any | {new(...args: any[]): any}}
-   */
-  this.init = this.init.bind(this);
-  this.handleResize = this.handleResize.bind(this);
-  this.canvasFunction = this.canvasFunction.bind(this);
-  this._addReFreshHandle = this._addReFreshHandle.bind(this);
-};
-
-/**
- * append layer to map
- * @param map
- */
-AMapWind.prototype.appendTo = function appendTo (map) {
-  if (map) {
-    this.init(map);
-  } else {
-    throw new Error('not map object');
-  }
-};
-
-/**
- * get layer data
- * @returns {*}
- */
-AMapWind.prototype.getData = function getData () {
-  return this.data;
-};
-
-/**
- * set data
- * @param data
- */
-AMapWind.prototype.setData = function setData (data) {
-  this.data = data;
-  if (this.map && this.canvas && this.data) {
-    this.render(this.canvas);
-  }
-};
-
-/**
- * init windy layer
- * @param map
- * @param options
- */
-AMapWind.prototype.init = function init (map, options) {
-  if (map) {
-    this.map = map;
-    this.context = this.options.context || '2d';
-    this.getCanvasLayer();
-    this.map.on('resize', this.handleResize, this);
-  } else {
-    throw new Error('not map object')
-  }
-};
-
-AMapWind.prototype.handleResize = function handleResize () {
-  if (this.canvas) {
-    this.canvasFunction();
-  }
-};
-
-/**
- *render layer
- * @param canvas
- * @returns {*}
- */
-AMapWind.prototype.render = function render (canvas) {
-  if (!canvas) { return; }
-  var extent = this._getExtent();
-  if (!this.getData() || !extent) { return this; }
-  if (canvas && !this._windy) {
-    var ref = this.options;
-      var minVelocity = ref.minVelocity;
-      var maxVelocity = ref.maxVelocity;
-      var velocityScale = ref.velocityScale;
-      var particleAge = ref.particleAge;
-      var lineWidth = ref.lineWidth;
-      var particleMultiplier = ref.particleMultiplier;
-      var colorScale = ref.colorScale;
-    this._windy = new Windy({
-      canvas: canvas,
-      data: this.getData(),
-      'onDraw': function () {
-      },
-      minVelocity: minVelocity,
-      maxVelocity: maxVelocity,
-      velocityScale: velocityScale,
-      particleAge: particleAge,
-      lineWidth: lineWidth,
-      particleMultiplier: particleMultiplier,
-      colorScale: colorScale
-    });
-    this._windy.start(extent[0], extent[1], extent[2], extent[3]);
-  } else if (canvas && this._windy) {
-    this._windy.start(extent[0], extent[1], extent[2], extent[3]);
-  }
-  // 2D视图时可以省略
-  this._addReFreshHandle();
-  return this;
-};
-
-/**
- * 3D模式下手动刷新
- * @private
- */
-AMapWind.prototype._addReFreshHandle = function _addReFreshHandle () {
-  if (!this.map) { return; }
-  var type = this.map.getViewMode_();
-  if (type.toLowerCase() === '3d') {
-    this.layer_ && this.layer_.reFresh();
-    AMap.Util.requestAnimFrame(this._addReFreshHandle);
-  }
-};
-
-/**
- * get canvas layer
- */
-AMapWind.prototype.getCanvasLayer = function getCanvasLayer () {
-  if (!this.canvas && !this.layer_) {
-    var canvas = this.canvasFunction();
-    var bounds = this._getBounds();
-    this.layer_ = new AMap.CanvasLayer({
-      canvas: canvas,
-      bounds: this.options.bounds || bounds,
-      zooms: this.options.zooms || [0, 22],
-      zIndex: this.options.zIndex || 12,
-      opacity: this.options.opacity || 1
-    });
-    this.map.on('mapmove', this.canvasFunction, this);
-    this.map.on('zoomchange', this.canvasFunction, this);
-    this.layer_.setMap(this.map);
-  }
-};
-
-/**
- * canvas constructor
- * @returns {*}
- */
-AMapWind.prototype.canvasFunction = function canvasFunction () {
-  var ref = [this.map.getSize().width, this.map.getSize().height];
-    var width = ref[0];
-    var height = ref[1];
-  if (!this.canvas) {
-    this.canvas = createCanvas(width, height, null);
-  } else {
-    this.canvas.width = width;
-    this.canvas.height = height;
-    var bounds = this._getBounds();
-    if (this.layer_) {
-      this.layer_.setBounds(this.options.bounds || bounds);
-    }
-  }
-  this.render(this.canvas);
-  return this.canvas;
-};
-
-/**
- * fixed viewMode
- * @private
- */
-AMapWind.prototype._getBounds = function _getBounds () {
-  var type = this.map.getViewMode_();
-  var ref = [];
-    var southWest = ref[0];
-    var northEast = ref[1];
-  var bounds = this.map.getBounds();
-  if (type.toLowerCase() === '2d') {
-    northEast = bounds.getNorthEast(); // xmax ymax
-    southWest = bounds.getSouthWest(); // xmin ymin
-  } else {
-    var arrays = bounds.bounds.map(function (item) {
-      return [item.getLng(), item.getLat()];
-    });
-    var extent = getExtent(arrays);
-    southWest = new AMap.LngLat(extent[0], extent[1]);
-    northEast = new AMap.LngLat(extent[2], extent[3]);
-  }
-  return new AMap.Bounds(southWest, northEast);
-};
-
-/**
- * bounds, width, height, extent
- * @returns {*}
- * @private
- */
-AMapWind.prototype._getExtent = function _getExtent () {
-  var ref = [this.map.getSize().width, this.map.getSize().height];
-    var width = ref[0];
-    var height = ref[1];
-  var _ne = this._getBounds().getNorthEast();
-  var _sw = this._getBounds().getSouthWest();
-  return [
-    [
-      [0, 0], [width, height]
-    ],
-    width,
-    height,
-    [
-      [_sw.lng, _sw.lat], [_ne.lng, _ne.lat] ]
-  ]
-};
-
-/**
- * remove layer
- */
-AMapWind.prototype.removeLayer = function removeLayer () {
-  if (!this.map) { return; }
-  this.layer_.setMap(null);
-  this.map.off('resize', this.handleResize, this);
-  this.map.off('mapmove', this.canvasFunction, this);
-  this.map.off('zoomchange', this.canvasFunction, this);
-  delete this.map;
-  delete this.layer_;
-  delete this.canvas;
-};
-
-/**
- * get canvas context
- * @returns {*}
- */
-AMapWind.prototype.getContext = function getContext () {
-  return this.canvas.getContext(this.context);
-};
-
-/**
- * get mouse point data
- * @param coordinates
- * @returns {{direction: number, speed: *}}
- */
-AMapWind.prototype.getPointData = function getPointData (coordinates) {
-  var gridValue = this._windy.interpolatePoint(coordinates[0], coordinates[1]);
-  if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
-    return {
-      direction: getDirection(gridValue[0], gridValue[1], this.options.angleConvention || 'bearingCCW'),
-      speed: getSpeed(gridValue[0], gridValue[1], this.options.speedUnit)
-    }
-  }
-};
-
-/**
- * clear wind
- */
-AMapWind.prototype.clearWind = function clearWind () {
-  if (this._windy) { this._windy.stop(); }
-};
-
-/**
- * update windy config
- * @param params
- * @returns {AMapWind}
- */
-AMapWind.prototype.updateParams = function updateParams (params) {
-  this.options = Object.assign(this.options, params);
-  if (this._windy) {
-    var ref = this.options;
-      var minVelocity = ref.minVelocity;
-      var maxVelocity = ref.maxVelocity;
-      var velocityScale = ref.velocityScale;
-      var particleAge = ref.particleAge;
-      var lineWidth = ref.lineWidth;
-      var particleMultiplier = ref.particleMultiplier;
-      var colorScale = ref.colorScale;
-    if (this._windy) {
-      // this._windy.stop();
-      this._windy.updateParams({
-        minVelocity: minVelocity,
-        maxVelocity: maxVelocity,
-        velocityScale: velocityScale,
-        particleAge: particleAge,
-        lineWidth: lineWidth,
-        particleMultiplier: particleMultiplier,
-        colorScale: colorScale
-      });
-      if (this.map && this.canvas && this.data) {
-        this.render(this.canvas);
-      }
-    }
-  }
-  return this;
-};
-
-/**
- * get windy config
- * @returns {null|*|Windy.params|{velocityScale, minVelocity, maxVelocity, colorScale, particleAge, lineWidth, particleMultiplier}}
- */
-AMapWind.prototype.getParams = function getParams () {
-  return this._windy && this._windy.getParams();
-};
-
-var global$2 = typeof window === 'undefined' ? {} : window;
-
-if (!global$2.BMap) { global$2.BMap = {}; }
-
-if (!global$2.BMap.Overlay) { global$2.BMap.Overlay = /*@__PURE__*/(function () {
-    function Overlay () {}
-
-    return Overlay;
-  }()); }
-
-var BaiduWind = /*@__PURE__*/(function (superclass) {
-  function BaiduWind (data, options) {
-    if ( options === void 0 ) options = {};
-
-    superclass.call(this, options);
-    this.options = options;
-    this.paneName = this.options.paneName || 'mapPane';
-    this.context = this.options.context || '2d';
-    this.zIndex = this.options.zIndex || 0;
-    this.mixBlendMode = this.options.mixBlendMode || null;
-    this.enableMassClear = this.options.enableMassClear;
-    this._map = options.map;
-    this._lastDrawTime = null;
-
-    /**
-     * 矢量图层
-     * @type {null}
-     */
-    this.canvas = null;
-
-    /**
-     * windy 数据
-     */
-    this.data = data;
-
-    /**
-     * windy layer
-     * @type {null}
-     */
-    this._windy = null;
-    this.show();
-  }
-
-  if ( superclass ) BaiduWind.__proto__ = superclass;
-  BaiduWind.prototype = Object.create( superclass && superclass.prototype );
-  BaiduWind.prototype.constructor = BaiduWind;
-
-  /**
-   * get layer data
-   * @returns {*}
-   */
-  BaiduWind.prototype.getData = function getData () {
-    return this.data;
-  };
-
-  /**
-   * set data
-   * @param data
-   */
-  BaiduWind.prototype.setData = function setData (data) {
-    this.data = data;
-    if (this._map && this.data) {
-      this._draw();
-    }
-  };
-
-  /**
-   * bounds, width, height, extent
-   * @returns {*}
-   * @private
-   */
-  BaiduWind.prototype._getExtent = function _getExtent () {
-    var size = this._map.getSize();
-    var _ne = this._map.getBounds().getNorthEast();
-    var _sw = this._map.getBounds().getSouthWest();
-    return [
-      [
-        [0, 0], [size.width, size.height]
-      ],
-      size.width,
-      size.height,
-      [
-        // [_ne.lng, _ne.lat], [_sw.lng, _sw.lat]
-        [_sw.lng, _sw.lat], [_ne.lng, _ne.lat] ]
-    ]
-  };
-
-  /**
-   * append layer to map
-   * @param map
-   */
-  BaiduWind.prototype.appendTo = function appendTo (map) {
-    if (map) {
-      map.addOverlay(this);
-    } else {
-      throw new Error('not map object');
-    }
-  };
-
-  BaiduWind.prototype.initialize = function initialize (map) {
-    var this$1 = this;
-
-    this._map = map;
-    var canvas = this.canvas = document.createElement('canvas');
-    canvas.style.cssText = "position:absolute; left:0; top:0; z-index: " + (this.zIndex) + " ;user-select:none;";
-    canvas.style.mixBlendMode = this.mixBlendMode;
-    this.adjustSize();
-    map.getPanes()[this.paneName].appendChild(canvas);
-    map.addEventListener('resize', function () {
-      this$1.adjustSize();
-      this$1._draw();
-    });
-    return this.canvas
-  };
-
-  BaiduWind.prototype.adjustSize = function adjustSize () {
-    var size = this._map.getSize();
-    var canvas = this.canvas;
-    var devicePixelRatio = this.devicePixelRatio = global$2.devicePixelRatio || 1;
-    canvas.width = size.width * devicePixelRatio;
-    canvas.height = size.height * devicePixelRatio;
-    if (this.context === '2d') {
-      canvas.getContext(this.context).scale(devicePixelRatio, devicePixelRatio);
-    }
-    canvas.style.width = size.width + 'px';
-    canvas.style.height = size.height + 'px';
-  };
-
-  BaiduWind.prototype.draw = function draw () {
-    var self = this;
-    clearTimeout(self.timeoutID);
-    self.timeoutID = setTimeout(function () {
-      self._draw();
-    }, 15);
-  };
-
-  BaiduWind.prototype._draw = function _draw () {
-    var map = this._map;
-    var size = map.getSize();
-    var center = map.getCenter();
-    if (center) {
-      var pixel = map.pointToOverlayPixel(center);
-      this.canvas.style.left = pixel.x - size.width / 2 + 'px';
-      this.canvas.style.top = pixel.y - size.height / 2 + 'px';
-      this.dispatchEvent('draw');
-      this.options.update && this.options.update.call(this);
-      this.render(this.canvas);
-    }
-  };
-
-  /**
-   * render windy layer
-   * @param canvas
-   * @returns {BaiduWind}
-   */
-  BaiduWind.prototype.render = function render (canvas) {
-    var extent = this._getExtent();
-    if (!this.getData() || !extent) { return this; }
-    if (canvas && !this._windy) {
-      var ref = this.options;
-      var minVelocity = ref.minVelocity;
-      var maxVelocity = ref.maxVelocity;
-      var velocityScale = ref.velocityScale;
-      var particleAge = ref.particleAge;
-      var lineWidth = ref.lineWidth;
-      var particleMultiplier = ref.particleMultiplier;
-      var colorScale = ref.colorScale;
-      this._windy = new Windy({
-        canvas: canvas,
-        data: this.getData(),
-        'onDraw': function () {
-        },
-        minVelocity: minVelocity,
-        maxVelocity: maxVelocity,
-        velocityScale: velocityScale,
-        particleAge: particleAge,
-        lineWidth: lineWidth,
-        particleMultiplier: particleMultiplier,
-        colorScale: colorScale
-      });
-      this._windy.start(extent[0], extent[1], extent[2], extent[3]);
-    } else if (canvas && this._windy) {
-      this._windy.start(extent[0], extent[1], extent[2], extent[3]);
-    }
-    return this;
-  };
-
-  BaiduWind.prototype.getContainer = function getContainer () {
-    return this.canvas;
-  };
-
-  BaiduWind.prototype.setZIndex = function setZIndex (zIndex) {
-    this.zIndex = zIndex;
-    this.canvas.style.zIndex = this.zIndex;
-  };
-
-  BaiduWind.prototype.getZIndex = function getZIndex () {
-    return this.zIndex;
-  };
-
-  /**
-   * get mouse point data
-   * @param coordinates
-   * @returns {{direction: number, speed: *}}
-   */
-  BaiduWind.prototype.getPointData = function getPointData (coordinates) {
-    var gridValue = this._windy.interpolatePoint(coordinates[0], coordinates[1]);
-    if (gridValue && !isNaN(gridValue[0]) && !isNaN(gridValue[1]) && gridValue[2]) {
-      return {
-        direction: getDirection(gridValue[0], gridValue[1], this.options.angleConvention || 'bearingCCW'),
-        speed: getSpeed(gridValue[0], gridValue[1], this.options.speedUnit)
-      }
-    }
-  };
-
-  /**
-   * clear wind
-   */
-  BaiduWind.prototype.clearWind = function clearWind () {
-    if (this._windy) { this._windy.stop(); }
-  };
-
-  /**
-   * update windy config
-   * @param params
-   * @returns {BaiduWind}
-   */
-  BaiduWind.prototype.updateParams = function updateParams (params) {
-    this.options = Object.assign(this.options, params);
-    if (this._windy) {
-      var ref = this.options;
-      var minVelocity = ref.minVelocity;
-      var maxVelocity = ref.maxVelocity;
-      var velocityScale = ref.velocityScale;
-      var particleAge = ref.particleAge;
-      var lineWidth = ref.lineWidth;
-      var particleMultiplier = ref.particleMultiplier;
-      var colorScale = ref.colorScale;
-      if (this._windy) {
-        // this._windy.stop();
-        this._windy.updateParams({
-          minVelocity: minVelocity,
-          maxVelocity: maxVelocity,
-          velocityScale: velocityScale,
-          particleAge: particleAge,
-          lineWidth: lineWidth,
-          particleMultiplier: particleMultiplier,
-          colorScale: colorScale
-        });
-        if (this._map && this.canvas && this.data) {
-          this.render(this.canvas);
-        }
-      }
-    }
-    return this;
-  };
-
-  /**
-   * get windy config
-   * @returns {null|*|Windy.params|{velocityScale, minVelocity, maxVelocity, colorScale, particleAge, lineWidth, particleMultiplier}}
-   */
-  BaiduWind.prototype.getParams = function getParams () {
-    return this._windy && this._windy.getParams();
-  };
-
-  return BaiduWind;
-}(global$2.BMap.Overlay));
-
-var index = {
-  AMapWind: AMapWind,
-  BMapWind: BaiduWind,
-  OlWind: OlWind
-};
-
-export default index;
-//# sourceMappingURL=windLayer.esm.js.map
+export default OlWindy;
+//# sourceMappingURL=OlWindy.esm.js.map

@@ -1,7 +1,7 @@
 {
   "name": "wind-layer",
-  "version": "0.0.7",
-  "description": "a openlayers extension to windjs",
+  "version": "0.1.0",
+  "description": "a openlayers ol bmap amap maptalks extension to windjs",
   "author": "sakitam-fdd <smilefdd@gmail.com>",
   "homepage": "https://sakitam-fdd.github.io/wind-layer",
   "private": false,
@@ -30,19 +30,24 @@
   ],
   "scripts": {
     "dev": "cross-env NODE_ENV=development input=index.js file=windLayer rollup -wm -c build/rollup.dev.config.js",
-    "dev:ol": "cross-env NODE_ENV=development input=openlayers/index.js file=OlWind rollup -wm -c build/rollup.dev.config.js",
+    "dev:ol": "cross-env NODE_ENV=development input=ol/index.js file=OlWindy rollup -wm -c build/rollup.dev.config.js",
+    "dev:openlayers": "cross-env NODE_ENV=development input=openlayers/index.js file=OlWind rollup -wm -c build/rollup.dev.config.js",
     "dev:bmap": "cross-env NODE_ENV=development input=bmap/index.js file=BMapWind rollup -wm -c build/rollup.dev.config.js",
     "dev:amap": "cross-env NODE_ENV=development input=amap/index.js file=AMapWind rollup -wm -c build/rollup.dev.config.js",
-    "build:ol": "cross-env NODE_ENV=production input=openlayers/index.js file=OlWind rollup -m -c build/rollup.dev.config.js && cross-env NODE_ENV=production input=openlayers/index.js file=OlWind rollup -c build/rollup.prod.config.js",
+    "dev:maptalks": "cross-env NODE_ENV=development input=maptalks/index.js file=MaptalksWindy rollup -wm -c build/rollup.dev.config.js",
+    "build:ol": "cross-env NODE_ENV=production input=ol/index.js file=OlWindy rollup -m -c build/rollup.dev.config.js && cross-env NODE_ENV=production input=ol/index.js file=OlWindy rollup -c build/rollup.prod.config.js",
+    "build:openlayers": "cross-env NODE_ENV=production input=openlayers/index.js file=OlWind rollup -m -c build/rollup.dev.config.js && cross-env NODE_ENV=production input=openlayers/index.js file=OlWind rollup -c build/rollup.prod.config.js",
     "build:amap": "cross-env NODE_ENV=production input=amap/index.js file=AMapWind rollup -m -c build/rollup.dev.config.js && cross-env NODE_ENV=production input=amap/index.js file=AMapWind rollup -c build/rollup.prod.config.js",
     "build:bmap": "cross-env NODE_ENV=production input=bmap/index.js file=BMapWind rollup -m -c build/rollup.dev.config.js && cross-env NODE_ENV=production input=bmap/index.js file=BMapWind rollup -c build/rollup.prod.config.js",
-    "build": "npm run build:ol && npm run build:bmap && npm run build:amap && cross-env NODE_ENV=development input=index.js file=windLayer rollup -m -c build/rollup.dev.config.js && cross-env NODE_ENV=production input=index.js file=windLayer rollup -c build/rollup.prod.config.js",
+    "build:maptalks": "cross-env NODE_ENV=production input=maptalks/index.js file=MaptalksWindy rollup -m -c build/rollup.dev.config.js && cross-env NODE_ENV=production input=maptalks/index.js file=MaptalksWindy rollup -c build/rollup.prod.config.js",
+    "build": "npm run build:ol && npm run build:openlayers && npm run build:bmap && npm run build:amap && npm run build:maptalks && cross-env NODE_ENV=development input=index.js file=windLayer rollup -m -c build/rollup.dev.config.js && cross-env NODE_ENV=production input=index.js file=windLayer rollup -c build/rollup.prod.config.js",
     "start": "node server/bin/www",
     "prd:server": "pm2 start server/bin/www"
   },
   "peerDependencies": {
     "ol": "^5.0.2",
-    "openlayers": "^3.0.0"
+    "openlayers": "^3.0.0",
+    "maptalks": "^0.40.0"
   },
   "dependencies": {
     "lodash": "^4.17.4",
@@ -50,6 +55,7 @@
   },
   "devDependencies": {
     "ol": "^5.0.2",
+    "maptalks": "^0.44.0",
     "openlayers": "^4.6.5",
     "@babel/core": "^7.3.4",
     "@babel/plugin-external-helpers": "^7.2.0",
