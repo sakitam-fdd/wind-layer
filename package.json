@@ -5,9 +5,10 @@
   "author": "sakitam-fdd <smilefdd@gmail.com>",
   "homepage": "https://sakitam-fdd.github.io/wind-layer",
   "private": false,
-  "main": "dist/windLayer.common.js",
-  "module": "dist/windLayer.esm.js",
   "unpkg": "dist/windLayer.js",
+  "main": "dist/windLayer.js",
+  "module": "dist/windLayer.esm.js",
+  "commonjs": "dist/windLayer.common.js",
   "namespace": "windLayer",
   "repository": {
     "type": "git",
@@ -40,13 +41,16 @@
     "prd:server": "pm2 start server/bin/www"
   },
   "peerDependencies": {
-    "ol": "^5.0.2"
+    "ol": "^5.0.2",
+    "openlayers": "^3.0.0"
   },
   "dependencies": {
     "lodash": "^4.17.4",
     "moment": "^2.20.1"
   },
   "devDependencies": {
+    "ol": "^5.0.2",
+    "openlayers": "^4.6.5",
     "@babel/core": "^7.3.4",
     "@babel/plugin-external-helpers": "^7.2.0",
     "@babel/preset-env": "^7.3.4",
