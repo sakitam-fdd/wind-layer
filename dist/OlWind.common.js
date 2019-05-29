@@ -1,7 +1,7 @@
 /*!
  * author: sakitam-fdd <smilefdd@gmail.com> 
  * wind-layer v0.1.0
- * build-time: 2019-5-25 22:8
+ * build-time: 2019-8-12 16:23
  * LICENSE: MIT
  * (c) 2017-2019 https://sakitam-fdd.github.io/wind-layer
  */
@@ -55,6 +55,7 @@ var Windy = function (params) {
     that.PARTICLE_REDUCTION = (Math.pow(window.devicePixelRatio, 1 / 3) || 1.6);   // multiply particle count for mobiles by this amount
     that.FRAME_RATE = params.frameRate || 16;
     that.COLOR_SCALE = params.colorScale || defaulColorScale;
+    that.useDefaults = 'useDefaults' in params ? params.useDefaults : true;
   };
 
   buildParams(params);
@@ -230,7 +231,8 @@ var Windy = function (params) {
   var distortion = function (projection, λ, φ, x, y, windy) {
     var τ = 2 * Math.PI;
     // var H = Math.pow(10, -5.2);
-    var H = that.params.projection === 'EPSG:4326' ? 5 : Math.pow(10, -5.2);
+    var H = 5;
+    // var H = that.params.projection === 'EPSG:4326' ? 5 : Math.pow(10, -5.2);
     var hλ = λ < 0 ? H : -H;
     var hφ = φ < 0 ? H : -H;
 
@@ -298,28 +300,24 @@ var Windy = function (params) {
     return ang / (Math.PI / 180.0);
   };
 
-  var invert;
+  var invert = function (x, y, windy) {
+    var mapLonDelta = windy.east - windy.west;
+    var mapLatDelta = windy.south - windy.north;
+    var lat = rad2deg(windy.north) + y / windy.height * rad2deg(mapLatDelta);
+    var lon = rad2deg(windy.west) + x / windy.width * rad2deg(mapLonDelta);
+    return [lon, lat];
+  };
 
-  if (that.params.projection === 'EPSG:4326') {
-    invert = function (x, y, windy) {
-      var mapLonDelta = windy.east - windy.west;
-      var mapLatDelta = windy.south - windy.north;
-      var lat = rad2deg(windy.north) + y / windy.height * rad2deg(mapLatDelta);
-      var lon = rad2deg(windy.west) + x / windy.width * rad2deg(mapLonDelta);
-      return [lon, lat];
-    };
-  } else {
-    invert = function (x, y, windy) {
-      var mapLonDelta = windy.east - windy.west;
-      var worldMapRadius = windy.width / rad2deg(mapLonDelta) * 360 / (2 * Math.PI);
-      var mapOffsetY = (worldMapRadius / 2 * Math.log((1 + Math.sin(windy.south)) / (1 - Math.sin(windy.south))));
-      var equatorY = windy.height + mapOffsetY;
-      var a = (equatorY - y) / worldMapRadius;
-      var lat = 180 / Math.PI * (2 * Math.atan(Math.exp(a)) - Math.PI / 2);
-      var lon = rad2deg(windy.west) + x / windy.width * rad2deg(mapLonDelta);
-      return [lon, lat];
-    };
-  }
+  // var invert = function (x, y, windy) {
+  //   var mapLonDelta = windy.east - windy.west;
+  //   var worldMapRadius = windy.width / rad2deg(mapLonDelta) * 360 / (2 * Math.PI);
+  //   var mapOffsetY = (worldMapRadius / 2 * Math.log((1 + Math.sin(windy.south)) / (1 - Math.sin(windy.south))));
+  //   var equatorY = windy.height + mapOffsetY;
+  //   var a = (equatorY - y) / worldMapRadius;
+  //   var lat = 180 / Math.PI * (2 * Math.atan(Math.exp(a)) - Math.PI / 2);
+  //   var lon = rad2deg(windy.west) + x / windy.width * rad2deg(mapLonDelta);
+  //   return [lon, lat];
+  // };
 
   var mercY = function (lat) {
     return Math.log(Math.tan(lat / 2 + Math.PI / 4));
@@ -327,15 +325,18 @@ var Windy = function (params) {
 
 
   var project = function (lat, lon, windy) { // both in radians, use deg2rad if neccessary
-    var ymin = mercY(windy.south);
-    var ymax = mercY(windy.north);
-    var xFactor = windy.width / (windy.east - windy.west);
-    var yFactor = windy.height / (ymax - ymin);
+    if (that.useDefaults) {
+      var ymin = mercY(windy.south);
+      var ymax = mercY(windy.north);
+      var xFactor = windy.width / (windy.east - windy.west);
+      var yFactor = windy.height / (ymax - ymin);
 
-    var y = mercY(deg2rad(lat));
-    var x = (deg2rad(lon) - windy.west) * xFactor;
-    var y = (ymax - y) * yFactor; // y points south
-    return [x, y];
+      var y = mercY(deg2rad(lat));
+      var x = (deg2rad(lon) - windy.west) * xFactor;
+      var y = (ymax - y) * yFactor; // y points south
+      return [x ,y];
+    }
+    return that.params.project([lon, lat]);
   };
 
   var interpolateField = function (grid, bounds, extent, callback) {
@@ -741,6 +742,7 @@ var OlWind = /*@__PURE__*/(function (superclass) {
   OlWind.prototype.render = function render (canvas) {
     var extent = this._getExtent();
     if (this.isClear || !this.getData() || !extent) { return this; }
+    var map = this.getMap();
     if (canvas && !this.$Windy) {
       var ref = this.options;
       var minVelocity = ref.minVelocity;
@@ -752,7 +754,7 @@ var OlWind = /*@__PURE__*/(function (superclass) {
       var colorScale = ref.colorScale;
       this.$Windy = new Windy({
         canvas: canvas,
-        projection: this._getProjectionCode(),
+        // projection: this._getProjectionCode(),
         data: this.getData(),
         minVelocity: minVelocity,
         maxVelocity: maxVelocity,
@@ -760,7 +762,17 @@ var OlWind = /*@__PURE__*/(function (superclass) {
         particleAge: particleAge,
         lineWidth: lineWidth,
         particleMultiplier: particleMultiplier,
-        colorScale: colorScale
+        colorScale: colorScale,
+        useDefaults: false, // 使用默认内置坐标转换函数
+        onDraw: function () {
+          // this.setCanvasUpdated();
+        },
+        project: function (coordinates) {
+          return map.getPixelFromCoordinate(coordinates);
+        },
+        unproject: function (point) {
+          return map.getCoordinateFromPixel(point);
+        }
       });
       this.$Windy.start(extent[0], extent[1], extent[2], extent[3]);
     } else if (canvas && this.$Windy) {

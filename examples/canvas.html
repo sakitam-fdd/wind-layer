@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>windy</title>
+  <style>
+    html, body, #map {
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+<canvas id="map"></canvas>
+<script>
+  // polyfill
+  window.requestAnimationFrame = (function () {
+    return window.requestAnimationFrame ||
+      window.webkitRequestAnimationFrame ||
+      window.mozRequestAnimationFrame ||
+      window.oRequestAnimationFrame ||
+      window.msRequestAnimationFrame ||
+      function (callback) {
+        return window.setTimeout(callback, 1000 / window.FRAME_RATE);
+      };
+  })();
+
+  if (!window.cancelAnimationFrame) {
+    window.cancelAnimationFrame = function (id) {
+      clearTimeout(id);
+    };
+  }
+
+  const cv = document.getElementById('map');
+  const ctx = cv.getContext('2d');
+  const data = [
+    [
+      {
+        x: 0,
+        y: 0,
+        nx: 0,
+        ny: 0,
+        px: 0,
+        py: 0,
+      },
+      {
+        x: 50,
+        y: 50,
+        nx: 50,
+        ny: 50,
+        px: 50,
+        py: 50,
+      },
+      {
+        x: 100,
+        y: 100,
+        nx: 100,
+        ny: 100,
+        px: 100,
+        py: 100,
+      }
+    ]
+  ];
+
+  resize();
+
+  function resize () {
+    const width = cv.clientWidth;
+    const height = cv.clientHeight;
+    cv.width = width;
+    cv.height = height;
+    cv.style.width = `${width}px`;
+    cv.style.height = `${height}px`;
+  }
+
+  function movePath (buckets) {
+    for (let i = 0; i < buckets.length; i++) {
+      const bucket = buckets[i];
+      if (bucket.length > 0) {
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgb(36,104, 180)';
+        for (let j = 0; j < bucket.length; j++) {
+          ctx.moveTo(ctx.canvas.width / 4, ctx.canvas.height / 4);
+          ctx.lineTo(ctx.canvas.width / 2, ctx.canvas.height / 2);
+        }
+        ctx.stroke();
+      }
+    }
+  }
+
+  function draw () {
+    const prev = 'lighter';
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.globalAlpha = 0.6;
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.globalCompositeOperation = prev;
+    ctx.globalAlpha = 0.9;
+    // fading paths...
+    ctx.fillStyle = `rgba(0, 0, 0, 0.9)`;
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
+    // this._moveParticles(paths);
+    // const s = (Date.now()).valueOf();
+    // this._drawParticles(context, paths);
+    // console.log((Date.now()).valueOf() - s);
+    movePath(data);
+  }
+
+  fetch('./out.json', {
+    method: 'GET',
+  })
+    .then(res => res.json())
+    .then(res => {
+      console.log(res);
+    });
+
+  draw();
+
+  (function frame () {
+    const animationLoop = requestAnimationFrame(frame);
+    draw();
+  })();
+</script>
+</body>
+</html>

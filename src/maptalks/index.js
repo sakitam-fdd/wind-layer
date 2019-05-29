@@ -1,4 +1,4 @@
-import { Layer, renderer, SpatialReference } from 'maptalks';
+import { Coordinate, Layer, Point, renderer, SpatialReference } from 'maptalks';
 import Windy from '../windy/windy';
 
 const defaultConfig = {
@@ -24,9 +24,16 @@ class Renderer extends renderer.CanvasRenderer {
     this._windy = new Windy({
       canvas: this.canvas,
       data: this.layer.getData(),
-      projection: proj.code || 'EPSG:4326',
+      useDefaults: false, // 使用默认内置坐标转换函数
+      projection: proj.code || 'EPSG:3857',
       onDraw: () => {
         this.setCanvasUpdated();
+      },
+      project: (coordinates) => {
+        return map.coordinateToContainerPoint(new Coordinate(coordinates)).toArray();
+      },
+      unproject: (point) => {
+        return map.containerPointToCoordinate(new Point(point)).toArray();
       },
       ...params
     });

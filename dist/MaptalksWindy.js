@@ -1,7 +1,7 @@
 /*!
  * author: sakitam-fdd <smilefdd@gmail.com> 
  * wind-layer v0.1.0
- * build-time: 2019-5-25 22:8
+ * build-time: 2019-8-20 22:42
  * LICENSE: MIT
  * (c) 2017-2019 https://sakitam-fdd.github.io/wind-layer
  */
@@ -59,6 +59,7 @@
       that.PARTICLE_REDUCTION = (Math.pow(window.devicePixelRatio, 1 / 3) || 1.6);   // multiply particle count for mobiles by this amount
       that.FRAME_RATE = params.frameRate || 16;
       that.COLOR_SCALE = params.colorScale || defaulColorScale;
+      that.useDefaults = 'useDefaults' in params ? params.useDefaults : true;
     };
 
     buildParams(params);
@@ -168,12 +169,19 @@
      * @param φ {Float} Latitude
      * @returns {Object}
      */
-    var interpolate = function (λ, φ) {
-
+    function interpolate(λ, φ) {
       if (!grid) { return null; }
-
       var i = floorMod(λ - λ0, 360) / Δλ;  // calculate longitude index in wrapped range [0, 360)
       var j = (φ0 - φ) / Δφ;                 // calculate latitude index in direction +90 to -90
+
+      //         1      2           After converting λ and φ to fractional grid indexes i and j, we find the
+      //        fi  i   ci          four points "G" that enclose point (i, j). These points are at the four
+      //         | =1.4 |           corners specified by the floor and ceiling of i and j. For example, given
+      //      ---G--|---G--- fj 8   i = 1.4 and j = 8.3, the four surrounding grid points are (1, 8), (2, 8),
+      //    j ___|_ .   |           (1, 9) and (2, 9).
+      //  =8.3   |      |
+      //      ---G------G--- cj 9   Note that for wrapped grids, the first column is duplicated as the last
+      //         |      |           column, so the index ci can be used without taking a modulo.
 
       var fi = Math.floor(i), ci = fi + 1;
       var fj = Math.floor(j), cj = fj + 1;
@@ -191,8 +199,18 @@
           }
         }
       }
+      // console.log("cannot interpolate: " + λ + "," + φ + ": " + fi + " " + ci + " " + fj + " " + cj);
       return null;
-    };
+    }
+
+    function bilinearInterpolateVector(x, y, g00, g10, g01, g11) {
+      var rx = (1 - x);
+      var ry = (1 - y);
+      var a = rx * ry,  b = x * ry,  c = rx * y,  d = x * y;
+      var u = g00[0] * a + g10[0] * b + g01[0] * c + g11[0] * d;
+      var v = g00[1] * a + g10[1] * b + g01[1] * c + g11[1] * d;
+      return [u, v, Math.sqrt(u * u + v * v)];
+    }
 
     /**
      * @returns {Boolean} true if the specified value is not null and not undefined.
@@ -209,6 +227,12 @@
       return a - n * Math.floor(a / n);
     };
 
+    // var isVisible = function(x, y) {
+    //   const width = that.canvas.width;
+    //   var i = (y * width + x) * 4;
+    //   return data[i + 3] > 0;  // non-zero alpha means pixel is visible
+    // };
+
     /**
      * @returns {Boolean} true if agent is probably a mobile device. Don't really care if this is accurate.
      */
@@ -220,37 +244,94 @@
      * Calculate distortion of the wind vector caused by the shape of the projection at point (x, y). The wind
      * vector is modified in place and returned by this function.
      */
-    var distort = function (projection, λ, φ, x, y, scale, wind, windy) {
+    // var distort = function (projection, λ, φ, x, y, scale, wind, windy) {
+    //   var u = wind[0] * scale;
+    //   var v = wind[1] * scale;
+    //   var d = distortion(projection, λ, φ, x, y, windy);
+    //
+    //   // Scale distortion vectors by u and v, then add.
+    //   wind[0] = d[0] * u + d[2] * v;
+    //   wind[1] = d[1] * u + d[3] * v;
+    //   return wind;
+    // };
+
+    /**
+     * Calculate distortion of the wind vector caused by the shape of the projection at point (x, y). The wind
+     * vector is modified in place and returned by this function.
+     */
+    function distort(projection, λ, φ, x, y, scale, wind) {
       var u = wind[0] * scale;
       var v = wind[1] * scale;
-      var d = distortion(projection, λ, φ, x, y, windy);
+      var d = distortion(projection, λ, φ, x, y);
 
       // Scale distortion vectors by u and v, then add.
       wind[0] = d[0] * u + d[2] * v;
       wind[1] = d[1] * u + d[3] * v;
       return wind;
-    };
+    }
 
-    var distortion = function (projection, λ, φ, x, y, windy) {
-      var τ = 2 * Math.PI;
-      // var H = Math.pow(10, -5.2);
-      var H = that.params.projection === 'EPSG:4326' ? 5 : Math.pow(10, -5.2);
+    /**
+     * Returns the distortion introduced by the specified projection at the given point.
+     *
+     * This method uses finite difference estimates to calculate warping by adding a very small amount (h) to
+     * both the longitude and latitude to create two lines. These lines are then projected to pixel space, where
+     * they become diagonals of triangles that represent how much the projection warps longitude and latitude at
+     * that location.
+     *
+     * <pre>
+     *        (λ, φ+h)                  (xλ, yλ)
+     *           .                         .
+     *           |               ==>        \
+     *           |                           \   __. (xφ, yφ)
+     *    (λ, φ) .____. (λ+h, φ)       (x, y) .--
+     * </pre>
+     *
+     * See:
+     *     Map Projections: A Working Manual, Snyder, John P: pubs.er.usgs.gov/publication/pp1395
+     *     gis.stackexchange.com/questions/5068/how-to-create-an-accurate-tissot-indicatrix
+     *     www.jasondavies.com/maps/tissot
+     *
+     * @returns {Array} array of scaled derivatives [dx/dλ, dy/dλ, dx/dφ, dy/dφ]
+     */
+    function distortion(projection, λ, φ, x, y) {
       var hλ = λ < 0 ? H : -H;
       var hφ = φ < 0 ? H : -H;
+      var pλ = projection([λ + hλ, φ]);
+      var pφ = projection([λ, φ + hφ]);
 
-      var pλ = project(φ, λ + hλ, windy);
-      var pφ = project(φ + hφ, λ, windy);
-
-      // Meridian scale factor (see Snyder, equation 4-3), where R = 1. This handles issue where length of 1º λ
+      // Meridian scale factor (see Snyder, equation 4-3), where R = 1. This handles issue where length of 1° λ
       // changes depending on φ. Without this, there is a pinching effect at the poles.
       var k = Math.cos(φ / 360 * τ);
+
       return [
         (pλ[0] - x) / hλ / k,
         (pλ[1] - y) / hλ / k,
         (pφ[0] - x) / hφ,
         (pφ[1] - y) / hφ
       ];
-    };
+    }
+
+    // var distortion = function (projection, λ, φ, x, y, windy) {
+    //   var τ = 2 * Math.PI;
+    //   // var H = Math.pow(10, -5.2);
+    //   var H = 5;
+    //   // var H = that.params.projection === 'EPSG:4326' ? 5 : Math.pow(10, -5.2);
+    //   var hλ = λ < 0 ? H : -H;
+    //   var hφ = φ < 0 ? H : -H;
+    //
+    //   var pλ = project(φ, λ + hλ, windy);
+    //   var pφ = project(φ + hφ, λ, windy);
+    //
+    //   // Meridian scale factor (see Snyder, equation 4-3), where R = 1. This handles issue where length of 1º λ
+    //   // changes depending on φ. Without this, there is a pinching effect at the poles.
+    //   var k = Math.cos(φ / 360 * τ);
+    //   return [
+    //     (pλ[0] - x) / hλ / k,
+    //     (pλ[1] - y) / hλ / k,
+    //     (pφ[0] - x) / hφ,
+    //     (pφ[1] - y) / hφ
+    //   ];
+    // };
 
     var createField = function (columns, bounds, callback) {
 
@@ -298,77 +379,93 @@
       return (deg / 180) * Math.PI;
     };
 
-    var rad2deg = function (ang) {
-      return ang / (Math.PI / 180.0);
-    };
+    // var invert = function (x, y, windy) {
+    //   var mapLonDelta = windy.east - windy.west;
+    //   var worldMapRadius = windy.width / rad2deg(mapLonDelta) * 360 / (2 * Math.PI);
+    //   var mapOffsetY = (worldMapRadius / 2 * Math.log((1 + Math.sin(windy.south)) / (1 - Math.sin(windy.south))));
+    //   var equatorY = windy.height + mapOffsetY;
+    //   var a = (equatorY - y) / worldMapRadius;
+    //   var lat = 180 / Math.PI * (2 * Math.atan(Math.exp(a)) - Math.PI / 2);
+    //   var lon = rad2deg(windy.west) + x / windy.width * rad2deg(mapLonDelta);
+    //   return [lon, lat];
+    // };
 
-    var invert;
-
-    if (that.params.projection === 'EPSG:4326') {
-      invert = function (x, y, windy) {
-        var mapLonDelta = windy.east - windy.west;
-        var mapLatDelta = windy.south - windy.north;
-        var lat = rad2deg(windy.north) + y / windy.height * rad2deg(mapLatDelta);
-        var lon = rad2deg(windy.west) + x / windy.width * rad2deg(mapLonDelta);
-        return [lon, lat];
-      };
-    } else {
-      invert = function (x, y, windy) {
-        var mapLonDelta = windy.east - windy.west;
-        var worldMapRadius = windy.width / rad2deg(mapLonDelta) * 360 / (2 * Math.PI);
-        var mapOffsetY = (worldMapRadius / 2 * Math.log((1 + Math.sin(windy.south)) / (1 - Math.sin(windy.south))));
-        var equatorY = windy.height + mapOffsetY;
-        var a = (equatorY - y) / worldMapRadius;
-        var lat = 180 / Math.PI * (2 * Math.atan(Math.exp(a)) - Math.PI / 2);
-        var lon = rad2deg(windy.west) + x / windy.width * rad2deg(mapLonDelta);
-        return [lon, lat];
-      };
-    }
-
-    var mercY = function (lat) {
-      return Math.log(Math.tan(lat / 2 + Math.PI / 4));
-    };
+    // var mercY = function (lat) {
+    //   return Math.log(Math.tan(lat / 2 + Math.PI / 4));
+    // };
 
 
-    var project = function (lat, lon, windy) { // both in radians, use deg2rad if neccessary
-      var ymin = mercY(windy.south);
-      var ymax = mercY(windy.north);
-      var xFactor = windy.width / (windy.east - windy.west);
-      var yFactor = windy.height / (ymax - ymin);
-
-      var y = mercY(deg2rad(lat));
-      var x = (deg2rad(lon) - windy.west) * xFactor;
-      var y = (ymax - y) * yFactor; // y points south
-      return [x, y];
-    };
+    // var project = function (lat, lon, windy) { // both in radians, use deg2rad if neccessary
+    //   if (that.useDefaults) {
+    //     var ymin = mercY(windy.south);
+    //     var ymax = mercY(windy.north);
+    //     var xFactor = windy.width / (windy.east - windy.west);
+    //     var yFactor = windy.height / (ymax - ymin);
+    //
+    //     var y = mercY(deg2rad(lat));
+    //     var x = (deg2rad(lon) - windy.west) * xFactor;
+    //     var y = (ymax - y) * yFactor; // y points south
+    //     return [x ,y];
+    //   }
+    //   return that.params.project([lon, lat]);
+    // };
 
     var interpolateField = function (grid, bounds, extent, callback) {
 
-      var projection = {};
+      var projection = that.params.project;
+      var unprojection = that.params.unproject;
       var mapArea = ((extent.south - extent.north) * (extent.west - extent.east));
       var velocityScale = that.VELOCITY_SCALE * Math.pow(mapArea, 0.4);
 
       var columns = [];
       var x = bounds.x;
 
-      function interpolateColumn (x) {
+      function interpolateColumn(x) {
         var column = [];
         for (var y = bounds.y; y <= bounds.yMax; y += 2) {
-          var coord = invert(x, y, extent);
+          // point[0] = x; point[1] = y;
+          var coord = unprojection([x, y]);
+          // var color = TRANSPARENT_BLACK;
+          var wind = null;
           if (coord) {
             var λ = coord[0], φ = coord[1];
             if (isFinite(λ)) {
-              var wind = grid.interpolate(λ, φ);
+              wind = interpolate(λ, φ);
+              var scalar = null;
               if (wind) {
-                wind = distort(projection, λ, φ, x, y, velocityScale, wind, extent);
-                column[y + 1] = column[y] = wind;
-
+                wind = distort(projection, λ, φ, x, y, velocityScale, wind);
+                scalar = wind[2];
               }
+              // if (hasDistinctOverlay) {
+              //   scalar = overlayInterpolate(λ, φ);
+              // }
+              // if (µ.isValue(scalar)) {
+              //   color = scale.gradient(scalar, OVERLAY_ALPHA);
+              // }
             }
           }
+          column[y+1] = column[y] = wind || HOLE_VECTOR;
         }
-        columns[x + 1] = columns[x] = column;
+        columns[x+1] = columns[x] = column;
       }
+
+      // function interpolateColumn (x) {
+      //   var column = [];
+      //   for (var y = bounds.y; y <= bounds.yMax; y += 2) {
+      //     var coord = invert(x, y, extent);
+      //     if (coord) {
+      //       var λ = coord[0], φ = coord[1];
+      //       if (isFinite(λ)) {
+      //         var wind = grid.interpolate(λ, φ);
+      //         if (wind) {
+      //           wind = distort(projection, λ, φ, x, y, velocityScale, wind, extent);
+      //           column[y + 1] = column[y] = wind;
+      //         }
+      //       }
+      //     }
+      //   }
+      //   columns[x + 1] = columns[x] = column;
+      // }
 
       (function batchInterpolate () {
         var start = Date.now();
@@ -620,9 +717,16 @@
       var proj = sr.getProjection();
       this._windy = new Windy(Object.assign({}, {canvas: this.canvas,
         data: this.layer.getData(),
-        projection: proj.code || 'EPSG:4326',
+        useDefaults: false, // 使用默认内置坐标转换函数
+        projection: proj.code || 'EPSG:3857',
         onDraw: function () {
           this$1.setCanvasUpdated();
+        },
+        project: function (coordinates) {
+          return map.coordinateToContainerPoint(new maptalks.Coordinate(coordinates)).toArray();
+        },
+        unproject: function (point) {
+          return map.containerPointToCoordinate(new maptalks.Point(point)).toArray();
         }},
         params));
     };

@@ -36,7 +36,7 @@
   });
 
   var realtime = false;
-  axios.get(realtime ? '../server/public/parseData/2018090706.json' : './out.json').then(function (res) {
+  axios.get(realtime ? '../server/public/parseData/2018090706.json' : './new.json').then(function (res) {
     if (res.data) {
       var config = {
         minVelocity: 0, // 粒子强度最小的速度 (m/s)

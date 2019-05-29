@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <title>windy</title>
+  <style>
+    html, body, #map {
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+<canvas id="map"></canvas>
+<script>
+  function getGrib(data) {
+    for (let y = 0; y < data.values.length; y++) {
+      for (let x = 0; x < data.values[0].length; x++) {
+
+      }
+    }
+  }
+
+  fetch('http://chibiapi.mojitest.com/tob-data-service/v1/data/ec/grid?elem=TT&level=P0000&dataTime=201908091200&startX=72&startY=25&endX=110&endY=54.2&disc=1', {
+    method: 'GET',
+  })
+    .then(res => res.json())
+    .then(({ data }) => {
+      console.log(data);
+    });
+</script>
+</body>
+</html>

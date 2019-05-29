@@ -92,6 +92,7 @@ class OlWind extends ol.layer.Image {
   render (canvas) {
     const extent = this._getExtent();
     if (this.isClear || !this.getData() || !extent) return this;
+    const map = this.getMap();
     if (canvas && !this.$Windy) {
       const {
         minVelocity,
@@ -104,7 +105,7 @@ class OlWind extends ol.layer.Image {
       } = this.options;
       this.$Windy = new Windy({
         canvas: canvas,
-        projection: this._getProjectionCode(),
+        // projection: this._getProjectionCode(),
         data: this.getData(),
         minVelocity,
         maxVelocity,
@@ -112,7 +113,17 @@ class OlWind extends ol.layer.Image {
         particleAge,
         lineWidth,
         particleMultiplier,
-        colorScale
+        colorScale,
+        useDefaults: false, // 使用默认内置坐标转换函数
+        onDraw: () => {
+          // this.setCanvasUpdated();
+        },
+        project: (coordinates) => {
+          return map.getPixelFromCoordinate(coordinates);
+        },
+        unproject: (point) => {
+          return map.getCoordinateFromPixel(point);
+        }
       });
       this.$Windy.start(extent[0], extent[1], extent[2], extent[3]);
     } else if (canvas && this.$Windy) {
