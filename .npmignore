@@ -1,8 +1,9 @@
-.idea/
 build/
-examples/
+example/
 docs/
+config/
 server/
+lib/
 node_modules/
 test/
 .editorconfig
