@@ -1,0 +1,24 @@
+{
+  "extends": [
+    "tslint:latest",
+    "tslint-plugin-prettier",
+    "tslint-config-prettier"
+  ],
+  "rules": {
+    "prettier": true,
+    "quotemark": [
+      true,
+      "single",
+      "avoid-escape",
+      "avoid-template",
+      "jsx-double"
+    ],
+    "object-literal-sort-keys": false
+  },
+  "include": [
+    "packages/**"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
