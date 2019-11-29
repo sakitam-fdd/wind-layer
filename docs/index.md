@@ -64,7 +64,7 @@ map.addLayer(wind) // 此模式下属性必须配置 map 字段
 | 配置项 | 简介 | 类型 | 备注 |
 | --- | --- | --- | --- |
 | logo | logo | `	string or olx.LogoOptions or undefined` | logo |
-| state | 图层数据源状态 | `	ol.source.State or undefined` | '' |
+| state | 图层数据源状态 | `	ol.source.State or undefined` | '--' |
 | attributions | 版权 | `ol.AttributionLike or undefined` | 版权 |
 | resolutions | 分辨率 | `Array.<number> or undefined` | 指定每一层级对应的分辨率 |
 | layerName | 图层名 | `String` | 图层名称或者其他可观察属性 |

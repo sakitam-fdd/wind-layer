@@ -106,6 +106,7 @@ class OlWind extends ol.layer.Image {
         canvas: canvas,
         projection: this._getProjectionCode(),
         data: this.getData(),
+        devicePixelRatio: this.options.devicePixelRatio,
         minVelocity,
         maxVelocity,
         velocityScale,
@@ -310,7 +311,8 @@ class OlWind extends ol.layer.Image {
           particleAge,
           lineWidth,
           particleMultiplier,
-          colorScale
+          colorScale,
+          devicePixelRatio: this.options.devicePixelRatio
         });
         if (this.getMap() && this._canvas && this.data) {
           this.render(this._canvas);
