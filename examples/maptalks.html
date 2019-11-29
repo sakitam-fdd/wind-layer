@@ -39,12 +39,12 @@
   axios.get(realtime ? '../server/public/parseData/2018090706.json' : './out.json').then(function (res) {
     if (res.data) {
       var config = {
-        minVelocity: 0, // 粒子强度最小的速度 (m/s)
-        maxVelocity: 10, // 粒子强度最大的速度 (m/s)
-        velocityScale: 0.05, // 风速的比例
-        particleAge: 90, // 重绘之前生成的离子数量的最大帧数
+        minVelocity: 1, // 粒子强度最小的速度 (m/s)
+        maxVelocity: 18, // 粒子强度最大的速度 (m/s)
+        velocityScale: 0.05 * 2, // 风速的比例
+        particleAge: 20, // 重绘之前生成的离子数量的最大帧数
         lineWidth: 1, // 绘制粒子的线宽
-        particleMultiplier: 0.005, // 离子数量
+        particleMultiplier: 0.005 * 2 * 10, // 离子数量
       };
 
       var layer = new MaptalksWindy('windy', res.data, {
@@ -65,12 +65,12 @@
           "rgb(220,24,32)",
           "rgb(180,0,35)"
         ],
-        minVelocity: 0,
-        maxVelocity: 10,
-        velocityScale: 0.005,
+        minVelocity: 1,
+        maxVelocity: 20,
+        velocityScale: 0.005 * 2,
         particleAge: 90,
         lineWidth: 1,
-        particleMultiplier: 1 / 300,
+        particleMultiplier: 1 / 300 * 2,
       });
 
       const gui = new dat.GUI();

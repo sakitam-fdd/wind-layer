@@ -1,5 +1,5 @@
 import Windy from '../windy/windy';
-import { createCanvas, getDirection, getSpeed, getExtent } from '../helper';
+import { createCanvas, getDirection, getSpeed } from '../helper';
 
 const global = typeof window === 'undefined' ? {} : window;
 const AMap = global.AMap || {};
@@ -205,12 +205,13 @@ class AMapWind {
       northEast = bounds.getNorthEast(); // xmax ymax
       southWest = bounds.getSouthWest(); // xmin ymin
     } else {
+      // TODO: 高德地图3D模式下目前返回的bounds顺序为左上-右上-右下-左下-左上
       const arrays = bounds.bounds.map(item => {
         return [item.getLng(), item.getLat()];
       });
-      const extent = getExtent(arrays);
-      southWest = new AMap.LngLat(extent[0], extent[1]);
-      northEast = new AMap.LngLat(extent[2], extent[3]);
+      // const extent = getExtent(arrays);
+      southWest = new AMap.LngLat(...arrays[3]);
+      northEast = new AMap.LngLat(...arrays[1]);
     }
     return new AMap.Bounds(southWest, northEast);
   }
@@ -222,8 +223,14 @@ class AMapWind {
    */
   _getExtent () {
     const [width, height] = [this.map.getSize().width, this.map.getSize().height];
-    const _ne = this._getBounds().getNorthEast();
-    const _sw = this._getBounds().getSouthWest();
+    const bounds = this._getBounds();
+    const _ne = bounds.getNorthEast();
+    const _sw = bounds.getSouthWest();
+    const min = _sw.lng;
+    // TODO: 当东北角坐标小于0时需要按照经度递增处理，而且目前高德最多只会有一个世界
+    const max = _ne.lng < 0 ? 360 + _ne.lng : _ne.lng;
+    const xmin = Math.min(min, max);
+    const xmax = Math.max(min, max);
     return [
       [
         [0, 0], [width, height]
@@ -231,7 +238,7 @@ class AMapWind {
       width,
       height,
       [
-        [_sw.lng, _sw.lat], [_ne.lng, _ne.lat] // [xmin, ymin, xmax, ymax]: 西南 和 东北
+        [xmin, _sw.lat], [xmax, _ne.lat] // [xmin, ymin, xmax, ymax]: 西南 和 东北
       ]
     ]
   }

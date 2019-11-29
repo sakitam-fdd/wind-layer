@@ -1,7 +1,7 @@
 /*!
  * author: sakitam-fdd <smilefdd@gmail.com> 
  * wind-layer v0.1.0
- * build-time: 2019-5-25 22:8
+ * build-time: 2019-11-29 18:37
  * LICENSE: MIT
  * (c) 2017-2019 https://sakitam-fdd.github.io/wind-layer
  */
@@ -58,6 +58,7 @@ var Windy = function (params) {
     that.PARTICLE_REDUCTION = (Math.pow(window.devicePixelRatio, 1 / 3) || 1.6);   // multiply particle count for mobiles by this amount
     that.FRAME_RATE = params.frameRate || 16;
     that.COLOR_SCALE = params.colorScale || defaulColorScale;
+    that.DEVICEPIXELRATIO = params.devicePixelRatio || 1;
   };
 
   buildParams(params);
@@ -437,8 +438,7 @@ var Windy = function (params) {
             particle.xt = xt;
             particle.yt = yt;
             buckets[colorStyles.indexFor(m)].push(particle);
-          }
-          else {
+          } else {
             // Particle isn't visible, but it still moves through the field.
             particle.x = xt;
             particle.y = yt;
@@ -457,7 +457,7 @@ var Windy = function (params) {
       // Fade existing particle trails.
       var prev = "lighter";
       g.globalCompositeOperation = "destination-in";
-      g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+      g.fillRect(bounds.x, bounds.y, that.canvas.width, that.canvas.height);
       g.globalCompositeOperation = prev;
       g.globalAlpha = 0.9;
 
@@ -467,8 +467,8 @@ var Windy = function (params) {
           g.beginPath();
           g.strokeStyle = colorStyles[i];
           bucket.forEach(function (particle) {
-            g.moveTo(particle.x, particle.y);
-            g.lineTo(particle.xt, particle.yt);
+            g.moveTo(particle.x * that.DEVICEPIXELRATIO, particle.y * that.DEVICEPIXELRATIO);
+            g.lineTo(particle.xt * that.DEVICEPIXELRATIO, particle.yt * that.DEVICEPIXELRATIO);
             particle.x = particle.xt;
             particle.y = particle.yt;
           });

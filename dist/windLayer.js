@@ -1,7 +1,7 @@
 /*!
  * author: sakitam-fdd <smilefdd@gmail.com> 
  * wind-layer v0.1.0
- * build-time: 2019-5-25 22:8
+ * build-time: 2019-11-29 18:38
  * LICENSE: MIT
  * (c) 2017-2019 https://sakitam-fdd.github.io/wind-layer
  */
@@ -59,6 +59,7 @@
       that.PARTICLE_REDUCTION = (Math.pow(window.devicePixelRatio, 1 / 3) || 1.6);   // multiply particle count for mobiles by this amount
       that.FRAME_RATE = params.frameRate || 16;
       that.COLOR_SCALE = params.colorScale || defaulColorScale;
+      that.DEVICEPIXELRATIO = params.devicePixelRatio || 1;
     };
 
     buildParams(params);
@@ -438,8 +439,7 @@
               particle.xt = xt;
               particle.yt = yt;
               buckets[colorStyles.indexFor(m)].push(particle);
-            }
-            else {
+            } else {
               // Particle isn't visible, but it still moves through the field.
               particle.x = xt;
               particle.y = yt;
@@ -458,7 +458,7 @@
         // Fade existing particle trails.
         var prev = "lighter";
         g.globalCompositeOperation = "destination-in";
-        g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+        g.fillRect(bounds.x, bounds.y, that.canvas.width, that.canvas.height);
         g.globalCompositeOperation = prev;
         g.globalAlpha = 0.9;
 
@@ -468,8 +468,8 @@
             g.beginPath();
             g.strokeStyle = colorStyles[i];
             bucket.forEach(function (particle) {
-              g.moveTo(particle.x, particle.y);
-              g.lineTo(particle.xt, particle.yt);
+              g.moveTo(particle.x * that.DEVICEPIXELRATIO, particle.y * that.DEVICEPIXELRATIO);
+              g.lineTo(particle.xt * that.DEVICEPIXELRATIO, particle.yt * that.DEVICEPIXELRATIO);
               particle.x = particle.xt;
               particle.y = particle.yt;
             });
@@ -644,21 +644,6 @@
     return meters * 3.6
   };
 
-  var getExtent = function (coords) {
-    var extent = [
-      Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY,
-      Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY
-    ];
-    return coords.reduce(function (prev, coord) {
-      return [
-        Math.min(coord[0], prev[0]),
-        Math.min(coord[1], prev[1]),
-        Math.max(coord[0], prev[2]),
-        Math.max(coord[1], prev[3])
-      ];
-    }, extent);
-  };
-
   var global = typeof window === 'undefined' ? {} : window;
   var ol = global.ol || {};
 
@@ -773,6 +758,7 @@
           canvas: canvas,
           projection: this._getProjectionCode(),
           data: this.getData(),
+          devicePixelRatio: this.options.devicePixelRatio,
           minVelocity: minVelocity,
           maxVelocity: maxVelocity,
           velocityScale: velocityScale,
@@ -974,7 +960,8 @@
             particleAge: particleAge,
             lineWidth: lineWidth,
             particleMultiplier: particleMultiplier,
-            colorScale: colorScale
+            colorScale: colorScale,
+            devicePixelRatio: this.options.devicePixelRatio
           });
           if (this.getMap() && this._canvas && this.data) {
             this.render(this._canvas);
@@ -1203,12 +1190,13 @@
       northEast = bounds.getNorthEast(); // xmax ymax
       southWest = bounds.getSouthWest(); // xmin ymin
     } else {
+      // TODO: 高德地图3D模式下目前返回的bounds顺序为左上-右上-右下-左下-左上
       var arrays = bounds.bounds.map(function (item) {
         return [item.getLng(), item.getLat()];
       });
-      var extent = getExtent(arrays);
-      southWest = new AMap.LngLat(extent[0], extent[1]);
-      northEast = new AMap.LngLat(extent[2], extent[3]);
+      // const extent = getExtent(arrays);
+      southWest = new (Function.prototype.bind.apply( AMap.LngLat, [ null ].concat( arrays[3]) ));
+      northEast = new (Function.prototype.bind.apply( AMap.LngLat, [ null ].concat( arrays[1]) ));
     }
     return new AMap.Bounds(southWest, northEast);
   };
@@ -1222,8 +1210,14 @@
     var ref = [this.map.getSize().width, this.map.getSize().height];
       var width = ref[0];
       var height = ref[1];
-    var _ne = this._getBounds().getNorthEast();
-    var _sw = this._getBounds().getSouthWest();
+    var bounds = this._getBounds();
+    var _ne = bounds.getNorthEast();
+    var _sw = bounds.getSouthWest();
+    var min = _sw.lng;
+    // TODO: 当东北角坐标小于0时需要按照经度递增处理，而且目前高德最多只会有一个世界
+    var max = _ne.lng < 0 ? 360 + _ne.lng : _ne.lng;
+    var xmin = Math.min(min, max);
+    var xmax = Math.max(min, max);
     return [
       [
         [0, 0], [width, height]
@@ -1231,7 +1225,7 @@
       width,
       height,
       [
-        [_sw.lng, _sw.lat], [_ne.lng, _ne.lat] ]
+        [xmin, _sw.lat], [xmax, _ne.lat] ]
     ]
   };
 

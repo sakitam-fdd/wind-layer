@@ -62,17 +62,18 @@ var map = new ol.Map({
       layerName: 'baseLayer',
       preload: 4,
       source: new ol.source.OSM({
-        url: "http://{a-c}.sm.mapstack.stamen.com/" +
-        "(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/" +
-        "{z}/{x}/{y}.png"
+        // url: "http://{a-c}.sm.mapstack.stamen.com/" +
+        // "(toner-lite,$fff[difference],$fff[@23],$fff[hsl-saturation@20])/" +
+        // "{z}/{x}/{y}.png"
+        url: 'http://mt2.google.cn/vt/lyrs=y&hl=zh-CN&gl=CN&src=app&x={x}&y={y}&z={z}&s=G'
       })
     })
   ],
   loadTilesWhileAnimating: true,
-  pixelRatio: 1,
+  pixelRatio: window.devicePixelRatio,
   view: new ol.View({
-    projection: 'EPSG:4326',
-    center: [113.53450137499999, 34.44104525],
+    projection: 'EPSG:3857',
+    center: ol.proj.fromLonLat([113.53450137499999, 34.44104525]),
     zoom: 5
   })
 });
@@ -98,7 +99,7 @@ axios.get(realtime ? '../server/public/parseData/2018090706.json' : './out.json'
     wind = new OlWind(data, {
       layerName: 'data',
       projection: 'EPSG:4326',
-      ratio: 1,
+      devicePixelRatio: window.devicePixelRatio,
       map: map,
       colorScale: [
         "rgb(36,104, 180)",
