@@ -13,10 +13,10 @@ RUN set -x \
     && npm install -g npm@latest yarn@latest
 
 # 输出版本
-RUN node -v
-RUN npm -v
-RUN yarn -v
-RUN java -version
+#RUN node -v
+#RUN npm -v
+#RUN yarn -v
+#RUN java -version
 
 # 清空缓存
 RUN apt-get clean && \
