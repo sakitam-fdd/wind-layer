@@ -1,6 +1,6 @@
 {
   "name": "wind-layer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "a openlayers ol bmap amap maptalks extension to windjs",
   "author": "sakitam-fdd <smilefdd@gmail.com>",
   "homepage": "https://sakitam-fdd.github.io/wind-layer",

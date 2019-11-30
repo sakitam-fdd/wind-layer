@@ -239,7 +239,9 @@ const fetchGribData = params => {
       })
     } else {
       const hours = utils.roundHours(moment(_time).hour(), 6);
+      // FIXME：uri
       const stamp = moment(_time).format('YYYYMMDD') + hours;
+      const stamp2 = moment(_time).format('YYYYMMDD') + '/' + hours;
       return new Promise((resolve, reject) => {
         const _sourcePath = utils.resolve(config.staticDir + config.sourceDataDir + stamp + '.f000');
         const _sourceExist = utils.checkFileExists(_sourcePath);
@@ -264,7 +266,7 @@ const fetchGribData = params => {
               rightlon: config.extent[2],
               toplat: config.extent[3], // 纬度
               bottomlat: config.extent[1],
-              dir: '/gfs.' + stamp
+              dir: '/gfs.' + stamp2
             }, config.requestParams)
           }).then(response => {
             if (response.status !== 200) {
@@ -289,6 +291,10 @@ const fetchGribData = params => {
                     name: stamp + '.f000'
                   }
                 })
+              });
+
+              stream.on('error', function (e) {
+                console.log(e);
               })
             }
           }).catch((error) => {

@@ -5,7 +5,7 @@ npm install wind-layer --save
 import windLayer from 'wind-layer'
 
 // 指定版本安装
-npm install wind-layer@0.0.7 --save
+npm install wind-layer@0.1.1 --save
 import windLayer from 'wind-layer'// 分模块
 // 分模块
 import {
@@ -27,21 +27,21 @@ import MaptalksWindy from 'wind-layer/dist/MaptalksWindy.esm.js'
 #### cdn
 
 目前可通过 [unpkg.com](https://unpkg.com/wind-layer/dist/windLayer.js) /
- [jsdelivr](https://cdn.jsdelivr.net/npm/wind-layer@0.1.0/dist/windLayer.js) 获取最新版本的资源。
+ [jsdelivr](https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/windLayer.js) 获取最新版本的资源。
 
 ```bash
 // jsdelivr (jsdelivr由于缓存原因最好锁定版本号，否则可能会出现意料之外的问题)
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.0/dist/windLayer.js
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.0/dist/windLayer.min.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/windLayer.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/windLayer.min.js
 // npm
 https://unpkg.com/wind-layer/dist/windLayer.js
 https://unpkg.com/wind-layer/dist/windLayer.min.js
 
 // 分模块
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.0/dist/AMapWind.js // amap
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.0/dist/BMapWind.js // bmap
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.0/dist/OlWind.js // openlayers
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.0/dist/MaptalksWindy.js // maptalks
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/AMapWind.js // amap
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/BMapWind.js // bmap
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/OlWind.js // openlayers
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/MaptalksWindy.js // maptalks
 ```
 
 
@@ -73,7 +73,8 @@ map.addLayer(wind) // 此模式下属性必须配置 map 字段
 | minResolution | 最小分辨率 | `Number` | 默认为 `undefined` |
 | maxResolution | 最大分辨率 | `Number` | 默认为 `undefined` |
 | zIndex | 图层index | `Number` | 默认为 `0` |
-| ratio | 画布和地图窗口的比值 | `Number` | 现在默认 `1.5` |
+| ratio | 画布和地图窗口的比值 | `Number` | 现在默认 `1` |
+| devicePixelRatio | 为了兼容高分屏，暂时新增一个参数 | `Number` | 默认 `1` |
 | map | 地图 | `ol.Map` | 对应的地图实例，调用原生 `addLayer` 时必须配置此字段 |
 
 #### bmap

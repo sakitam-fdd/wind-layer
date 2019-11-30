@@ -1,7 +1,7 @@
 /*!
  * author: sakitam-fdd <smilefdd@gmail.com> 
- * wind-layer v0.1.0
- * build-time: 2019-11-29 18:37
+ * wind-layer v0.1.1
+ * build-time: 2019-11-30 21:42
  * LICENSE: MIT
  * (c) 2017-2019 https://sakitam-fdd.github.io/wind-layer
  */
@@ -755,7 +755,8 @@ var OlWindy = /*@__PURE__*/(function (ImageLayer) {
         particleAge: particleAge,
         lineWidth: lineWidth,
         particleMultiplier: particleMultiplier,
-        colorScale: colorScale
+        colorScale: colorScale,
+        devicePixelRatio: this.options.devicePixelRatio
       });
       this.$Windy.start(extent[0], extent[1], extent[2], extent[3]);
     } else if (canvas && this.$Windy) {
@@ -950,7 +951,8 @@ var OlWindy = /*@__PURE__*/(function (ImageLayer) {
           particleAge: particleAge,
           lineWidth: lineWidth,
           particleMultiplier: particleMultiplier,
-          colorScale: colorScale
+          colorScale: colorScale,
+          devicePixelRatio: this.options.devicePixelRatio
         });
         if (this.getMap() && this._canvas && this.data) {
           this.render(this._canvas);
