@@ -145,7 +145,7 @@ version: '3'
 
 services:
   wind-server:
-    image: sakitamclone/wind-server:0.0.1
+    image: sakitamclone/wind-server:latest
     build:
       context: ./
       args:

@@ -1,8 +1,18 @@
 language: node_js
 node_js: node
+
+services:
+  - docker
+
 cache:
   directories:
     - node_modules
+
+before_install:
 install: npm install
+after_install:
+  - make image-dev
 script:
-- npm run build
+  - npm run build
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - make push-dev
