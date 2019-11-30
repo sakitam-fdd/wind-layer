@@ -111,7 +111,8 @@ class OlWindy extends ImageLayer {
         particleAge,
         lineWidth,
         particleMultiplier,
-        colorScale
+        colorScale,
+        devicePixelRatio: this.options.devicePixelRatio
       });
       this.$Windy.start(extent[0], extent[1], extent[2], extent[3]);
     } else if (canvas && this.$Windy) {
@@ -309,7 +310,8 @@ class OlWindy extends ImageLayer {
           particleAge,
           lineWidth,
           particleMultiplier,
-          colorScale
+          colorScale,
+          devicePixelRatio: this.options.devicePixelRatio
         });
         if (this.getMap() && this._canvas && this.data) {
           this.render(this._canvas);
