@@ -9,8 +9,8 @@ cache:
     - node_modules
 
 before_install:
-install: npm install
-after_install:
+install:
+  - npm install
   - make image-dev
 script:
   - npm run build
