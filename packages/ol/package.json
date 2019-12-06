@@ -1,7 +1,7 @@
 {
   "name": "ol-wind",
   "version": "1.0.0",
-  "description": "Now I’m the model of a modern major general / The venerated Virginian veteran whose men are all / Lining up, to put me up on a pedestal / Writin’ letters to relatives / Embellishin’ my elegance and eloquence / But the elephant is in the room / The truth is in ya face when ya hear the British cannons go / BOOM",
+  "description": "ol wind",
   "keywords": [],
   "author": "sakitam-fdd <smilefdd@gmail.com>",
   "license": "MIT",
@@ -24,10 +24,25 @@
     "directory": "packages/ol"
   },
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "tsc": "tsc --project tsconfig.prod.json",
+    "clean": "rimraf dist; rimraf esm; rimraf cjs;",
+    "build": "run-p build:*",
+    "build:cjs": "BABEL_ENV=cjs babel src --root-mode upward --out-dir cjs --source-maps --extensions .ts,.tsx --delete-dir-on-start --no-comments",
+    "build:esm": "BABEL_ENV=esm babel src --root-mode upward --out-dir esm --source-maps --extensions .ts,.tsx --delete-dir-on-start --no-comments",
+    "watch": "BABEL_ENV=cjs babel src --watch --root-mode upward --out-dir cjs --source-maps --extensions .ts,.tsx --delete-dir-on-start --no-comments",
+    "lint:ts": "run-p -c lint:ts-*",
+    "test": "jest",
+    "prepublishOnly": "run-p test",
+    "generate:docs": "typedoc --out docs --target es6 --theme minimal --mode file src"
   },
   "bugs": {
     "url": "https://github.com/sakitam-fdd/wind-layer/issues"
   },
-  "homepage": "https://github.com/sakitam-fdd/wind-layer#readme"
+  "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
+  "peerDependencies": {
+    "ol": ">=5.0.0"
+  },
+  "devDependencies": {
+    "ol": "^6.0.0"
+  }
 }

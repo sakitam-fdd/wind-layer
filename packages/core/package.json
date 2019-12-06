@@ -24,15 +24,16 @@
     "directory": "packages/core"
   },
   "scripts": {
-    "tsc": "tsc --project tsconfig.build.json",
-    "clean": "rimraf dist; rimraf es; rimraf lib;",
+    "tsc": "tsc --project tsconfig.prod.json",
+    "clean": "rimraf dist; rimraf esm; rimraf cjs;",
     "build": "run-p build:*",
-    "build:cjs": "BABEL_ENV=cjs babel src --root-mode upward --out-dir lib --source-maps --extensions .ts,.tsx --delete-dir-on-start --no-comments",
-    "build:esm": "BABEL_ENV=esm babel src --root-mode upward --out-dir es --source-maps --extensions .ts,.tsx --delete-dir-on-start --no-comments",
-    "watch": "BABEL_ENV=cjs babel src --watch --root-mode upward --out-dir lib --source-maps --extensions .ts,.tsx --delete-dir-on-start --no-comments",
+    "build:cjs": "BABEL_ENV=cjs babel src --root-mode upward --out-dir cjs --source-maps --extensions .ts,.tsx --delete-dir-on-start --no-comments",
+    "build:esm": "BABEL_ENV=esm babel src --root-mode upward --out-dir esm --source-maps --extensions .ts,.tsx --delete-dir-on-start --no-comments",
+    "watch": "BABEL_ENV=cjs babel src --watch --root-mode upward --out-dir cjs --source-maps --extensions .ts,.tsx --delete-dir-on-start --no-comments",
     "lint:ts": "run-p -c lint:ts-*",
     "test": "jest",
-    "prepublishOnly": "run-p test"
+    "prepublishOnly": "run-p test",
+    "generate:docs": "typedoc --out docs --target es6 --theme minimal --mode file src"
   },
   "bugs": {
     "url": "https://github.com/sakitam-fdd/wind-layer/issues"
