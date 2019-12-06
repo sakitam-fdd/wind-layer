@@ -1,0 +1,12 @@
+{
+  "extends": "",
+  "compilerOptions": {
+
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

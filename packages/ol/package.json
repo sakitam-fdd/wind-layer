@@ -1,0 +1,33 @@
+{
+  "name": "ol-wind",
+  "version": "1.0.0",
+  "description": "Now I’m the model of a modern major general / The venerated Virginian veteran whose men are all / Lining up, to put me up on a pedestal / Writin’ letters to relatives / Embellishin’ my elegance and eloquence / But the elephant is in the room / The truth is in ya face when ya hear the British cannons go / BOOM",
+  "keywords": [],
+  "author": "sakitam-fdd <smilefdd@gmail.com>",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "types": "types/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sakitam-fdd/wind-layer.git",
+    "directory": "packages/ol"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/sakitam-fdd/wind-layer/issues"
+  },
+  "homepage": "https://github.com/sakitam-fdd/wind-layer#readme"
+}
