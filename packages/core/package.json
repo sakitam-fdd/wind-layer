@@ -38,5 +38,8 @@
   "bugs": {
     "url": "https://github.com/sakitam-fdd/wind-layer/issues"
   },
-  "homepage": "https://github.com/sakitam-fdd/wind-layer#readme"
+  "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
+  "dependencies": {
+    "eventemitter3": "^4.0.0"
+  }
 }
