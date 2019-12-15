@@ -37,7 +37,7 @@ export function TypeOf(value: any) {
  * @param value
  * @returns {boolean}
  */
-export function isFunction (value: any) {
+export function isFunction (value: any): boolean {
   if (!isObject(value)) {
     return false
   }
@@ -79,11 +79,20 @@ export function isArrayBuffer(val: any) {
  * @param value
  * @returns {boolean}
  */
-export function isString (value: any) {
+export function isString (value: any): boolean {
   if (value == null) {
     return false;
   }
   return typeof value === 'string' || (value.constructor !== null && value.constructor === String);
+}
+
+/**
+ * 判断是否为数字
+ * @param value
+ * @returns {boolean}
+ */
+export function isNumber (value: any) {
+  return Object.prototype.toString.call(value) === '[object Number]' && !isNaN(value);
 }
 
 /**
