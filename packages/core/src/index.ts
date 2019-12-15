@@ -1,7 +1,7 @@
-import EventEmit from 'eventemitter3';
-import isString from 'lodash/isString';
+import { EventEmitter } from 'eventemitter3';
+import { isString } from './utils';
 
-class BaseLayer extends EventEmit {
+class BaseLayer extends EventEmitter {
   private ctx: CanvasRenderingContext2D;
   private options: {
     globalAlpha?: number; // 全局透明度
@@ -126,3 +126,5 @@ class BaseLayer extends EventEmit {
 
   }
 }
+
+export default BaseLayer;
