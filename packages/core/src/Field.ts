@@ -1,28 +1,4 @@
-import Cell from './Cell';
-
-// refTime: "2016-04-06T12:00:00.000Z"
-// parameterCategory: 0
-// parameterCategoryName: "Temperature"
-// parameterNumber: 0
-// parameterNumberName: "Temperature"
-// parameterUnit: "K"
-// numberPoints: 65160
-// shape: 6
-// shapeName: "Earth spherical with radius of 6,371,229.0 m"
-// gridUnits: "degrees"
-// resolution: 48
-// winds: "true"
-// scanMode: 0
-// nx: 360
-// ny: 181
-// basicAngle: 0
-// subDivisions: 0
-// lo1: 0
-// la1: 90
-// lo2: 359
-// la2: -90
-// dx: 1
-// dy: 1
+import Vector from './Vector';
 
 export interface IField {
   xmin: number; // 一般格点数据是按照矩形范围来切割，所以定义其经纬度范围
@@ -33,16 +9,26 @@ export interface IField {
   deltaY: number; // y（维度）增量
   cols: number; // 列（可由 `(xmax - xmin) / deltaX` 得到）
   rows: number; // 行
+  us: number[]; // U分量
+  vs: number[]; // V分量
+  wrapX: boolean;
 }
 
 export default class Field {
-  private xmin: number;
-  private xmax: number;
-  private ymin: number;
-  private ymax: number;
-  private cols: number;
-  private rows: number;
+  private readonly xmin: number;
+  private readonly xmax: number;
+  private readonly ymin: number;
+  private readonly ymax: number;
+  private readonly cols: number;
+  private readonly rows: number;
   private grid: null;
+  private us: number[];
+  private vs: number[];
+  private isContinuous: boolean;
+  private deltaY: number;
+  private deltaX: number;
+  private wrapX: boolean;
+
   constructor(params: IField) {
     this.grid = null;
 
@@ -55,12 +41,64 @@ export default class Field {
     this.cols = params.cols;
     this.rows = params.rows;
 
+    this.us = params.us;
+    this.vs = params.vs;
+
+    this.deltaX = params.deltaX;
+    this.deltaY = params.deltaY;
+
     const cols = Math.ceil((this.xmax - this.xmin) / params.deltaX);
     const rows = Math.ceil((this.ymax - this.ymin) / params.deltaY);
 
     if (cols !== this.cols || rows !== this.rows) {
       console.warn('The data grid is not available');
     }
+
+    this.isContinuous = Math.floor(this.cols * params.deltaX) >= 360;
+    this.wrapX = params.wrapX;
+  }
+
+  buildGrid() {
+    // grid = [];
+    // var p = 0;
+    // var isContinuous = Math.floor(ni * Δλ) >= 360;
+    //
+    // for (var j = 0; j < nj; j++) {
+    //   var row = [];
+    //   for (var i = 0; i < ni; i++, p++) {
+    //     row[i] = builder.data(p);
+    //   }
+    //   if (isContinuous) {
+    //     row.push(row[0]);
+    //   }
+    //   grid[j] = row;
+    // }
+
+    let grid = [];
+    let p = 0;
+
+    const { rows, cols, us, vs } = this;
+
+    for (let j = 0; j < rows; j++) {
+      const row = [];
+      for (let i = 0; i < cols; i++, p++) {
+        let u = us[p];
+        let v = vs[p];
+        let valid = this.isValid(u) && this.isValid(v);
+        row[i] = valid ? new Vector(u, v) : null;
+      }
+
+      if (this.isContinuous) {
+        // For wrapped grids, duplicate first column as last column to simplify interpolation logic
+        row.push(row[0]);
+      }
+      grid[j] = row;
+    }
+    return grid;
+  }
+
+  release() {
+    this.grid = [];
   }
 
   /**
@@ -74,7 +112,13 @@ export default class Field {
    * @param   {Number[]} g11
    * @returns {Vector}
    */
-  _doInterpolation(x, y, g00, g10, g01, g11) {
+  bilinearInterpolateVector(
+    x: number, y: number,
+    g00: { u: number; v: number; },
+    g10: { u: number; v: number; },
+    g01: { u: number; v: number; },
+    g11: { u: number; v: number; }
+  ) {
     const rx = 1 - x;
     const ry = 1 - y;
 
@@ -87,23 +131,25 @@ export default class Field {
     return new Vector(u, v);
   }
 
+  calculateRange() {
+
+  }
+
   /**
-   * Is valid (not 'null' nor 'undefined')
+   * 检查 uv是否合法
+   * @param x
    * @private
-   * @param   {Object} x object
-   * @returns {Boolean}
    */
-  _isValid(x) {
+  isValid(x: any) {
     return x !== null && x !== undefined;
   }
 
   /**
    * Nearest value at lon-lat coordinates
-   * @param   {Number} longitude
-   * @param   {Number} latitude
-   * @returns {Vector|Number}
+   * @param lon
+   * @param lat
    */
-  valueAt(lon, lat) {
+  valueAt(lon: number, lat: number) {
 
     if (!this.contains(lon, lat)) return null;
 
@@ -112,25 +158,40 @@ export default class Field {
     return new Vector(value[0], value[1]);
   }
 
-  hasValueAt(lon, lat) {
-
+  hasValueAt(lon: number, lat: number) {
     let value = this.valueAt(lon, lat);
-
     const hasValue = value !== null;
     let included = true;
-    // if (this._inFilter) {
-    //     if (until.isFunction(this._inFilter))
-    //         included = this._inFilter(value);
-    //     else if (!until.isNil(this._inFilter.min) && !until.isNil(this._inFilter.max)) {
-    //         const {min, max} = this._inFilter;
-    //         included = value <= max && value >= min;
-    //     }
-    //
-    // }
     return hasValue && included;
   }
 
-  interpolatedValueAtIndexes(i, j) {
+  // var interpolate = function (λ, φ) {
+  //
+  //   if (!grid) return null;
+  //
+  //   var i = floorMod(λ - λ0, 360) / Δλ;  // calculate longitude index in wrapped range [0, 360)
+  //   var j = (φ0 - φ) / Δφ;                 // calculate latitude index in direction +90 to -90
+  //
+  //   var fi = Math.floor(i), ci = fi + 1;
+  //   var fj = Math.floor(j), cj = fj + 1;
+  //
+  //   var row;
+  //   if ((row = grid[fj])) {
+  //     var g00 = row[fi];
+  //     var g10 = row[ci];
+  //     if (isValue(g00) && isValue(g10) && (row = grid[cj])) {
+  //       var g01 = row[fi];
+  //       var g11 = row[ci];
+  //       if (isValue(g01) && isValue(g11)) {
+  //         // All four points found, so interpolate the value.
+  //         return builder.interpolate(i - fi, j - fj, g00, g10, g01, g11);
+  //       }
+  //     }
+  //   }
+  //   return null;
+  // };
+
+  interpolatePoint(i, j) {
     //         1      2           After converting λ and φ to fractional grid indexes i and j, we find the
     //        fi  i   ci          four points 'G' that enclose point (i, j). These points are at the four
     //         | =1.4 |           corners specified by the floor and ceiling of i and j. For example, given
@@ -157,7 +218,9 @@ export default class Field {
    * @param   {Number} j - row index (integer)
    * @returns {Vector|Number}
    */
-  _valueAtIndexes(i, j) {
+  valueAtIndexes(i: number, j: number) {
+    if (!this.grid) return null;
+    // @ts-ignore
     return this.grid[j][i]; // <-- j,i !!
   }
 
@@ -167,7 +230,7 @@ export default class Field {
    * @param   {Number} j - row index (integer)
    * @returns {Number[]} [lon, lat]
    */
-  _lonLatAtIndexes(i, j) {
+  lonLatAtIndexes(i: number, j: number) {
     let lon = this._longitudeAtX(i);
     let lat = this._latitudeAtY(j);
 
@@ -179,10 +242,10 @@ export default class Field {
    * @param   {Number} i - column index (integer)
    * @returns {Number} longitude at the center of the cell
    */
-  _longitudeAtX(i) {
-    let halfXPixel = this.cellXSize / 2.0;
-    let lon = this.xllCorner + halfXPixel + i * this.cellXSize;
-    if (this.longitudeNeedsToBeWrapped) {
+  _longitudeAtX(i: number) {
+    let halfXPixel = this.deltaX / 2.0;
+    let lon = this.xmin + halfXPixel + i * this.deltaX;
+    if (this.wrapX) {
       lon = lon > 180 ? lon - 360 : lon;
     }
     return lon;
@@ -193,9 +256,9 @@ export default class Field {
    * @param   {Number} j - row index (integer)
    * @returns {Number} latitude at the center of the cell
    */
-  _latitudeAtY(j) {
-    let halfYPixel = this.cellYSize / 2.0;
-    return this.yurCorner - halfYPixel - j * this.cellYSize;
+  _latitudeAtY(j: number) {
+    let halfYPixel = this.deltaY / 2.0;
+    return this.ymax - halfYPixel - j * this.deltaY;
   }
 
   randomize(o: any = {}) {
@@ -212,8 +275,8 @@ export default class Field {
     //   return o;
     // };
 
-    let i = (Math.random() * this.nCols) | 0;
-    let j = (Math.random() * this.nRows) | 0;
+    let i = (Math.random() * this.cols) | 0;
+    let j = (Math.random() * this.rows) | 0;
 
     o.x = this._longitudeAtX(i);
     o.y = this._latitudeAtY(j);
