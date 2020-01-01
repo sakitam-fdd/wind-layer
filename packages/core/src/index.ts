@@ -68,9 +68,7 @@ class BaseLayer extends EventEmitter {
   private moveParticles(particles: any) {
     // 清空组
     const maxAge = this.options.maxAge;
-    // buckets.forEach(function (bucket) {
-    //   bucket.length = 0;
-    // });
+
     let i = 0;
     let len = particles.length;
     for (; i < len; i++) {
@@ -128,6 +126,7 @@ class BaseLayer extends EventEmitter {
 
   private drawParticle(particle: any) {
     this.ctx.beginPath();
+    // TODO 需要判断粒子是否超出视野
     // this.ctx.strokeStyle = color;
 
     this.ctx.moveTo(particle.x, particle.y);
@@ -148,10 +147,20 @@ class BaseLayer extends EventEmitter {
     this.ctx.stroke();
   }
 
-  private prepareParticlePaths() {
+  private prepareParticlePaths() { // 由用户自行处理，不再自动修改粒子数
+    // var particleCount = Math.round(bounds.width * bounds.height * that.PARTICLE_MULTIPLIER);
+    // if (isMobile()) {
+    //   particleCount *= that.PARTICLE_REDUCTION;
+    // }
+    // var particles = [];
+    // for (var i = 0; i < particleCount; i++) {
+    //   particles.push(field.randomize({age: Math.floor(Math.random() * that.MAX_PARTICLE_AGE) + 0}));
+    // }
+
+    const particleCount = this.options.paths;
     const particles = [];
     let i = 0;
-    for (; i < this.options.paths; i++) {
+    for (; i < particleCount; i++) {
       let p = this._field.randomize();
       p.age = this.randomize();
       particles.push(p);
@@ -160,7 +169,7 @@ class BaseLayer extends EventEmitter {
   }
 
   private randomize() {
-    return Math.floor(Math.random() * this.options.maxAge)
+    return Math.floor(Math.random() * this.options.maxAge); // 例如最大生成90帧插值粒子路径
   }
 
   /**

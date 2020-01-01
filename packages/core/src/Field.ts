@@ -1,13 +1,66 @@
 import Cell from './Cell';
 
+// refTime: "2016-04-06T12:00:00.000Z"
+// parameterCategory: 0
+// parameterCategoryName: "Temperature"
+// parameterNumber: 0
+// parameterNumberName: "Temperature"
+// parameterUnit: "K"
+// numberPoints: 65160
+// shape: 6
+// shapeName: "Earth spherical with radius of 6,371,229.0 m"
+// gridUnits: "degrees"
+// resolution: 48
+// winds: "true"
+// scanMode: 0
+// nx: 360
+// ny: 181
+// basicAngle: 0
+// subDivisions: 0
+// lo1: 0
+// la1: 90
+// lo2: 359
+// la2: -90
+// dx: 1
+// dy: 1
 
-/**
- *  Abstract class for a set of values (Vector | Scalar)
- *  assigned to a regular 2D-grid (lon-lat), aka 'a Raster source'
- */
+export interface IField {
+  xmin: number; // 一般格点数据是按照矩形范围来切割，所以定义其经纬度范围
+  ymin: number;
+  xmax: number;
+  ymax: number;
+  deltaX: number; // x（经度）增量
+  deltaY: number; // y（维度）增量
+  cols: number; // 列（可由 `(xmax - xmin) / deltaX` 得到）
+  rows: number; // 行
+}
+
 export default class Field {
-  constructor(x, y) {
+  private xmin: number;
+  private xmax: number;
+  private ymin: number;
+  private ymax: number;
+  private cols: number;
+  private rows: number;
+  private grid: null;
+  constructor(params: IField) {
     this.grid = null;
+
+    this.xmin = params.xmin;
+    this.xmax = params.xmax;
+
+    this.ymin = params.ymin;
+    this.ymax = params.ymax;
+
+    this.cols = params.cols;
+    this.rows = params.rows;
+
+    const cols = Math.ceil((this.xmax - this.xmin) / params.deltaX);
+    const rows = Math.ceil((this.ymax - this.ymin) / params.deltaY);
+
+    if (cols !== this.cols || rows !== this.rows) {
+      console.warn('The data grid is not available');
+    }
   }
 
   /**
