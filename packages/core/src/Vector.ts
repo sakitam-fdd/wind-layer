@@ -1,14 +1,14 @@
 // from: https://sourcegraph.com/github.com/IHCantabria/Leaflet.CanvasLayer.Field/-/blob/src/Vector.js?utm_source=share
 export default class Vector {
-  private readonly u: number;
-  private readonly v: number;
+  public u: number;
+  public readonly v: number;
   constructor(u: number, v: number) {
     this.u = u;
     this.v = v;
   }
 
   /**
-   * Magnitude
+   * 向量值
    * @returns {Number}
    */
   magnitude() {

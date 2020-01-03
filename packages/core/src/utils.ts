@@ -116,3 +116,7 @@ export function isEmpty (object: {}) {
 export function isNull (obj: any) {
   return obj == null;
 }
+
+export function floorMod (a: number, n: number) {
+  return a - n * Math.floor(a / n);
+}

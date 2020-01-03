@@ -1,6 +1,6 @@
 import { EventEmitter } from 'eventemitter3';
 import { isString, isNumber, isFunction } from './utils';
-import Field from "./Field";
+import Field from './Field';
 
 const defaultOptions = {
   globalAlpha: 0.9, // 全局透明度
@@ -41,8 +41,9 @@ export interface IOptions {
 class BaseLayer extends EventEmitter {
   private ctx: CanvasRenderingContext2D;
   private options: IOptions;
+  private field: Field;
 
-  constructor(ctx: CanvasRenderingContext2D, options: Partial<IOptions>) {
+  constructor(ctx: CanvasRenderingContext2D, options: Partial<IOptions>, field: Field) {
     super();
 
     this.ctx = ctx;
@@ -63,6 +64,14 @@ class BaseLayer extends EventEmitter {
       // @ts-ignore
       this.options.paths = Math.round(width * height * this.options.particleMultiplier);
     }
+
+    if (field) {
+      this.updateData(field);
+    }
+  }
+
+  public updateData(field: Field) {
+    this.field = field;
   }
 
   private moveParticles(particles: any) {
@@ -82,15 +91,15 @@ class BaseLayer extends EventEmitter {
       const x = particle.x;
       const y = particle.y;
 
-      const vector = new Field(x, y);
+      const vector = this.field.valueAt(x, y);
 
-      if (vector[2] === null) {
+      if (vector === null) {
         particle.age = maxAge;
       } else {
-        const xt = x + vector[0];
-        const yt = y + vector[1];
+        const xt = x + vector.u;
+        const yt = y + vector.v;
 
-        if (this._field.hasValueAt(xt, yt)) {
+        if (this.field.hasValueAt(xt, yt)) {
           // Path from (x,y) to (xt,yt) is visible, so add this particle to the appropriate draw bucket.
           particle.xt = xt;
           particle.yt = yt;
@@ -98,6 +107,7 @@ class BaseLayer extends EventEmitter {
           // Particle isn't visible, but it still moves through the field.
           particle.x = xt;
           particle.y = yt;
+          particle.vector = vector.magnitude();
         }
         particle.age = maxAge;
       }
@@ -161,7 +171,7 @@ class BaseLayer extends EventEmitter {
     const particles = [];
     let i = 0;
     for (; i < particleCount; i++) {
-      let p = this._field.randomize();
+      let p = this.field.randomize();
       p.age = this.randomize();
       particles.push(p);
     }

@@ -21,7 +21,7 @@ export default class Field {
   private readonly ymax: number;
   private readonly cols: number;
   private readonly rows: number;
-  private grid: null;
+  private grid: any[];
   private us: number[];
   private vs: number[];
   private isContinuous: boolean;
@@ -30,7 +30,7 @@ export default class Field {
   private wrapX: boolean;
 
   constructor(params: IField) {
-    this.grid = null;
+    this.grid = [];
 
     this.xmin = params.xmin;
     this.xmax = params.xmax;
@@ -56,9 +56,11 @@ export default class Field {
 
     this.isContinuous = Math.floor(this.cols * params.deltaX) >= 360;
     this.wrapX = params.wrapX;
+
+    this.grid = this.buildGrid();
   }
 
-  buildGrid() {
+  public buildGrid() {
     // grid = [];
     // var p = 0;
     // var isContinuous = Math.floor(ni * Δλ) >= 360;
@@ -97,8 +99,20 @@ export default class Field {
     return grid;
   }
 
-  release() {
+  public release() {
     this.grid = [];
+  }
+
+  /**
+   * grib data extent
+   */
+  public extent() {
+    return [
+      this.xmin,
+      this.ymin,
+      this.xmax,
+      this.ymax,
+    ]
   }
 
   /**
@@ -112,7 +126,7 @@ export default class Field {
    * @param   {Number[]} g11
    * @returns {Vector}
    */
-  bilinearInterpolateVector(
+  private bilinearInterpolateVector(
     x: number, y: number,
     g00: { u: number; v: number; },
     g10: { u: number; v: number; },
@@ -131,17 +145,36 @@ export default class Field {
     return new Vector(u, v);
   }
 
-  calculateRange() {
-
-  }
+  // TODO: 如果支持x方向平铺，范围需要重新计算
+  calculateRange() {}
 
   /**
    * 检查 uv是否合法
    * @param x
    * @private
    */
-  isValid(x: any) {
+  public isValid(x: any) {
     return x !== null && x !== undefined;
+  }
+
+  public contains(lon: number, lat: number) {
+    let longitudeIn = lon >= this.xmin && lon <= this.xmax;
+    let latitudeIn = lat >= this.ymin && lat <= this.ymax;
+    return longitudeIn && latitudeIn;
+  }
+
+  /**
+   * 获取经纬度所在的位置索引
+   * @param lon
+   * @param lat
+   */
+  public getDecimalIndexes(lon: number, lat: number) {
+    if (this.wrapX && lon < this.xmin) {
+      lon = lon + 360;
+    }
+    let i = (lon - this.xmin) / this.deltaX;
+    let j = (this.ymax - lat) / this.deltaY;
+    return [i, j];
   }
 
   /**
@@ -149,16 +182,16 @@ export default class Field {
    * @param lon
    * @param lat
    */
-  valueAt(lon: number, lat: number) {
+  public valueAt(lon: number, lat: number) {
 
     if (!this.contains(lon, lat)) return null;
 
-    const indexes = this._getDecimalIndexes(lon, lat);
-    let value = this._valueAtIndexes(indexes[0], indexes[1]);
+    const indexes = this.getDecimalIndexes(lon, lat);
+    let value = this.valueAtIndexes(indexes[0], indexes[1]);
     return new Vector(value[0], value[1]);
   }
 
-  hasValueAt(lon: number, lat: number) {
+  public hasValueAt(lon: number, lat: number) {
     let value = this.valueAt(lon, lat);
     const hasValue = value !== null;
     let included = true;
@@ -191,7 +224,7 @@ export default class Field {
   //   return null;
   // };
 
-  interpolatePoint(i, j) {
+  private interpolatePoint(i: number, j: number) {
     //         1      2           After converting λ and φ to fractional grid indexes i and j, we find the
     //        fi  i   ci          four points 'G' that enclose point (i, j). These points are at the four
     //         | =1.4 |           corners specified by the floor and ceiling of i and j. For example, given
@@ -200,14 +233,109 @@ export default class Field {
     //  =8.3   |      |
     //      ---G------G--- cj 9   Note that for wrapped grids, the first column is duplicated as the last
     //         |      |           column, so the index ci can be used without taking a modulo.
-    const indexes = this._getFourSurroundingIndexes(i, j);
+    const indexes = this.getFourSurroundingIndexes(i, j);
     const [fi, ci, fj, cj] = indexes;
-    let values = this._getFourSurroundingValues(fi, ci, fj, cj);
-    values = values.map((v) => new Vector(v[0], v[1]));
-
+    let values = this.getFourSurroundingValues(fi, ci, fj, cj);
     if (values) {
-      const [g00, g10, g01, g11] = values;
-      return this._doInterpolation(i - fi, j - fj, g00, g10, g01, g11);
+      values = values.map((v) => new Vector(v[0], v[1]));
+
+      if (values) {
+        const [g00, g10, g01, g11] = values;
+        return this.bilinearInterpolateVector(i - fi, j - fj, g00, g10, g01, g11);
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Check the column index is inside the field,
+   * adjusting to min or max when needed
+   * @private
+   * @param   {Number} ii - index
+   * @returns {Number} i - inside the allowed indexes
+   */
+  private clampColumnIndex(ii: number) {
+    let i = ii;
+    if (ii < 0) {
+      i = 0;
+    }
+    let maxCol = this.cols - 1;
+    if (ii > maxCol) {
+      i = maxCol;
+    }
+    return i;
+  }
+
+  /**
+   * Check the row index is inside the field,
+   * adjusting to min or max when needed
+   * @private
+   * @param   {Number} jj index
+   * @returns {Number} j - inside the allowed indexes
+   */
+  private clampRowIndex(jj: number) {
+    let j = jj;
+    if (jj < 0) {
+      j = 0;
+    }
+    let maxRow = this.rows - 1;
+    if (jj > maxRow) {
+      j = maxRow;
+    }
+    return j;
+  }
+
+  /**
+   * Get surrounding indexes (integer), clampling on borders
+   * @private
+   * @param   {Number} i - decimal index
+   * @param   {Number} j - decimal index
+   * @returns {Array} [fi, ci, fj, cj]
+   */
+  private getFourSurroundingIndexes(i: number, j: number) {
+    let fi = Math.floor(i);
+    let ci = fi + 1;
+    // duplicate colum to simplify interpolation logic (wrapped value)
+    if (this.isContinuous && ci >= this.cols) {
+      ci = 0;
+    }
+    ci = this.clampColumnIndex(ci);
+
+    let fj = this.clampRowIndex(Math.floor(j));
+    let cj = this.clampRowIndex(fj + 1);
+
+    return [fi, ci, fj, cj];
+  }
+
+  /**
+   * Get four surrounding values or null if not available,
+   * from 4 integer indexes
+   * @private
+   * @param   {Number} fi
+   * @param   {Number} ci
+   * @param   {Number} fj
+   * @param   {Number} cj
+   * @returns {Array}
+   */
+  private getFourSurroundingValues(fi: number, ci: number, fj: number, cj: number) {
+    let row;
+    if ((row = this.grid[fj])) {
+      // upper row ^^
+      const g00 = row[fi]; // << left
+      const g10 = row[ci]; // right >>
+      if (
+        this.isValid(g00) &&
+        this.isValid(g10) &&
+        (row = this.grid[cj])
+      ) {
+        // lower row vv
+        const g01 = row[fi]; // << left
+        const g11 = row[ci]; // right >>
+        if (this.isValid(g01) && this.isValid(g11)) {
+          return [g00, g10, g01, g11]; // 4 values found!
+        }
+      }
     }
     return null;
   }
@@ -218,7 +346,7 @@ export default class Field {
    * @param   {Number} j - row index (integer)
    * @returns {Vector|Number}
    */
-  valueAtIndexes(i: number, j: number) {
+  public valueAtIndexes(i: number, j: number) {
     if (!this.grid) return null;
     // @ts-ignore
     return this.grid[j][i]; // <-- j,i !!
@@ -230,9 +358,9 @@ export default class Field {
    * @param   {Number} j - row index (integer)
    * @returns {Number[]} [lon, lat]
    */
-  lonLatAtIndexes(i: number, j: number) {
-    let lon = this._longitudeAtX(i);
-    let lat = this._latitudeAtY(j);
+  public lonLatAtIndexes(i: number, j: number) {
+    let lon = this.longitudeAtX(i);
+    let lat = this.latitudeAtY(j);
 
     return [lon, lat];
   }
@@ -242,7 +370,7 @@ export default class Field {
    * @param   {Number} i - column index (integer)
    * @returns {Number} longitude at the center of the cell
    */
-  _longitudeAtX(i: number) {
+  private longitudeAtX(i: number) {
     let halfXPixel = this.deltaX / 2.0;
     let lon = this.xmin + halfXPixel + i * this.deltaX;
     if (this.wrapX) {
@@ -256,12 +384,12 @@ export default class Field {
    * @param   {Number} j - row index (integer)
    * @returns {Number} latitude at the center of the cell
    */
-  _latitudeAtY(j: number) {
+  private latitudeAtY(j: number) {
     let halfYPixel = this.deltaY / 2.0;
     return this.ymax - halfYPixel - j * this.deltaY;
   }
 
-  randomize(o: any = {}) {
+  public randomize(o: any = {}) {
 
     // field.randomize = function (o) {  // UNDONE: this method is terrible
     //   var x, y;
@@ -278,8 +406,8 @@ export default class Field {
     let i = (Math.random() * this.cols) | 0;
     let j = (Math.random() * this.rows) | 0;
 
-    o.x = this._longitudeAtX(i);
-    o.y = this._latitudeAtY(j);
+    o.x = this.longitudeAtX(i);
+    o.y = this.latitudeAtY(j);
 
     return o;
   }
