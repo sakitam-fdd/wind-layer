@@ -12,7 +12,7 @@ import { resolve } from './utils';
 
 const input = process.env.input;
 
-module.exports = {
+export default {
   input: resolve(input),
   plugins: [
     replace({ 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV) }),

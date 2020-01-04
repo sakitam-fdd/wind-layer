@@ -3539,6 +3539,10 @@ eventemitter3@^3.1.0:
   version "3.1.2"
   resolved "https://registry.npm.taobao.org/eventemitter3/download/eventemitter3-3.1.2.tgz#2d3d48f9c346698fce83a85d7d664e98535df6e7"
 
+eventemitter3@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.npm.taobao.org/eventemitter3/download/eventemitter3-4.0.0.tgz#d65176163887ee59f386d64c82610b696a4a74eb"
+
 events@^1.0.2:
   version "1.1.1"
   resolved "https://registry.npm.taobao.org/events/download/events-1.1.1.tgz#9ebdb7635ad099c70dcc4c2a1f5004288e8bd924"
