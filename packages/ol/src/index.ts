@@ -1,17 +1,20 @@
 // @ts-ignore
-import ViewHint from 'ol/ViewHint';
+import { Layer } from 'ol/layer.js';
 // @ts-ignore
-import { Layer } from 'ol/layer';
+import { fromUserExtent } from 'ol/proj.js';
 // @ts-ignore
-import { fromUserExtent } from 'ol/proj';
+import CanvasLayerRenderer from 'ol/renderer/canvas/Layer.js';
 // @ts-ignore
-import CanvasLayerRenderer from 'ol/renderer/canvas/Layer';
+import { compose as composeTransform, makeInverse } from 'ol/transform.js';
 // @ts-ignore
-import { compose as composeTransform, makeInverse } from 'ol/transform';
-// @ts-ignore
-import { containsExtent, intersects, getIntersection, isEmpty } from 'ol/extent';
+import { containsExtent, intersects, getIntersection, isEmpty } from 'ol/extent.js';
 
 import WindCore from 'wind-core';
+
+const ViewHint = {
+  ANIMATING: 0,
+  INTERACTING: 1
+};
 
 export class OlWindyRender extends CanvasLayerRenderer {
   private wind: WindCore | null;
