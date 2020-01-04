@@ -1,21 +1,44 @@
+// @ts-ignore
+import ViewHint from 'ol/ViewHint';
+// @ts-ignore
 import { Layer } from 'ol/layer';
+// @ts-ignore
 import { fromUserExtent } from 'ol/proj';
-import { getIntersection, isEmpty } from 'ol/extent';
-// FIXME: 最好采用的是 CanvasLayerRenderer, 但是UMD版本未暴露
-import ImageLayerRenderer from 'ol/renderer/canvas/ImageLayer';
+// @ts-ignore
+import CanvasLayerRenderer from 'ol/renderer/canvas/Layer';
+// @ts-ignore
+import { compose as composeTransform, makeInverse } from 'ol/transform';
+// @ts-ignore
+import { containsExtent, intersects, getIntersection, isEmpty } from 'ol/extent';
 
-class OlWindyRenderer extends ImageLayerRenderer {
-  constructor(layer: typeof OlWindy) {
+import WindCore from 'wind-core';
+
+export class OlWindyRender extends CanvasLayerRenderer {
+  private wind: WindCore | null;
+  private pixelTransform: any;
+  private inversePixelTransform: any;
+  private context: CanvasRenderingContext2D;
+  private containerReused: boolean;
+  private container: HTMLDivElement | HTMLCanvasElement;
+
+  constructor(layer: OlWindy) {
     super(layer);
+
+    this.wind = null;
   }
 
-  prepareFrame(frameState: any) {
+  prepareFrame(frameState: {
+    layerStatesArray: { [x: string]: any; };
+    layerIndex: string | number;
+    pixelRatio: any;
+    viewState: any;
+    viewHints: any;
+    extent: any;
+  }) {
     const layerState = frameState.layerStatesArray[frameState.layerIndex];
     const pixelRatio = frameState.pixelRatio;
     const viewState = frameState.viewState;
     const viewResolution = viewState.resolution;
-
-    const imageSource = this.getLayer().getSource();
 
     const hints = frameState.viewHints;
 
@@ -26,36 +49,17 @@ class OlWindyRenderer extends ImageLayerRenderer {
 
     if (!hints[ViewHint.ANIMATING] && !hints[ViewHint.INTERACTING] && !isEmpty(renderedExtent)) {
       let projection = viewState.projection;
-      if (!ENABLE_RASTER_REPROJECTION) {
-        const sourceProjection = imageSource.getProjection();
-        if (sourceProjection) {
-          projection = sourceProjection;
-        }
-      }
-      const image = imageSource.getImage(renderedExtent, viewResolution, pixelRatio, projection);
-      if (image && this.loadImage(image)) {
-        this.image_ = image;
-      }
+      console.log(projection, renderedExtent, viewResolution);
     }
 
-    return !!this.image_;
+    return !!this.wind;
   }
 
-  /**
-   * @inheritDoc
-   */
-  renderFrame(frameState, target) {
-    const image = this.image_;
-    const imageExtent = image.getExtent();
-    const imageResolution = image.getResolution();
-    const imagePixelRatio = image.getPixelRatio();
+  renderFrame(frameState: any, target: any) {
     const layerState = frameState.layerStatesArray[frameState.layerIndex];
     const pixelRatio = frameState.pixelRatio;
     const viewState = frameState.viewState;
-    const viewCenter = viewState.center;
-    const viewResolution = viewState.resolution;
     const size = frameState.size;
-    const scale = pixelRatio * imageResolution / (viewResolution * imagePixelRatio);
 
     let width = Math.round(size[0] * pixelRatio);
     let height = Math.round(size[1] * pixelRatio);
@@ -75,8 +79,10 @@ class OlWindyRenderer extends ImageLayerRenderer {
     );
     makeInverse(this.inversePixelTransform, this.pixelTransform);
 
+    // @ts-ignore
     const canvasTransform = this.createTransformString(this.pixelTransform);
 
+    // @ts-ignore
     this.useContainer(target, canvasTransform, layerState.opacity);
 
     const context = this.context;
@@ -95,40 +101,15 @@ class OlWindyRenderer extends ImageLayerRenderer {
       const layerExtent = fromUserExtent(layerState.extent, viewState.projection);
       clipped = !containsExtent(layerExtent, frameState.extent) && intersects(layerExtent, frameState.extent);
       if (clipped) {
+        // @ts-ignore
         this.clipUnrotated(context, frameState, layerExtent);
       }
     }
 
-    const img = image.getImage();
-
-    const transform = composeTransform(this.tempTransform_,
-      width / 2, height / 2,
-      scale, scale,
-      0,
-      imagePixelRatio * (imageExtent[0] - viewCenter[0]) / imageResolution,
-      imagePixelRatio * (viewCenter[1] - imageExtent[3]) / imageResolution);
-
-    this.renderedResolution = imageResolution * pixelRatio / imagePixelRatio;
-
-    const dx = transform[4];
-    const dy = transform[5];
-    const dw = img.width * transform[0];
-    const dh = img.height * transform[3];
-
+    // @ts-ignore
     this.preRender(context, frameState);
-    if (dw >= 0.5 && dh >= 0.5) {
-      const opacity = layerState.opacity;
-      let previousAlpha;
-      if (opacity !== 1) {
-        previousAlpha = this.context.globalAlpha;
-        this.context.globalAlpha = opacity;
-      }
-      this.context.drawImage(img, 0, 0, +img.width, +img.height,
-        Math.round(dx), Math.round(dy), Math.round(dw), Math.round(dh));
-      if (opacity !== 1) {
-        this.context.globalAlpha = previousAlpha;
-      }
-    }
+    // render
+    // @ts-ignore
     this.postRender(context, frameState);
 
     if (clipped) {
@@ -143,23 +124,29 @@ class OlWindyRenderer extends ImageLayerRenderer {
   }
 }
 
-class OlWindy extends Layer {
+export default class OlWindy extends Layer {
+  private renderer_: OlWindyRender;
+
   constructor(options: any) {
-    const baseOptions = Object.assign({}, options);
-    delete baseOptions.source;
-
-    super(baseOptions);
+    super(options);
   }
 
-  createRenderer() {
-    return new OlWindyRenderer(this);
-  }
-
-  render(frameState: any, target: HTMLElement) {
+  public render(frameState: any, target: any) {
     const layerRenderer = this.getRenderer();
 
     if (layerRenderer.prepareFrame(frameState)) {
       return layerRenderer.renderFrame(frameState, target);
     }
+  }
+
+  public getRenderer() {
+    if (!this.renderer_) {
+      this.renderer_ = this.createRenderer();
+    }
+    return this.renderer_;
+  }
+
+  private createRenderer() {
+    return new OlWindyRender(this);
   }
 }

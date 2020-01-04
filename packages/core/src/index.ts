@@ -1,4 +1,3 @@
-import { EventEmitter } from 'eventemitter3';
 import { isString, isNumber, isFunction } from './utils';
 import Field from './Field';
 
@@ -38,14 +37,12 @@ export interface IOptions {
   paths: number;
 }
 
-class BaseLayer extends EventEmitter {
+class BaseLayer {
   private ctx: CanvasRenderingContext2D;
   private options: IOptions;
   private field: Field;
 
   constructor(ctx: CanvasRenderingContext2D, options: Partial<IOptions>, field: Field) {
-    super();
-
     this.ctx = ctx;
 
     if (!this.ctx) {

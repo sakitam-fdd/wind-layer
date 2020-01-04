@@ -2,13 +2,11 @@
 import { terser } from 'rollup-plugin-terser';
 import { banner, pkg, resolve, handleMinEsm } from './utils';
 import baseConfig from './base.config';
-const ol = require('./ol/globals');
 
 const common = {
   banner: banner,
   extend: false,
   globals: {
-    ...ol,
   },
 };
 
@@ -26,4 +24,4 @@ const config = Object.assign(baseConfig, {
 
 config.plugins.push(terser());
 
-module.exports = config;
+export default config;

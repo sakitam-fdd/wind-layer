@@ -3,7 +3,9 @@
     "paths": {
       "*": [
         "node_modules",
-        "packages"
+        "packages",
+        "typings/*",
+        "types/*"
       ]
     },
     "rootDir": "./",

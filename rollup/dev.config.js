@@ -1,13 +1,10 @@
 import { banner, pkg, resolve } from './utils';
 import baseConfig from './base.config';
-const ol = require('./ol/globals');
 
 const common = {
   banner,
   extend: false,
   globals: {
-    ...ol,
-    'echarts': 'echarts',
   },
 };
 
@@ -33,4 +30,4 @@ const config = Object.assign(baseConfig, {
   ],
 });
 
-module.exports = config;
+export default config;

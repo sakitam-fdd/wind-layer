@@ -5,15 +5,14 @@
   "keywords": [],
   "author": "sakitam-fdd <smilefdd@gmail.com>",
   "license": "MIT",
-  "main": "lib/index.js",
-  "module": "es/index.js",
+  "main": "dist/wind-core.js",
+  "module": "dist/wind-core.esm.js",
+  "unpkg": "dist/wind-core.js",
+  "commonjs": "dist/wind-core.cjs.js",
+  "namespace": "WindCore",
   "types": "types/index.d.ts",
-  "directories": {
-    "lib": "lib",
-    "test": "__tests__"
-  },
   "files": [
-    "lib"
+    "dist"
   ],
   "publishConfig": {
     "access": "public"
@@ -25,11 +24,14 @@
   },
   "scripts": {
     "tsc": "tsc --project tsconfig.prod.json",
-    "clean": "rimraf dist; rimraf esm; rimraf cjs;",
+    "clean": "rimraf dist",
+    "dev": "run-p dev:*",
+    "dev:rollup": "cross-env NODE_ENV=development modulePath=core input=src/index.ts rollup -wm -c ../../rollup/dev.config.js",
+    "dev:cjs": "cross-env NODE_ENV=development BABEL_ENV=cjs babel src --watch --root-mode upward --out-dir cjs --source-maps --extensions .ts,.tsx --delete-dir-on-start --no-comments",
     "build": "run-p build:*",
-    "build:cjs": "BABEL_ENV=cjs babel src --root-mode upward --out-dir cjs --source-maps --extensions .ts,.tsx --delete-dir-on-start --no-comments",
-    "build:esm": "BABEL_ENV=esm babel src --root-mode upward --out-dir esm --source-maps --extensions .ts,.tsx --delete-dir-on-start --no-comments",
-    "watch": "BABEL_ENV=cjs babel src --watch --root-mode upward --out-dir cjs --source-maps --extensions .ts,.tsx --delete-dir-on-start --no-comments",
+    "bulid:rollup": "cross-env NODE_ENV=production modulePath=core input=src/index.ts rollup -m -c ../../rollup/dev.config.js && cross-env NODE_ENV=production modulePath=core input=src/index.ts rollup -c ../../rollup/prod.config.js",
+    "build:cjs": "cross-env NODE_ENV=production BABEL_ENV=cjs babel src --root-mode upward --out-dir cjs --source-maps --extensions .ts,.tsx --delete-dir-on-start --no-comments",
+    "build:esm": "cross-env NODE_ENV=production BABEL_ENV=esm babel src --root-mode upward --out-dir esm --source-maps --extensions .ts,.tsx --delete-dir-on-start --no-comments",
     "lint:ts": "run-p -c lint:ts-*",
     "test": "jest",
     "prepublishOnly": "run-p test",
