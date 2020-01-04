@@ -41,8 +41,9 @@ class BaseLayer {
   private ctx: CanvasRenderingContext2D;
   private options: IOptions;
   private field: Field;
+  private particles: any;
 
-  constructor(ctx: CanvasRenderingContext2D, options: Partial<IOptions>, field: Field) {
+  constructor(ctx: CanvasRenderingContext2D, options: Partial<IOptions>, field?: Field) {
     this.ctx = ctx;
 
     if (!this.ctx) {
@@ -135,9 +136,14 @@ class BaseLayer {
     this.ctx.beginPath();
     // TODO 需要判断粒子是否超出视野
     // this.ctx.strokeStyle = color;
+    const source = [particle.x, particle.y];
+    const target = [particle.xt, particle.yt];
 
-    this.ctx.moveTo(particle.x, particle.y);
-    this.ctx.lineTo(particle.xt, particle.yt);
+    const pointPrev = this.project(source);
+    const pointNext = this.project(target);
+
+    this.ctx.moveTo(pointPrev[0], pointPrev[1]);
+    this.ctx.lineTo(pointNext[0], pointNext[1]);
     particle.x = particle.xt;
     particle.y = particle.yt;
 
@@ -163,9 +169,9 @@ class BaseLayer {
     // for (var i = 0; i < particleCount; i++) {
     //   particles.push(field.randomize({age: Math.floor(Math.random() * that.MAX_PARTICLE_AGE) + 0}));
     // }
-
     const particleCount = this.options.paths;
     const particles = [];
+    if (!this.field) return [];
     let i = 0;
     for (; i < particleCount; i++) {
       let p = this.field.randomize();
@@ -179,18 +185,22 @@ class BaseLayer {
     return Math.floor(Math.random() * this.options.maxAge); // 例如最大生成90帧插值粒子路径
   }
 
+  // @ts-ignore
+  project(...args: any[]): [number, number] {}
+
   /**
    * 渲染前处理
    */
   prerender() {
-
+    this.particles = this.prepareParticlePaths();
   }
 
   /**
    * 开始渲染
    */
   render() {
-
+    this.moveParticles(this.particles);
+    this.drawParticles(this.particles);
   }
 
   /**
