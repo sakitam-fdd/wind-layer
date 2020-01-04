@@ -8,7 +8,7 @@
     "prebuild": "run-p tsc lint",
     "clean": "lerna run --parallel clean",
     "lint": "tslint --project tsconfig.json -t codeFrame 'src/**/*.ts' 'test/**/*.ts'",
-    "dev": "lerna run --parallel dev:rollup",
+    "dev": "lerna run --parallel dev",
     "build": "lerna run --parallel build",
     "build:declarations": "lerna run --parallel tsc",
     "postbuild": "yarn build:declarations",
