@@ -9,6 +9,7 @@
     "clean": "lerna run --parallel clean",
     "lint": "tslint --project tsconfig.json -t codeFrame 'src/**/*.ts' 'test/**/*.ts'",
     "dev": "lerna run --parallel dev",
+    "dev:demo": "rollup -wm -c rollup/demo.config.js",
     "build": "lerna run --parallel build",
     "build:declarations": "lerna run --parallel tsc",
     "postbuild": "yarn build:declarations",

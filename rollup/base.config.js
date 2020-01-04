@@ -19,11 +19,11 @@ export default {
     json({
       indent: ' '
     }),
-    tslint({
-      exclude: [
-        'node_modules/**',
-      ]
-    }),
+    // tslint({
+    //   exclude: [
+    //     'node_modules/**',
+    //   ]
+    // }),
     typescript({
       clean: true,
       useTsconfigDeclarationDir: true,

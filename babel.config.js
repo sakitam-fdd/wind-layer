@@ -9,6 +9,8 @@ module.exports = (api) => {
             browsers: 'Last 2 Chrome versions, Firefox ESR',
             node: 'current',
           },
+          loose: true,
+          modules: false,
         },
       ],
       // [
@@ -33,7 +35,7 @@ module.exports = (api) => {
           loose: true,
         }
       ],
-      '@babel/plugin-transform-modules-commonjs',
+      // '@babel/plugin-transform-modules-commonjs',
       [
         'babel-plugin-inline-import',
         {
