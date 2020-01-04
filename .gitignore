@@ -17,8 +17,6 @@ coverage
 node_modules/
 packages/**/node_modules
 packages/**/dist
-packages/**/cjs
-packages/**/esm
 jspm_packages/
 .npm
 # Yarn Integrity file
