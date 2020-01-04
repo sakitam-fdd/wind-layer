@@ -52,10 +52,10 @@ export class OlWindyRender extends CanvasLayerRenderer {
 
     if (!hints[ViewHint.ANIMATING] && !hints[ViewHint.INTERACTING] && !isEmpty(renderedExtent)) {
       let projection = viewState.projection;
-      console.log(projection, renderedExtent, viewResolution);
+      console.log(this, projection, renderedExtent, viewResolution);
     }
 
-    return !!this.wind;
+    return true;
   }
 
   renderFrame(frameState: any, target: any) {
@@ -109,11 +109,20 @@ export class OlWindyRender extends CanvasLayerRenderer {
       }
     }
 
+    if (!this.wind) {
+      this.wind = new WindCore(this.context, {});
+    }
+
+    this.wind.prerender();
+
     // @ts-ignore
     this.preRender(context, frameState);
     // render
+    this.wind.render();
     // @ts-ignore
     this.postRender(context, frameState);
+
+    this.wind.postrender();
 
     if (clipped) {
       context.restore();
