@@ -157,15 +157,20 @@ export class OlWindyRender extends CanvasLayerRenderer {
 export default class OlWindy extends Layer {
   private renderer_: OlWindyRender;
   private field: any;
+  private _map: any;
 
   constructor(data: any, options: any) {
     super(options);
 
     this.field = null;
 
+    this._map = null;
+
     if (data) {
       this.setData(data);
     }
+
+    this.animate = this.animate.bind(this);
   }
 
   public render(frameState: any, target: any) {
@@ -204,5 +209,32 @@ export default class OlWindy extends Layer {
       console.error('inValid');
     }
     return this;
+  }
+
+  private animate() {
+    console.log('animate');
+    if (this._map) {
+      this._map.render();
+    }
+  }
+
+  public setMap(map: any) {
+    this._map = map;
+    console.log(map);
+    super.setMap(map);
+    console.log(map);
+    if (map) {
+      this.on('postrender', this.animate);
+    } else {
+      this.un('postrender', this.animate);
+    }
+  }
+
+  public on(...args: any[]) {
+    return super.on(...args);
+  }
+
+  public un(...args: any[]) {
+    return super.on(...args);
   }
 }
