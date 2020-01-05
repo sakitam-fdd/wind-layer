@@ -9,7 +9,7 @@ import { fromLonLat } from 'ol/proj';
 // @ts-ignore
 import OSM from 'ol/source/OSM';
 
-import OlWindy from 'ol-wind';
+import OlWindy, { Field } from 'ol-wind';
 
 function initMap() {
   const layer = new TileLayer({
@@ -28,11 +28,55 @@ function initMap() {
     }),
   });
 
-  const windLayer = new OlWindy({});
+  fetch('https://sakitam-fdd.github.io/wind-layer/examples/out.json')
+    .then(res => res.json())
+    .then(res => {
 
-  console.log(map, windLayer);
+      let uComp: any = null;
+      let vComp: any = null;
 
-  map.addLayer(windLayer);
+      console.time('start');
+
+      res.forEach(function (record: { header: { parameterCategory: string; parameterNumber: string; }; }) {
+        switch (record.header.parameterCategory + "," + record.header.parameterNumber) {
+          case "1,2":
+          case "2,2":
+            uComp = record;
+            break;
+          case "1,3":
+          case "2,3":
+            vComp = record;
+            break;
+        }
+      });
+
+      const header: any = uComp.header;
+
+      // @ts-ignore
+      const vectorField = new Field({
+        xmin: header.lo1, // 一般格点数据是按照矩形范围来切割，所以定义其经纬度范围
+        ymin: header.la2,
+        xmax: header.lo2,
+        ymax: header.la1,
+        deltaX: 1, // x（经度）增量
+        deltaY: 1, // y（维度）增量
+        cols: 359, // 列（可由 `(xmax - xmin) / deltaX` 得到）
+        rows: 180, // 行
+        us: uComp.data, // U分量
+        vs: vComp.data, // V分量
+        wrapX: true,
+      });
+
+      console.timeEnd('start');
+
+      console.log(res, vectorField);
+
+      const windLayer = new OlWindy(vectorField, {});
+
+      console.log(map, windLayer);
+
+      map.addLayer(windLayer);
+    });
 }
 
 if (document.getElementById('map')) {

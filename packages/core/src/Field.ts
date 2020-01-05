@@ -187,8 +187,13 @@ export default class Field {
     if (!this.contains(lon, lat)) return null;
 
     const indexes = this.getDecimalIndexes(lon, lat);
-    let value = this.valueAtIndexes(indexes[0], indexes[1]);
-    return new Vector(value[0], value[1]);
+    let ii = Math.floor(indexes[0]);
+    let jj = Math.floor(indexes[1]);
+
+    const ci = this.clampColumnIndex(ii);
+    const cj = this.clampRowIndex(jj);
+
+    return this.valueAtIndexes(ci, cj);
   }
 
   public hasValueAt(lon: number, lat: number) {
@@ -347,8 +352,6 @@ export default class Field {
    * @returns {Vector|Number}
    */
   public valueAtIndexes(i: number, j: number) {
-    if (!this.grid) return null;
-    // @ts-ignore
     return this.grid[j][i]; // <-- j,i !!
   }
 

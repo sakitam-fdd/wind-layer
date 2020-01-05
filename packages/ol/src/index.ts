@@ -5,7 +5,7 @@ import { fromUserExtent } from 'ol/proj.js';
 // @ts-ignore
 import CanvasLayerRenderer from 'ol/renderer/canvas/Layer.js';
 // @ts-ignore
-import { compose as composeTransform, makeInverse } from 'ol/transform.js';
+import { compose as composeTransform, makeInverse, apply as applyTransform } from 'ol/transform.js';
 // @ts-ignore
 import { containsExtent, intersects, getIntersection, isEmpty } from 'ol/extent.js';
 
@@ -15,6 +15,8 @@ const ViewHint = {
   ANIMATING: 0,
   INTERACTING: 1
 };
+
+export const Field = WindCore.Field;
 
 export class OlWindyRender extends CanvasLayerRenderer {
   private wind: WindCore | null;
@@ -52,7 +54,7 @@ export class OlWindyRender extends CanvasLayerRenderer {
 
     if (!hints[ViewHint.ANIMATING] && !hints[ViewHint.INTERACTING] && !isEmpty(renderedExtent)) {
       let projection = viewState.projection;
-      console.log(this, projection, renderedExtent, viewResolution);
+      // console.log(this, projection, renderedExtent, viewResolution);
     }
 
     return true;
@@ -110,7 +112,11 @@ export class OlWindyRender extends CanvasLayerRenderer {
     }
 
     if (!this.wind) {
-      this.wind = new WindCore(this.context, {});
+      const layer = this.getLayer();
+      const data = layer.getData();
+      this.wind = new WindCore(this.context, {}, data);
+
+      this.wind.project = this.getPixelFromCoordinateInternal.bind(this, frameState);
     }
 
     this.wind.prerender();
@@ -134,13 +140,32 @@ export class OlWindyRender extends CanvasLayerRenderer {
 
     return this.container;
   }
+
+  private getPixelFromCoordinateInternal(frameState: { coordinateToPixelTransform: any; }, coordinate: [number, number]) {
+    if (!frameState) {
+      return null;
+    } else {
+      return applyTransform(frameState.coordinateToPixelTransform, coordinate.slice(0, 2));
+    }
+  }
+
+  public getLayer(): OlWindy {
+    return super.getLayer();
+  }
 }
 
 export default class OlWindy extends Layer {
   private renderer_: OlWindyRender;
+  private field: any;
 
-  constructor(options: any) {
+  constructor(data: any, options: any) {
     super(options);
+
+    this.field = null;
+
+    if (data) {
+      this.setData(data);
+    }
   }
 
   public render(frameState: any, target: any) {
@@ -160,5 +185,24 @@ export default class OlWindy extends Layer {
 
   private createRenderer() {
     return new OlWindyRender(this);
+  }
+
+  public getData () {
+    return this.field;
+  }
+
+  /**
+   * set layer data
+   * @param data
+   * @returns {OlWindy}
+   */
+  public setData (data: any) {
+    // @ts-ignore
+    if (data && data instanceof Field) {
+      this.field = data;
+    } else {
+      console.error('inValid');
+    }
+    return this;
   }
 }
