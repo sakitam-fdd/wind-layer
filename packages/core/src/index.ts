@@ -21,6 +21,7 @@ const defaultOptions = {
     "rgb(220,24,32)",
     "rgb(180,0,35)"
   ],
+  velocityScale: 0.005 * (Math.pow(window.devicePixelRatio, 1 / 3) || 1),
   particleAge: 90, // 粒子在重新生成之前绘制的最大帧数
   maxAge: 90, // alias for particleAge
   particleMultiplier: 1 / 300, // TODO: PATHS = Math.round(width * height * particleMultiplier);
@@ -31,6 +32,7 @@ export interface IOptions {
   globalAlpha: number; // 全局透明度
   lineWidth: number | ((v: any) => number); // 线条宽度
   colorScale: string[] | ((v: any) => number) | string;
+  velocityScale: number | (() => number);
   particleAge?: number; // 粒子在重新生成之前绘制的最大帧数
   maxAge: number; // alias for particleAge
   particleMultiplier?: number; // TODO: PATHS = Math.round(width * height * that.particleMultiplier);
@@ -42,6 +44,8 @@ class BaseLayer {
   private options: IOptions;
   private field: Field;
   private particles: any;
+
+  static Field = Field;
 
   constructor(ctx: CanvasRenderingContext2D, options: Partial<IOptions>, field?: Field) {
     this.ctx = ctx;
@@ -75,6 +79,12 @@ class BaseLayer {
   private moveParticles(particles: any) {
     // 清空组
     const maxAge = this.options.maxAge;
+    const mapArea = 1 / 5000;
+    const optVelocityScale = isFunction(this.options.velocityScale)
+      // @ts-ignore
+      ? this.options.velocityScale()
+      : this.options.velocityScale;
+    const velocityScale = optVelocityScale * Math.pow(mapArea, 0.4);
 
     let i = 0;
     let len = particles.length;
@@ -84,6 +94,8 @@ class BaseLayer {
       if (particle.age > maxAge || particle.m * Math.random() * 10 < 0.0001) {
         // restart, on a random x,y
         particle.age = 0;
+
+        this.field.randomize(particle);
       }
 
       const x = particle.x;
@@ -94,20 +106,20 @@ class BaseLayer {
       if (vector === null) {
         particle.age = maxAge;
       } else {
-        const xt = x + vector.u;
-        const yt = y + vector.v;
+        const xt = x + vector.u * velocityScale;
+        const yt = y + vector.v * velocityScale;
 
         if (this.field.hasValueAt(xt, yt)) {
           // Path from (x,y) to (xt,yt) is visible, so add this particle to the appropriate draw bucket.
           particle.xt = xt;
           particle.yt = yt;
+          particle.m = vector.magnitude();
         } else {
           // Particle isn't visible, but it still moves through the field.
-          particle.x = xt;
-          particle.y = yt;
-          particle.vector = vector.magnitude();
+          // particle.x = xt;
+          // particle.y = yt;
+          particle.age = maxAge;
         }
-        particle.age = maxAge;
       }
 
       particle.age += 1;
@@ -137,7 +149,8 @@ class BaseLayer {
     // TODO 需要判断粒子是否超出视野
     // this.ctx.strokeStyle = color;
     const source = [particle.x, particle.y];
-    const target = [particle.xt, particle.yt];
+    // when xt isn't exit
+    const target = [particle.xt || source[0], particle.yt || source[1]];
 
     const pointPrev = this.project(source);
     const pointNext = this.project(target);
