@@ -14,6 +14,7 @@ import OlWindy, { Field } from 'ol-wind';
 function initMap() {
   const layer = new TileLayer({
     source: new OSM({
+      // projection: 'EPSG:3857',
       url: 'http://{a-d}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
     }),
   });
@@ -24,6 +25,7 @@ function initMap() {
     view: new View({
       projection: 'EPSG:3857',
       center: fromLonLat([113.53450137499999, 34.44104525]),
+      // center: [113.53450137499999, 34.44104525],
       zoom: 2,
     }),
   });
@@ -71,7 +73,12 @@ function initMap() {
 
       console.log(res, vectorField);
 
-      const windLayer = new OlWindy(vectorField, {});
+      const windLayer = new OlWindy(vectorField, {
+        colorScale: (m: any) => {
+          console.log(m);
+          return '#fff';
+        },
+      });
 
       console.log(map, windLayer);
 

@@ -1,7 +1,7 @@
 // @ts-ignore
 import { Layer } from 'ol/layer.js';
 // @ts-ignore
-import { fromUserExtent } from 'ol/proj.js';
+import { fromUserExtent, transform } from 'ol/proj.js';
 // @ts-ignore
 import CanvasLayerRenderer from 'ol/renderer/canvas/Layer.js';
 // @ts-ignore
@@ -114,6 +114,7 @@ export class OlWindyRender extends CanvasLayerRenderer {
     if (!this.wind) {
       const layer = this.getLayer();
       const data = layer.getData();
+
       this.wind = new WindCore(this.context, {}, data);
 
       this.wind.project = this.getPixelFromCoordinateInternal.bind(this, frameState);
@@ -141,7 +142,12 @@ export class OlWindyRender extends CanvasLayerRenderer {
     return this.container;
   }
 
-  private getPixelFromCoordinateInternal(frameState: { coordinateToPixelTransform: any; }, coordinate: [number, number]) {
+  private getPixelFromCoordinateInternal(frameState: {
+    viewState: any;
+    coordinateToPixelTransform: any;
+  }, coordinate: [number, number]) {
+    const viewState = frameState.viewState;
+    coordinate = transform(coordinate, 'EPSG:4326', viewState.projection);
     if (!frameState) {
       return null;
     } else {
@@ -169,8 +175,6 @@ export default class OlWindy extends Layer {
     if (data) {
       this.setData(data);
     }
-
-    this.animate = this.animate.bind(this);
   }
 
   public render(frameState: any, target: any) {
@@ -209,25 +213,6 @@ export default class OlWindy extends Layer {
       console.error('inValid');
     }
     return this;
-  }
-
-  private animate() {
-    console.log('animate');
-    if (this._map) {
-      this._map.render();
-    }
-  }
-
-  public setMap(map: any) {
-    this._map = map;
-    console.log(map);
-    super.setMap(map);
-    console.log(map);
-    if (map) {
-      this.on('postrender', this.animate);
-    } else {
-      this.un('postrender', this.animate);
-    }
   }
 
   public on(...args: any[]) {

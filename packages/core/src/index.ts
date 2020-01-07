@@ -4,28 +4,13 @@ import Field from './Field';
 const defaultOptions = {
   globalAlpha: 0.9, // 全局透明度
   lineWidth: 1, // 线条宽度
-  colorScale: [
-    "rgb(36,104, 180)",
-    "rgb(60,157, 194)",
-    "rgb(128,205,193 )",
-    "rgb(151,218,168 )",
-    "rgb(198,231,181)",
-    "rgb(238,247,217)",
-    "rgb(255,238,159)",
-    "rgb(252,217,125)",
-    "rgb(255,182,100)",
-    "rgb(252,150,75)",
-    "rgb(250,112,52)",
-    "rgb(245,64,32)",
-    "rgb(237,45,28)",
-    "rgb(220,24,32)",
-    "rgb(180,0,35)"
-  ],
-  velocityScale: 0.005 * (Math.pow(window.devicePixelRatio, 1 / 3) || 1),
+  colorScale: '#fff',
+  velocityScale: 1 / 5000,
   particleAge: 90, // 粒子在重新生成之前绘制的最大帧数
   maxAge: 90, // alias for particleAge
   particleMultiplier: 1 / 300, // TODO: PATHS = Math.round(width * height * particleMultiplier);
-  paths: 200,
+  paths: 800,
+  frameRate: 16,
 };
 
 export interface IOptions {
@@ -37,6 +22,7 @@ export interface IOptions {
   maxAge: number; // alias for particleAge
   particleMultiplier?: number; // TODO: PATHS = Math.round(width * height * that.particleMultiplier);
   paths: number;
+  frameRate: number;
 }
 
 class BaseLayer {
@@ -46,6 +32,9 @@ class BaseLayer {
   private particles: any;
 
   static Field = Field;
+  private animationLoop: number;
+  private _then: number;
+  private starting: boolean;
 
   constructor(ctx: CanvasRenderingContext2D, options: Partial<IOptions>, field?: Field) {
     this.ctx = ctx;
@@ -67,6 +56,8 @@ class BaseLayer {
       this.options.paths = Math.round(width * height * this.options.particleMultiplier);
     }
 
+    this.animate = this.animate.bind(this);
+
     if (field) {
       this.updateData(field);
     }
@@ -79,12 +70,11 @@ class BaseLayer {
   private moveParticles(particles: any) {
     // 清空组
     const maxAge = this.options.maxAge;
-    const mapArea = 1 / 5000;
     const optVelocityScale = isFunction(this.options.velocityScale)
       // @ts-ignore
       ? this.options.velocityScale()
       : this.options.velocityScale;
-    const velocityScale = optVelocityScale * Math.pow(mapArea, 0.4);
+    const velocityScale = optVelocityScale;
 
     let i = 0;
     let len = particles.length;
@@ -145,7 +135,6 @@ class BaseLayer {
   }
 
   private drawParticle(particle: any) {
-    this.ctx.beginPath();
     // TODO 需要判断粒子是否超出视野
     // this.ctx.strokeStyle = color;
     const source = [particle.x, particle.y];
@@ -154,7 +143,7 @@ class BaseLayer {
 
     const pointPrev = this.project(source);
     const pointNext = this.project(target);
-
+    this.ctx.beginPath();
     this.ctx.moveTo(pointPrev[0], pointPrev[1]);
     this.ctx.lineTo(pointNext[0], pointNext[1]);
     particle.x = particle.xt;
@@ -201,6 +190,16 @@ class BaseLayer {
   // @ts-ignore
   project(...args: any[]): [number, number] {}
 
+  animate() {
+    this.animationLoop = requestAnimationFrame(this.animate);
+    const now = Date.now();
+    const delta = now - this._then;
+    if (delta > this.options.frameRate) {
+      this._then = now - (delta % this.options.frameRate);
+      this.render();
+    }
+  }
+
   /**
    * 渲染前处理
    */
@@ -212,6 +211,11 @@ class BaseLayer {
    * 开始渲染
    */
   render() {
+    if (!this.starting) {
+      this.starting = true;
+      this._then = Date.now();
+      this.animate();
+    }
     this.moveParticles(this.particles);
     this.drawParticles(this.particles);
   }
