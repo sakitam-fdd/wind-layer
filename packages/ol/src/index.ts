@@ -1,7 +1,7 @@
 // @ts-ignore
 import { Layer } from 'ol/layer.js';
 // @ts-ignore
-import { fromUserExtent, transform } from 'ol/proj.js';
+import { fromUserExtent, fromUserCoordinate } from 'ol/proj.js';
 // @ts-ignore
 import CanvasLayerRenderer from 'ol/renderer/canvas/Layer.js';
 // @ts-ignore
@@ -147,11 +147,11 @@ export class OlWindyRender extends CanvasLayerRenderer {
     coordinateToPixelTransform: any;
   }, coordinate: [number, number]) {
     const viewState = frameState.viewState;
-    coordinate = transform(coordinate, 'EPSG:4326', viewState.projection);
+    const viewCoordinate = fromUserCoordinate(coordinate, viewState.projection);
     if (!frameState) {
       return null;
     } else {
-      return applyTransform(frameState.coordinateToPixelTransform, coordinate.slice(0, 2));
+      return applyTransform(frameState.coordinateToPixelTransform, viewCoordinate.slice(0, 2));
     }
   }
 

@@ -1,0 +1,51 @@
+{
+  "name": "maptalks-wind",
+  "version": "1.0.0",
+  "description": "maptalks wind",
+  "keywords": [],
+  "author": "sakitam-fdd <smilefdd@gmail.com>",
+  "license": "MIT",
+  "main": "dist/maptalks-wind.js",
+  "module": "dist/maptalks-wind.esm.js",
+  "unpkg": "dist/maptalks-wind.js",
+  "commonjs": "dist/maptalks-wind.cjs.js",
+  "namespace": "MaptalksWind",
+  "types": "types/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sakitam-fdd/wind-layer.git",
+    "directory": "packages/maptalks"
+  },
+  "scripts": {
+    "tsc": "tsc --project tsconfig.prod.json",
+    "clean": "rimraf dist",
+    "dev": "run-p dev:*",
+    "dev:rollup": "cross-env NODE_ENV=development modulePath=maptalks input=src/index.ts rollup -wm -c ../../rollup/dev.config.js",
+    "build": "run-p build:*",
+    "bulid:dev": "cross-env NODE_ENV=production modulePath=maptalks input=src/index.ts rollup -m -c ../../rollup/dev.config.js",
+    "bulid:prod": "cross-env NODE_ENV=production modulePath=maptalks input=src/index.ts rollup -c ../../rollup/prod.config.js",
+    "lint:ts": "run-p -c lint:ts-*",
+    "test": "jest",
+    "prepublishOnly": "run-p test",
+    "generate:docs": "typedoc --out docs --target es6 --theme minimal --mode file src"
+  },
+  "bugs": {
+    "url": "https://github.com/sakitam-fdd/wind-layer/issues"
+  },
+  "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
+  "dependencies": {
+    "wind-core": "^1.0.0"
+  },
+  "peerDependencies": {
+    "maptalks": ">=0.40.0"
+  },
+  "devDependencies": {
+    "maptalks": "^0.46.0"
+  }
+}
