@@ -1,7 +1,7 @@
 // from: https://sourcegraph.com/github.com/IHCantabria/Leaflet.CanvasLayer.Field/-/blob/src/Vector.js?utm_source=share
 export default class Vector {
   public u: number;
-  public readonly v: number;
+  public v: number;
   constructor(u: number, v: number) {
     this.u = u;
     this.v = v;

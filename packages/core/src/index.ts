@@ -13,11 +13,13 @@ const defaultOptions = {
   frameRate: 20,
 };
 
+type emptyFunc = (v?: any) => number;
+
 export interface IOptions {
   globalAlpha: number; // 全局透明度
-  lineWidth: number | ((v: any) => number); // 线条宽度
-  colorScale: string[] | ((v: any) => number) | string;
-  velocityScale: number | (() => number);
+  lineWidth: number | emptyFunc; // 线条宽度
+  colorScale: string | string[] | emptyFunc;
+  velocityScale: number | emptyFunc;
   particleAge?: number; // 粒子在重新生成之前绘制的最大帧数
   maxAge: number; // alias for particleAge
   particleMultiplier?: number; // TODO: PATHS = Math.round(width * height * that.particleMultiplier);
@@ -29,7 +31,7 @@ class BaseLayer {
   private ctx: CanvasRenderingContext2D;
   private options: IOptions;
   private field: Field;
-  private particles: any;
+  private particles: any[];
 
   static Field = Field;
   private animationLoop: number;
@@ -76,7 +78,8 @@ class BaseLayer {
     this.field = field;
   }
 
-  private moveParticles(particles: any) {
+  private moveParticles() {
+    const particles = this.particles;
     // 清空组
     const maxAge = this.options.maxAge;
     const optVelocityScale = isFunction(this.options.velocityScale)
@@ -90,11 +93,10 @@ class BaseLayer {
     for (; i < len; i++) {
       const particle = particles[i];
 
-      if (particle.age > maxAge || particle.m * Math.random() * 10 < 0.0001) {
+      if (particle.age > maxAge) {
         // restart, on a random x,y
-        particle.age = 0;
-
         this.field.randomize(particle);
+        particle.age = 0;
       }
 
       const x = particle.x;
@@ -125,7 +127,8 @@ class BaseLayer {
     }
   }
 
-  private drawParticles(particles: any) {
+  private drawParticles() {
+    const particles = this.particles;
     const prev = this.ctx.globalCompositeOperation; // lighter
     this.ctx.globalCompositeOperation = 'destination-in';
     this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
@@ -133,7 +136,7 @@ class BaseLayer {
     // this.ctx.globalAlpha = 0.9;
 
     this.ctx.fillStyle = `rgba(0, 0, 0, ${this.options.globalAlpha})`;
-    this.ctx.lineWidth = this.options.lineWidth as number;
+    this.ctx.lineWidth = (isNumber(this.options.lineWidth) ? this.options.lineWidth : 1) as number;
     this.ctx.strokeStyle = (isString(this.options.colorScale) ? this.options.colorScale : '#fff') as string;
 
     let i = 0;
@@ -160,12 +163,12 @@ class BaseLayer {
 
     if (isFunction(this.options.colorScale)) {
       // @ts-ignore
-      this.ctx.strokeStyle = this.options.colorScale(particle.m);
+      this.ctx.strokeStyle = this.options.colorScale(particle.m) as string;
     }
 
     if (isFunction(this.options.lineWidth)) {
       // @ts-ignore
-      this.ctx.lineWidth = this.options.lineWidth(particle.m);
+      this.ctx.lineWidth = this.options.lineWidth(particle.m) as number;
     }
 
     this.ctx.stroke();
@@ -226,8 +229,8 @@ class BaseLayer {
    * 开始渲染
    */
   render() {
-    this.moveParticles(this.particles);
-    this.drawParticles(this.particles);
+    this.moveParticles();
+    this.drawParticles();
     this.postrender();
   }
 
