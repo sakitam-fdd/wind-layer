@@ -43,9 +43,20 @@ class BaseLayer {
       throw new Error('ctx error');
     }
 
+    this.setOptions(options);
+
+    this.animate = this.animate.bind(this);
+
+    if (field) {
+      this.updateData(field);
+    }
+  }
+
+  public setOptions(options: Partial<IOptions>) {
+    this.options = Object.assign({}, defaultOptions, options);
+
     const { width, height } = this.ctx.canvas;
 
-    this.options = Object.assign({}, defaultOptions, options);
     if (('particleAge' in options) && !('maxAge' in options) && isNumber(this.options.particleAge)) {
       // @ts-ignore
       this.options.maxAge = this.options.particleAge;
@@ -55,12 +66,10 @@ class BaseLayer {
       // @ts-ignore
       this.options.paths = Math.round(width * height * this.options.particleMultiplier);
     }
+  }
 
-    this.animate = this.animate.bind(this);
-
-    if (field) {
-      this.updateData(field);
-    }
+  public getOptions() {
+    return this.options;
   }
 
   public updateData(field: Field) {
@@ -219,14 +228,13 @@ class BaseLayer {
   render() {
     this.moveParticles(this.particles);
     this.drawParticles(this.particles);
+    this.postrender();
   }
 
   /**
-   * 渲染后
+   * each frame render end
    */
-  postrender() {
-
-  }
+  postrender() {}
 }
 
 export default BaseLayer;

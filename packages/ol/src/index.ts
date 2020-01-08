@@ -18,7 +18,7 @@ const ViewHint = {
 
 export const Field = WindCore.Field;
 
-export class OlWindyRender extends CanvasLayerRenderer {
+export class WindLayerRender extends CanvasLayerRenderer {
   private wind: WindCore | null;
   private pixelTransform: any;
   private inversePixelTransform: any;
@@ -26,7 +26,7 @@ export class OlWindyRender extends CanvasLayerRenderer {
   private containerReused: boolean;
   private container: HTMLDivElement | HTMLCanvasElement;
 
-  constructor(layer: OlWindy) {
+  constructor(layer: WindLayer) {
     super(layer);
 
     this.wind = null;
@@ -118,6 +118,7 @@ export class OlWindyRender extends CanvasLayerRenderer {
       this.wind = new WindCore(this.context, {}, data);
 
       this.wind.project = this.getPixelFromCoordinateInternal.bind(this, frameState);
+      this.wind.postrender = () => {};
     }
 
     this.wind.prerender();
@@ -128,8 +129,6 @@ export class OlWindyRender extends CanvasLayerRenderer {
     this.wind.render();
     // @ts-ignore
     this.postRender(context, frameState);
-
-    this.wind.postrender();
 
     if (clipped) {
       context.restore();
@@ -155,13 +154,13 @@ export class OlWindyRender extends CanvasLayerRenderer {
     }
   }
 
-  public getLayer(): OlWindy {
+  public getLayer(): WindLayer {
     return super.getLayer();
   }
 }
 
-export default class OlWindy extends Layer {
-  private renderer_: OlWindyRender;
+export class WindLayer extends Layer {
+  private renderer_: WindLayerRender;
   private field: any;
   private _map: any;
 
@@ -193,7 +192,7 @@ export default class OlWindy extends Layer {
   }
 
   private createRenderer() {
-    return new OlWindyRender(this);
+    return new WindLayerRender(this);
   }
 
   public getData () {

@@ -9,7 +9,7 @@
   "module": "dist/maptalks-wind.esm.js",
   "unpkg": "dist/maptalks-wind.js",
   "commonjs": "dist/maptalks-wind.cjs.js",
-  "namespace": "MaptalksWind",
+  "namespace": "maptalksWind",
   "types": "types/index.d.ts",
   "files": [
     "dist"
