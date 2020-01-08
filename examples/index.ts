@@ -9,7 +9,7 @@ import { fromLonLat } from 'ol/proj';
 // @ts-ignore
 import OSM from 'ol/source/OSM';
 
-import OlWindy, { Field } from 'ol-wind';
+import { WindLayer, Field } from 'ol-wind';
 
 function initMap() {
   const layer = new TileLayer({
@@ -73,7 +73,7 @@ function initMap() {
 
       console.log(res, vectorField);
 
-      const windLayer = new OlWindy(vectorField, {
+      const windLayer = new WindLayer(vectorField, {
         colorScale: (m: any) => {
           console.log(m);
           return '#fff';
