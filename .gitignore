@@ -27,6 +27,8 @@ jspm_packages/
 .rpt2_cache
 _site/
 types/
+examples/*.js
+examples/*.map
 
 .nyc_output
 .DS_Store

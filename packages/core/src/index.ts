@@ -10,7 +10,7 @@ const defaultOptions = {
   maxAge: 90, // alias for particleAge
   particleMultiplier: 1 / 300, // TODO: PATHS = Math.round(width * height * particleMultiplier);
   paths: 800,
-  frameRate: 16,
+  frameRate: 20,
 };
 
 export interface IOptions {
@@ -205,17 +205,18 @@ class BaseLayer {
    */
   prerender() {
     this.particles = this.prepareParticlePaths();
+
+    if (!this.starting) {
+      this.starting = true;
+      this._then = Date.now();
+      this.animate();
+    }
   }
 
   /**
    * 开始渲染
    */
   render() {
-    if (!this.starting) {
-      this.starting = true;
-      this._then = Date.now();
-      this.animate();
-    }
     this.moveParticles(this.particles);
     this.drawParticles(this.particles);
   }
