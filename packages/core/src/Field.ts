@@ -11,7 +11,7 @@ export interface IField {
   rows: number; // 行
   us: number[]; // U分量
   vs: number[]; // V分量
-  wrapX: boolean;
+  wrappedX: boolean; // 当数据范围时按照 [0, 360] 时需要对x方向进行切割转换为 [-180, 180]
 }
 
 export default class Field {
@@ -27,7 +27,7 @@ export default class Field {
   private isContinuous: boolean;
   private deltaY: number;
   private deltaX: number;
-  private wrapX: boolean;
+  private wrappedX: boolean;
 
   constructor(params: IField) {
     this.grid = [];
@@ -38,14 +38,14 @@ export default class Field {
     this.ymin = params.ymin;
     this.ymax = params.ymax;
 
-    this.cols = params.cols;
-    this.rows = params.rows;
+    this.cols = params.cols; // 列数
+    this.rows = params.rows; // 行数
 
-    this.us = params.us;
+    this.us = params.us; //
     this.vs = params.vs;
 
-    this.deltaX = params.deltaX;
-    this.deltaY = params.deltaY;
+    this.deltaX = params.deltaX; // x 方向增量
+    this.deltaY = params.deltaY; // y方向增量
 
     const cols = Math.ceil((this.xmax - this.xmin) / params.deltaX);
     const rows = Math.ceil((this.ymax - this.ymin) / params.deltaY);
@@ -55,7 +55,7 @@ export default class Field {
     }
 
     this.isContinuous = Math.floor(this.cols * params.deltaX) >= 360;
-    this.wrapX = params.wrapX;
+    this.wrappedX = params.wrappedX;
 
     this.grid = this.buildGrid();
   }
@@ -90,10 +90,6 @@ export default class Field {
         row[i] = valid ? new Vector(u, v) : null;
       }
 
-      if (this.isContinuous) {
-        // For wrapped grids, duplicate first column as last column to simplify interpolation logic
-        row.push(row[0]);
-      }
       grid[j] = row;
     }
     return grid;
@@ -157,8 +153,30 @@ export default class Field {
     return x !== null && x !== undefined;
   }
 
+  private getWrappedLongitudes() {
+    let xmin = this.xmin;
+    let xmax = this.xmax;
+
+    if (this.wrappedX) {
+      if (this.isContinuous) {
+        xmin = -180;
+        xmax = 180;
+      } else {
+        // not sure about this (just one particular case, but others...?)
+        xmax = this.xmax - 360;
+        xmin = this.xmin - 360;
+        /* eslint-disable no-console */
+        // console.warn(`are these xmin: ${xmin} & xmax: ${xmax} OK?`);
+        // TODO: Better throw an exception on no-controlled situations.
+        /* eslint-enable no-console */
+      }
+    }
+    return [xmin, xmax];
+  }
+
   public contains(lon: number, lat: number) {
-    let longitudeIn = lon >= this.xmin && lon <= this.xmax;
+    const [xmin, xmax] = this.getWrappedLongitudes();
+    let longitudeIn = lon >= xmin && lon <= xmax;
     let latitudeIn = lat >= this.ymin && lat <= this.ymax;
     return longitudeIn && latitudeIn;
   }
@@ -169,7 +187,7 @@ export default class Field {
    * @param lat
    */
   public getDecimalIndexes(lon: number, lat: number) {
-    if (this.wrapX && lon < this.xmin) {
+    if (this.wrappedX && lon < this.xmin) {
       lon = lon + 360;
     }
     let i = (lon - this.xmin) / this.deltaX;
@@ -194,6 +212,18 @@ export default class Field {
     const cj = this.clampRowIndex(jj);
 
     return this.valueAtIndexes(ci, cj);
+  }
+
+  /**
+   * Interpolated value at lon-lat coordinates (bilinear method)
+   * @param lon
+   * @param lat
+   */
+  interpolatedValueAt(lon: number, lat: number) {
+    if (!this.contains(lon, lat)) return null;
+
+    let [i, j] = this.getDecimalIndexes(lon, lat);
+    return this.interpolatePoint(i, j);
   }
 
   public hasValueAt(lon: number, lat: number) {
@@ -229,6 +259,11 @@ export default class Field {
   //   return null;
   // };
 
+  /**
+   * 基于向量的双线性插值
+   * @param i
+   * @param j
+   */
   private interpolatePoint(i: number, j: number) {
     //         1      2           After converting λ and φ to fractional grid indexes i and j, we find the
     //        fi  i   ci          four points 'G' that enclose point (i, j). These points are at the four
@@ -242,12 +277,8 @@ export default class Field {
     const [fi, ci, fj, cj] = indexes;
     let values = this.getFourSurroundingValues(fi, ci, fj, cj);
     if (values) {
-      values = values.map((v) => new Vector(v[0], v[1]));
-
-      if (values) {
-        const [g00, g10, g01, g11] = values;
-        return this.bilinearInterpolateVector(i - fi, j - fj, g00, g10, g01, g11);
-      }
+      const [g00, g10, g01, g11] = values;
+      return this.bilinearInterpolateVector(i - fi, j - fj, g00, g10, g01, g11);
     }
 
     return null;
@@ -292,23 +323,23 @@ export default class Field {
   }
 
   /**
-   * Get surrounding indexes (integer), clampling on borders
+   * 计算索引位置周围的数据
    * @private
    * @param   {Number} i - decimal index
    * @param   {Number} j - decimal index
    * @returns {Array} [fi, ci, fj, cj]
    */
   private getFourSurroundingIndexes(i: number, j: number) {
-    let fi = Math.floor(i);
-    let ci = fi + 1;
+    let fi = Math.floor(i); // 左
+    let ci = fi + 1; // 右
     // duplicate colum to simplify interpolation logic (wrapped value)
     if (this.isContinuous && ci >= this.cols) {
       ci = 0;
     }
     ci = this.clampColumnIndex(ci);
 
-    let fj = this.clampRowIndex(Math.floor(j));
-    let cj = this.clampRowIndex(fj + 1);
+    let fj = this.clampRowIndex(Math.floor(j)); // 上 纬度方向索引（取整）
+    let cj = this.clampRowIndex(fj + 1); // 下
 
     return [fi, ci, fj, cj];
   }
@@ -326,7 +357,6 @@ export default class Field {
   private getFourSurroundingValues(fi: number, ci: number, fj: number, cj: number) {
     let row;
     if ((row = this.grid[fj])) {
-      // upper row ^^
       const g00 = row[fi]; // << left
       const g10 = row[ci]; // right >>
       if (
@@ -376,7 +406,7 @@ export default class Field {
   private longitudeAtX(i: number) {
     let halfXPixel = this.deltaX / 2.0;
     let lon = this.xmin + halfXPixel + i * this.deltaX;
-    if (this.wrapX) {
+    if (this.wrappedX) {
       lon = lon > 180 ? lon - 360 : lon;
     }
     return lon;
@@ -392,8 +422,11 @@ export default class Field {
     return this.ymax - halfYPixel - j * this.deltaY;
   }
 
+  /**
+   * 生成粒子位置
+   * @param o
+   */
   public randomize(o: any = {}) {
-
     // field.randomize = function (o) {  // UNDONE: this method is terrible
     //   var x, y;
     //   var safetyNet = 0;
