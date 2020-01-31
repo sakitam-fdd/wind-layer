@@ -117,6 +117,14 @@ export function isNull (obj: any) {
   return obj == null;
 }
 
+/**
+ * Get floored division
+ * @param a
+ * @param n
+ * @returns {Number} returns remainder of floored division,
+ * i.e., floor(a / n). Useful for consistent modulo of negative numbers.
+ * See http://en.wikipedia.org/wiki/Modulo_operation.
+ */
 export function floorMod (a: number, n: number) {
   return a - n * Math.floor(a / n);
 }

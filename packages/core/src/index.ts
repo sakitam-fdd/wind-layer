@@ -11,6 +11,8 @@ const defaultOptions = {
   particleMultiplier: 1 / 300, // TODO: PATHS = Math.round(width * height * particleMultiplier);
   paths: 800,
   frameRate: 20,
+  minVelocity: 0,
+  maxVelocity: 10,
 };
 
 type emptyFunc = (v?: any) => number;
@@ -25,6 +27,8 @@ export interface IOptions {
   particleMultiplier?: number; // TODO: PATHS = Math.round(width * height * that.particleMultiplier);
   paths: number;
   frameRate: number;
+  minVelocity?: number;
+  maxVelocity?: number;
 }
 
 class BaseLayer {
