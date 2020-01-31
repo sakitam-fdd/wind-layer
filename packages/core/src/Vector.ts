@@ -8,19 +8,23 @@ export default class Vector {
   }
 
   /**
-   * 向量值
+   * the vector value
+   * 向量值（流体强度）
    * @returns {Number}
    */
-  magnitude() {
+  public magnitude() {
+    // Math.pow(u, 2)
+    // Math.pow(v, 2)
     return Math.sqrt(this.u * this.u + this.v * this.v);
   }
 
   /**
    * Angle in degrees (0 to 360º) --> Towards
+   * 流体方向
    * N is 0º and E is 90º
    * @returns {Number}
    */
-  directionTo() {
+  public directionTo() {
     const verticalAngle = Math.atan2(this.u, this.v);
     let inDegrees = verticalAngle * (180.0 / Math.PI);
     if (inDegrees < 0) {
@@ -34,7 +38,7 @@ export default class Vector {
    * N is 0º and E is 90º
    * @returns {Number}
    */
-  directionFrom() {
+  public directionFrom() {
     const a = this.directionTo();
     return (a + 180.0) % 360.0;
   }

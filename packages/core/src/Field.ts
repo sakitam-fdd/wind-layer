@@ -1,4 +1,5 @@
 import Vector from './Vector';
+import { floorMod } from './utils';
 
 export interface IField {
   xmin: number; // 一般格点数据是按照矩形范围来切割，所以定义其经纬度范围
@@ -35,8 +36,8 @@ export default class Field {
     this.xmin = params.xmin;
     this.xmax = params.xmax;
 
-    this.ymin = params.ymin;
-    this.ymax = params.ymax;
+    this.ymin = Math.min(params.ymax, params.ymin);
+    this.ymax = Math.max(params.ymax, params.ymin);
 
     this.cols = params.cols; // 列数
     this.rows = params.rows; // 行数
@@ -47,35 +48,23 @@ export default class Field {
     this.deltaX = params.deltaX; // x 方向增量
     this.deltaY = params.deltaY; // y方向增量
 
-    const cols = Math.ceil((this.xmax - this.xmin) / params.deltaX);
-    const rows = Math.ceil((this.ymax - this.ymin) / params.deltaY);
+    const cols = Math.ceil((this.xmax - this.xmin) / params.deltaX); // 列
+    const rows = Math.ceil((this.ymax - this.ymin) / params.deltaY); // 行
 
     if (cols !== this.cols || rows !== this.rows) {
       console.warn('The data grid is not available');
     }
 
+    // Math.floor(ni * Δλ) >= 360;
+    // lon lat 经度 纬度
     this.isContinuous = Math.floor(this.cols * params.deltaX) >= 360;
     this.wrappedX = params.wrappedX;
 
     this.grid = this.buildGrid();
   }
 
+  // from https://github.com/sakitam-fdd/wind-layer/blob/95368f9433/src/windy/windy.js#L110
   public buildGrid() {
-    // grid = [];
-    // var p = 0;
-    // var isContinuous = Math.floor(ni * Δλ) >= 360;
-    //
-    // for (var j = 0; j < nj; j++) {
-    //   var row = [];
-    //   for (var i = 0; i < ni; i++, p++) {
-    //     row[i] = builder.data(p);
-    //   }
-    //   if (isContinuous) {
-    //     row.push(row[0]);
-    //   }
-    //   grid[j] = row;
-    // }
-
     let grid = [];
     let p = 0;
 
@@ -90,6 +79,10 @@ export default class Field {
         row[i] = valid ? new Vector(u, v) : null;
       }
 
+      if (this.isContinuous) {
+        row.push(row[0]);
+      }
+
       grid[j] = row;
     }
     return grid;
@@ -101,6 +94,7 @@ export default class Field {
 
   /**
    * grib data extent
+   * 格点数据范围
    */
   public extent() {
     return [
@@ -113,6 +107,7 @@ export default class Field {
 
   /**
    * Bilinear interpolation for Vector
+   * 针对向量进行双线性插值
    * https://en.wikipedia.org/wiki/Bilinear_interpolation
    * @param   {Number} x
    * @param   {Number} y
@@ -187,16 +182,16 @@ export default class Field {
    * @param lat
    */
   public getDecimalIndexes(lon: number, lat: number) {
-    if (this.wrappedX && lon < this.xmin) {
-      lon = lon + 360;
-    }
-    let i = (lon - this.xmin) / this.deltaX;
+    // var i = floorMod(lon - xmin, 360) / deltaX; // calculate longitude index in wrapped range [0, 360)
+    // var j = (ymax - lat) / deltaY; // calculate latitude index in direction +90 to -90
+    let i = floorMod(lon - this.xmin, 360) / this.deltaX;
     let j = (this.ymax - lat) / this.deltaY;
     return [i, j];
   }
 
   /**
    * Nearest value at lon-lat coordinates
+   * 线性插值
    * @param lon
    * @param lat
    */
@@ -215,7 +210,8 @@ export default class Field {
   }
 
   /**
-   * Interpolated value at lon-lat coordinates (bilinear method)
+   * Get interpolated grid value lon-lat coordinates
+   * 双线性插值
    * @param lon
    * @param lat
    */
@@ -232,32 +228,6 @@ export default class Field {
     let included = true;
     return hasValue && included;
   }
-
-  // var interpolate = function (λ, φ) {
-  //
-  //   if (!grid) return null;
-  //
-  //   var i = floorMod(λ - λ0, 360) / Δλ;  // calculate longitude index in wrapped range [0, 360)
-  //   var j = (φ0 - φ) / Δφ;                 // calculate latitude index in direction +90 to -90
-  //
-  //   var fi = Math.floor(i), ci = fi + 1;
-  //   var fj = Math.floor(j), cj = fj + 1;
-  //
-  //   var row;
-  //   if ((row = grid[fj])) {
-  //     var g00 = row[fi];
-  //     var g10 = row[ci];
-  //     if (isValue(g00) && isValue(g10) && (row = grid[cj])) {
-  //       var g01 = row[fi];
-  //       var g11 = row[ci];
-  //       if (isValue(g01) && isValue(g11)) {
-  //         // All four points found, so interpolate the value.
-  //         return builder.interpolate(i - fi, j - fj, g00, g10, g01, g11);
-  //       }
-  //     }
-  //   }
-  //   return null;
-  // };
 
   /**
    * 基于向量的双线性插值
@@ -323,6 +293,7 @@ export default class Field {
   }
 
   /**
+   * from: https://github.com/IHCantabria/Leaflet.CanvasLayer.Field/blob/master/src/Field.js#L252
    * 计算索引位置周围的数据
    * @private
    * @param   {Number} i - decimal index
@@ -345,6 +316,7 @@ export default class Field {
   }
 
   /**
+   * from https://github.com/IHCantabria/Leaflet.CanvasLayer.Field/blob/master/src/Field.js#L277
    * Get four surrounding values or null if not available,
    * from 4 integer indexes
    * @private
@@ -427,18 +399,6 @@ export default class Field {
    * @param o
    */
   public randomize(o: any = {}) {
-    // field.randomize = function (o) {  // UNDONE: this method is terrible
-    //   var x, y;
-    //   var safetyNet = 0;
-    //   do {
-    //     x = Math.round(Math.floor(Math.random() * bounds.width) + bounds.x);
-    //     y = Math.round(Math.floor(Math.random() * bounds.height) + bounds.y)
-    //   } while (field(x, y)[2] === null && safetyNet++ < 30);
-    //   o.x = x;
-    //   o.y = y;
-    //   return o;
-    // };
-
     let i = (Math.random() * this.cols) | 0;
     let j = (Math.random() * this.rows) | 0;
 

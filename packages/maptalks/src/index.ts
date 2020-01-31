@@ -146,7 +146,7 @@ class WindLayer extends CanvasLayer {
    */
   public setData (data: any) {
     // @ts-ignore
-    if (data && data instanceof Field) {
+    if (data) {
       this.field = data;
     } else {
       console.error('inValid');
