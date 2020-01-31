@@ -15,6 +15,15 @@ export interface IField {
   wrappedX: boolean; // 当数据范围时按照 [0, 360] 时需要对x方向进行切割转换为 [-180, 180]
 }
 
+export interface IPosition {
+  age?: number;
+  x?: number;
+  y?: number;
+  xt?: number;
+  yt?: number;
+  m?: number;
+}
+
 export default class Field {
   private readonly xmin: number;
   private readonly xmax: number;
@@ -22,13 +31,14 @@ export default class Field {
   private readonly ymax: number;
   private readonly cols: number;
   private readonly rows: number;
-  private grid: any[];
+  private grid: (Vector | null)[][];
   private us: number[];
   private vs: number[];
   private isContinuous: boolean;
   private deltaY: number;
   private deltaX: number;
   private wrappedX: boolean;
+  private range: (number | undefined)[] | undefined;
 
   constructor(params: IField) {
     this.grid = [];
@@ -58,13 +68,14 @@ export default class Field {
     // Math.floor(ni * Δλ) >= 360;
     // lon lat 经度 纬度
     this.isContinuous = Math.floor(this.cols * params.deltaX) >= 360;
-    this.wrappedX = params.wrappedX;
+    this.wrappedX = 'wrappedX' in params ? params.wrappedX : this.xmax > 180; // [0, 360] --> [-180, 180];
 
     this.grid = this.buildGrid();
+    this.range = this.calculateRange();
   }
 
   // from https://github.com/sakitam-fdd/wind-layer/blob/95368f9433/src/windy/windy.js#L110
-  public buildGrid() {
+  public buildGrid(): (Vector | null)[][] {
     let grid = [];
     let p = 0;
 
@@ -136,8 +147,44 @@ export default class Field {
     return new Vector(u, v);
   }
 
-  // TODO: 如果支持x方向平铺，范围需要重新计算
-  calculateRange() {}
+  /**
+   * calculate vector value range
+   */
+  calculateRange() {
+    if (!this.grid || !this.grid[0]) return;
+    const rows = this.grid.length as number;
+    const cols = this.grid[0].length as number;
+
+    // const vectors = [];
+    let min;
+    let max;
+    // @from: https://stackoverflow.com/questions/13544476/how-to-find-max-and-min-in-array-using-minimum-comparisons
+    for (let j = 0; j < rows; j++) {
+      for (let i = 0; i < cols; i++) {
+        const vec = this.grid[j][i];
+
+        if (vec !== null) {
+          const val = vec.magnitude();
+          // vectors.push();
+          if (min === undefined) {
+            min = val;
+          } else if (max === undefined) {
+            max = val;
+            // update min max
+            // 1. Pick 2 elements(a, b), compare them. (say a > b)
+            min = Math.min(min, max);
+            max = Math.max(min, max);
+          } else {
+            // 2. Update min by comparing (min, b)
+            // 3. Update max by comparing (max, a)
+            min = Math.min(val, min);
+            max = Math.max(val, max);
+          }
+        }
+      }
+    }
+    return [min, max];
+  }
 
   /**
    * 检查 uv是否合法
@@ -248,6 +295,7 @@ export default class Field {
     let values = this.getFourSurroundingValues(fi, ci, fj, cj);
     if (values) {
       const [g00, g10, g01, g11] = values;
+      // @ts-ignore
       return this.bilinearInterpolateVector(i - fi, j - fj, g00, g10, g01, g11);
     }
 
@@ -398,7 +446,7 @@ export default class Field {
    * 生成粒子位置
    * @param o
    */
-  public randomize(o: any = {}) {
+  public randomize(o: IPosition = {}) {
     let i = (Math.random() * this.cols) | 0;
     let j = (Math.random() * this.rows) | 0;
 

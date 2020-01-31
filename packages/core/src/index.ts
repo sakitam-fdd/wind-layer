@@ -5,7 +5,7 @@ const defaultOptions = {
   globalAlpha: 0.9, // 全局透明度
   lineWidth: 1, // 线条宽度
   colorScale: '#fff',
-  velocityScale: 1 / 5000,
+  velocityScale: 1 / 25,
   particleAge: 90, // 粒子在重新生成之前绘制的最大帧数
   maxAge: 90, // alias for particleAge
   particleMultiplier: 1 / 300, // TODO: PATHS = Math.round(width * height * particleMultiplier);
@@ -106,7 +106,7 @@ class BaseLayer {
       const x = particle.x;
       const y = particle.y;
 
-      const vector = this.field.valueAt(x, y);
+      const vector = this.field.interpolatedValueAt(x, y);
 
       if (vector === null) {
         particle.age = maxAge;
