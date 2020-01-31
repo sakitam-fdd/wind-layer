@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.css">
 <style type="text/css">
   html, body {
-    margin: 0px;
+    margin: 0;
     height: 100%;
     width: 100%
   }
@@ -16,12 +16,13 @@
     height: 100%
   }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm//axios/dist/axios.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
 <body>
 
 <div id="map" class="container"></div>
+<script src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm//axios/dist/axios.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
+<script src="//cdn.jsdelivr.net/npm/chroma-js@2.1.0/chroma.js"></script>
 <script src="../packages/maptalks/dist/maptalks-wind.js"></script>
 <script>
   const map = new maptalks.Map('map', {
@@ -66,22 +67,27 @@
         deltaX: 1, // x（经度）增量
         deltaY: 1, // y（维度）增量
         cols: 360, // 列（可由 `(xmax - xmin) / deltaX` 得到）
-        rows: 180, // 行
+        rows: 181, // 行
         us: uComp.data, // U分量
         vs: vComp.data, // V分量
-        wrappedX: true,
+        // wrappedX: false,
       });
 
       console.timeEnd('start');
 
       console.log(res, vectorField);
+      const range = vectorField.range || [0.02, 28.21618329965979];
+      const scale = chroma.scale('OrRd').domain(range);
 
       const windLayer = new maptalksWind.WindLayer('wind', vectorField, {
         windOptions: {
-          colorScale: (m) => {
-            // console.log(m);
-            return '#fff';
-          },
+          // colorScale: (m) => {
+          //   // console.log(m);
+          //   return '#fff';
+          // },
+          colorScale: scale,
+          velocityScale: 1 / 20,
+          paths: 5000,
         },
       });
 
