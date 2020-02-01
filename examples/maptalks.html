@@ -50,6 +50,14 @@
           velocityScale: 1 / 20,
           paths: 5000,
         },
+        colorScale: (m) => {
+          // console.log(m);
+          return '#ff473c';
+        },
+        // colorScale: scale,
+        velocityScale: 1 / 20,
+        paths: 5000,
+        generateParticleOption: false,
       });
 
       console.log(map, windLayer);
