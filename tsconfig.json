@@ -22,7 +22,7 @@
       "es2018",
       "dom"
     ],
-    "types": ["reflect-metadata", "jest"],
+    "types": ["node", "reflect-metadata", "jest"],
     "module": "esnext",
     "moduleResolution": "node",
     "esModuleInterop": true,
@@ -31,7 +31,8 @@
     "emitDecoratorMetadata": true
   },
   "include": [
-    "packages/**/src"
+    "packages/**/src",
+    "node_modules/@types/node/globals.d.ts"
   ],
   "exclude": [
     "node_modules",

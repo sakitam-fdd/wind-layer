@@ -12,7 +12,7 @@ export interface IField {
   rows: number; // 行
   us: number[]; // U分量
   vs: number[]; // V分量
-  wrappedX: boolean; // 当数据范围时按照 [0, 360] 时需要对x方向进行切割转换为 [-180, 180]
+  wrappedX?: boolean; // 当数据范围时按照 [0, 360] 时需要对x方向进行切割转换为 [-180, 180]
 }
 
 export interface IPosition {
@@ -37,7 +37,7 @@ export default class Field {
   private isContinuous: boolean;
   private deltaY: number;
   private deltaX: number;
-  private wrappedX: boolean;
+  private wrappedX: undefined | boolean;
   private range: (number | undefined)[] | undefined;
 
   constructor(params: IField) {
