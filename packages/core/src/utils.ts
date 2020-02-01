@@ -1,3 +1,5 @@
+import Field from './Field';
+
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 const symToStringTag = typeof Symbol !== 'undefined' ? Symbol.toStringTag : undefined;
 
@@ -117,6 +119,25 @@ export function isNull (obj: any) {
   return obj == null;
 }
 
+if (!Array.isArray) {
+  // @ts-ignore
+  Array.isArray = function(arg: any) {
+    return Object.prototype.toString.call(arg) === '[object Array]';
+  };
+}
+
+/**
+ * check is array
+ * @param arr
+ */
+export function isArray(arr: any) {
+  return Array.isArray(arr);
+}
+
+export function warnLog(msg: string) {
+  console.warn(`wind-layer: ${msg}`);
+}
+
 /**
  * Get floored division
  * @param a
@@ -127,4 +148,71 @@ export function isNull (obj: any) {
  */
 export function floorMod (a: number, n: number) {
   return a - n * Math.floor(a / n);
+}
+
+export interface IGFSItem {
+  header: {
+    parameterCategory: number | string;
+    parameterNumber: number | string;
+    dx: number;
+    dy: number;
+    nx: number;
+    ny: number;
+    lo1: number;
+    lo2: number;
+    la1: number;
+    la2: number;
+    [key: string]: any;
+  };
+  data: number[];
+}
+
+/**
+ * format gfs json to vector
+ * @param data
+ */
+export function formatData(data: IGFSItem[]) {
+  let uComp: IGFSItem;
+  let vComp: IGFSItem;
+
+  if (process.env.NODE_ENV === 'development') {
+    console.time('format-start');
+  }
+
+  data.forEach(function (record: IGFSItem) {
+    switch (record.header.parameterCategory + "," + record.header.parameterNumber) {
+      case "1,2":
+      case "2,2":
+        uComp = record;
+        break;
+      case "1,3":
+      case "2,3":
+        vComp = record;
+        break;
+    }
+  });
+
+  // @ts-ignore
+  if (!vComp || !uComp) return;
+
+  const header = uComp.header;
+  const vectorField = new Field({
+    xmin: header.lo1, // 一般格点数据是按照矩形范围来切割，所以定义其经纬度范围
+    ymin: header.la2,
+    xmax: 360,
+    ymax: header.la1,
+    deltaX: 1, // x（经度）增量
+    deltaY: 1, // y（维度）增量
+    cols: 360, // 列（可由 `(xmax - xmin) / deltaX` 得到）
+    rows: 181, // 行
+    us: uComp.data, // U分量
+    vs: vComp.data, // V分量
+    wrappedX: false,
+  });
+
+  if (process.env.NODE_ENV === 'development') {
+    console.timeEnd('format-start');
+  }
+
+  return vectorField;
 }

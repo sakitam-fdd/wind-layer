@@ -1,7 +1,7 @@
-import { isString, isNumber, isFunction } from './utils';
 import Field from './Field';
+import { isString, isNumber, isFunction } from './utils';
 
-const defaultOptions = {
+export const defaultOptions = {
   globalAlpha: 0.9, // 全局透明度
   lineWidth: 1, // 线条宽度
   colorScale: '#fff',
@@ -243,5 +243,9 @@ class BaseLayer {
    */
   postrender() {}
 }
+
+export { default as Field } from './Field';
+export { default as Vector } from './Vector';
+export * from './utils';
 
 export default BaseLayer;

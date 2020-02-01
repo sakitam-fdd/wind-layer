@@ -1,7 +1,17 @@
 // @ts-ignore
-import { CanvasLayer, renderer, Coordinate } from 'maptalks';
+import { CanvasLayer, renderer, Coordinate } from 'maptalks/dist/maptalks.es.js';
 
-import WindCore from 'wind-core';
+import WindCore, {
+  Field, isArray,
+  formatData, warnLog,
+  defaultOptions,
+  IOptions,
+} from 'wind-core';
+
+export interface IWindOptions extends IOptions {
+  windOptions: Partial<IOptions>;
+  [key: string]: any;
+}
 
 const _options = {
   renderer: 'canvas',
@@ -9,8 +19,6 @@ const _options = {
   animation: false,
   windOptions: {},
 };
-
-export const Field = WindCore.Field;
 
 export interface IWindLayerRenderer {}
 
@@ -118,7 +126,7 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
 class WindLayer extends CanvasLayer {
   private field: any;
   private _map: any;
-  private options: any;
+  private options: Partial<IWindOptions>;
 
   constructor(id: string | number, data: any, options: any) {
     super(id, Object.assign({}, _options, options));
@@ -127,9 +135,23 @@ class WindLayer extends CanvasLayer {
 
     this._map = null;
 
+    this.pickWindOptions();
+
     if (data) {
       this.setData(data);
     }
+  }
+
+  private pickWindOptions() {
+    Object.keys(defaultOptions).forEach((key: string) => {
+      if (key in this.options) {
+        if (this.options.windOptions === undefined) {
+          this.options.windOptions = {};
+        }
+        // @ts-ignore
+        this.options.windOptions[key] = this.options[key];
+      }
+    });
   }
 
   /**
@@ -145,29 +167,31 @@ class WindLayer extends CanvasLayer {
    * @returns {WindLayer}
    */
   public setData (data: any) {
-    // @ts-ignore
-    if (data) {
+    if (data && data instanceof Field) {
       this.field = data;
+    } else if (isArray(data)) {
+      this.field = formatData(data);
     } else {
-      console.error('inValid');
+      console.error('Illegal data');
     }
     return this;
   }
 
-  public updateParams(options = {}) {
-    console.warn('will move to setWindOptions');
+  public updateParams(options : Partial<IOptions> = {}) {
+    warnLog('will move to setWindOptions');
     this.setWindOptions(options);
     return this;
   }
 
   public getParams() {
-    console.warn('will move to getWindOptions');
+    warnLog('will move to getWindOptions');
     return this.getWindOptions();
   }
 
-  public setWindOptions(options: any) {
+  public setWindOptions(options: Partial<IOptions>) {
+    const beforeOptions = this.options.windOptions;
     this.options = Object.assign(this.options, {
-      windOptions: options || {},
+      windOptions: Object.assign(beforeOptions, options || {}),
     });
 
     const renderer = this._getRenderer();
@@ -205,5 +229,6 @@ class WindLayer extends CanvasLayer {
 WindLayer.registerRenderer('canvas', WindLayerRenderer);
 
 export {
+  Field,
   WindLayer,
 };
