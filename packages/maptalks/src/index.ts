@@ -2,8 +2,11 @@
 import { CanvasLayer, renderer, Coordinate } from 'maptalks/dist/maptalks.es.js';
 
 import WindCore, {
-  Field, isArray,
-  formatData, warnLog,
+  Field,
+  isArray,
+  formatData,
+  warnLog,
+  assign,
   defaultOptions,
   IOptions,
 } from 'wind-core';
@@ -66,9 +69,9 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
           // @ts-ignore
           this.setCanvasUpdated();
         };
-      }
 
-      this.wind.prerender();
+        this.wind.prerender();
+      }
 
       this.wind.render();
     }
@@ -89,12 +92,48 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
   }
 
   onZoomStart(...args: any[]) {
+    if (this.wind) {
+      this.wind.stop();
+    }
     super.onZoomStart.apply(this, args);
   }
 
   onZoomEnd(...args: any[]) {
+    if (this.wind) {
+      this.wind.start();
+    }
     super.onZoomEnd.apply(this, args);
   }
+
+  onDragRotateStart(...args: any[]) {
+    if (this.wind) {
+      this.wind.stop();
+    }
+    super.onDragRotateStart.apply(this, args);
+  }
+
+  onDragRotateEnd(...args: any[]) {
+    if (this.wind) {
+      this.wind.start();
+    }
+    super.onDragRotateEnd.apply(this, args);
+  }
+
+  onMoveStart(...args: any[]) {
+    if (this.wind) {
+      this.wind.stop();
+    }
+    super.onMoveStart.apply(this, args);
+  }
+
+  onMoveEnd(...args: any[]) {
+    if (this.wind) {
+      this.wind.start();
+    }
+    super.onMoveEnd.apply(this, args);
+  }
+
+  // onResize() {}
 
   remove() {
     delete this._drawContext;
@@ -129,7 +168,7 @@ class WindLayer extends CanvasLayer {
   private options: Partial<IWindOptions>;
 
   constructor(id: string | number, data: any, options: any) {
-    super(id, Object.assign({}, _options, options));
+    super(id, assign({}, _options, options));
 
     this.field = null;
 
@@ -189,9 +228,9 @@ class WindLayer extends CanvasLayer {
   }
 
   public setWindOptions(options: Partial<IOptions>) {
-    const beforeOptions = this.options.windOptions;
-    this.options = Object.assign(this.options, {
-      windOptions: Object.assign(beforeOptions, options || {}),
+    const beforeOptions = this.options.windOptions || {};
+    this.options = assign(this.options, {
+      windOptions: assign(beforeOptions, options || {}),
     });
 
     const renderer = this._getRenderer();

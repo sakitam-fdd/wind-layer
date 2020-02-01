@@ -13,9 +13,11 @@ export const defaultOptions = {
   frameRate: 20,
   minVelocity: 0,
   maxVelocity: 10,
+  generateParticleOption: true,
 };
 
 type emptyFunc = (v?: any) => number;
+type emptyGenerateParticleFunc = (v?: any) => boolean;
 
 export interface IOptions {
   globalAlpha: number; // 全局透明度
@@ -29,6 +31,7 @@ export interface IOptions {
   frameRate: number;
   minVelocity?: number;
   maxVelocity?: number;
+  generateParticleOption?: boolean | emptyGenerateParticleFunc;
 }
 
 class BaseLayer {
@@ -41,6 +44,7 @@ class BaseLayer {
   private animationLoop: number;
   private _then: number;
   private starting: boolean;
+  private generated: boolean = false;
 
   constructor(ctx: CanvasRenderingContext2D, options: Partial<IOptions>, field?: Field) {
     this.ctx = ctx;
@@ -206,6 +210,17 @@ class BaseLayer {
   // @ts-ignore
   project(...args: any[]): [number, number] {}
 
+  start() {
+    this.starting = true;
+    this._then = Date.now();
+    this.animate();
+  }
+
+  stop() {
+    cancelAnimationFrame(this.animationLoop);
+    this.starting = false;
+  }
+
   animate() {
     this.animationLoop = requestAnimationFrame(this.animate);
     const now = Date.now();
@@ -220,7 +235,18 @@ class BaseLayer {
    * 渲染前处理
    */
   prerender() {
-    this.particles = this.prepareParticlePaths();
+    const gen = isFunction(this.options.generateParticleOption) ?
+      // @ts-ignore
+      this.options.generateParticleOption() : this.options.generateParticleOption;
+    if (!gen && !this.generated) {
+      this.particles = this.prepareParticlePaths();
+      this.generated = true;
+      console.log('once');
+    } else if (gen) {
+      this.particles = this.prepareParticlePaths();
+      this.generated = true;
+      console.log('more');
+    }
 
     if (!this.starting) {
       this.starting = true;
