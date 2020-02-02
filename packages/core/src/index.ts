@@ -157,29 +157,34 @@ class BaseLayer {
   private drawParticle(particle: any) {
     // TODO 需要判断粒子是否超出视野
     // this.ctx.strokeStyle = color;
-    const source = [particle.x, particle.y];
+    const source: [number, number] = [particle.x, particle.y];
     // when xt isn't exit
     const target = [particle.xt || source[0], particle.yt || source[1]];
 
-    const pointPrev = this.project(source);
-    const pointNext = this.project(target);
-    this.ctx.beginPath();
-    this.ctx.moveTo(pointPrev[0], pointPrev[1]);
-    this.ctx.lineTo(pointNext[0], pointNext[1]);
-    particle.x = particle.xt;
-    particle.y = particle.yt;
+    if (
+      this.intersectsCoordinate(source)
+      && particle.age <= this.options.maxAge
+    ) {
+      const pointPrev = this.project(source);
+      const pointNext = this.project(target);
+      this.ctx.beginPath();
+      this.ctx.moveTo(pointPrev[0], pointPrev[1]);
+      this.ctx.lineTo(pointNext[0], pointNext[1]);
+      particle.x = particle.xt;
+      particle.y = particle.yt;
 
-    if (isFunction(this.options.colorScale)) {
-      // @ts-ignore
-      this.ctx.strokeStyle = this.options.colorScale(particle.m) as string;
+      if (isFunction(this.options.colorScale)) {
+        // @ts-ignore
+        this.ctx.strokeStyle = this.options.colorScale(particle.m) as string;
+      }
+
+      if (isFunction(this.options.lineWidth)) {
+        // @ts-ignore
+        this.ctx.lineWidth = this.options.lineWidth(particle.m) as number;
+      }
+
+      this.ctx.stroke();
     }
-
-    if (isFunction(this.options.lineWidth)) {
-      // @ts-ignore
-      this.ctx.lineWidth = this.options.lineWidth(particle.m) as number;
-    }
-
-    this.ctx.stroke();
   }
 
   private prepareParticlePaths() { // 由用户自行处理，不再自动修改粒子数
@@ -208,7 +213,13 @@ class BaseLayer {
   }
 
   // @ts-ignore
-  project(...args: any[]): [number, number] {}
+  project(...args: any[]): [number, number] {
+    throw new Error('must be overriden');
+  }
+
+  intersectsCoordinate(coordinates: [number, number]): boolean {
+    throw new Error('must be overriden');
+  }
 
   start() {
     this.starting = true;

@@ -65,6 +65,7 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
         this.wind = new WindCore(this.context, opt, data);
 
         this.wind.project = this.project.bind(this);
+        this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
         this.wind.postrender = () => {
           // @ts-ignore
           this.setCanvasUpdated();
@@ -85,6 +86,13 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
       pixel.x,
       pixel.y,
     ];
+  }
+
+  intersectsCoordinate(coordinate: [number, number]): boolean {
+    // const map = this.getMap();
+    // const mapExtent = map.getExtent();
+    // return mapExtent.contains(new Coordinate(...coordinate)) as boolean;
+    return true;
   }
 
   drawOnInteracting() {
