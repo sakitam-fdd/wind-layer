@@ -6,7 +6,8 @@
         "packages",
         "typings/*",
         "types/*"
-      ]
+      ],
+      "maptalks": ["maptalks/dist/maptalks.es.js"]
     },
     "rootDir": "./",
     "baseUrl": "./",
