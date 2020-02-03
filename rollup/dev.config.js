@@ -4,6 +4,7 @@ import baseConfig from './base.config';
 const common = {
   banner,
   extend: false,
+  // exports: 'named',
   globals: {
   },
 };

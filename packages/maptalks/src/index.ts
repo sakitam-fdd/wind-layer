@@ -170,10 +170,10 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
   }
 }
 
-class WindLayer extends CanvasLayer {
+class MaptalksWind extends CanvasLayer {
   private field: any;
   private _map: any;
-  private options: Partial<IWindOptions>;
+  private options: IWindOptions;
 
   constructor(id: string | number, data: any, options: any) {
     super(id, assign({}, _options, options));
@@ -273,9 +273,13 @@ class WindLayer extends CanvasLayer {
 }
 
 // @ts-ignore
-WindLayer.registerRenderer('canvas', WindLayerRenderer);
+MaptalksWind.registerRenderer('canvas', WindLayerRenderer);
+
+const WindLayer = MaptalksWind;
 
 export {
   Field,
   WindLayer,
 };
+
+export default MaptalksWind;
