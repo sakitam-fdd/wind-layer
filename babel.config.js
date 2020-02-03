@@ -1,5 +1,27 @@
 module.exports = (api) => {
   api.cache.using(() => process.env.NODE_ENV === 'development');
+
+  const isSite = api.env('site');
+
+  if (isSite) {
+    return {
+      presets: [
+        'babel-preset-gatsby'
+      ],
+      plugins: [
+        '@babel/plugin-proposal-optional-chaining',
+        '@babel/plugin-proposal-nullish-coalescing-operator',
+        'transform-inline-environment-variables',
+        [
+          '@babel/plugin-proposal-decorators',
+          {
+            legacy: true
+          }
+        ],
+      ]
+    };
+  }
+
   return {
     presets: [
       [

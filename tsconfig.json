@@ -23,6 +23,7 @@
       "es2018",
       "dom"
     ],
+    "jsx": "react",
     "types": ["node", "reflect-metadata", "jest"],
     "module": "esnext",
     "moduleResolution": "node",
