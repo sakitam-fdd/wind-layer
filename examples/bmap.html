@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+  <title>bmap-wind</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.css">
+  <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=bxFuXXDt1oKdlgu6mXCCnK51cDgDGBLp"></script>
+  <style type="text/css">
+    body, html,#container {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      margin:0;
+    }
+  </style>
+</head>
+<body>
+<div id="container"></div>
+<script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
+<script src="../packages/bmap/dist/bmap-wind.js"></script>
+<script type="text/javascript">
+  var map = new BMap.Map("container");
+  map.centerAndZoom(new BMap.Point(116.3964,39.9093), 2);
+  map.enableScrollWheelZoom();
+  // 地图自定义样式
+  map.setMapStyle({
+    styleJson: [{
+      "featureType": "water",
+      "elementType": "all",
+      "stylers": {
+        "color": "#044161"
+      }
+    }, {
+      "featureType": "land",
+      "elementType": "all",
+      "stylers": {
+        "color": "#091934"
+      }
+    }, {
+      "featureType": "boundary",
+      "elementType": "geometry",
+      "stylers": {
+        "color": "#064f85"
+      }
+    }, {
+      "featureType": "railway",
+      "elementType": "all",
+      "stylers": {
+        "visibility": "off"
+      }
+    }, {
+      "featureType": "highway",
+      "elementType": "geometry",
+      "stylers": {
+        "color": "#004981"
+      }
+    }, {
+      "featureType": "highway",
+      "elementType": "geometry.fill",
+      "stylers": {
+        "color": "#005b96",
+        "lightness": 1
+      }
+    }, {
+      "featureType": "highway",
+      "elementType": "labels",
+      "stylers": {
+        "visibility": "on"
+      }
+    }, {
+      "featureType": "arterial",
+      "elementType": "geometry",
+      "stylers": {
+        "color": "#004981",
+        "lightness": -39
+      }
+    }, {
+      "featureType": "arterial",
+      "elementType": "geometry.fill",
+      "stylers": {
+        "color": "#00508b"
+      }
+    }, {
+      "featureType": "poi",
+      "elementType": "all",
+      "stylers": {
+        "visibility": "off"
+      }
+    }, {
+      "featureType": "green",
+      "elementType": "all",
+      "stylers": {
+        "color": "#056197",
+        "visibility": "off"
+      }
+    }, {
+      "featureType": "subway",
+      "elementType": "all",
+      "stylers": {
+        "visibility": "off"
+      }
+    }, {
+      "featureType": "manmade",
+      "elementType": "all",
+      "stylers": {
+        "visibility": "off"
+      }
+    }, {
+      "featureType": "local",
+      "elementType": "all",
+      "stylers": {
+        "visibility": "off"
+      }
+    }, {
+      "featureType": "arterial",
+      "elementType": "labels",
+      "stylers": {
+        "visibility": "off"
+      }
+    }, {
+      "featureType": "boundary",
+      "elementType": "geometry.fill",
+      "stylers": {
+        "color": "#029fd4"
+      }
+    }, {
+      "featureType": "building",
+      "elementType": "all",
+      "stylers": {
+        "color": "#1a5787"
+      }
+    }, {
+      "featureType": "label",
+      "elementType": "all",
+      "stylers": {
+        "visibility": "off"
+      }
+    }, {
+      "featureType": "poi",
+      "elementType": "labels.text.fill",
+      "stylers": {
+        "color": "#ffffff"
+      }
+    }, {
+      "featureType": "poi",
+      "elementType": "labels.text.stroke",
+      "stylers": {
+        "color": "#1e1c1c"
+      }
+    }, {
+      "featureType": "administrative",
+      "elementType": "labels",
+      "stylers": {
+        "visibility": "off"
+      }
+    },{
+      "featureType": "road",
+      "elementType": "labels",
+      "stylers": {
+        "visibility": "off"
+      }
+    }]
+  });
+
+  fetch('https://sakitam-fdd.github.io/wind-layer/examples/out.json')
+    .then(res => res.json())
+    .then(res => {
+      var config = {
+        velocityScale: 0.05, // 风速的比例
+        particleAge: 90, // 重绘之前生成的离子数量的最大帧数
+        lineWidth: 1, // 绘制粒子的线宽
+      };
+
+      var layer = new BMapWind.WindLayer(res, {
+        colorScale: "rgb(238,247,217)",
+        velocityScale: 1 / 30,
+        paths: 8000,
+        generateParticleOption: false,
+      });
+
+      const gui = new dat.GUI();
+      gui.add(config, 'particleAge', 0, 180).onChange(function (value) {
+        layer.updateParams(config);
+      });
+      gui.add(config, 'lineWidth', 1, 10).onChange(function (value) {
+        layer.updateParams(config);
+      });
+
+      map.addOverlay(layer);
+
+      setTimeout(() => {
+        // layer.removeLayer();
+        // map.removeOverlay(layer);
+      }, 5000);
+    });
+</script>
+</body>
+</html>

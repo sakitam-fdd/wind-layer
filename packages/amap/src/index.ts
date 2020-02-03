@@ -1,3 +1,4 @@
+import { throws } from 'assert';
 import WindCore, {
   Field,
   isArray,
@@ -21,7 +22,11 @@ export interface IWindOptions extends IOptions {
 
 const G = typeof window === 'undefined' ? global : window;
 // @ts-ignore
-const AMap = G?.AMap || {};
+const AMap = G?.AMap;
+
+if (!AMap) {
+  throw new Error('Before using this plugin, you must first introduce the amap JS API <https://lbs.amap.com/api/javascript-api/summary>');
+}
 
 const _options = {
   context: '2d',
@@ -41,7 +46,7 @@ class AMapWind {
   private map: any;
   private layer_: any;
 
-  constructor (data: any, options = {}) {
+  constructor (data: any, options: Partial<IWindOptions> = {}) {
     this.options = assign({}, _options, options);
 
     /**
@@ -167,6 +172,7 @@ class AMapWind {
   getCanvasLayer () {
     if (!this.canvas && !this.layer_) {
       const canvas = this.canvasFunction();
+      const bounds = this._getBounds();
 
       const ops: {
         canvas: HTMLCanvasElement | null,
@@ -176,10 +182,8 @@ class AMapWind {
         opacity?: number;
       } = {
         canvas: canvas,
+        bounds: this.options.bounds || bounds,
       };
-      if (this.options.bounds) {
-        ops.bounds = this.options.bounds;
-      }
 
       if (this.options.zooms) {
         ops.zooms = this.options.zooms;
@@ -262,7 +266,7 @@ class AMapWind {
   }
 
   public project(coordinate: [number, number]): [number, number] {
-    const pixel = this.map.lnglatToPixel(new AMap.LngLat(...coordinate));
+    const pixel = this.map.lngLatToContainer(new AMap.LngLat(...coordinate));
     return [
       pixel.x,
       pixel.y,
@@ -270,9 +274,9 @@ class AMapWind {
   }
 
   public intersectsCoordinate(coordinate: [number, number]): boolean {
-    // const mapExtent = this._getBounds();
-    // return mapExtent.contains(new AMap.LngLat(...coordinate)) as boolean;
-    return true;
+    const mapExtent = this._getBounds();
+    return mapExtent.contains(new AMap.LngLat(...coordinate)) as boolean;
+    // return true;
   }
 
   /**
