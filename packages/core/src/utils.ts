@@ -255,3 +255,24 @@ export function formatData(data: IGFSItem[]) {
 
   return vectorField;
 }
+
+/**
+ * create canvas
+ * @param width
+ * @param height
+ * @param retina
+ * @param Canvas
+ * @returns {HTMLCanvasElement}
+ */
+export function createCanvas(width: number, height: number, retina: number, Canvas: any) {
+  if (typeof document !== 'undefined') {
+    const canvas = document.createElement('canvas');
+    canvas.width = width * retina;
+    canvas.height = height * retina;
+    return canvas
+  } else {
+    // create a new canvas instance in node.js
+    // the canvas class needs to have a default constructor without any parameter
+    return new Canvas(width * retina, height * retina);
+  }
+}

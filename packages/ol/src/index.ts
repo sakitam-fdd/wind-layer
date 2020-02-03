@@ -7,19 +7,36 @@ import CanvasLayerRenderer from 'ol/renderer/canvas/Layer.js';
 // @ts-ignore
 import { compose as composeTransform, makeInverse, apply as applyTransform } from 'ol/transform.js';
 // @ts-ignore
-import { containsExtent, intersects, getIntersection, isEmpty } from 'ol/extent.js';
+import { containsExtent, intersects, getIntersection, isEmpty, containsCoordinate } from 'ol/extent.js';
 
-import WindCore from 'wind-core';
+import WindCore, {
+  Field,
+  isArray,
+  formatData,
+  warnLog,
+  assign,
+  defaultOptions,
+  IOptions,
+} from 'wind-core';
 
 const ViewHint = {
   ANIMATING: 0,
   INTERACTING: 1
 };
 
-export const Field = WindCore.Field;
+const _options = {
+  windOptions: {},
+};
+
+export { Field } from 'wind-core';
+
+export interface IWindOptions extends IOptions {
+  windOptions: Partial<IOptions>;
+  [key: string]: any;
+}
 
 export class WindLayerRender extends CanvasLayerRenderer {
-  private wind: WindCore | null;
+  public wind: WindCore | null;
   private pixelTransform: any;
   private inversePixelTransform: any;
   private context: CanvasRenderingContext2D;
@@ -111,20 +128,23 @@ export class WindLayerRender extends CanvasLayerRenderer {
       }
     }
 
-    if (!this.wind) {
-      const layer = this.getLayer();
-      const data = layer.getData();
-
-      this.wind = new WindCore(this.context, {}, data);
-
-      this.wind.project = this.getPixelFromCoordinateInternal.bind(this, frameState);
-      this.wind.postrender = () => {};
-    }
-
-    this.wind.prerender();
-
     // @ts-ignore
     this.preRender(context, frameState);
+
+    if (!this.wind) {
+      const layer = this.getLayer();
+      const opt = layer.getWindOptions();
+      const data = layer.getData();
+
+      this.wind = new WindCore(this.context, opt, data);
+
+      this.wind.project = this.getPixelFromCoordinateInternal.bind(this, frameState);
+      this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this, frameState);
+      this.wind.postrender = () => {};
+
+      this.wind.prerender();
+    }
+
     // render
     this.wind.render();
     // @ts-ignore
@@ -154,6 +174,14 @@ export class WindLayerRender extends CanvasLayerRenderer {
     }
   }
 
+  private intersectsCoordinate(frameState: {
+    extent: [number, number, number, number];
+    viewState: any;
+    coordinateToPixelTransform: any;
+  }, coordinate: [number, number]): boolean {
+    return containsCoordinate(frameState.extent, coordinate) as boolean;
+  }
+
   public getLayer(): WindLayer {
     return super.getLayer();
   }
@@ -162,14 +190,20 @@ export class WindLayerRender extends CanvasLayerRenderer {
 export class WindLayer extends Layer {
   private renderer_: WindLayerRender;
   private field: any;
-  private _map: any;
+  public _map: any;
+  private options: IWindOptions;
 
   constructor(data: any, options: any) {
-    super(options);
+    const opt = assign({}, _options, options);
+    super(opt);
 
     this.field = null;
 
-    this._map = null;
+    this.options = opt;
+
+    this.pickWindOptions();
+
+    this._map = opt.map || null;
 
     if (data) {
       this.setData(data);
@@ -195,6 +229,21 @@ export class WindLayer extends Layer {
     return new WindLayerRender(this);
   }
 
+  private pickWindOptions() {
+    Object.keys(defaultOptions).forEach((key: string) => {
+      if (key in this.options) {
+        if (this.options.windOptions === undefined) {
+          this.options.windOptions = {};
+        }
+        // @ts-ignore
+        this.options.windOptions[key] = this.options[key];
+      }
+    });
+  }
+
+  /**
+   * get wind layer data
+   */
   public getData () {
     return this.field;
   }
@@ -202,16 +251,45 @@ export class WindLayer extends Layer {
   /**
    * set layer data
    * @param data
-   * @returns {OlWindy}
+   * @returns {WindLayer}
    */
   public setData (data: any) {
-    // @ts-ignore
     if (data && data instanceof Field) {
       this.field = data;
+    } else if (isArray(data)) {
+      this.field = formatData(data);
     } else {
-      console.error('inValid');
+      console.error('Illegal data');
     }
     return this;
+  }
+
+  public updateParams(options : Partial<IOptions> = {}) {
+    warnLog('will move to setWindOptions');
+    this.setWindOptions(options);
+    return this;
+  }
+
+  public getParams() {
+    warnLog('will move to getWindOptions');
+    return this.getWindOptions();
+  }
+
+  public setWindOptions(options: Partial<IOptions>) {
+    const beforeOptions = this.options.windOptions || {};
+    this.options = assign(this.options, {
+      windOptions: assign(beforeOptions, options || {}),
+    });
+
+    const renderer = this.getRenderer();
+    if (renderer && renderer.wind) {
+      const windOptions = this.options.windOptions;
+      renderer.wind.setOptions(windOptions);
+    }
+  }
+
+  public getWindOptions() {
+    return this.options.windOptions || {};
   }
 
   public on(...args: any[]) {

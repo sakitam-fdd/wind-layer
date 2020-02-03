@@ -9,7 +9,7 @@
   "module": "dist/ol-wind.esm.js",
   "unpkg": "dist/ol-wind.js",
   "commonjs": "dist/ol-wind.cjs.js",
-  "namespace": "olWind",
+  "namespace": "OlWind",
   "types": "types/index.d.ts",
   "files": [
     "dist"
