@@ -1,4 +1,3 @@
-import { throws } from 'assert';
 import WindCore, {
   Field,
   isArray,

@@ -1,7 +1,7 @@
 export const external = [
-  'openlayers',
+  'maptalks',
 ];
 
 export const globals = {
-  openlayers: 'ol',
+  maptalks: 'maptalks',
 };

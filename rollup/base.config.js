@@ -9,6 +9,9 @@ import replace from 'rollup-plugin-replace';
 import typescript from 'rollup-plugin-typescript2';
 import tslint from 'rollup-plugin-tslint';
 import { resolve } from './utils';
+import { external as olExternal } from './external/ol';
+import { external as maptalksExternal } from './external/maptalks';
+import { external as openlayersExternal } from './external/openlayers';
 
 const input = process.env.input;
 
@@ -41,5 +44,9 @@ export default {
     }),
     commonjs(),
   ],
-  external: []
+  external: [
+    ...olExternal,
+    ...maptalksExternal,
+    ...openlayersExternal,
+  ]
 };
