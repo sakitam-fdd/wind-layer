@@ -1,11 +1,17 @@
 import { banner, pkg, resolve } from './utils';
 import baseConfig from './base.config';
+import { globals as olGlobals } from './external/ol';
+import { globals as maptalksGlobals } from './external/maptalks';
+import { globals as openlayersGlobals } from './external/openlayers';
 
 const common = {
   banner,
   extend: false,
   // exports: 'named',
   globals: {
+    ...olGlobals,
+    ...maptalksGlobals,
+    ...openlayersGlobals,
   },
 };
 

@@ -41,7 +41,6 @@ class BMapWind extends BMap.Overlay {
   private context: '2d';
   private field: Field | undefined;
   private map: any;
-  private timeoutID: Timeout;
   private paneName: string;
   private zIndex: number;
   private mixBlendMode: any;
@@ -164,11 +163,7 @@ class BMapWind extends BMap.Overlay {
   }
 
   private draw () {
-    const self = this;
-    clearTimeout(self.timeoutID);
-    self.timeoutID = setTimeout(function () {
-      self._draw()
-    }, 15);
+    this._draw();
   }
 
   private _draw () {

@@ -264,7 +264,7 @@ export function formatData(data: IGFSItem[]) {
  * @param Canvas
  * @returns {HTMLCanvasElement}
  */
-export function createCanvas(width: number, height: number, retina: number, Canvas: any) {
+export function createCanvas(width: number, height: number, retina: number, Canvas: any): HTMLCanvasElement {
   if (typeof document !== 'undefined') {
     const canvas = document.createElement('canvas');
     canvas.width = width * retina;

@@ -1,0 +1,52 @@
+{
+  "name": "openlayers-wind",
+  "version": "1.0.0",
+  "description": "ol3-ol4 wind",
+  "keywords": [],
+  "author": "sakitam-fdd <smilefdd@gmail.com>",
+  "license": "MIT",
+  "main": "dist/ol-wind.js",
+  "module": "dist/ol-wind.esm.js",
+  "unpkg": "dist/ol-wind.js",
+  "commonjs": "dist/ol-wind.cjs.js",
+  "namespace": "OlWind",
+  "types": "types/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sakitam-fdd/wind-layer.git",
+    "directory": "packages/openlayers"
+  },
+  "scripts": {
+    "tsc": "tsc --project tsconfig.prod.json",
+    "clean": "rimraf dist",
+    "dev": "run-p dev:*",
+    "dev:rollup": "cross-env NODE_ENV=development modulePath=openlayers input=src/index.ts rollup -wm -c ../../rollup/dev.config.js",
+    "build": "run-p build:*",
+    "bulid:dev": "cross-env NODE_ENV=production modulePath=openlayers input=src/index.ts rollup -m -c ../../rollup/dev.config.js",
+    "bulid:prod": "cross-env NODE_ENV=production modulePath=openlayers input=src/index.ts rollup -c ../../rollup/prod.config.js",
+    "lint:ts": "run-p -c lint:ts-*",
+    "test": "jest",
+    "prepublishOnly": "run-p test",
+    "generate:docs": "typedoc --out docs --target es6 --theme minimal --mode file src"
+  },
+  "bugs": {
+    "url": "https://github.com/sakitam-fdd/wind-layer/issues"
+  },
+  "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
+  "dependencies": {
+    "wind-core": "^1.0.0"
+  },
+  "peerDependencies": {
+    "openlayers": ">=3.0.0"
+  },
+  "devDependencies": {
+    "openlayers": "^4.6.5",
+    "@types/openlayers": "^4.6.17"
+  }
+}
