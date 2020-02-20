@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.prod.json",
+  "compilerOptions": {
+    "declarationDir": "./types",
+    "rootDir": "./src"
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

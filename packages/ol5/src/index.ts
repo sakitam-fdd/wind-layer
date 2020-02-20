@@ -9,13 +9,18 @@ import WindCore, {
   IOptions,
 } from 'wind-core';
 
-import ol, { olx } from 'openlayers';
+import { Map } from 'ol';
+import { Size as ISize } from 'ol/size';
+import { Extent as IExtent, containsCoordinate } from 'ol/extent';
+import { Image as ImageLayer } from 'ol/layer';
+import { ProjectionLike as IProjection } from 'ol/proj';
+import ImageCanvas, { Options as ImageCanvasOptions } from 'ol/source/ImageCanvas';
 
 export interface IWindOptions extends IOptions {
   opacity?: number;
-  map?: ol.Map;
+  map?: Map;
   visible?: boolean;
-  extent?: ol.Extent;
+  extent?: IExtent;
   minResolution?: number;
   maxResolution?: number;
   zIndex?: number;
@@ -36,13 +41,11 @@ const _options = {
 //   throw new Error('Before using this plugin, you must first introduce the openlayers <https://openlayers.org/>');
 // }
 
-class OlWind extends ol.layer.Image {
+class OlWind extends ImageLayer {
   private options: IWindOptions;
   private canvas: HTMLCanvasElement;
   private wind: WindCore | null;
   private field: Field | undefined;
-  public viewProjection: ol.ProjectionLike;
-  public pixelRatio: number;
   private map: any;
 
   constructor (data: any, options: Partial<IWindOptions> = {}) {
@@ -59,6 +62,7 @@ class OlWind extends ol.layer.Image {
 
     this.start = this.start.bind(this);
     this.stop = this.stop.bind(this);
+    this.rerender = this.rerender.bind(this);
 
     this.pickWindOptions();
 
@@ -70,9 +74,12 @@ class OlWind extends ol.layer.Image {
       canvasFunction: this.canvasFunction.bind(this),
       // projection: (options.hasOwnProperty('projection') ? options.projection : 'EPSG:3857'),
       ratio: (options.hasOwnProperty('ratio') ? options.ratio : 1)
-    } as olx.source.ImageCanvasOptions;
+    } as ImageCanvasOptions;
 
-    this.setSource(new ol.source.ImageCanvas(sourceOptions));
+    this.setSource(new ImageCanvas(sourceOptions));
+
+    // @ts-ignore
+    this.on('precompose', this.rerender);
 
     if (data) {
       this.setData(data);
@@ -85,9 +92,7 @@ class OlWind extends ol.layer.Image {
    */
   public appendTo (map: any) {
     if (map) {
-      map.addLayer(this);
-
-      this.viewProjection = this.getProjection();
+      map.addOverlay(this);
     } else {
       throw new Error('not map object');
     }
@@ -106,15 +111,14 @@ class OlWind extends ol.layer.Image {
   }
 
   public canvasFunction (
-    extent: ol.Extent,
+    extent: IExtent,
     resolution: number,
     pixelRatio: number,
-    size: ol.Size,
-    proj: ol.proj.Projection,
+    size: ISize,
+    proj: IProjection
   ): HTMLCanvasElement {
-    this.pixelRatio = pixelRatio;
     if (!this.canvas) {
-      this.canvas = createCanvas(size[0], size[1], 1, null);
+      this.canvas = createCanvas(size[0], size[1], pixelRatio, null);
     } else {
       this.canvas.width = size[0];
       this.canvas.height = size[1];
@@ -135,11 +139,10 @@ class OlWind extends ol.layer.Image {
   /**
    * render windy layer
    * @param canvas
-   * @returns {OlWind}
+   * @returns {BMapWind}
    */
   private render (canvas: HTMLCanvasElement) {
-    const map = this.getMap();
-    if (!this.getData() || !map) return this;
+    if (!this.getData() || !this.map) return this;
     if (canvas && !this.wind) {
       const opt = this.getWindOptions();
       const data = this.getData();
@@ -150,14 +153,10 @@ class OlWind extends ol.layer.Image {
         this.wind = new WindCore(ctx, opt, data);
 
         this.wind.project = this.project.bind(this);
-        // this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
-        this.wind.intersectsCoordinate = () => true;
+        this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
         this.wind.postrender = () => {
           // @ts-ignore
           // this.setCanvasUpdated();
-          if (map) {
-            map.render();
-          }
         };
 
         this.wind.prerender();
@@ -171,26 +170,22 @@ class OlWind extends ol.layer.Image {
     return this;
   }
 
-  public project(coordinate: [number, number]): [number, number] {
-    const map = this.getMap();
-    return map.getPixelFromCoordinate(ol.proj.transform(coordinate, 'EPSG:4326', this.viewProjection));
+  private rerender() {
+    if (this.wind) {
+      this.wind.render();
+    }
   }
 
-  /**
-   * TODO: 空间判断出错，需要修复
-   * @param coordinate
-   */
+  public project(coordinate: [number, number]): [number, number] {
+    return this.map.getCoordinateFromPixel(coordinate);
+  }
+
   public intersectsCoordinate(coordinate: [number, number]): boolean {
-    const map = this.getMap();
-    if (!map) return false;
-    const view = map.getView();
-    const size = map.getSize();
+    const view = this.map.getView();
+    const size = this.map.getSize();
     if (view && size) {
-      const extent = view.calculateExtent([
-        size[0] * this.pixelRatio,
-        size[1] * this.pixelRatio,
-      ]);
-      return ol.extent.containsCoordinate(extent, ol.proj.transform(coordinate, 'EPSG:4326', this.viewProjection));
+      const extent = view.calculateExtent(size);
+      return containsCoordinate(extent, coordinate);
     }
     return false;
   }
@@ -217,7 +212,7 @@ class OlWind extends ol.layer.Image {
   /**
    * set layer data
    * @param data
-   * @returns {OlWind}
+   * @returns {BMapWind}
    */
   public setData (data: any) {
     if (data && data instanceof Field) {
@@ -228,9 +223,7 @@ class OlWind extends ol.layer.Image {
       console.error('Illegal data');
     }
 
-    const map = this.getMap();
-
-    if (map && this.canvas && this.field) {
+    if (this.map && this.canvas && this.field) {
       this.render(this.canvas);
     }
 
@@ -263,25 +256,12 @@ class OlWind extends ol.layer.Image {
     return this.options.windOptions || {};
   }
 
-  private getProjection () {
-    let projection;
-    const map = this.getMap();
-    // tslint:disable-next-line: prefer-conditional-expression
-    if (map) {
-      projection = map.getView() && map.getView().getProjection();
-    } else {
-      projection = 'EPSG:3857';
-    }
-    return projection;
-  }
-
   /**
    * set map
    * @param map
    */
   public setMap (map: any) {
     this.set('originMap', map);
-    this.viewProjection = this.getProjection();
     // ol.layer.Image.prototype.setMap.call(this, map)
   }
 

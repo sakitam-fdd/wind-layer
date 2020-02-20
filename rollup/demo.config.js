@@ -4,7 +4,7 @@ import babel from 'rollup-plugin-babel';
 import replace from 'rollup-plugin-replace';
 import json from 'rollup-plugin-json';
 import nodeResolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
+import commonjs from '@rollup/plugin-commonjs';
 
 const resolve = _path => path.resolve(__dirname, '../', _path);
 
