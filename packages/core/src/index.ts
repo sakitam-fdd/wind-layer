@@ -167,23 +167,26 @@ class BaseLayer {
     ) {
       const pointPrev = this.project(source);
       const pointNext = this.project(target);
-      this.ctx.beginPath();
-      this.ctx.moveTo(pointPrev[0], pointPrev[1]);
-      this.ctx.lineTo(pointNext[0], pointNext[1]);
-      particle.x = particle.xt;
-      particle.y = particle.yt;
 
-      if (isFunction(this.options.colorScale)) {
-        // @ts-ignore
-        this.ctx.strokeStyle = this.options.colorScale(particle.m) as string;
+      if (pointPrev && pointNext) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(pointPrev[0], pointPrev[1]);
+        this.ctx.lineTo(pointNext[0], pointNext[1]);
+        particle.x = particle.xt;
+        particle.y = particle.yt;
+
+        if (isFunction(this.options.colorScale)) {
+          // @ts-ignore
+          this.ctx.strokeStyle = this.options.colorScale(particle.m) as string;
+        }
+
+        if (isFunction(this.options.lineWidth)) {
+          // @ts-ignore
+          this.ctx.lineWidth = this.options.lineWidth(particle.m) as number;
+        }
+
+        this.ctx.stroke();
       }
-
-      if (isFunction(this.options.lineWidth)) {
-        // @ts-ignore
-        this.ctx.lineWidth = this.options.lineWidth(particle.m) as number;
-      }
-
-      this.ctx.stroke();
     }
   }
 
@@ -213,7 +216,7 @@ class BaseLayer {
   }
 
   // @ts-ignore
-  project(...args: any[]): [number, number] {
+  project(...args: any[]): [number, number] | null {
     throw new Error('must be overriden');
   }
 
