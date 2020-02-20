@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ol4 wind-layer</title>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/openlayers/dist/ol.css">
+<style type="text/css">
+  html, body {
+    margin: 0;
+    height: 100%;
+    width: 100%
+  }
+  .container {
+    width: 100%;
+    height: 100%
+  }
+</style>
+<body>
+
+<div id="map" class="container"></div>
+<script src="//cdn.jsdelivr.net/npm/openlayers/dist/ol-debug.js"></script>
+<script src="../packages/openlayers/dist/ol-wind.js"></script>
+<script>
+  const map = new ol.Map({
+    target: 'map',
+    view: new ol.View({
+      center: [113.53450137499999, 34.44104525],
+      // center: ol.proj.fromLonLat([113.53450137499999, 34.44104525]),
+      zoom: 5,
+      projection: 'EPSG:4326',
+    }),
+    layers: [
+      new ol.layer.Tile({
+        source: new ol.source.OSM({
+          url: '//{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+        })
+      })
+    ],
+  });
+
+  fetch('https://sakitam-fdd.github.io/wind-layer/examples/out.json')
+    .then(res => res.json())
+    .then(res => {
+      // const range = vectorField.range || [0.02, 28.21618329965979];
+      // const scale = chroma.scale('OrRd').domain(range);
+
+      const windLayer = new OlWind.WindLayer(res, {
+        windOptions: {
+          colorScale: (m) => {
+            // console.log(m);
+            return '#fff';
+          },
+          // colorScale: scale,
+          velocityScale: 1 / 20,
+          paths: 5000,
+        },
+        colorScale: (m) => {
+          // console.log(m);
+          return '#ff473c';
+        },
+        // colorScale: scale,
+        velocityScale: 1 / 30,
+        paths: 10000,
+        generateParticleOption: false,
+        map: map,
+      });
+
+      console.log(map, windLayer);
+
+      map.addLayer(windLayer);
+    });
+</script>
+</body>
+</html>
