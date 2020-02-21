@@ -1,7 +1,8 @@
 import { Layer } from 'ol/layer';
 import { FrameState } from 'ol/PluggableMap';
+import WindLayerRender from './renderer';
 
-import WindCore, {
+import {
   Field,
   isArray,
   formatData,
@@ -26,6 +27,7 @@ export class WindLayer extends Layer {
   private field: any;
   public _map: any;
   private options: IWindOptions;
+  private renderer_: WindLayerRender;
 
   constructor(data: any, options: any) {
     const opt = assign({}, _options, options);
@@ -44,27 +46,28 @@ export class WindLayer extends Layer {
     }
   }
 
-  // public getType(): LayerType {
-  //   return 'CUSTOM' as LayerType;
-  // };
-
   // @ts-ignore
   public render(frameState: FrameState, target: HTMLDivElement) {
-    console.log(frameState, target);
+    const layerRenderer = this.getRenderer();
+
+    if (layerRenderer.prepareFrame(frameState)) {
+      return layerRenderer.renderFrame(frameState, target);
+    }
   }
 
-  // @ts-ignore
   public getRenderer() {
-    // if (!this.renderer_) {
-    //   this.renderer_ = this.createRenderer();
-    // }
-    // return this.renderer_;
+    if (!this.renderer_) {
+      this.renderer_ = this.createRenderer();
+    }
+    return this.renderer_;
   }
 
-  // @ts-ignore
+  hasRenderer() {
+    return !!this.renderer_;
+  }
+
   private createRenderer() {
-    // return new WindLayerRender(this);
-    return null;
+    return new WindLayerRender(this);
   }
 
   private pickWindOptions() {
@@ -119,11 +122,11 @@ export class WindLayer extends Layer {
       windOptions: assign(beforeOptions, options || {}),
     });
 
-    // const renderer = this.getRenderer();
-    // if (renderer && renderer.wind) {
-    //   const windOptions = this.options.windOptions;
-    //   renderer.wind.setOptions(windOptions);
-    // }
+    const renderer = this.getRenderer();
+    if (renderer && renderer.wind) {
+      const windOptions = this.options.windOptions;
+      renderer.wind.setOptions(windOptions);
+    }
   }
 
   public getWindOptions() {

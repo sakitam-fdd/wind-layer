@@ -29,6 +29,9 @@
       "git add"
     ]
   },
+  "dependencies": {
+    "ol": "^6.2.1"
+  },
   "devDependencies": {
     "@babel/cli": "^7.7.4",
     "@babel/core": "^7.7.4",
