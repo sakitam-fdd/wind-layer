@@ -1,4 +1,4 @@
-# `ol`
+# `ol6`
 
 > TODO: description
 

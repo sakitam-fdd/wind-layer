@@ -1,6 +1,6 @@
 import { FrameState } from 'ol/PluggableMap';
 import { Coordinate } from 'ol/coordinate';
-import { fromUserExtent, fromUserCoordinate } from 'ol/proj';
+import { fromUserExtent, fromUserCoordinate, transform } from 'ol/proj';
 import CanvasLayerRenderer from 'ol/renderer/canvas/Layer';
 import { compose as composeTransform, makeInverse, apply as applyTransform } from 'ol/transform';
 import { containsExtent, intersects, getIntersection, isEmpty, containsCoordinate } from 'ol/extent';
@@ -136,7 +136,8 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     }
 
     if (canvasTransform !== canvas.style.transform) {
-      canvas.style.transform = canvasTransform;
+      // TODO: 缩放后位置计算有问题
+      // canvas.style.transform = canvasTransform;
     }
 
     return this.container;
@@ -147,7 +148,8 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     coordinateToPixelTransform: any;
   }, coordinate: [number, number]) {
     const viewState = frameState.viewState;
-    const viewCoordinate = fromUserCoordinate(coordinate, viewState.projection);
+    const point = transform(coordinate, 'EPSG:4326', viewState.projection);
+    const viewCoordinate = fromUserCoordinate(point, viewState.projection);
     if (!frameState) {
       return null;
     } else {
@@ -157,7 +159,8 @@ export default class WindLayerRender extends CanvasLayerRenderer {
 
   private intersectsCoordinate(frameState: FrameState, coordinate: Coordinate) {
     const viewState = frameState.viewState;
-    const viewCoordinate = fromUserCoordinate(coordinate, viewState.projection);
+    const point = transform(coordinate, 'EPSG:4326', viewState.projection);
+    const viewCoordinate = fromUserCoordinate(point, viewState.projection);
     return containsCoordinate(frameState.extent, viewCoordinate.slice(0, 2));
   }
 }
