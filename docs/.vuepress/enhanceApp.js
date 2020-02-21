@@ -1,5 +1,5 @@
 import './styles/index.less';
-import datGUI from '../../examples/dat-gui';
+// import datGUI from '../../examples/dat-gui';
 import Highlight from './utils/highlight';
 
 function setPrototype(Vue) {
@@ -13,6 +13,6 @@ export default ({
     siteData // 站点元数据
   }) => {
   Vue.use(Highlight);
-  Vue.use(datGUI);
+  // Vue.use(datGUI);
   setPrototype(Vue);
 }
