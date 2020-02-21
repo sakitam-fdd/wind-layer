@@ -17,6 +17,7 @@ const config = {
     format: 'iife',
     // name: _package.namespace,
     banner: '',
+    sourceMap: 'inline',
   },
   plugins: [
     replace({ 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV) }),

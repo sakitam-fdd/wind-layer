@@ -1,18 +1,11 @@
-import { Layer } from 'ol/layer';
+import { FrameState } from 'ol/PluggableMap';
+import { Coordinate } from 'ol/coordinate';
 import { fromUserExtent, fromUserCoordinate } from 'ol/proj';
 import CanvasLayerRenderer from 'ol/renderer/canvas/Layer';
 import { compose as composeTransform, makeInverse, apply as applyTransform } from 'ol/transform';
 import { containsExtent, intersects, getIntersection, isEmpty, containsCoordinate } from 'ol/extent';
 
-import WindCore, {
-  Field,
-  isArray,
-  formatData,
-  warnLog,
-  assign,
-  defaultOptions,
-  IOptions,
-} from 'wind-core';
+import WindCore from 'wind-core';
 
 import { WindLayer } from './index';
 
@@ -21,6 +14,7 @@ const ViewHint = {
   INTERACTING: 1
 };
 
+// @ts-ignore
 export default class WindLayerRender extends CanvasLayerRenderer {
   public wind: WindCore;
   private pixelTransform: any;
@@ -43,9 +37,7 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     extent: any;
   }) {
     const layerState = frameState.layerStatesArray[frameState.layerIndex];
-    const pixelRatio = frameState.pixelRatio;
     const viewState = frameState.viewState;
-    const viewResolution = viewState.resolution;
 
     const hints = frameState.viewHints;
 
@@ -55,11 +47,28 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     }
 
     if (!hints[ViewHint.ANIMATING] && !hints[ViewHint.INTERACTING] && !isEmpty(renderedExtent)) {
-      let projection = viewState.projection;
-      // console.log(this, projection, renderedExtent, viewResolution);
+      if (!this.wind && this.context) {
+        const layer = this.getLayer() as unknown as WindLayer;
+        const opt = layer.getWindOptions();
+        const data = layer.getData();
+
+        this.wind = new WindCore(this.context, opt, data);
+
+        // @ts-ignore
+        this.wind.project = this.getPixelFromCoordinateInternal.bind(this, frameState);
+        // this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this, frameState);
+        this.wind.intersectsCoordinate = () => true;
+        this.wind.postrender = () => {};
+
+        this.wind.prerender();
+      } else {
+        return true;
+      }
+    } else {
+      return false;
     }
 
-    return true;
+    return !!this.wind;
   }
 
   renderFrame(frameState: any, target: any) {
@@ -116,22 +125,9 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     // @ts-ignore
     this.preRender(context, frameState);
 
-    if (!this.wind) {
-      const layer = this.getLayer();
-      const opt = layer.getWindOptions();
-      const data = layer.getData();
-
-      this.wind = new WindCore(this.context, opt, data);
-
-      this.wind.project = this.getPixelFromCoordinateInternal.bind(this, frameState);
-      this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this, frameState);
-      this.wind.postrender = () => {};
-
-      this.wind.prerender();
-    }
-
     // render
-    this.wind.render();
+    this.wind && this.wind.render();
+
     // @ts-ignore
     this.postRender(context, frameState);
 
@@ -159,31 +155,9 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     }
   }
 
-  private intersectsCoordinate(frameState: {
-    extent: [number, number, number, number];
-    viewState: any;
-    coordinateToPixelTransform: any;
-  }, coordinate: [number, number]): boolean {
-    return containsCoordinate(frameState.extent, coordinate) as boolean;
-  }
-
-  public getLayer(): WindLayer {
-    return super.getLayer();
-  }
-
-  forEachFeatureAtCoordinate<T>(
-    coordinate: import("ol/coordinate").Coordinate,
-    frameState: import("ol/PluggableMap").FrameState,
-    hitTolerance: number,
-    callback: (
-      p0: import("ol/Feature").FeatureLike,
-      p1: Layer<import("ol/source/Source").default>) => T,
-      declutteredFeatures: import("ol/Feature").FeatureLike[]
-  ): void | T {
-    throw new Error("Method not implemented.");
-  }
-
-  handleFontsChanged(): void {
-    throw new Error("Method not implemented.");
+  private intersectsCoordinate(frameState: FrameState, coordinate: Coordinate) {
+    const viewState = frameState.viewState;
+    const viewCoordinate = fromUserCoordinate(coordinate, viewState.projection);
+    return containsCoordinate(frameState.extent, viewCoordinate.slice(0, 2));
   }
 }
