@@ -1,7 +1,7 @@
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
-// import { fromLonLat } from 'ol/proj';
+import { fromLonLat } from 'ol/proj';
 import OSM from 'ol/source/OSM';
 
 import { WindLayer } from 'ol-wind';
@@ -18,11 +18,12 @@ function initMap() {
     layers: [layer],
     target: 'map',
     view: new View({
-      projection: 'EPSG:4326',
-      // center: fromLonLat([113.53450137499999, 34.44104525]),
-      center: [113.53450137499999, 34.44104525],
+      // projection: 'EPSG:4326',
+      center: fromLonLat([113.53450137499999, 34.44104525]),
+      // center: [113.53450137499999, 34.44104525],
       zoom: 2,
     }),
+    // pixelRatio: 2,
   });
 
   fetch('https://sakitam-fdd.github.io/wind-layer/examples/out.json')
@@ -38,6 +39,7 @@ function initMap() {
             // console.log(m);
             return '#ff473c';
           },
+          width: 3,
           // colorScale: scale,
           generateParticleOption: false
         },
