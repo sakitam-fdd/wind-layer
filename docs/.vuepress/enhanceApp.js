@@ -1,6 +1,7 @@
 import './styles/index.less';
 // import datGUI from '../../examples/dat-gui';
 import Highlight from './utils/highlight';
+import ExamplesComponents from '../../examples/components';
 
 function setPrototype(Vue) {
   // Vue.prototype.$log = log;
@@ -14,5 +15,6 @@ export default ({
   }) => {
   Vue.use(Highlight);
   // Vue.use(datGUI);
+  Vue.use(ExamplesComponents);
   setPrototype(Vue);
 }

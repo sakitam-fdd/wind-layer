@@ -6,36 +6,120 @@ module.exports = {
   description: 'wind layer for webgis',
   // theme: 'api',
   base: '/',
+  locales: {
+    '/': {
+      lang: 'en-US',
+      title: 'wind-layer',
+      description: 'wind layer for webgis'
+    },
+    '/zh/': {
+      lang: 'zh-CN',
+      title: 'wind-layer',
+      description: '一个面向webgis的风场插件'
+    }
+  },
   head: [
-    ['script', { src: '' }]
+    // ['link', { rel: 'stylesheet', href: '//at.alicdn.com/t/font_1125947_cnbcy1q7tzm.css' }],
+    // ['script', { src: '//unpkg.com/babel-standalone' }]
   ],
   themeConfig: {
-    nav: [
-      {
-        text: "使用",
-        link: "/start/"
+    editLinks: true,
+    // docsDir: 'packages/docs/docs',
+    // algolia: ctx.isProd ? ({
+    //   apiKey: '',
+    //   indexName: 'wind-layer'
+    // }) : null,
+    smoothScroll: true,
+    locales: {
+      '/': {
+        label: 'English',
+        selectText: 'Languages',
+        ariaLabel: 'Select language',
+        editLinkText: 'Edit this page on GitHub',
+        lastUpdated: 'Last Updated',
+        nav: [
+          {
+            text: "use",
+            link: "/start/"
+          },
+          {
+            text: "api",
+            link: "/api/"
+          },
+          {
+            text: "repositories",
+            link: "https://github.com/sakitam-fdd/wind-layer"
+          },
+        ],
+        sidebar: {
+          '/start/': [
+            {
+              title: 'Introduction',
+              collapsable: false,
+              children: [
+                '',
+                'Introduction',
+              ],
+            }
+          ],
+          '/api/': [
+            {
+              title: 'detail',
+              collapsable: false,
+              children: [
+                '',
+                'getting-started',
+              ],
+            }
+          ]
+        },
       },
-      {
-        text: "API",
-        link: "/api/"
-      },
-      {
-        text: "仓库",
-        link: "https://github.com/sakitam-fdd/wind-layer"
-      },
-    ],
-    sidebar: [
-      {
-        title: "快速开始",
-        collapsable: false,
-        children: [
-          ["/start/", "快速开始"],
-        ]
-      },
-    ],
-    search: true,
-    sidebarDepth: 2,
-    lastUpdated: '上次更新', // string | boolean
+      '/zh/': {
+        label: '简体中文',
+        nav: [
+          {
+            text: "使用",
+            link: "/zh/start/"
+          },
+          {
+            text: "API",
+            link: "/zh/api/"
+          },
+          {
+            text: "仓库",
+            link: "https://github.com/sakitam-fdd/wind-layer"
+          },
+        ],
+        sidebar: {
+          '/zh/start/': [
+            {
+              title: '简介',
+              collapsable: false,
+              children: [
+                '',
+                'Introduction',
+              ],
+            }
+          ],
+          '/zh/api/': [
+            {
+              title: '详细文档',
+              collapsable: false,
+              children: [
+                '',
+                'getting-started',
+              ],
+            }
+          ]
+        },
+        search: true,
+        selectText: '选择语言',
+        ariaLabel: '选择语言',
+        editLinkText: '在 GitHub 上编辑此页',
+        sidebarDepth: 2,
+        lastUpdated: '上次更新', // string | boolean
+      }
+    },
   },
   configureWebpack: {
     resolve: {
