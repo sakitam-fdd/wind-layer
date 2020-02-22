@@ -233,6 +233,7 @@
         position: fixed;
         bottom: 0;
         width: calc(100% - 38px);
+        max-width: 740px;
         z-index: 999;
       }
       .vuepress-caret-top {
