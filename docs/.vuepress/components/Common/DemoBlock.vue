@@ -232,7 +232,7 @@
       &.is-fixed {
         position: fixed;
         bottom: 0;
-        width: 868px;
+        width: calc(100% - 38px);
         z-index: 999;
       }
       .vuepress-caret-top {
@@ -279,7 +279,7 @@
         display: inline-block;
       }
       &:hover {
-        color: #3eaf7c;
+        color: #349EF7;
         background-color: #f9fafc;
       }
       & .text-slide-enter,
@@ -297,7 +297,7 @@
         padding: 9px 25px 9px 5px;
         border-radius: 3px;
         border-color: transparent;
-        color: #3eaf7c;
+        color: #349EF7;
         background: transparent;
         display: inline-block;
         white-space: nowrap;
