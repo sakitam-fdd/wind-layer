@@ -173,7 +173,11 @@ class OlWind extends ol.layer.Image {
 
   public project(coordinate: [number, number]): [number, number] {
     const map = this.getMap();
-    return map.getPixelFromCoordinate(ol.proj.transform(coordinate, 'EPSG:4326', this.viewProjection));
+    const pixel = map.getPixelFromCoordinate(ol.proj.transform(coordinate, 'EPSG:4326', this.viewProjection));
+    return [
+      pixel[0] * this.pixelRatio,
+      pixel[1] * this.pixelRatio,
+    ];
   }
 
   /**

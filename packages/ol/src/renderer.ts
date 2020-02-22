@@ -28,14 +28,7 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     super(layer);
   }
 
-  prepareFrame(frameState: {
-    layerStatesArray: { [x: string]: any; };
-    layerIndex: string | number;
-    pixelRatio: any;
-    viewState: any;
-    viewHints: any;
-    extent: any;
-  }) {
+  prepareFrame(frameState: FrameState) {
     const layerState = frameState.layerStatesArray[frameState.layerIndex];
     const viewState = frameState.viewState;
 
@@ -56,7 +49,8 @@ export default class WindLayerRender extends CanvasLayerRenderer {
 
         // @ts-ignore
         this.wind.project = this.getPixelFromCoordinateInternal.bind(this, frameState);
-        // this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this, frameState);
+        // @ts-ignore
+        this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this, frameState);
         this.wind.intersectsCoordinate = () => true;
         this.wind.postrender = () => {};
 
@@ -65,13 +59,13 @@ export default class WindLayerRender extends CanvasLayerRenderer {
         return true;
       }
     } else {
-      return false;
+      return true;
     }
 
     return !!this.wind;
   }
 
-  renderFrame(frameState: any, target: any) {
+  renderFrame(frameState: FrameState, target: HTMLDivElement) {
     const layerState = frameState.layerStatesArray[frameState.layerIndex];
     const pixelRatio = frameState.pixelRatio;
     const viewState = frameState.viewState;
@@ -137,23 +131,25 @@ export default class WindLayerRender extends CanvasLayerRenderer {
 
     if (canvasTransform !== canvas.style.transform) {
       // TODO: 缩放后位置计算有问题
-      // canvas.style.transform = canvasTransform;
+      canvas.style.transform = canvasTransform;
     }
 
     return this.container;
   }
 
-  private getPixelFromCoordinateInternal(frameState: {
-    viewState: any;
-    coordinateToPixelTransform: any;
-  }, coordinate: [number, number]) {
+  private getPixelFromCoordinateInternal(frameState: FrameState, coordinate: Coordinate) {
     const viewState = frameState.viewState;
+    const pixelRatio = frameState.pixelRatio;
     const point = transform(coordinate, 'EPSG:4326', viewState.projection);
     const viewCoordinate = fromUserCoordinate(point, viewState.projection);
     if (!frameState) {
       return null;
     } else {
-      return applyTransform(frameState.coordinateToPixelTransform, viewCoordinate.slice(0, 2));
+      const pixel = applyTransform(frameState.coordinateToPixelTransform, viewCoordinate.slice(0, 2));
+      return [
+        pixel[0] * pixelRatio,
+        pixel[1] * pixelRatio
+      ];
     }
   }
 

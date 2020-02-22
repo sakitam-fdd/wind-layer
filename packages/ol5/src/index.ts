@@ -11,9 +11,10 @@ import WindCore, {
 
 import { Map } from 'ol';
 import { Size as ISize } from 'ol/size';
+import { Coordinate } from 'ol/coordinate';
 import { Extent as IExtent, containsCoordinate } from 'ol/extent';
 import { Image as ImageLayer } from 'ol/layer';
-import { ProjectionLike as IProjection } from 'ol/proj';
+import { ProjectionLike as IProjection, transform } from 'ol/proj';
 import ImageCanvas, { Options as ImageCanvasOptions } from 'ol/source/ImageCanvas';
 
 export interface IWindOptions extends IOptions {
@@ -47,6 +48,8 @@ class OlWind extends ImageLayer {
   private wind: WindCore | null;
   private field: Field | undefined;
   private map: any;
+  private pixelRatio: number;
+  private viewProjection: IProjection;
 
   constructor (data: any, options: Partial<IWindOptions> = {}) {
     const opt = assign({}, _options, options);
@@ -62,7 +65,6 @@ class OlWind extends ImageLayer {
 
     this.start = this.start.bind(this);
     this.stop = this.stop.bind(this);
-    this.rerender = this.rerender.bind(this);
 
     this.pickWindOptions();
 
@@ -78,9 +80,6 @@ class OlWind extends ImageLayer {
 
     this.setSource(new ImageCanvas(sourceOptions));
 
-    // @ts-ignore
-    this.on('precompose', this.rerender);
-
     if (data) {
       this.setData(data);
     }
@@ -90,9 +89,11 @@ class OlWind extends ImageLayer {
    * append layer to map
    * @param map
    */
-  public appendTo (map: any) {
+  public appendTo (map: Map) {
     if (map) {
-      map.addOverlay(this);
+      map.addLayer(this);
+
+      this.viewProjection = this.getProjection();
     } else {
       throw new Error('not map object');
     }
@@ -117,6 +118,7 @@ class OlWind extends ImageLayer {
     size: ISize,
     proj: IProjection
   ): HTMLCanvasElement {
+    this.pixelRatio = pixelRatio;
     if (!this.canvas) {
       this.canvas = createCanvas(size[0], size[1], pixelRatio, null);
     } else {
@@ -142,7 +144,8 @@ class OlWind extends ImageLayer {
    * @returns {BMapWind}
    */
   private render (canvas: HTMLCanvasElement) {
-    if (!this.getData() || !this.map) return this;
+    const map = this.getMap();
+    if (!this.getData() || !map) return this;
     if (canvas && !this.wind) {
       const opt = this.getWindOptions();
       const data = this.getData();
@@ -170,22 +173,26 @@ class OlWind extends ImageLayer {
     return this;
   }
 
-  private rerender() {
-    if (this.wind) {
-      this.wind.render();
-    }
+  public project(coordinate: Coordinate): [number, number] {
+    const map = this.getMap();
+    const pixel = map.getPixelFromCoordinate(transform(coordinate, 'EPSG:4326', this.viewProjection));
+    return [
+      pixel[0] * this.pixelRatio,
+      pixel[1] * this.pixelRatio,
+    ];
   }
 
-  public project(coordinate: [number, number]): [number, number] {
-    return this.map.getCoordinateFromPixel(coordinate);
-  }
-
-  public intersectsCoordinate(coordinate: [number, number]): boolean {
-    const view = this.map.getView();
-    const size = this.map.getSize();
+  public intersectsCoordinate(coordinate: Coordinate): boolean {
+    const map = this.getMap();
+    if (!map) return false;
+    const view = map.getView();
+    const size = map.getSize();
     if (view && size) {
-      const extent = view.calculateExtent(size);
-      return containsCoordinate(extent, coordinate);
+      const extent = view.calculateExtent([
+        size[0] * this.pixelRatio,
+        size[1] * this.pixelRatio,
+      ]);
+      return containsCoordinate(extent, transform(coordinate, 'EPSG:4326', this.viewProjection));
     }
     return false;
   }
@@ -223,7 +230,9 @@ class OlWind extends ImageLayer {
       console.error('Illegal data');
     }
 
-    if (this.map && this.canvas && this.field) {
+    const map = this.getMap();
+
+    if (map && this.canvas && this.field) {
       this.render(this.canvas);
     }
 
@@ -256,12 +265,25 @@ class OlWind extends ImageLayer {
     return this.options.windOptions || {};
   }
 
+  private getProjection () {
+    let projection;
+    const map = this.getMap();
+    // tslint:disable-next-line: prefer-conditional-expression
+    if (map) {
+      projection = map.getView() && map.getView().getProjection();
+    } else {
+      projection = 'EPSG:3857';
+    }
+    return projection;
+  }
+
   /**
    * set map
    * @param map
    */
   public setMap (map: any) {
     this.set('originMap', map);
+    this.viewProjection = this.getProjection();
     // ol.layer.Image.prototype.setMap.call(this, map)
   }
 
