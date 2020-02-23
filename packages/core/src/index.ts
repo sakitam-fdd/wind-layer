@@ -255,11 +255,9 @@ class BaseLayer {
     if (!gen && !this.generated) {
       this.particles = this.prepareParticlePaths();
       this.generated = true;
-      console.log('once');
     } else if (gen) {
       this.particles = this.prepareParticlePaths();
       this.generated = true;
-      console.log('more');
     }
 
     if (!this.starting) {

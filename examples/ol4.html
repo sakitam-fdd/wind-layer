@@ -39,6 +39,8 @@
     ],
   });
 
+  let layer;
+
   fetch('https://sakitam-fdd.github.io/wind-layer/examples/out.json')
     .then(res => res.json())
     .then(res => {
@@ -49,24 +51,22 @@
         windOptions: {
           colorScale: (m) => {
             // console.log(m);
-            return '#fff';
+            return '#ff473c';
           },
           // colorScale: scale,
           velocityScale: 1 / 20,
-          paths: 5000,
+          paths: 10000,
+          generateParticleOption: true,
+          // particleMultiplier: 0.3 * 10,
         },
-        colorScale: (m) => {
-          // console.log(m);
-          return '#ff473c';
-        },
-        // colorScale: scale,
-        velocityScale: 1 / 30,
-        paths: 10000,
-        generateParticleOption: false,
         map: map,
       });
 
       console.log(map, windLayer);
+
+      layer = windLayer;
+
+      // layer.appendTo(map);
 
       map.addLayer(windLayer);
     });

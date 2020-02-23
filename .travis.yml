@@ -1,15 +1,22 @@
 language: node_js
 cache:
   directories:
-    - ~/.npm
+    - node_modules
 notifications:
   email: false
 node_js:
   - '10'
   - '11'
   - '8'
+
+before_install:
+install:
+  - npm install
+  - make image-dev
 script:
-  - npm run test:prod && npm run build
+  - npm run build
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - make push-dev
 after_success:
   - npm run travis-deploy-once "npm run report-coverage"
   - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then npm run travis-deploy-once "npm run deploy-docs"; fi

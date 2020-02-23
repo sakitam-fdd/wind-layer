@@ -51,7 +51,6 @@ export default class WindLayerRender extends CanvasLayerRenderer {
         this.wind.project = this.getPixelFromCoordinateInternal.bind(this, frameState);
         // @ts-ignore
         this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this, frameState);
-        this.wind.intersectsCoordinate = () => true;
         this.wind.postrender = () => {};
 
         this.wind.prerender();
