@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sphere Mollweide</title>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/openlayers/dist/ol.css">
+  <style type="text/css">
+    html, body {
+      margin: 0;
+      height: 100%;
+      width: 100%
+    }
+    .container {
+      width: 100%;
+      height: 100%
+    }
+  </style>
+</head>
+<body>
+<div id="map" class="map"></div>
+<script src="//cdn.jsdelivr.net/npm/openlayers/dist/ol-debug.js"></script>
+<script src="//cdn.jsdelivr.net/npm/proj4@2.6.0/dist/proj4.js"></script>
+<script src="../packages/openlayers/dist/ol-wind.js"></script>
+<script>
+  proj4.defs('ESRI:53009', '+proj=moll +lon_0=0 +x_0=0 +y_0=0 +a=6371000 ' +
+    '+b=6371000 +units=m +no_defs');
+
+  // Configure the Sphere Mollweide projection object with an extent,
+  // and a world extent. These are required for the Graticule.
+  var sphereMollweideProjection = new ol.proj.Projection({
+    code: 'ESRI:53009',
+    extent: [-9009954.605703328, -9009954.605703328,
+      9009954.605703328, 9009954.605703328],
+    worldExtent: [-179, -89.99, 179, 89.99]
+  });
+
+  var map = new ol.Map({
+    keyboardEventTarget: document,
+    layers: [
+      new ol.layer.Vector({
+        source: new ol.source.Vector({
+          url: 'https://openlayers.org/en/v4.6.5/examples/data/geojson/countries-110m.geojson',
+          format: new ol.format.GeoJSON()
+        })
+      })
+    ],
+    target: 'map',
+    view: new ol.View({
+      center: [0, 0],
+      projection: sphereMollweideProjection,
+      resolutions: [65536, 32768, 16384, 8192, 4096, 2048],
+      zoom: 0
+    })
+  });
+
+  new ol.Graticule({
+    map: map
+  });
+
+  let layer;
+
+  fetch('https://sakitam-fdd.github.io/wind-layer/examples/out.json')
+    .then(res => res.json())
+    .then(res => {
+      // const range = vectorField.range || [0.02, 28.21618329965979];
+      // const scale = chroma.scale('OrRd').domain(range);
+
+      const windLayer = new OlWind.WindLayer(res, {
+        windOptions: {
+          colorScale: (m) => {
+            // console.log(m);
+            return '#ff473c';
+          },
+          // colorScale: scale,
+          velocityScale: 1 / 20,
+          paths: 5000,
+          generateParticleOption: true,
+          // particleMultiplier: 0.3 * 10,
+        },
+        map: map,
+      });
+
+      console.log(map, windLayer);
+
+      layer = windLayer;
+
+      // layer.appendTo(map);
+
+      map.addLayer(windLayer);
+    });
+</script>
+</body>
+</html>
