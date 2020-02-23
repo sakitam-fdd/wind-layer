@@ -302,20 +302,18 @@ class OlWindy extends ImageLayer {
         particleMultiplier, // 离子数量
         colorScale
       } = this.options;
-      if (this.$Windy) {
-        this.$Windy.updateParams({
-          minVelocity,
-          maxVelocity,
-          velocityScale,
-          particleAge,
-          lineWidth,
-          particleMultiplier,
-          colorScale,
-          devicePixelRatio: this.options.devicePixelRatio
-        });
-        if (this.getMap() && this._canvas && this.data) {
-          this.render(this._canvas);
-        }
+      this.$Windy.updateParams({
+        minVelocity,
+        maxVelocity,
+        velocityScale,
+        particleAge,
+        lineWidth,
+        particleMultiplier,
+        colorScale,
+        devicePixelRatio: this.options.devicePixelRatio
+      });
+      if (this.getMap() && this._canvas && this.data) {
+        this.render(this._canvas);
       }
     }
     return this;

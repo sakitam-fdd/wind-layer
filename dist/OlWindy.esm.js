@@ -1,9 +1,9 @@
 /*!
  * author: sakitam-fdd <smilefdd@gmail.com> 
- * wind-layer v0.1.1
- * build-time: 2019-11-30 21:42
+ * wind-layer v0.1.2
+ * build-time: 2020-2-23 16:31
  * LICENSE: MIT
- * (c) 2017-2019 https://sakitam-fdd.github.io/wind-layer
+ * (c) 2017-2020 https://sakitam-fdd.github.io/wind-layer
  */
 import { Map } from 'ol';
 import { Image } from 'ol/layer';
@@ -941,20 +941,18 @@ var OlWindy = /*@__PURE__*/(function (ImageLayer) {
       var lineWidth = ref.lineWidth;
       var particleMultiplier = ref.particleMultiplier;
       var colorScale = ref.colorScale;
-      if (this.$Windy) {
-        this.$Windy.updateParams({
-          minVelocity: minVelocity,
-          maxVelocity: maxVelocity,
-          velocityScale: velocityScale,
-          particleAge: particleAge,
-          lineWidth: lineWidth,
-          particleMultiplier: particleMultiplier,
-          colorScale: colorScale,
-          devicePixelRatio: this.options.devicePixelRatio
-        });
-        if (this.getMap() && this._canvas && this.data) {
-          this.render(this._canvas);
-        }
+      this.$Windy.updateParams({
+        minVelocity: minVelocity,
+        maxVelocity: maxVelocity,
+        velocityScale: velocityScale,
+        particleAge: particleAge,
+        lineWidth: lineWidth,
+        particleMultiplier: particleMultiplier,
+        colorScale: colorScale,
+        devicePixelRatio: this.options.devicePixelRatio
+      });
+      if (this.getMap() && this._canvas && this.data) {
+        this.render(this._canvas);
       }
     }
     return this;

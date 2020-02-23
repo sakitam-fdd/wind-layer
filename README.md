@@ -3,8 +3,9 @@
 > a [openlayers](http://openlayers.org) | [bmap](https://map.baidu.com/) | [amap](https://ditu.amap.com/) | [maptalks](https://maptalks.org/) extension to windjs
 
 > 示例：[openlayers](//sakitam-fdd.github.io/wind-layer/examples/index.html) |
- [bmap](//sakitam-fdd.github.io/wind-layer/examples/baidu.html) |
-  [amap](//sakitam-fdd.github.io/wind-layer/examples/amap.html) | 
+  [ol6.x](//sakitam-fdd.github.io/wind-layer/examples/ol6.html) |
+  [bmap](//sakitam-fdd.github.io/wind-layer/examples/baidu.html) |
+  [amap](//sakitam-fdd.github.io/wind-layer/examples/amap.html) |
   [maptalks](//sakitam-fdd.github.io/wind-layer/examples/maptalks.html)
 
 [![Build Status](https://travis-ci.org/sakitam-fdd/wind-layer.svg?branch=master)](https://www.travis-ci.org/sakitam-fdd/wind-layer)
@@ -25,7 +26,7 @@ npm run dev
 npm run build
 ```
 
-### 
+###
 
 ### 安装
 
@@ -42,9 +43,13 @@ import {
   OlWind // openlayers
 } from 'wind-layer'
 
-// ol5 & ol6
+// ol5
 import OlWindy from 'wind-layer/dist/OlWindy.js'
 import OlWindy from 'wind-layer/dist/OlWindy.esm.js'
+
+// ol6
+import OlWindy from 'wind-layer/dist/Ol6Windy.js'
+import OlWindy from 'wind-layer/dist/Ol6Windy.esm.js'
 
 // maptalks
 import MaptalksWindy from 'wind-layer/dist/MaptalksWindy.js'
@@ -55,21 +60,21 @@ import MaptalksWindy from 'wind-layer/dist/MaptalksWindy.esm.js'
 #### cdn
 
 目前可通过 [unpkg.com](https://unpkg.com/wind-layer/dist/windLayer.js) /
- [jsdelivr](https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/windLayer.js) 获取最新版本的资源。
+ [jsdelivr](https://cdn.jsdelivr.net/npm/wind-layer@0.1.2/dist/windLayer.js) 获取最新版本的资源。
 
 ```bash
 # jsdelivr (jsdelivr由于缓存原因最好锁定版本号，否则可能会出现意料之外的问题)
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/windLayer.js
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/windLayer.min.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.2/dist/windLayer.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.2/dist/windLayer.min.js
 # npm
 https://unpkg.com/wind-layer/dist/windLayer.js
 https://unpkg.com/wind-layer/dist/windLayer.min.js
 
 # 分模块
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/AMapWind.js // amap
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/BMapWind.js // bmap
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/OlWind.js // openlayers
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/MaptalksWindy.js // maptalks
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.2/dist/AMapWind.js // amap
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.2/dist/BMapWind.js // bmap
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.2/dist/OlWind.js // openlayers
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.2/dist/MaptalksWindy.js // maptalks
 ```
 
 #### [![示例](https://sakitam-fdd.github.io/wind-layer/windy.jpg)](https://jsfiddle.net/sakitamfdd/hgvdu76j/?utm_source=website&utm_medium=embed&utm_campaign=hgvdu76j)

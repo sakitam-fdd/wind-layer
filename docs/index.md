@@ -5,7 +5,7 @@ npm install wind-layer --save
 import windLayer from 'wind-layer'
 
 // 指定版本安装
-npm install wind-layer@0.1.1 --save
+npm install wind-layer@0.1.2 --save
 import windLayer from 'wind-layer'// 分模块
 // 分模块
 import {
@@ -14,9 +14,13 @@ import {
   OlWind // openlayers
 } from 'wind-layer'
 
-// ol5 & ol6
+// ol5
 import OlWindy from 'wind-layer/dist/OlWindy.js'
 import OlWindy from 'wind-layer/dist/OlWindy.esm.js'
+
+// ol6
+import OlWindy from 'wind-layer/dist/Ol6Windy.js'
+import OlWindy from 'wind-layer/dist/Ol6Windy.esm.js'
 
 // maptalks
 import MaptalksWindy from 'wind-layer/dist/MaptalksWindy.js'
@@ -27,21 +31,21 @@ import MaptalksWindy from 'wind-layer/dist/MaptalksWindy.esm.js'
 #### cdn
 
 目前可通过 [unpkg.com](https://unpkg.com/wind-layer/dist/windLayer.js) /
- [jsdelivr](https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/windLayer.js) 获取最新版本的资源。
+ [jsdelivr](https://cdn.jsdelivr.net/npm/wind-layer@0.1.2/dist/windLayer.js) 获取最新版本的资源。
 
 ```bash
 // jsdelivr (jsdelivr由于缓存原因最好锁定版本号，否则可能会出现意料之外的问题)
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/windLayer.js
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/windLayer.min.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.2/dist/windLayer.js
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.2/dist/windLayer.min.js
 // npm
 https://unpkg.com/wind-layer/dist/windLayer.js
 https://unpkg.com/wind-layer/dist/windLayer.min.js
 
 // 分模块
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/AMapWind.js // amap
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/BMapWind.js // bmap
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/OlWind.js // openlayers
-https://cdn.jsdelivr.net/npm/wind-layer@0.1.1/dist/MaptalksWindy.js // maptalks
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.2/dist/AMapWind.js // amap
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.2/dist/BMapWind.js // bmap
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.2/dist/OlWind.js // openlayers
+https://cdn.jsdelivr.net/npm/wind-layer@0.1.2/dist/MaptalksWindy.js // maptalks
 ```
 
 
@@ -55,7 +59,7 @@ var wind = new windLayer.OlWind(res.data, {
   ratio: 1
 })
 wind.appendTo(map)
-// or 
+// or
 map.addLayer(wind) // 此模式下属性必须配置 map 字段
 ```
 

@@ -1,6 +1,6 @@
 {
   "name": "wind-layer",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "a openlayers ol bmap amap maptalks extension to windjs",
   "author": "sakitam-fdd <smilefdd@gmail.com>",
   "homepage": "https://sakitam-fdd.github.io/wind-layer",
@@ -29,18 +29,23 @@
     "grib"
   ],
   "scripts": {
-    "dev": "cross-env NODE_ENV=development input=index.js file=windLayer rollup -wm -c build/rollup.dev.config.js",
+    "dev": "run-p dev:*",
+    "dev:all": "cross-env NODE_ENV=development input=index.js file=windLayer rollup -m -c build/rollup.dev.config.js",
     "dev:ol": "cross-env NODE_ENV=development input=ol/index.js file=OlWindy rollup -wm -c build/rollup.dev.config.js",
+    "dev:ol6": "cross-env NODE_ENV=development input=ol6/index.js file=Ol6Windy rollup -wm -c build/rollup.dev.config.js",
+    "demo:ol6": "cross-env NODE_ENV=demo input=ol6/demo.js file=ol6-demo rollup -wm -c build/rollup.dev.config.js",
     "dev:openlayers": "cross-env NODE_ENV=development input=openlayers/index.js file=OlWind rollup -wm -c build/rollup.dev.config.js",
     "dev:bmap": "cross-env NODE_ENV=development input=bmap/index.js file=BMapWind rollup -wm -c build/rollup.dev.config.js",
     "dev:amap": "cross-env NODE_ENV=development input=amap/index.js file=AMapWind rollup -wm -c build/rollup.dev.config.js",
     "dev:maptalks": "cross-env NODE_ENV=development input=maptalks/index.js file=MaptalksWindy rollup -wm -c build/rollup.dev.config.js",
+    "build:all": "cross-env NODE_ENV=production input=index.js file=windLayer rollup -c build/rollup.dev.config.js && cross-env NODE_ENV=production input=index.js file=windLayer rollup -c build/rollup.prod.config.js",
     "build:ol": "cross-env NODE_ENV=production input=ol/index.js file=OlWindy rollup -m -c build/rollup.dev.config.js && cross-env NODE_ENV=production input=ol/index.js file=OlWindy rollup -c build/rollup.prod.config.js",
+    "build:ol6": "cross-env NODE_ENV=production input=ol6/index.js file=Ol6Windy rollup -m -c build/rollup.dev.config.js && cross-env NODE_ENV=production input=ol6/index.js file=Ol6Windy rollup -c build/rollup.prod.config.js",
     "build:openlayers": "cross-env NODE_ENV=production input=openlayers/index.js file=OlWind rollup -m -c build/rollup.dev.config.js && cross-env NODE_ENV=production input=openlayers/index.js file=OlWind rollup -c build/rollup.prod.config.js",
     "build:amap": "cross-env NODE_ENV=production input=amap/index.js file=AMapWind rollup -m -c build/rollup.dev.config.js && cross-env NODE_ENV=production input=amap/index.js file=AMapWind rollup -c build/rollup.prod.config.js",
     "build:bmap": "cross-env NODE_ENV=production input=bmap/index.js file=BMapWind rollup -m -c build/rollup.dev.config.js && cross-env NODE_ENV=production input=bmap/index.js file=BMapWind rollup -c build/rollup.prod.config.js",
     "build:maptalks": "cross-env NODE_ENV=production input=maptalks/index.js file=MaptalksWindy rollup -m -c build/rollup.dev.config.js && cross-env NODE_ENV=production input=maptalks/index.js file=MaptalksWindy rollup -c build/rollup.prod.config.js",
-    "build": "npm run build:ol && npm run build:openlayers && npm run build:bmap && npm run build:amap && npm run build:maptalks && cross-env NODE_ENV=development input=index.js file=windLayer rollup -m -c build/rollup.dev.config.js && cross-env NODE_ENV=production input=index.js file=windLayer rollup -c build/rollup.prod.config.js",
+    "build": "run-p build:*",
     "start": "node server/bin/www",
     "prd:server": "pm2 start server/bin/www"
   },
@@ -54,7 +59,7 @@
     "moment": "^2.20.1"
   },
   "devDependencies": {
-    "ol": "^5.0.2",
+    "ol": "^6.0.0",
     "maptalks": "^0.44.0",
     "openlayers": "^4.6.5",
     "@babel/core": "^7.3.4",
@@ -73,6 +78,7 @@
     "eslint-plugin-promise": "^3.8.0",
     "eslint-plugin-standard": "^4.0.0",
     "eslint-config-standard": "^12.0.0",
+    "npm-run-all": "^4.1.5",
     "fs-extra": "^3.0.1",
     "koa": "^2.4.1",
     "koa-body": "^2.5.0",

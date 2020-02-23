@@ -14,29 +14,45 @@ const common = {
   },
 };
 
+let config;
 const namespace = process.env.file;
 const file = namespace === 'windlayer' ? lowerFirstChart(namespace) : namespace;
 
-const config = Object.assign(baseConfig, {
-  output: [
-    {
-      file: resolve(`dist/${file}.js`),
-      format: 'umd',
-      name: namespace,
-      ...common,
-    },
-    {
-      file: `dist/${file}.common.js`,
-      format: 'cjs',
-      ...common,
-    },
-    {
-      file: `dist/${file}.esm.js`,
-      format: 'es',
-      ...common,
-    }
-  ]
-});
+if (process.env.NODE_ENV === 'demo') {
+  config = Object.assign(baseConfig, {
+    output: [
+      {
+        file: resolve(`examples/${file}.js`),
+        format: 'iife',
+        // name: _package.namespace,
+        banner: '',
+        sourceMap: 'inline',
+        // name: namespace,
+      }
+    ]
+  })
+} else {
+  config = Object.assign(baseConfig, {
+    output: [
+      {
+        file: resolve(`dist/${file}.js`),
+        format: 'umd',
+        name: namespace,
+        ...common,
+      },
+      {
+        file: `dist/${file}.common.js`,
+        format: 'cjs',
+        ...common,
+      },
+      {
+        file: `dist/${file}.esm.js`,
+        format: 'es',
+        ...common,
+      }
+    ]
+  });
+}
 
 // if (process.env.NODE_ENV === 'development') {
 //   config.plugins.push(// Default options
