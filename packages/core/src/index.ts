@@ -6,9 +6,9 @@ export const defaultOptions = {
   lineWidth: 1, // 线条宽度
   colorScale: '#fff',
   velocityScale: 1 / 25,
-  particleAge: 90, // 粒子在重新生成之前绘制的最大帧数
+  // particleAge: 90, // 粒子在重新生成之前绘制的最大帧数
   maxAge: 90, // alias for particleAge
-  particleMultiplier: 1 / 300, // TODO: PATHS = Math.round(width * height * particleMultiplier);
+  // particleMultiplier: 1 / 300, // TODO: PATHS = Math.round(width * height * particleMultiplier);
   paths: 800,
   frameRate: 20,
   minVelocity: 0,
@@ -32,6 +32,11 @@ export interface IOptions {
   minVelocity?: number;
   maxVelocity?: number;
   generateParticleOption?: boolean | emptyGenerateParticleFunc;
+}
+
+function indexFor (m: number, min: number, max: number, colorScale: string[]) {  // map velocity speed to a style
+  return Math.max(0, Math.min((colorScale.length - 1),
+    Math.round((m - min) / (max - min) * (colorScale.length - 1))));
 }
 
 class BaseLayer {
@@ -149,12 +154,15 @@ class BaseLayer {
 
     let i = 0;
     let len = particles.length;
-    for (; i < len; i++) {
-      this.drawParticle(particles[i]);
+    if (this.field && len > 0) {
+      const [min, max] = this.field.range as [number, number];
+      for (; i < len; i++) {
+        this.drawParticle(particles[i], min, max);
+      }
     }
   }
 
-  private drawParticle(particle: any) {
+  private drawParticle(particle: any, min: number, max: number) {
     // TODO 需要判断粒子是否超出视野
     // this.ctx.strokeStyle = color;
     const source: [number, number] = [particle.x, particle.y];
@@ -178,6 +186,9 @@ class BaseLayer {
         if (isFunction(this.options.colorScale)) {
           // @ts-ignore
           this.ctx.strokeStyle = this.options.colorScale(particle.m) as string;
+        } else if (Array.isArray(this.options.colorScale)) {
+          const colorIdx = indexFor(particle.m, min, max, this.options.colorScale);
+          this.ctx.strokeStyle = this.options.colorScale[colorIdx];
         }
 
         if (isFunction(this.options.lineWidth)) {
