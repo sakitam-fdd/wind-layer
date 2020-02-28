@@ -160,7 +160,7 @@ export function isNull (obj: any) {
  * check is array
  * @param arr
  */
-export function isArray(arr: any) {
+export function isArray(arr: any): boolean {
   return Array.isArray(arr);
 }
 

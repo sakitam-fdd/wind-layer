@@ -31,14 +31,14 @@ export default class Field {
   private readonly ymax: number;
   private readonly cols: number;
   private readonly rows: number;
-  private grid: (Vector | null)[][];
+  public grid: (Vector | null)[][];
   private us: number[];
   private vs: number[];
   private isContinuous: boolean;
   private deltaY: number;
   private deltaX: number;
   private wrappedX: undefined | boolean;
-  private range: (number | undefined)[] | undefined;
+  public range: (number | undefined)[] | undefined;
 
   constructor(params: IField) {
     this.grid = [];
