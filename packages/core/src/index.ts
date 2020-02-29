@@ -27,7 +27,7 @@ export interface IOptions {
   particleAge?: number; // 粒子在重新生成之前绘制的最大帧数
   maxAge: number; // alias for particleAge
   particleMultiplier?: number; // TODO: PATHS = Math.round(width * height * that.particleMultiplier);
-  paths: number;
+  paths: number | emptyFunc;
   frameRate: number;
   minVelocity?: number;
   maxVelocity?: number;
@@ -210,7 +210,7 @@ class BaseLayer {
     // for (var i = 0; i < particleCount; i++) {
     //   particles.push(field.randomize({age: Math.floor(Math.random() * that.MAX_PARTICLE_AGE) + 0}));
     // }
-    const particleCount = this.options.paths;
+    const particleCount = typeof this.options.paths === 'function' ? this.options.paths(this) : this.options.paths;
     const particles = [];
     if (!this.field) return [];
     let i = 0;

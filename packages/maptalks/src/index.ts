@@ -70,9 +70,9 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
           // @ts-ignore
           this.setCanvasUpdated();
         };
-
-        this.wind.prerender();
       }
+
+      this.wind.prerender();
 
       this.wind.render();
     }
@@ -89,10 +89,10 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
   }
 
   intersectsCoordinate(coordinate: [number, number]): boolean {
-    // const map = this.getMap();
-    // const mapExtent = map.getExtent();
-    // return mapExtent.contains(new Coordinate(...coordinate)) as boolean;
-    return true;
+    const map = this.getMap();
+    const mapExtent = map.getExtent();
+    return mapExtent.contains(new Coordinate(...coordinate)) as boolean;
+    // return true;
   }
 
   drawOnInteracting() {

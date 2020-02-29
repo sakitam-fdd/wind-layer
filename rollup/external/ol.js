@@ -1,17 +1,25 @@
 export const external = [
   'ol',
-  'ol/layer.js',
-  'ol/proj.js',
-  'ol/transform.js',
-  'ol/extent.js',
-  'ol/renderer/canvas/Layer.js',
+  'ol/size',
+  'ol/layer',
+  'ol/PluggableMap',
+  'ol/coordinate',
+  'ol/proj',
+  'ol/transform',
+  'ol/extent',
+  'ol/renderer/canvas/Layer',
+  'ol/source/ImageCanvas',
 ];
 
 export const globals = {
   'ol': 'ol',
-  'ol/layer.js': 'ol.layer',
-  'ol/proj.js': 'ol.proj',
-  'ol/transform.js': 'ol.transform',
-  'ol/extent.js': 'ol.extent',
-  'ol/renderer/canvas/Layer.js': 'ol.renderer.canvas.Layer',
+  'ol/size': 'ol.size',
+  'ol/layer': 'ol.layer',
+  'ol/proj': 'ol.proj',
+  'ol/source/ImageCanvas': 'ol.source.ImageCanvas',
+  'ol/PluggableMap': 'ol.PluggableMap',
+  'ol/coordinate': 'ol.coordinate',
+  'ol/transform': 'ol.transform',
+  'ol/extent': 'ol.extent',
+  'ol/renderer/canvas/Layer': 'ol.renderer.canvas.ImageLayer', // CanvasLayer is not export
 };
