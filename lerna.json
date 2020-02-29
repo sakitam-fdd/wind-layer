@@ -18,7 +18,8 @@
       "verifyAccess": false,
       "verifyRegistry": false,
       "allowBranch": [
-        "master"
+        "master",
+        "next"
       ],
       "message": "chore: publish"
     }
@@ -34,5 +35,8 @@
       "tag: abandon": "🙅 废弃"
     },
     "cacheDir": ".changelog"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
