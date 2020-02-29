@@ -111,27 +111,27 @@ class BMapWind extends BMap.Overlay {
   public bindEvent() {
     this.map.addEventListener('resize', this.handleResize);
 
-    this.map.addEventListener('dragstart', this.stop);
-    this.map.addEventListener('dragend', this.start);
+    // this.map.addEventListener('dragstart', this.stop);
+    // this.map.addEventListener('dragend', this.start);
     this.map.addEventListener('movestart', this.stop);
     this.map.addEventListener('moveend', this.start);
-    this.map.addEventListener('zoomstart', this.stop);
-    this.map.addEventListener('zoomend', this.start);
-    this.map.addEventListener('touchstart', this.stop);
-    this.map.addEventListener('touchend', this.start);
+    // this.map.addEventListener('zoomstart', this.stop);
+    // this.map.addEventListener('zoomend', this.start);
+    // this.map.addEventListener('touchstart', this.stop);
+    // this.map.addEventListener('touchend', this.start);
   }
 
   public unbindEvent() {
     this.map.removeEventListener('resize', this.handleResize);
 
-    this.map.removeEventListener('dragstart', this.stop);
-    this.map.removeEventListener('dragend', this.start);
+    // this.map.removeEventListener('dragstart', this.stop);
+    // this.map.removeEventListener('dragend', this.start);
     this.map.removeEventListener('movestart', this.stop);
     this.map.removeEventListener('moveend', this.start);
-    this.map.removeEventListener('zoomstart', this.stop);
-    this.map.removeEventListener('zoomend', this.start);
-    this.map.removeEventListener('touchstart', this.stop);
-    this.map.removeEventListener('touchend', this.start);
+    // this.map.removeEventListener('zoomstart', this.stop);
+    // this.map.removeEventListener('zoomend', this.start);
+    // this.map.removeEventListener('touchstart', this.stop);
+    // this.map.removeEventListener('touchend', this.start);
   }
 
   public start() {
@@ -203,12 +203,11 @@ class BMapWind extends BMap.Overlay {
           // @ts-ignore
           // this.setCanvasUpdated();
         };
-
-        this.wind.prerender();
       }
     }
 
     if (this.wind) {
+      this.wind.prerender();
       this.wind.render();
     }
 
@@ -228,13 +227,83 @@ class BMapWind extends BMap.Overlay {
     return this.canvas;
   }
 
+  private getProjection() {
+    const map = this.map;
+
+    const mapType = map.getMapType();
+    let projection;
+    if (mapType.getProjection) {
+      projection = mapType.getProjection();
+    } else {
+      projection = {
+        lngLatToPoint: function(point: {
+          lng: number;
+          lat: number;
+        }) {
+          const mc = map.lnglatToMercator(point.lng, point.lat);
+          return {
+            x: mc[0],
+            y: mc[1]
+          }
+        }
+      }
+    }
+
+    return projection;
+  }
+
+  // 经纬度左边转换为墨卡托坐标 from: https://github.com/huiyan-fe/mapv/blob/master/src/map/baidu-map/AnimationLayer.js#L62
+  public transferToMercator(coordinates: [number, number]): [number, number] {
+    const projection = this.getProjection();
+
+    if (coordinates[0] < -180 || coordinates[0] > 180 || coordinates[1] < -90 || coordinates[1] > 90) {
+      return coordinates;
+    } else {
+      const pixel = projection.lngLatToPoint({
+        lng: coordinates[0],
+        lat: coordinates[1]
+      });
+      return [pixel.x, pixel.y];
+    }
+  }
+
+  private projectInner(coordinate: [number, number]): [number, number] {
+    const map = this.map;
+    let scale = 1;
+    if (this.context != '2d') {
+      scale = window.devicePixelRatio;
+    }
+
+    const projection = this.getProjection();
+    let mcCenter;
+    if  (map.getMapType().getProjection) {
+      mcCenter = projection.lngLatToPoint(map.getCenter());
+    } else  {
+      mcCenter = {
+        x: map.getCenter().lng,
+        y: map.getCenter().lat
+      };
+    }
+
+    let zoomUnit;
+    if (projection.getZoomUnits) {
+      zoomUnit = projection.getZoomUnits(map.getZoom());
+    } else {
+      zoomUnit = Math.pow(2, 18 - map.getZoom());
+    }
+
+    const nwMc = new BMap.Pixel(mcCenter.x - (map.getSize().width / 2) * zoomUnit, mcCenter.y + (map.getSize().height / 2) * zoomUnit); //左上角墨卡托坐标
+
+    const x = (coordinate[0] - nwMc.x) / zoomUnit * scale;
+    const y = (nwMc.y - coordinate[1]) / zoomUnit * scale;
+    return [x, y];
+  }
+
   public project(coordinate: [number, number]): [number, number] {
     // FIXME: https://github.com/huiyan-fe/mapv/blob/master/src/map/baidu-map/Layer.js#L194
-    const pixel = this.map.pointToPixel(new BMap.Point(...coordinate));
-    return [
-      pixel.x,
-      pixel.y,
-    ];
+    // const pixel = this.map.pointToPixel(new BMap.Point(...coordinate));
+    const mercatorCoordinates = this.transferToMercator(coordinate);
+    return this.projectInner(mercatorCoordinates);
   }
 
   public intersectsCoordinate(coordinate: [number, number]): boolean {
