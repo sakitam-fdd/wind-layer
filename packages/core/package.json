@@ -1,6 +1,6 @@
 {
   "name": "wind-core",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.0",
   "description": "wind layer core",
   "keywords": [],
   "author": "sakitam-fdd <smilefdd@gmail.com>",
@@ -38,6 +38,5 @@
   "bugs": {
     "url": "https://github.com/sakitam-fdd/wind-layer/issues"
   },
-  "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
-  "dependencies": {}
+  "homepage": "https://github.com/sakitam-fdd/wind-layer#readme"
 }
