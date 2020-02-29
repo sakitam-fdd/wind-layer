@@ -17,22 +17,22 @@
 </head>
 <body>
 <div id="map"></div>
-<script src="../node_modules/axios/dist/axios.js"></script>
-<script src="../dist/AMapWind.js"></script>
+<script src="../packages/amap/dist/amap-wind.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
 <script>
 
   var map = new AMap.Map('map', {
-    viewMode: '3D',
+    // viewMode: '3D',
     resizeEnable: true,
-    zoom: 5,
+    zoom: 0,
     center: [113.53450137499999, 34.44104525],
-    mapStyle: 'amap://styles/dark',
-    zooms: [3, 18]
+    // mapStyle: 'amap://styles/dark',
+    zooms: [0, 18]
   });
-  var realtime = false;
-  axios.get(realtime ? '../server/public/parseData/2018090706.json' : './out.json').then(function (res) {
-    if (res.data) {
+
+  fetch('https://sakitam-fdd.github.io/wind-layer/examples/out.json')
+    .then(res => res.json())
+    .then(res => {
       var config = {
         minVelocity: 0, // 粒子强度最小的速度 (m/s)
         maxVelocity: 10, // 粒子强度最大的速度 (m/s)
@@ -42,32 +42,14 @@
         particleMultiplier: 0.01, // 离子数量
       };
 
-      var layer = new AMapWind(res.data, {
-        projection: 'EPSG:4326',
+      var layer = new AMapWind.WindLayer(res, {
+        // projection: 'EPSG:4326',
         zIndex: 20,
-        colorScale: [
-          "rgb(36,104, 180)",
-          "rgb(60,157, 194)",
-          "rgb(128,205,193 )",
-          "rgb(151,218,168 )",
-          "rgb(198,231,181)",
-          "rgb(238,247,217)",
-          "rgb(255,238,159)",
-          "rgb(252,217,125)",
-          "rgb(255,182,100)",
-          "rgb(252,150,75)",
-          "rgb(250,112,52)",
-          "rgb(245,64,32)",
-          "rgb(237,45,28)",
-          "rgb(220,24,32)",
-          "rgb(180,0,35)"
-        ],
-        minVelocity: 0,
-        maxVelocity: 10,
-        velocityScale: 0.05,
-        particleAge: 90,
-        lineWidth: 1,
-        particleMultiplier: 0.01,
+        colorScale: "rgb(255, 255, 255)",
+        velocityScale: 1 / 30,
+        paths: 8000,
+        generateParticleOption: false,
+        // bounds: map.getBounds(),
       });
 
       const gui = new dat.GUI();
@@ -95,9 +77,7 @@
       setTimeout(() => {
         // layer.removeLayer();
       }, 5000)
-    }
-  });
-
+    });
 </script>
 </body>
 </html>

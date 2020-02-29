@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ol4-epsg3413</title>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/openlayers/dist/ol.css">
+  <style type="text/css">
+    html, body {
+      margin: 0;
+      height: 100%;
+      width: 100%
+    }
+    .container {
+      width: 100%;
+      height: 100%
+    }
+  </style>
+</head>
+<body>
+<div id="map" class="container"></div>
+<script src="//cdn.jsdelivr.net/npm/openlayers/dist/ol-debug.js"></script>
+<script src="//cdn.jsdelivr.net/npm/proj4@2.6.0/dist/proj4.js"></script>
+<script src="../packages/openlayers/dist/ol-wind.js"></script>
+<script>
+  // proj4.defs("EPSG:3413","+proj=stere +lat_0=90 +lat_ts=70 +lon_0=-45 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs");
+  proj4.defs("EPSG:3413","+proj=stere +lat_0=90 +lat_ts=70 +lon_0=-45 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs");
+
+  var extent  = [-190, 90, 180, 60];
+  var bounds = [
+    -6894746.0420226175, -6894746.0420226175,
+    6894746.0420226175, 6894746.0420226175
+  ];
+
+  var projection = ol.proj.get('EPSG:3413');
+  projection.setWorldExtent(extent);
+  projection.setExtent(bounds.map(n => 3 * n));
+
+  var osm = new ol.layer.Tile({
+    source: new ol.source.OSM({
+      projection: 'EPSG:3857',
+    }),
+  });
+
+  var map = new ol.Map({
+    target: 'map',
+    layers: [
+      osm
+    ],
+    view: new ol.View({
+      projection: projection,
+      center: [-47527.08583899386, 534308.4103305723]
+    })
+  });
+
+  map.getView().fit(bounds, map.getSize());
+
+  var graticule = new ol.Graticule({
+    // the style to use for the lines, optional.
+    strokeStyle: new ol.style.Stroke({
+      color: 'rgba(255,120,0,0.9)',
+      width: 2,
+      lineDash: [0.5, 4]
+    }),
+    showLabels: true
+  });
+
+  graticule.setMap(map);
+
+  let layer;
+
+  fetch('https://sakitam-fdd.github.io/wind-layer/examples/out.json')
+    .then(res => res.json())
+    .then(res => {
+      // const range = vectorField.range || [0.02, 28.21618329965979];
+      // const scale = chroma.scale('OrRd').domain(range);
+
+      const windLayer = new OlWind.WindLayer(res, {
+        windOptions: {
+          colorScale: (m) => {
+            // console.log(m);
+            return '#ff473c';
+          },
+          // colorScale: scale,
+          velocityScale: 1 / 20,
+          paths: 5000,
+          generateParticleOption: true,
+          // particleMultiplier: 0.3 * 10,
+        },
+        map: map,
+      });
+
+      console.log(map, windLayer);
+
+      layer = windLayer;
+
+      // layer.appendTo(map);
+
+      map.addLayer(windLayer);
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{
+  "lerna": "3.19.0",
+  "packages": [
+    "packages/*"
+  ],
+  "version": "1.0.0-alpha.0",
+  "npmClient": "yarn",
+  "useWorkspaces": true,
+  "command": {
+    "bootstrap": {
+      "npmClientArgs": [
+        "--no-lockfile"
+      ]
+    },
+    "publish": {
+      "npmClient": "yarn",
+      "ignoreChanges": [
+        "*.md"
+      ],
+      "verifyAccess": false,
+      "verifyRegistry": false,
+      "allowBranch": [
+        "master",
+        "next"
+      ],
+      "message": "chore: publish"
+    }
+  },
+  "changelog": {
+    "labels": {
+      "tag: add": "🌟 新增",
+      "tag: edit": "💄 修改",
+      "tag: fix": "🐞 修复 ",
+      "tag: remove": "🗑 移除",
+      "tag: refactor": "📝 重构",
+      "tag: publish": "📖 发布",
+      "tag: abandon": "🙅 废弃"
+    },
+    "cacheDir": ".changelog"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

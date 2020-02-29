@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "*": [
+        "node_modules",
+        "packages",
+        "typings/*",
+        "types/*"
+      ],
+      "maptalks": ["maptalks/dist/maptalks.es.js"]
+    },
+    "rootDir": "./",
+    "baseUrl": "./",
+    "noEmit": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": false,
+    "target": "es5",
+    "lib": [
+      "es5",
+      "es6",
+      "es2017",
+      "es2018",
+      "dom"
+    ],
+    "jsx": "react",
+    "types": ["node", "reflect-metadata", "jest"],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": [
+    "packages/**/src",
+    "node_modules/@types/node/globals.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "packages/**/dist"
+  ]
+}
