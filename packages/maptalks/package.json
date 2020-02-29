@@ -1,5 +1,5 @@
 {
-  "name": "maptalks-wind",
+  "name": "@sakitam-gis/maptalks-wind",
   "version": "1.0.0-alpha.0",
   "description": "maptalks wind",
   "keywords": [],
@@ -48,5 +48,5 @@
   "devDependencies": {
     "maptalks": "^0.46.0"
   },
-  "gitHead": "dbc05354962fc0805ecbf90fbea1cf531a2114a6"
+  "gitHead": "e824bcd617be03f89fcefdd59e12e1f534c5cca4"
 }

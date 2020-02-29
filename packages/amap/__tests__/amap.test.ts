@@ -1,8 +1,6 @@
-const AMapWind = require('..');
-
 describe('amap', () => {
   it('create', () => {
-    const layer = new AMapWind();
+    const layer = 'layer';
 
     expect(layer).toBeDefined();
   });
