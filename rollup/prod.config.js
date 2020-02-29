@@ -3,9 +3,11 @@ import { terser } from 'rollup-plugin-terser';
 import { banner, pkg, resolve, handleMinEsm } from './utils';
 import baseConfig from './base.config';
 
+const extend = process.env.extend;
+
 const common = {
   banner: banner,
-  extend: false,
+  extend: !!extend,
   globals: {
   },
 };

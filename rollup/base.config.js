@@ -7,7 +7,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import nodeResolve from 'rollup-plugin-node-resolve';
 import replace from 'rollup-plugin-replace';
 import typescript from 'rollup-plugin-typescript2';
-import tslint from 'rollup-plugin-tslint';
+// import tslint from 'rollup-plugin-tslint';
 import { resolve } from './utils';
 import { external as olExternal } from './external/ol';
 import { external as maptalksExternal } from './external/maptalks';

@@ -447,6 +447,9 @@ export default class Field {
    * @param o
    */
   public randomize(o: IPosition = {}) {
+    // x = Math.round(Math.floor(Math.random() * bounds.width) + bounds.x);
+    // y = Math.round(Math.floor(Math.random() * bounds.height) + bounds.y)
+
     let i = (Math.random() * this.cols) | 0;
     let j = (Math.random() * this.rows) | 0;
 

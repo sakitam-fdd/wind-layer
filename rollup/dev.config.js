@@ -4,9 +4,11 @@ import { globals as olGlobals } from './external/ol';
 import { globals as maptalksGlobals } from './external/maptalks';
 import { globals as openlayersGlobals } from './external/openlayers';
 
+const extend = process.env.extend;
+
 const common = {
   banner,
-  extend: false,
+  extend: !!extend,
   // exports: 'named',
   globals: {
     ...olGlobals,
