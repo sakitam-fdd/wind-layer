@@ -3,6 +3,10 @@ node_modules/
 .idea/
 .git/
 .vscode/
-run/
 typings/
+packages/
+rollup/
+examples/
+docs/
 logs/
+run/

@@ -19,7 +19,6 @@ image-prd:
 push-prd:
 	docker push $(TARGET_IMAGE_PRD)
 
-
 ci-dev: image-dev push-dev
 ci-dev-nch: build-dev-nch push-dev
 clean:
