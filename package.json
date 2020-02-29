@@ -21,7 +21,6 @@
     "test:watch": "jest --coverage --watch",
     "test:prod": "npm run lint && npm run test -- --no-cache",
     "report-coverage": "cat ./coverage/lcov.info | coveralls",
-    "travis-deploy-once": "travis-deploy-once",
     "precommit": "lint-staged",
     "publish-packages": "lerna publish --force-publish",
     "start": "node server/bin/www",

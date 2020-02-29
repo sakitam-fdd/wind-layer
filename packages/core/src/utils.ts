@@ -214,8 +214,8 @@ export function formatData(data: IGFSItem[]) {
   let uComp: IGFSItem;
   let vComp: IGFSItem;
 
-  if (process.env.NODE_ENV === 'development') {
-    console.time('format-start');
+  if ((process.env.NODE_ENV as string) === ('development' as string)) {
+    console.time('format-data');
   }
 
   data.forEach(function (record: IGFSItem) {
@@ -249,8 +249,8 @@ export function formatData(data: IGFSItem[]) {
     wrappedX: false,
   });
 
-  if (process.env.NODE_ENV === 'development') {
-    console.timeEnd('format-start');
+  if ((process.env.NODE_ENV as string) === ('development' as string)) {
+    console.timeEnd('format-data');
   }
 
   return vectorField;
