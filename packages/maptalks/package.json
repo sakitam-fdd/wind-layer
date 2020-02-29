@@ -47,5 +47,6 @@
   },
   "devDependencies": {
     "maptalks": "^0.46.0"
-  }
+  },
+  "gitHead": "dbc05354962fc0805ecbf90fbea1cf531a2114a6"
 }

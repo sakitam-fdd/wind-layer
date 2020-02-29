@@ -41,5 +41,6 @@
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
   "dependencies": {
     "wind-core": "^1.0.0-alpha.0"
-  }
+  },
+  "gitHead": "dbc05354962fc0805ecbf90fbea1cf531a2114a6"
 }

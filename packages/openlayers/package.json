@@ -48,5 +48,6 @@
   "devDependencies": {
     "@types/openlayers": "^4.6.17",
     "openlayers": "^4.6.5"
-  }
+  },
+  "gitHead": "dbc05354962fc0805ecbf90fbea1cf531a2114a6"
 }
