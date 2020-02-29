@@ -51,6 +51,8 @@ class BaseLayer {
   private starting: boolean;
   private generated: boolean = false;
 
+  public forceStop: boolean;
+
   constructor(ctx: CanvasRenderingContext2D, options: Partial<IOptions>, field?: Field) {
     this.ctx = ctx;
 
@@ -167,10 +169,10 @@ class BaseLayer {
     // this.ctx.strokeStyle = color;
     const source: [number, number] = [particle.x, particle.y];
     // when xt isn't exit
-    const target = [particle.xt || source[0], particle.yt || source[1]];
+    const target: [number, number] = [particle.xt || source[0], particle.yt || source[1]];
 
     if (
-      this.intersectsCoordinate(source)
+      this.intersectsCoordinate(target)
       && particle.age <= this.options.maxAge
     ) {
       const pointPrev = this.project(source);
@@ -237,6 +239,7 @@ class BaseLayer {
 
   start() {
     this.starting = true;
+    this.forceStop = false;
     this._then = Date.now();
     this.animate();
   }
@@ -244,9 +247,11 @@ class BaseLayer {
   stop() {
     cancelAnimationFrame(this.animationLoop);
     this.starting = false;
+    this.forceStop = true;
   }
 
   animate() {
+    if (this.animationLoop) cancelAnimationFrame(this.animationLoop);
     this.animationLoop = requestAnimationFrame(this.animate);
     const now = Date.now();
     const delta = now - this._then;
@@ -271,7 +276,7 @@ class BaseLayer {
       this.generated = true;
     }
 
-    if (!this.starting) {
+    if (!this.starting && !this.forceStop) {
       this.starting = true;
       this._then = Date.now();
       this.animate();
