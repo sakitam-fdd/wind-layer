@@ -9,7 +9,7 @@ footer: sakitam-fdd
 
 ## wind-layer
 
-a [openlayers](http://openlayers.org) | [bmap](https://map.baidu.com/) | [amap](https://ditu.amap.com/) | [maptalks](https://maptalks.org/) extension to windjs
+a [openlayers](http://openlayers.org) | [bmap](https://map.baidu.com/) | [amap](https://ditu.amap.com/) | [maptalks](https://maptalks.org/) extension to show wind field。
 
 ### 介绍
 
