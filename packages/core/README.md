@@ -1,11 +1,15 @@
-# `core`
+# `wind-core`
 
-> TODO: description
+> Wind field core
 
 ## Usage
 
-```
-const core = require('core');
+```js
+import WindCore from 'wind-core';
 
-// TODO: DEMONSTRATE API
+const wind = new WindCore(this.context, opt, data);
+
+wind.project = (coordinate) => pixel;
+wind.intersectsCoordinate = (coordinate) => true;
+wind.postrender = () => {};
 ```

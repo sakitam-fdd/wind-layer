@@ -12,6 +12,7 @@ node_js:
 before_install:
 install:
   - npm install
+  - npm bootstrap
   - make image-dev
 script:
   - npm run build
