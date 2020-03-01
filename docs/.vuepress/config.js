@@ -19,8 +19,16 @@ module.exports = {
     }
   },
   head: [
+    ['link', { rel: 'manifest', href: '/manifest.json' }],
+    ['link', { rel: 'stylesheet', href: '//cdn.jsdelivr.net/npm/openlayers/dist/ol.css' }],
+    ['link', { rel: 'stylesheet', href: '//cache.amap.com/lbs/static/main1119.css' }],
+    ['meta', { name: 'theme-color', content: '#3eaf7c' }],
+    ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
+    ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black' }],
     // ['link', { rel: 'stylesheet', href: '//at.alicdn.com/t/font_1125947_cnbcy1q7tzm.css' }],
-    // ['script', { src: '//unpkg.com/babel-standalone' }]
+    ['script', { src: '//cdn.jsdelivr.net/npm/proj4@2.6.0/dist/proj4.js' }],
+    ['script', { src: '//cdn.jsdelivr.net/npm/openlayers/dist/ol.js' }],
+    ['script', { src: '//api.map.baidu.com/api?v=3.0&ak=bxFuXXDt1oKdlgu6mXCCnK51cDgDGBLp' }],
   ],
   themeConfig: {
     editLinks: true,
@@ -97,7 +105,19 @@ module.exports = {
               collapsable: false,
               children: [
                 '',
-                'Introduction',
+                'data',
+              ],
+            },
+            {
+              title: '使用示例',
+              collapsable: false,
+              children: [
+                'ol',
+                'ol5',
+                'openlayers',
+                'maptalks',
+                'amap',
+                'bmap',
               ],
             }
           ],
