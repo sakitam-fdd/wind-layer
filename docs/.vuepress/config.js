@@ -5,7 +5,7 @@ module.exports = {
   title: 'wind-layer',
   description: 'wind layer for webgis',
   // theme: 'api',
-  base: '/',
+  base: '/wind-layer/',
   locales: {
     '/': {
       lang: 'en-US',
@@ -66,7 +66,19 @@ module.exports = {
               collapsable: false,
               children: [
                 '',
-                'Introduction',
+                'data',
+              ],
+            },
+            {
+              title: 'examples',
+              collapsable: false,
+              children: [
+                'ol',
+                'ol5',
+                'openlayers',
+                'maptalks',
+                'amap',
+                'bmap',
               ],
             }
           ],
@@ -76,7 +88,7 @@ module.exports = {
               collapsable: false,
               children: [
                 '',
-                'getting-started',
+                'Color',
               ],
             }
           ]
@@ -127,7 +139,7 @@ module.exports = {
               collapsable: false,
               children: [
                 '',
-                'getting-started',
+                'Color',
               ],
             }
           ]

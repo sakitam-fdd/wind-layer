@@ -54,7 +54,9 @@
           // pixelRatio: 2,
         });
 
-        fetch('/data/wind.json')
+        console.log(this.$withBase('data/wind.json'));
+
+        fetch(this.$withBase('/data/wind.json'))
           .then(res => res.json())
           .then(res => {
             const windLayer = new WindLayer(res, {
