@@ -350,12 +350,13 @@ volumes:
 
 然后使用命令 docker-compose up -d 来启动，停止服务使用 docker-compose down。
 
-## Resources
+## Acknowledgments
 
 * https://github.com/cambecc/earth
 * http://earth.nullschool.net
 * https://github.com/Esri/wind-js
 * https://github.com/danwild/wind-js-leaflet
+* https://github.com/IHCantabria/Leaflet.CanvasLayer.Field
 
 
 ## License

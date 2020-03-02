@@ -43,10 +43,10 @@
     "wind-core": "^1.0.0-alpha.0"
   },
   "peerDependencies": {
-    "ol": ">=5.0.0"
+    "ol": ">=5.0.0 <6.0.0"
   },
   "devDependencies": {
-    "@types/ol": "^5.3.0",
+    "@types/ol": "5.3.7",
     "ol": "^5.0.3"
   },
   "gitHead": "e824bcd617be03f89fcefdd59e12e1f534c5cca4"

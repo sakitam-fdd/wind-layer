@@ -1,6 +1,6 @@
 ---
-title: 高德地图
-lang: cn-ZH
+title: amap
+lang: en-US
 description: 
 order: 4
 ---
@@ -12,7 +12,9 @@ order: 4
 :::demo 基础使用, 默认不要开启 `3D` 模式。
 
 ```demo
-<demo-amap-wind-base />  
+<ClientOnly>
+  <demo-amap-wind-base />
+</ClientOnly>  
 ```
 
 <<<@/examples/components/amap/base.vue

@@ -7,7 +7,6 @@ import WindCore, {
   defaultOptions,
   IOptions,
 } from 'wind-core';
-import Timeout = NodeJS.Timeout;
 
 export interface IWindOptions extends IOptions {
   opacity: number;
@@ -188,8 +187,8 @@ class BMapWind extends BMap.Overlay {
    */
   private render (canvas: HTMLCanvasElement) {
     if (!this.getData() || !this.map) return this;
+    const opt = this.getWindOptions();
     if (canvas && !this.wind) {
-      const opt = this.getWindOptions();
       const data = this.getData();
 
       const ctx = this.getContext();
@@ -203,11 +202,16 @@ class BMapWind extends BMap.Overlay {
           // @ts-ignore
           // this.setCanvasUpdated();
         };
+        this.wind.prerender();
       }
     }
 
     if (this.wind) {
-      this.wind.prerender();
+      if ('generateParticleOption' in opt) {
+        const flag = typeof opt.generateParticleOption === 'function' ? opt.generateParticleOption() : opt.generateParticleOption;
+        flag && this.wind.prerender();
+      }
+
       this.wind.render();
     }
 

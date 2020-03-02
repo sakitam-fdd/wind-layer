@@ -2,7 +2,7 @@ import { FrameState } from 'ol/PluggableMap';
 import { Coordinate } from 'ol/coordinate';
 import { fromUserExtent, fromUserCoordinate, transform } from 'ol/proj';
 import CanvasLayerRenderer from 'ol/renderer/canvas/Layer';
-import { compose as composeTransform, makeInverse, apply as applyTransform } from 'ol/transform';
+import { toString as transformToString, makeScale, makeInverse, apply as applyTransform } from 'ol/transform';
 import { containsExtent, intersects, getIntersection, isEmpty, containsCoordinate } from 'ol/extent';
 
 import WindCore from 'wind-core';
@@ -52,13 +52,13 @@ export default class WindLayerRender extends CanvasLayerRenderer {
         // @ts-ignore
         this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this, frameState);
         this.wind.postrender = () => {};
-
         this.wind.prerender();
       } else {
         return true;
       }
     } else {
-      return true;
+      const layer = this.getLayer() as unknown as WindLayer;
+      return layer.get('forceRender');
     }
 
     return !!this.wind;
@@ -72,26 +72,13 @@ export default class WindLayerRender extends CanvasLayerRenderer {
 
     let width = Math.round(size[0] * pixelRatio);
     let height = Math.round(size[1] * pixelRatio);
-    const rotation = viewState.rotation;
-    if (rotation) {
-      const size = Math.round(Math.sqrt(width * width + height * height));
-      width = size;
-      height = size;
-    }
 
     // set forward and inverse pixel transforms
-    composeTransform(this.pixelTransform,
-      frameState.size[0] / 2, frameState.size[1] / 2,
-      1 / pixelRatio, 1 / pixelRatio,
-      rotation,
-      -width / 2, -height / 2
-    );
+    makeScale(this.pixelTransform, 1 / pixelRatio, 1 / pixelRatio);
     makeInverse(this.inversePixelTransform, this.pixelTransform);
 
-    // @ts-ignore
-    const canvasTransform = this.createTransformString(this.pixelTransform);
+    const canvasTransform = transformToString(this.pixelTransform);
 
-    // @ts-ignore
     this.useContainer(target, canvasTransform, layerState.opacity);
 
     const context = this.context;
@@ -100,9 +87,14 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     if (canvas.width != width || canvas.height != height) {
       canvas.width = width;
       canvas.height = height;
+      if (canvas.style.transform !== canvasTransform) {
+        canvas.style.transform = canvasTransform;
+      }
     } else if (!this.containerReused) {
       context.clearRect(0, 0, width, height);
     }
+
+    this.preRender(context, frameState);
 
     // clipped rendering if layer extent is set
     let clipped = false;
@@ -110,27 +102,32 @@ export default class WindLayerRender extends CanvasLayerRenderer {
       const layerExtent = fromUserExtent(layerState.extent, viewState.projection);
       clipped = !containsExtent(layerExtent, frameState.extent) && intersects(layerExtent, frameState.extent);
       if (clipped) {
-        // @ts-ignore
         this.clipUnrotated(context, frameState, layerExtent);
       }
     }
 
-    // @ts-ignore
-    this.preRender(context, frameState);
+    const layer = this.getLayer() as unknown as WindLayer;
+    const opt = layer.getWindOptions();
 
-    // render
-    this.wind && this.wind.render();
+    if (this.wind) {
+      if ('generateParticleOption' in opt) {
+        const flag = typeof opt.generateParticleOption === 'function' ? opt.generateParticleOption() : opt.generateParticleOption;
+        flag && this.wind.prerender();
+      }
 
-    // @ts-ignore
-    this.postRender(context, frameState);
+      this.wind.render();
+    }
 
     if (clipped) {
       context.restore();
     }
 
-    if (canvasTransform !== canvas.style.transform) {
-      // TODO: 缩放后位置计算有问题
-      canvas.style.transform = canvasTransform;
+    this.postRender(context, frameState);
+
+    const opacity = layerState.opacity;
+    const container = this.container;
+    if (opacity !== parseFloat(container.style.opacity)) {
+      container.style.opacity = (opacity === 1 ? '' : opacity) as string;
     }
 
     return this.container;

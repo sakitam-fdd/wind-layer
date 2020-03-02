@@ -214,6 +214,3 @@ redirect_from:
 </html>
 
 ```
-
-
-

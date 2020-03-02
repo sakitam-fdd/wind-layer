@@ -19,7 +19,7 @@
 <body>
 
 <div id="map" class="container"></div>
-<script src="//cdn.jsdelivr.net/npm/openlayers/dist/ol-debug.js"></script>
+<script src="//cdn.jsdelivr.net/npm/openlayers/dist/ol.js"></script>
 <script src="../packages/openlayers/dist/ol-wind.js"></script>
 <script>
   const map = new ol.Map({
@@ -41,7 +41,7 @@
 
   let layer;
 
-  fetch('https://sakitam-fdd.github.io/wind-layer/examples/out.json')
+  fetch('https://sakitam-1255686840.cos.ap-beijing.myqcloud.com/public/codepen/json/out.json')
     .then(res => res.json())
     .then(res => {
       // const range = vectorField.range || [0.02, 28.21618329965979];

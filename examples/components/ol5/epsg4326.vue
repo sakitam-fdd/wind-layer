@@ -4,13 +4,13 @@
   </div>
 </template>
 <script>
-  import 'ol/ol.css';
-  import Map from 'ol/Map';
-  import View from 'ol/View';
-  import TileLayer from 'ol/layer/Tile';
-  import { fromLonLat } from 'ol/proj';
-  import OSM from 'ol/source/OSM';
-  import { WindLayer } from 'ol5-wind';
+  import '@sakitam-gis/ol5/ol.css';
+  // import Map from '@sakitam-gis/ol5/Map';
+  // import View from '@sakitam-gis/ol5/View';
+  // import TileLayer from '@sakitam-gis/ol5/layer/Tile';
+  // import { fromLonLat } from '@sakitam-gis/ol5/proj';
+  // import OSM from '@sakitam-gis/ol5/source/OSM';
+  // import { WindLayer } from 'ol5-wind';
 
   export default {
     name: 'ol5-wind-epsg4326',
@@ -19,7 +19,13 @@
     },
     watch: {},
     methods: {
-      initMap() {
+      async initMap() {
+        const Map = await import('@sakitam-gis/ol5/Map').then(res => res.default);
+        const View = await import('@sakitam-gis/ol5/View').then(res => res.default);
+        const TileLayer = await import('@sakitam-gis/ol5/layer/Tile').then(res => res.default);
+        const OSM = await import('@sakitam-gis/ol5/source/OSM').then(res => res.default);
+        const { WindLayer } = await import('ol5-wind');
+
         const layer = new TileLayer({
           source: new OSM({
             projection: 'EPSG:3857',
@@ -65,17 +71,15 @@
                   "rgb(220,24,32)",
                   "rgb(180,0,35)"
                 ],
-                width: 3,
+                lineWidth: 2,
                 // colorScale: scale,
                 generateParticleOption: false
               },
-              // map: map,
+              map: map,
               // projection: 'EPSG:4326'
             });
 
             console.log(map, windLayer);
-
-            map.addLayer(windLayer);
           });
       }
     },
