@@ -1,6 +1,6 @@
 ---
 title: openlayers 5
-lang: cn-ZH
+lang: en-US
 description: 
 order: 1
 ---
@@ -12,7 +12,9 @@ order: 1
 :::demo 基础使用，地图投影默认为 `EPSG:3857` 墨卡托投影。
 
 ```demo
-<demo-ol5-wind-base />  
+<ClientOnly>
+  <demo-ol5-wind-base />
+</ClientOnly> 
 ```
 
 <<<@/examples/components/ol5/base.vue
@@ -28,7 +30,9 @@ order: 1
 :::demo 投影变换，地图投影默认为 `EPSG:4326`, 可以看到地图两极有明显变形;
 
 ```demo
-<demo-ol5-wind-epsg4326 />  
+<ClientOnly>
+  <demo-ol5-wind-epsg4326 />
+</ClientOnly> 
 ```
 
 <<<@/examples/components/ol5/epsg4326.vue
@@ -40,7 +44,9 @@ order: 1
 :::demo 投影变换，地图投影默认为 `EPSG:3413` 极投影;
 
 ```demo
-<demo-ol5-wind-epsg3413 />  
+<ClientOnly>
+  <demo-ol5-wind-epsg3413 />
+</ClientOnly>
 ```
 
 <<<@/examples/components/ol5/epsg3413.vue
@@ -52,7 +58,9 @@ order: 1
 :::demo 投影变换，地图投影默认为 `ESRI:53009`;
 
 ```demo
-<demo-ol5-wind-moll />  
+<ClientOnly>
+  <demo-ol5-wind-moll />
+</ClientOnly>
 ```
 
 <<<@/examples/components/ol5/moll.vue

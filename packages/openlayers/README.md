@@ -1,11 +1,32 @@
-# `ol`
+# `openlayers-wind`
 
-> TODO: description
+> openlayers 3-4 wind field
 
 ## Usage
 
-```
-const ol = require('ol');
+```js
+import { WindLayer } from 'openlayers-wind';
 
-// TODO: DEMONSTRATE API
+const windLayer = new WindLayer(res, {
+    forceRender: false,
+    windOptions: {
+      // colorScale: scale,
+      velocityScale: 1 / 20,
+      paths: 5000,
+      // eslint-disable-next-line no-unused-vars
+      colorScale: () => {
+        // console.log(m);
+        return '#ff473c';
+      },
+      width: 3,
+      // colorScale: scale,
+      generateParticleOption: false
+    },
+    // map: map,
+    // projection: 'EPSG:4326'
+});
+    
+console.log(map, windLayer);
+    
+map.addLayer(windLayer);
 ```

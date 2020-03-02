@@ -44,6 +44,7 @@ class OlWind extends ol.layer.Image {
   public viewProjection: ol.ProjectionLike;
   public pixelRatio: number;
   private map: ol.Map;
+  private type: string;
 
   constructor (data: any, options: Partial<IWindOptions> = {}) {
     const opt = assign({}, _options, options);
@@ -56,6 +57,8 @@ class OlWind extends ol.layer.Image {
      * @type {null}
      */
     this.wind = null;
+
+    this.type = 'IMAGE';
 
     this.start = this.start.bind(this);
     this.stop = this.stop.bind(this);
@@ -71,7 +74,16 @@ class OlWind extends ol.layer.Image {
       ratio: (options.hasOwnProperty('ratio') ? options.ratio : 1)
     } as olx.source.ImageCanvasOptions;
 
-    this.setSource(new ol.source.ImageCanvas(sourceOptions));
+    const source = new ol.source.ImageCanvas(sourceOptions);
+
+    // @ts-ignore
+    if (!source.getAttributions2) {
+      // FIXED: when use webpack throw exception
+      // @ts-ignore
+      source.getAttributions2 = () => source.getAttributions();
+    }
+
+    this.setSource(source);
 
     if (data) {
       this.setData(data);
@@ -85,8 +97,6 @@ class OlWind extends ol.layer.Image {
   public appendTo (map: ol.Map) {
     if (map) {
       this.setMap(map);
-
-      map.addLayer(this);
     } else {
       throw new Error('not map object');
     }
@@ -139,8 +149,8 @@ class OlWind extends ol.layer.Image {
   private render (canvas: HTMLCanvasElement) {
     const map = this.getMap();
     if (!this.getData() || !map) return this;
+    const opt = this.getWindOptions();
     if (canvas && !this.wind) {
-      const opt = this.getWindOptions();
       const data = this.getData();
 
       const ctx = this.getContext();
@@ -160,6 +170,11 @@ class OlWind extends ol.layer.Image {
     }
 
     if (this.wind) {
+      if ('generateParticleOption' in opt) {
+        const flag = typeof opt.generateParticleOption === 'function' ? opt.generateParticleOption() : opt.generateParticleOption;
+        flag && this.wind.prerender();
+      }
+
       this.wind.render();
     }
 
@@ -289,6 +304,10 @@ class OlWind extends ol.layer.Image {
    */
   public getMap () {
     return this.get('originMap');
+  }
+
+  public getType() {
+    return this.type;
   }
 }
 

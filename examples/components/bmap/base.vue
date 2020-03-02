@@ -187,7 +187,7 @@
                     "rgb(220,24,32)",
                     "rgb(180,0,35)"
                   ],
-                  width: 3,
+                  lineWidth: 2,
                   // colorScale: scale,
                   generateParticleOption: false
                 },

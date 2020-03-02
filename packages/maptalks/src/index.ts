@@ -57,9 +57,9 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
   drawWind() {
     const map = this.getMap();
     if (this.context) {
+      const layer = this.layer;
+      const opt = layer.getWindOptions();
       if (!this.wind && map) {
-        const layer = this.layer;
-        const opt = layer.getWindOptions();
         const data = layer.getData();
 
         this.wind = new WindCore(this.context, opt, data);
@@ -70,11 +70,18 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
           // @ts-ignore
           this.setCanvasUpdated();
         };
+
+        this.wind.prerender();
       }
 
-      this.wind.prerender();
+      if (this.wind) {
+        if ('generateParticleOption' in opt) {
+          const flag = typeof opt.generateParticleOption === 'function' ? opt.generateParticleOption() : opt.generateParticleOption;
+          flag && this.wind.prerender();
+        }
 
-      this.wind.render();
+        this.wind.render();
+      }
     }
     this.completeRender();
   }

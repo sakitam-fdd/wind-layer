@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ol5 wind-layer</title>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@sakitam-gis/ol5/dist/ol.css">
+<style type="text/css">
+  html, body {
+    margin: 0;
+    height: 100%;
+    width: 100%
+  }
+  .container {
+    width: 100%;
+    height: 100%
+  }
+</style>
+<body>
+
+<div id="map" class="container"></div>
+<script src="//cdn.jsdelivr.net/npm/@sakitam-gis/ol5@5.3.3/dist/ol-debug.js"></script>
+<script src="../packages/ol5/dist/ol-wind.js"></script>
+<script>
+  const map = new ol.Map({
+    target: 'map',
+    view: new ol.View({
+      // center: [113.53450137499999, 34.44104525],
+      center: ol.proj.fromLonLat([113.53450137499999, 34.44104525]),
+      zoom: 5,
+      // projection: 'EPSG:4326',
+    }),
+    layers: [
+      new ol.layer.Tile({
+        source: new ol.source.OSM({
+          url: '//{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+        })
+      })
+    ],
+  });
+
+  let layer;
+
+  fetch('https://sakitam-1255686840.cos.ap-beijing.myqcloud.com/public/codepen/json/out.json')
+    .then(res => res.json())
+    .then(res => {
+      // const range = vectorField.range || [0.02, 28.21618329965979];
+      // const scale = chroma.scale('OrRd').domain(range);
+
+      const windLayer = new OlWind.WindLayer(res, {
+        windOptions: {
+          velocityScale: 1 / 20,
+          paths: 5000,
+          // eslint-disable-next-line no-unused-vars
+          colorScale: [
+            "rgb(36,104, 180)",
+            "rgb(60,157, 194)",
+            "rgb(128,205,193 )",
+            "rgb(151,218,168 )",
+            "rgb(198,231,181)",
+            "rgb(238,247,217)",
+            "rgb(255,238,159)",
+            "rgb(252,217,125)",
+            "rgb(255,182,100)",
+            "rgb(252,150,75)",
+            "rgb(250,112,52)",
+            "rgb(245,64,32)",
+            "rgb(237,45,28)",
+            "rgb(220,24,32)",
+            "rgb(180,0,35)"
+          ],
+          lineWidth: 3,
+          // colorScale: scale,
+          generateParticleOption: false
+          // particleMultiplier: 0.3 * 10,
+        },
+        map: map,
+      });
+      console.log(map, windLayer);
+      //
+      // windLayer.appendTo(map);
+
+      // map.addLayer(windLayer);
+    });
+</script>
+</body>
+</html>

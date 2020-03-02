@@ -123,8 +123,8 @@ class AMapWind {
    */
   render (canvas: HTMLCanvasElement) {
     if (!this.getData()) return this;
+    const opt = this.getWindOptions();
     if (canvas && !this.wind) {
-      const opt = this.getWindOptions();
       const data = this.getData();
 
       const ctx = this.getContext();
@@ -144,6 +144,11 @@ class AMapWind {
     }
 
     if (this.wind) {
+      if ('generateParticleOption' in opt) {
+        const flag = typeof opt.generateParticleOption === 'function' ? opt.generateParticleOption() : opt.generateParticleOption;
+        flag && this.wind.prerender();
+      }
+
       this.wind.render();
     }
 

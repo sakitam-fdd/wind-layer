@@ -12,7 +12,9 @@ order: 5
 :::demo 基础使用。
 
 ```demo
-<demo-bmap-wind-base />  
+<ClientOnly>
+  <demo-bmap-wind-base />
+</ClientOnly>  
 ```
 
 <<<@/examples/components/bmap/base.vue
