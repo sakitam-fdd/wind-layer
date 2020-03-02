@@ -1,8 +1,6 @@
 ---
-title: 快速使用
+title: quick start
 order: 0
-redirect_from:
-  - /zh/start/
 ---
 
 ::: tip
@@ -214,6 +212,3 @@ redirect_from:
 </html>
 
 ```
-
-
-

@@ -10,12 +10,18 @@ import WindCore, {
 } from 'wind-core';
 
 import { Map } from 'ol';
+import LayerType from 'ol/LayerType';
 import { Size as ISize } from 'ol/size';
 import { Coordinate } from 'ol/coordinate';
 import { Extent as IExtent, containsCoordinate } from 'ol/extent';
 import { Image as ImageLayer } from 'ol/layer';
 import { ProjectionLike as IProjection, transform } from 'ol/proj';
 import ImageCanvas, { Options as ImageCanvasOptions } from 'ol/source/ImageCanvas';
+
+import {
+  PerfWindLayer,
+  WindLayerRender,
+} from './layer';
 
 export interface IWindOptions extends IOptions {
   opacity?: number;
@@ -63,6 +69,8 @@ class OlWind extends ImageLayer {
      */
     this.wind = null;
 
+    this.type = 'IMAGE' as LayerType;
+
     this.start = this.start.bind(this);
     this.stop = this.stop.bind(this);
 
@@ -91,9 +99,7 @@ class OlWind extends ImageLayer {
    */
   public appendTo (map: Map) {
     if (map) {
-      map.addLayer(this);
-
-      this.viewProjection = this.getProjection();
+      this.setMap(map);
     } else {
       throw new Error('not map object');
     }
@@ -146,8 +152,8 @@ class OlWind extends ImageLayer {
   private render (canvas: HTMLCanvasElement) {
     const map = this.getMap();
     if (!this.getData() || !map) return this;
+    const opt = this.getWindOptions();
     if (canvas && !this.wind) {
-      const opt = this.getWindOptions();
       const data = this.getData();
 
       const ctx = this.getContext();
@@ -158,15 +164,18 @@ class OlWind extends ImageLayer {
         this.wind.project = this.project.bind(this);
         this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
         this.wind.postrender = () => {
-          // @ts-ignore
-          // this.setCanvasUpdated();
+          this.changed();
         };
-
         this.wind.prerender();
       }
     }
 
     if (this.wind) {
+      if ('generateParticleOption' in opt) {
+        const flag = typeof opt.generateParticleOption === 'function' ? opt.generateParticleOption() : opt.generateParticleOption;
+        flag && this.wind.prerender();
+      }
+
       this.wind.render();
     }
 
@@ -284,7 +293,7 @@ class OlWind extends ImageLayer {
   public setMap (map: any) {
     this.set('originMap', map);
     this.viewProjection = this.getProjection();
-    // ol.layer.Image.prototype.setMap.call(this, map)
+    return super.setMap(map);
   }
 
   /**
@@ -293,6 +302,10 @@ class OlWind extends ImageLayer {
   public getMap () {
     return this.get('originMap');
   }
+
+  public getType(): LayerType {
+    return this.type;
+  }
 }
 
 const WindLayer = OlWind;
@@ -300,6 +313,8 @@ const WindLayer = OlWind;
 export {
   Field,
   WindLayer,
+  PerfWindLayer,
+  WindLayerRender,
 };
 
 export default OlWind;

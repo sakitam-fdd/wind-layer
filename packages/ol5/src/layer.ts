@@ -1,44 +1,63 @@
-import { Layer } from 'ol/layer';
-import { FrameState } from 'ol/PluggableMap';
-import WindLayerRender from './renderer';
-
+import { Map } from 'ol';
+import { Extent as IExtent } from 'ol/extent';
+import { Image as ImageLayer } from 'ol/layer'; // FIXME: should use Layer, but not export, use ImageLayer instead.
 import {
-  Field,
-  isArray,
-  formatData,
-  warnLog,
   assign,
   defaultOptions,
+  Field,
+  formatData,
   IOptions,
+  isArray,
+  warnLog,
 } from 'wind-core';
 
-const _options = {
-  forceRender: true,
-  windOptions: {},
-};
-
-export { Field } from 'wind-core';
+import WindLayerRender from './renderer';
 
 export interface IWindOptions extends IOptions {
-  forceRender: boolean;
+  opacity?: number;
+  map?: Map;
+  visible?: boolean;
+  extent?: IExtent;
+  minResolution?: number;
+  maxResolution?: number;
+  zIndex?: number;
   windOptions: Partial<IOptions>;
   [key: string]: any;
 }
 
-export class WindLayer extends Layer {
+declare enum LayerType {
+  IMAGE = 'IMAGE',
+  TILE = 'TILE',
+  VECTOR_TILE = 'VECTOR_TILE',
+  VECTOR = 'VECTOR',
+  WIND = 'WIND',
+}
+
+const _options = {
+  windOptions: {},
+};
+
+export interface IWindOptions extends IOptions {
+  windOptions: Partial<IOptions>;
+  // [key: string]: any;
+}
+
+class PerfWindLayer extends ImageLayer {
   private field: any;
   public _map: any;
   private options: IWindOptions;
-  private renderer_: WindLayerRender;
+  // @ts-ignore
+  private type: LayerType;
 
   constructor(data: any, options: any) {
     const opt = assign({}, _options, options);
-
     super(opt);
 
     this.field = null;
 
     this.options = opt;
+
+    this.type = 'WIND' as LayerType;
 
     this.pickWindOptions();
 
@@ -47,30 +66,6 @@ export class WindLayer extends Layer {
     if (data) {
       this.setData(data);
     }
-  }
-
-  // @ts-ignore
-  public render(frameState: FrameState, target: HTMLDivElement) {
-    const layerRenderer = this.getRenderer();
-
-    if (layerRenderer.prepareFrame(frameState)) {
-      return layerRenderer.renderFrame(frameState, target);
-    }
-  }
-
-  public getRenderer() {
-    if (!this.renderer_) {
-      this.renderer_ = this.createRenderer();
-    }
-    return this.renderer_;
-  }
-
-  hasRenderer() {
-    return !!this.renderer_;
-  }
-
-  private createRenderer() {
-    return new WindLayerRender(this);
   }
 
   private pickWindOptions() {
@@ -124,15 +119,27 @@ export class WindLayer extends Layer {
     this.options = assign(this.options, {
       windOptions: assign(beforeOptions, options || {}),
     });
-
-    const renderer = this.getRenderer();
-    if (renderer && renderer.wind) {
-      const windOptions = this.options.windOptions;
-      renderer.wind.setOptions(windOptions);
-    }
   }
 
   public getWindOptions() {
     return this.options.windOptions || {};
   }
+
+  public getSourceState(): any {
+    return !!this.field ? 'ready': undefined;
+  }
+
+  // @ts-ignore
+  public getType(): LayerType {
+    return this.type;
+  }
+
+  public setMap(map: Map): void {
+    super.setMap(map);
+  }
 }
+
+export {
+  PerfWindLayer,
+  WindLayerRender,
+};

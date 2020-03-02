@@ -10,6 +10,11 @@ import Ol5WindEPSG4326 from './ol5/epsg4326'; // epsg:4326
 import Ol5WindEPSG3413 from './ol5/epsg3413'; // epsg:3413
 import Ol5WindMoll from './ol5/moll'; // moll
 
+import OpenlayersWindBase from './openlayers/base'; // 基础地图加载
+import OpenlayersWindEPSG4326 from './openlayers/epsg4326'; // epsg:4326
+import OpenlayersWindEPSG3413 from './openlayers/epsg3413'; // epsg:3413
+import OpenlayersWindMoll from './openlayers/moll'; // moll
+
 import MaptalksWindBase from './maptalks/base'; // 基础地图加载
 
 import AMapWindBase from './amap/base';
@@ -24,6 +29,10 @@ const components = [
   Ol5WindEPSG4326,
   Ol5WindEPSG3413,
   Ol5WindMoll,
+  OpenlayersWindBase,
+  OpenlayersWindEPSG4326,
+  OpenlayersWindEPSG3413,
+  OpenlayersWindMoll,
   MaptalksWindBase,
   AMapWindBase,
   BMapWindBase,

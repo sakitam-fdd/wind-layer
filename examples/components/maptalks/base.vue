@@ -11,7 +11,7 @@
     TileLayer,
   } from 'maptalks';
 
-  import { WindLayer } from 'maptalks-wind';
+  import { WindLayer } from '@sakitam-gis/maptalks-wind';
 
   export default {
     name: 'maptalks-wind-base',

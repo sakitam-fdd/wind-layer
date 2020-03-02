@@ -5,13 +5,13 @@
 </template>
 <script>
   import 'ol/ol.css';
-  import Map from 'ol/Map';
-  import View from 'ol/View';
-  import TileLayer from 'ol/layer/Tile';
-  import { get as getProjection } from 'ol/proj';
-  import OSM from 'ol/source/OSM';
-  import { register } from 'ol/proj/proj4';
-  import { WindLayer } from 'ol-wind';
+  // import Map from 'ol/Map';
+  // import View from 'ol/View';
+  // import TileLayer from 'ol/layer/Tile';
+  // import { get as getProjection } from 'ol/proj';
+  // import OSM from 'ol/source/OSM';
+  // import { register } from 'ol/proj/proj4';
+  // import { WindLayer } from 'ol-wind';
 
   export default {
     name: 'ol-wind-epsg3413',
@@ -20,7 +20,16 @@
     },
     watch: {},
     methods: {
-      initMap() {
+      async initMap() {
+        const Map = await import('ol/Map').then(res => res.default);
+        const View = await import('ol/View').then(res => res.default);
+        const TileLayer = await import('ol/layer/Tile').then(res => res.default);
+        const { fromLonLat } = await import('ol/proj');
+        const OSM = await import('ol/source/OSM').then(res => res.default);
+        const { get: getProjection } = await import('ol/proj');
+        const { register } = await import('ol/proj/proj4');
+        const { WindLayer } = await import('ol-wind');
+
         proj4.defs("EPSG:3413","+proj=stere +lat_0=90 +lat_ts=70 +lon_0=-45 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs");
 
         register(proj4);
@@ -79,7 +88,7 @@
                   "rgb(220,24,32)",
                   "rgb(180,0,35)"
                 ],
-                width: 3,
+                lineWidth: 2,
                 // colorScale: scale,
                 generateParticleOption: false
               },

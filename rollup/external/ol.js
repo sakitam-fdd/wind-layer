@@ -9,6 +9,8 @@ export const external = [
   'ol/extent',
   'ol/renderer/canvas/Layer',
   'ol/source/ImageCanvas',
+  'ol/renderer/Map',
+  'ol/renderer/canvas/ImageLayer'
 ];
 
 export const globals = {
@@ -19,7 +21,8 @@ export const globals = {
   'ol/source/ImageCanvas': 'ol.source.ImageCanvas',
   'ol/PluggableMap': 'ol.PluggableMap',
   'ol/coordinate': 'ol.coordinate',
-  'ol/transform': 'ol.transform',
   'ol/extent': 'ol.extent',
   'ol/renderer/canvas/Layer': 'ol.renderer.canvas.ImageLayer', // CanvasLayer is not export
+  'ol/renderer/Map': 'ol.renderer.canvas.Map',
+  'ol/renderer/canvas/ImageLayer': 'ol.renderer.canvas.ImageLayer',
 };
