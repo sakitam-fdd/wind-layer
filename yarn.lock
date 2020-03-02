@@ -2177,6 +2177,15 @@
   dependencies:
     estree-walker "^1.0.1"
 
+"@sakitam-gis/ol5@^5.3.3":
+  version "5.3.3"
+  resolved "https://registry.yarnpkg.com/@sakitam-gis/ol5/-/ol5-5.3.3.tgz#392f64ddfb90f70f2aad531e06addeb831fb7df3"
+  integrity sha512-ljX/XMJO82acHAp6sTiff2ebUJ471ipW0UAUQourfKaO5DE74vrd0/z4rka18snuEID4gv+aYtcb3Sgls5fJNw==
+  dependencies:
+    pbf "3.1.0"
+    pixelworks "1.1.0"
+    rbush "2.0.2"
+
 "@samverschueren/stream-to-observable@^0.3.0":
   version "0.3.0"
   resolved "https://registry.npm.taobao.org/@samverschueren/stream-to-observable/download/@samverschueren/stream-to-observable-0.3.0.tgz#ecdf48d532c58ea477acfcab80348424f8d0662f"

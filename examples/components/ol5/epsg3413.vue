@@ -4,14 +4,14 @@
   </div>
 </template>
 <script>
-  import 'ol/ol.css';
-  import Map from 'ol/Map';
-  import View from 'ol/View';
-  import TileLayer from 'ol/layer/Tile';
-  import { get as getProjection } from 'ol/proj';
-  import OSM from 'ol/source/OSM';
-  import { register } from 'ol/proj/proj4';
-  import { WindLayer } from 'ol5-wind';
+  import '@sakitam-gis/ol5/ol.css';
+  // import Map from '@sakitam-gis/ol5/Map';
+  // import View from '@sakitam-gis/ol5/View';
+  // import TileLayer from '@sakitam-gis/ol5/layer/Tile';
+  // import { get as getProjection } from '@sakitam-gis/ol5/proj';
+  // import OSM from '@sakitam-gis/ol5/source/OSM';
+  // import { register } from '@sakitam-gis/ol5/proj/proj4';
+  // import { WindLayer } from 'ol5-wind';
 
   export default {
     name: 'ol5-wind-epsg3413',
@@ -20,7 +20,15 @@
     },
     watch: {},
     methods: {
-      initMap() {
+      async initMap() {
+        const Map = await import('@sakitam-gis/ol5/Map').then(res => res.default);
+        const View = await import('@sakitam-gis/ol5/View').then(res => res.default);
+        const TileLayer = await import('@sakitam-gis/ol5/layer/Tile').then(res => res.default);
+        const OSM = await import('@sakitam-gis/ol5/source/OSM').then(res => res.default);
+        const { get: getProjection } = await import('@sakitam-gis/ol5/proj');
+        const { register } = await import('@sakitam-gis/ol5/proj/proj4');
+        const { WindLayer } = await import('ol5-wind');
+
         proj4.defs("EPSG:3413","+proj=stere +lat_0=90 +lat_ts=70 +lon_0=-45 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs");
 
         register(proj4);
@@ -79,17 +87,15 @@
                   "rgb(220,24,32)",
                   "rgb(180,0,35)"
                 ],
-                width: 3,
+                lineWidth: 2,
                 // colorScale: scale,
                 generateParticleOption: false
               },
-              // map: map,
+              map: map,
               // projection: 'EPSG:4326'
             });
 
             console.log(map, windLayer);
-
-            map.addLayer(windLayer);
           });
       }
     },

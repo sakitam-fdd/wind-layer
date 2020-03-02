@@ -33,7 +33,8 @@
     ]
   },
   "dependencies": {
-    "ol": "^6.2.1"
+    "ol": "^6.2.1",
+    "@sakitam-gis/ol5": "^5.3.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.4",

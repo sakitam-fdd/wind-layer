@@ -32,3 +32,4 @@ examples/*.map
 
 .nyc_output
 .DS_Store
+/docs/.vuepress/dist/

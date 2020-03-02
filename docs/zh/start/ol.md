@@ -12,7 +12,9 @@ order: 0
 :::demo 基础使用，地图投影默认为 `EPSG:3857` 墨卡托投影。
 
 ```demo
-<demo-ol-wind-base />  
+<ClientOnly>
+  <demo-ol-wind-base />
+</ClientOnly>
 ```
 
 <<<@/examples/components/ol/base.vue
@@ -28,7 +30,9 @@ order: 0
 :::demo 投影变换，地图投影默认为 `EPSG:4326`, 可以看到地图两极有明显变形;
 
 ```demo
-<demo-ol-wind-epsg4326 />  
+<ClientOnly>
+  <demo-ol-wind-epsg4326 />
+</ClientOnly>
 ```
 
 <<<@/examples/components/ol/epsg4326.vue
@@ -40,7 +44,9 @@ order: 0
 :::demo 投影变换，地图投影默认为 `EPSG:3413` 极投影;
 
 ```demo
-<demo-ol-wind-epsg3413 />  
+<ClientOnly>
+  <demo-ol-wind-epsg3413 />
+</ClientOnly>
 ```
 
 <<<@/examples/components/ol/epsg3413.vue
@@ -52,7 +58,9 @@ order: 0
 :::demo 投影变换，地图投影默认为 `ESRI:53009`;
 
 ```demo
-<demo-ol-wind-moll />  
+<ClientOnly>
+  <demo-ol-wind-moll />
+</ClientOnly>
 ```
 
 <<<@/examples/components/ol/moll.vue

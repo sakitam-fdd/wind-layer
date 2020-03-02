@@ -4,17 +4,17 @@
   </div>
 </template>
 <script>
-  import 'ol/ol.css';
-  import Map from 'ol/Map';
-  import View from 'ol/View';
-  import TileLayer from 'ol/layer/Tile';
-  import Projection from 'ol/proj/Projection'
-  import OSM from 'ol/source/OSM';
-  import { register } from 'ol/proj/proj4';
-  import GeoJSON from 'ol/format/GeoJSON';
-  import VectorLayer from 'ol/layer/Vector';
-  import VectorSource from 'ol/source/Vector';
-  import { WindLayer } from 'ol5-wind';
+  import '@sakitam-gis/ol5/ol.css';
+  // import Map from '@sakitam-gis/ol5/Map';
+  // import View from '@sakitam-gis/ol5/View';
+  // import TileLayer from '@sakitam-gis/ol5/layer/Tile';
+  // import Projection from '@sakitam-gis/ol5/proj/Projection'
+  // import OSM from '@sakitam-gis/ol5/source/OSM';
+  // import { register } from '@sakitam-gis/ol5/proj/proj4';
+  // import GeoJSON from '@sakitam-gis/ol5/format/GeoJSON';
+  // import VectorLayer from '@sakitam-gis/ol5/layer/Vector';
+  // import VectorSource from '@sakitam-gis/ol5/source/Vector';
+  // import { WindLayer } from 'ol5-wind';
 
   export default {
     name: 'ol5-wind-moll',
@@ -23,7 +23,19 @@
     },
     watch: {},
     methods: {
-      initMap() {
+      async initMap() {
+        const Map = await import('@sakitam-gis/ol5/Map').then(res => res.default);
+        const View = await import('@sakitam-gis/ol5/View').then(res => res.default);
+        const TileLayer = await import('@sakitam-gis/ol5/layer/Tile').then(res => res.default);
+        const Projection = await import('@sakitam-gis/ol5/proj/Projection').then(res => res.default);
+        const OSM = await import('@sakitam-gis/ol5/source/OSM').then(res => res.default);
+        // const { get: getProjection } = await import('@sakitam-gis/ol5/proj');
+        const { register } = await import('@sakitam-gis/ol5/proj/proj4');
+        const GeoJSON = await import('@sakitam-gis/ol5/format/GeoJSON').then(res => res.default);
+        const VectorLayer = await import('@sakitam-gis/ol5/layer/Vector').then(res => res.default);
+        const VectorSource = await import('@sakitam-gis/ol5/source/Vector').then(res => res.default);
+        const { WindLayer } = await import('ol5-wind');
+
         proj4.defs('ESRI:53009', '+proj=moll +lon_0=0 +x_0=0 +y_0=0 +a=6371000 ' +
           '+b=6371000 +units=m +no_defs');
 
@@ -91,17 +103,15 @@
                   "rgb(220,24,32)",
                   "rgb(180,0,35)"
                 ],
-                width: 3,
+                lineWidth: 2,
                 // colorScale: scale,
                 generateParticleOption: false
               },
-              // map: map,
+              map: map,
               // projection: 'EPSG:4326'
             });
 
             console.log(map, windLayer);
-
-            map.addLayer(windLayer);
           });
       }
     },
