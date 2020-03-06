@@ -7,19 +7,19 @@ notifications:
 node_js:
   - '10'
   - '11'
-  - '8'
 
 install:
-  - npm install
-  - npm run bootstrap
+  - yarn
+  - yarn run bootstrap
   - make image-dev
 script:
-  - npm run build
+  - yarn run build:declarations
+  - yarn run build
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - make push-dev
-  - npm run build:docs
+  - yarn run build:docs
 after_success:
-  - npm run test:prod
+  - yarn run test:prod
 deploy:
   provider: pages
   skip_cleanup: true
