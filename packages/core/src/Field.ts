@@ -39,6 +39,7 @@ export default class Field {
   private deltaX: number;
   private wrappedX: undefined | boolean;
   public range: (number | undefined)[] | undefined;
+  private isFields: boolean;
 
   constructor(params: IField) {
     this.grid = [];
@@ -57,6 +58,8 @@ export default class Field {
 
     this.deltaX = params.deltaX; // x 方向增量
     this.deltaY = params.deltaY; // y方向增量
+
+    this.isFields = true;
 
     const cols = Math.ceil((this.xmax - this.xmin) / params.deltaX); // 列
     const rows = Math.ceil((this.ymax - this.ymin) / params.deltaY); // 行
@@ -457,5 +460,9 @@ export default class Field {
     o.y = this.latitudeAtY(j);
 
     return o;
+  }
+
+  public checkFields() {
+    return this.isFields;
   }
 }
