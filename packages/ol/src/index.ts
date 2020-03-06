@@ -98,7 +98,7 @@ export class WindLayer extends Layer {
    * @returns {WindLayer}
    */
   public setData (data: any) {
-    if (data && data instanceof Field) {
+    if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
       this.field = formatData(data);

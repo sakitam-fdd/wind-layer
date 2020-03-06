@@ -238,12 +238,12 @@ export function formatData(data: IGFSItem[]) {
   const vectorField = new Field({
     xmin: header.lo1, // 一般格点数据是按照矩形范围来切割，所以定义其经纬度范围
     ymin: header.la2,
-    xmax: 360,
+    xmax: header.lo2,
     ymax: header.la1,
-    deltaX: 1, // x（经度）增量
-    deltaY: 1, // y（维度）增量
-    cols: 360, // 列（可由 `(xmax - xmin) / deltaX` 得到）
-    rows: 181, // 行
+    deltaX: header.dx, // x（经度）增量
+    deltaY: header.dy, // y（维度）增量
+    cols: header.nx, // 列（可由 `(xmax - xmin) / deltaX` 得到）
+    rows: header.ny, // 行
     us: uComp.data, // U分量
     vs: vComp.data, // V分量
     wrappedX: false,

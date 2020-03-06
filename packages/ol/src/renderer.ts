@@ -126,7 +126,7 @@ export default class WindLayerRender extends CanvasLayerRenderer {
 
     const opacity = layerState.opacity;
     const container = this.container;
-    if (opacity !== parseFloat(container.style.opacity)) {
+    if (container !== null && opacity !== parseFloat(<string>container.style.opacity)) {
       container.style.opacity = (opacity === 1 ? '' : opacity) as string;
     }
 

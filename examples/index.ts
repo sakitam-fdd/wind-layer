@@ -26,7 +26,7 @@ function initMap() {
     // pixelRatio: 2,
   });
 
-  fetch('https://sakitam-1255686840.cos.ap-beijing.myqcloud.com/public/codepen/json/out.json')
+  fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
     .then(res => res.json())
     .then(res => {
       const windLayer = new WindLayer(res, {

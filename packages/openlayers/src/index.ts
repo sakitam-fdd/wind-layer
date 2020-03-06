@@ -234,7 +234,7 @@ class OlWind extends ol.layer.Image {
    * @returns {OlWind}
    */
   public setData (data: any) {
-    if (data && data instanceof Field) {
+    if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
       this.field = formatData(data);
