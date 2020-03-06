@@ -13,7 +13,6 @@ install:
   - yarn run bootstrap
   - make image-dev
 script:
-  - yarn run build:declarations
   - yarn run build
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - make push-dev
