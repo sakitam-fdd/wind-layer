@@ -1,0 +1,11 @@
+eccodes==0.9.7
+eccodes-python==0.9.7
+Flask==1.1.1
+Jinja2==2.11.1
+numpy==1.18.2
+PyExecJS==1.5.1
+rasterio==1.1.3
+requests==2.23.0
+urllib3==1.25.8
+Pillow==7.0.0
+redis==3.4.1

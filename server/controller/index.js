@@ -166,7 +166,7 @@ const getData = async (ctx, next) => {
       const hours = utils.roundHours(moment(_time).hour(), 6);
       const stamp = moment(_time).format('YYYYMMDD') + hours;
       utils.checkFolderExist(utils.resolve(config.staticDir + config.parseDataDir), true);
-      const _sourcePath = utils.resolve(config.staticDir + config.sourceDataDir + stamp + '.f000');
+      const _sourcePath = utils.resolve(config.staticDir + config.sourceDataDir + stamp + `.f000${config.withExtension}`);
       const _parsePath = utils.resolve(config.staticDir + config.parseDataDir + stamp + '.json');
       const _sourceExist = utils.checkFileExists(_sourcePath);
       const _parseExist = utils.checkFileExists(_parsePath);
@@ -243,7 +243,7 @@ const fetchGribData = params => {
       const stamp = moment(_time).format('YYYYMMDD') + hours;
       const stamp2 = moment(_time).format('YYYYMMDD') + '/' + hours;
       return new Promise((resolve, reject) => {
-        const _sourcePath = utils.resolve(config.staticDir + config.sourceDataDir + stamp + '.f000');
+        const _sourcePath = utils.resolve(config.staticDir + config.sourceDataDir + stamp + `.f000${config.withExtension}`);
         const _sourceExist = utils.checkFileExists(_sourcePath);
         if (_sourceExist) {
           resolve({
@@ -252,7 +252,7 @@ const fetchGribData = params => {
             data: {
               time: stamp,
               timeStamp: moment(_time).format('X'),
-              name: stamp + '.f000'
+              name: stamp + `.f000${config.withExtension}`
             }
           })
         } else {
@@ -269,13 +269,14 @@ const fetchGribData = params => {
               dir: '/gfs.' + stamp2
             }, config.requestParams)
           }).then(response => {
+            console.log(response)
             if (response.status !== 200) {
               console.log('current data not Exist');
               reject(response);
             } else {
               utils.checkFolderExist(utils.resolve(config.staticDir + config.sourceDataDir), true);
               // 此时part为返回的流对象
-              const newpath = utils.resolve(config.staticDir + config.sourceDataDir + '/' + stamp + '.f000');
+              const newpath = utils.resolve(config.staticDir + config.sourceDataDir + '/' + stamp + `.f000${config.withExtension}`);
               // 生成存储路径，要注意这里的newpath必须是绝对路径，否则Stream报错
               const stream = fs.createWriteStream(newpath);
               // 写入文件流
@@ -288,7 +289,7 @@ const fetchGribData = params => {
                   data: {
                     time: stamp,
                     timeStamp: moment(_time).format('X'),
-                    name: stamp + '.f000'
+                    name: stamp + `.f000${config.withExtension}`
                   }
                 })
               });
@@ -399,7 +400,7 @@ const getDataByFileName = async (ctx, next) => {
   } else if (_type === 'f000') {
     const _sourcePath = utils.resolve(config.staticDir + config.sourceDataDir + ctx.query.filename);
     const _sourceExist = utils.checkFileExists(_sourcePath);
-    const _parsePath = utils.resolve(config.staticDir + config.parseDataDir + ctx.query.filename.replace('.f000', '.json'));
+    const _parsePath = utils.resolve(config.staticDir + config.parseDataDir + ctx.query.filename.replace(`.f000${config.withExtension}`, '.json'));
     if (_sourceExist) {
       try {
         const _data = await grib2json(_sourcePath, {
