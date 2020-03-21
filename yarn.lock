@@ -2397,10 +2397,10 @@
   resolved "https://registry.npm.taobao.org/@types/normalize-package-data/download/@types/normalize-package-data-2.4.0.tgz#e486d0d97396d79beedd0a6e33f4534ff6b4973e"
   integrity sha1-5IbQ2XOW15vu3QpuM/RTT/a0lz4=
 
-"@types/ol@^5.3.0":
+"@types/ol@5.3.7":
   version "5.3.7"
-  resolved "https://registry.npm.taobao.org/@types/ol/download/@types/ol-5.3.7.tgz#a426fe3818f7761985e636e7c110f3cd6fd0ce16"
-  integrity sha1-pCb+OBj3dhmF5jbnwRDzzW/QzhY=
+  resolved "https://registry.yarnpkg.com/@types/ol/-/ol-5.3.7.tgz#a426fe3818f7761985e636e7c110f3cd6fd0ce16"
+  integrity sha512-zwrsCRNyUA7jSAZWcoeaxY5f1f+wI73xya9LhM2eAvPlO9mHDG81BMXj7IQ0/Hqh3wxu/wfELEsyezbSge7N6Q==
   dependencies:
     "@types/arcgis-rest-api" "*"
     "@types/geojson" "*"
@@ -12585,6 +12585,11 @@ pn@^1.1.0:
   version "1.1.0"
   resolved "https://registry.npm.taobao.org/pn/download/pn-1.1.0.tgz#e2f4cef0e219f463c179ab37463e4e1ecdccbafb"
   integrity sha1-4vTO8OIZ9GPBeas3Rj5OHs3Muvs=
+
+pngjs@^3.4.0:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/pngjs/-/pngjs-3.4.0.tgz#99ca7d725965fb655814eaf65f38f12bbdbf555f"
+  integrity sha512-NCrCHhWmnQklfH4MtJMRjZ2a8c80qXeMlQMv2uVp9ISJMTt562SbGd6n2oq0PaPgKm7Z6pL9E2UlLIhC+SHL3w==
 
 portfinder@^1.0.13, portfinder@^1.0.25:
   version "1.0.25"
