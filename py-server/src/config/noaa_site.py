@@ -50,6 +50,12 @@ def get_grib_filepath(name):
     os.mkdir(OUTPUT_DIR)
 
   if os.path.exists(path) and os.path.getsize(path):
-    return False
+    return {
+      "exist": True,
+      "path": path,
+    }
   else:
-    return path
+    return {
+      "exist": False,
+      "path": path,
+    }

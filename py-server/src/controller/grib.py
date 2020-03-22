@@ -10,7 +10,7 @@ import execjs as execjs
 from src.app import app
 from src.enum.wind import WindEnum
 
-BASE_PATH = '/Users/dongdong.feng/Documents/gitlab/wind-server/static/data/'
+BASE_PATH = ''
 OUTPUT = os.path.join(BASE_PATH, 'u.0p25.grib_samples.grib')
 VERBOSE = 1  # verbose error reporting
 

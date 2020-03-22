@@ -1,4 +1,5 @@
-import os
+import rasterio
+import logging
 from eccodes import eccodes
 from flask import abort, jsonify, request
 
@@ -7,10 +8,8 @@ from src.app import app
 from src.service.grib import download_data
 from src.enum.wind import WindEnum
 
-BASE_PATH = '/Users/dongdong.feng/Documents/gitlab/wind-server/static/data/'
-OUTPUT = os.path.join(BASE_PATH, 'u.0p25.grib_samples.grib')
 VERBOSE = 1  # verbose error reporting
-
+logger = logging.getLogger('app.controller.decode')
 
 def own_decode_data(input_path):
   # sample_id = codes_grib_new_from_samples("v-component_of_wind_height_above_ground")
@@ -30,11 +29,11 @@ def own_decode_data(input_path):
         item = eccodes.codes_get(gid, key)
         header.__setitem__(key, item)
         print('  %s: %s' % (key, item))
-      except KeyValueNotFoundError as err:
+      except eccodes.KeyValueNotFoundError as err:
         # Full list of exceptions here:
         #   https://confluence.ecmwf.int/display/ECC/Python+exception+classes
-        print('  Key="%s" was not found: %s' % (key, err.msg))
-      except CodesInternalError as err:
+        logger.info('  Key="%s" was not found: %s' % (key, err.msg))
+      except eccodes.CodesInternalError as err:
         print('Error with key="%s" : %s' % (key, err.msg))
 
     values = eccodes.codes_get_values(gid)
@@ -56,6 +55,13 @@ def own_decode_data(input_path):
   }
 
 
+def decode_by_rasterio():
+  grib_path = 'xxx'
+  logger.info(grib_path)
+  with rasterio.open(grib_path) as src:
+    return src.read()
+
+
 # 将grib 转成json数据
 @app.route('/reader/json', methods=['GET', 'POST'])
 def wright_json():
@@ -72,16 +78,28 @@ def wright_json():
     else:
       LEVEL = request.json['level'] or 'u.0p25.grib'
 
-  filename = download_data(
-    '20200321',
-    '06',
+  ufile = download_data(
+    '20200322',
+    '00',
     '1p00',
     'leftlon=0&rightlon=360&toplat=90&bottomlat=-90',
     'lev_10_m_above_ground=on',
-    'var_UGRD=on&var_VGRD=on'
+    'var_UGRD=on',
+    'u'
   )
 
-  data = own_decode_data(filename)
+  vfile = download_data(
+    '20200322',
+    '00',
+    '1p00',
+    'leftlon=0&rightlon=360&toplat=90&bottomlat=-90',
+    'lev_10_m_above_ground=on',
+    'var_VGRD=on',
+    'v'
+  )
+
+  udata = own_decode_data(ufile)
+  vdata = own_decode_data(vfile)
 
   return jsonify({
     'code': 200,
@@ -97,3 +115,7 @@ def wright_json():
       },
     ]
   })
+
+
+if __name__ == '__main__':
+  decode_by_rasterio()
