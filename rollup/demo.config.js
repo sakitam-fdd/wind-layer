@@ -1,10 +1,11 @@
 import path from 'path';
-import typescript from 'rollup-plugin-typescript2';
-import babel from 'rollup-plugin-babel';
-import replace from 'rollup-plugin-replace';
-import json from 'rollup-plugin-json';
-import nodeResolve from 'rollup-plugin-node-resolve';
+import json from '@rollup/plugin-json';
+// import babel from 'rollup-plugin-babel';
+import buble from '@rollup/plugin-buble';
 import commonjs from '@rollup/plugin-commonjs';
+import nodeResolve from '@rollup/plugin-node-resolve';
+import replace from '@rollup/plugin-replace';
+import typescript from '@rollup/plugin-typescript';
 
 const resolve = _path => path.resolve(__dirname, '../', _path);
 
@@ -13,10 +14,11 @@ const config = {
     resolve('examples/index.ts'),
   ],
   output: {
-    file: './examples/index.js',
+    // file: './examples/index.js',
     format: 'iife',
     // name: _package.namespace,
     banner: '',
+    dir: './examples/bundle',
     sourceMap: 'inline',
   },
   plugins: [
@@ -31,16 +33,12 @@ const config = {
     // }),
     typescript({
       tsconfig: 'tsconfig.demo.json',
-      clean: true,
-      // outDir: resolve('types/'),
-      declarationDir: 'examples',
-      useTsconfigDeclarationDir: false,
     }),
-    babel({
-      exclude: [
-        resolve('node_modules/**')
-      ]
-    }),
+    // babel({
+    //   exclude: [
+    //     resolve('node_modules/**')
+    //   ]
+    // }),
     nodeResolve({
       mainFields: ['module', 'main'], // Default: ['module', 'main']
       browser: true,  // Default: false
@@ -48,6 +46,10 @@ const config = {
       preferBuiltins: true,  // Default: true
     }),
     commonjs(),
+    buble({
+      objectAssign: true,
+      transforms: { generator: false },
+    }),
   ],
   external: undefined
 };

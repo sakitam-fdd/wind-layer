@@ -26,6 +26,9 @@ function initMap() {
     // pixelRatio: 2,
   });
 
+  // @ts-ignore
+  window.map = map;
+
   fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
     .then(res => res.json())
     .then(res => {
