@@ -25,11 +25,17 @@ export interface IWindOptions extends IOptions {
   [key: string]: any;
 }
 
-export class WindLayer extends Layer {
+interface Interface {
+
+}
+
+export class WindLayer extends Layer implements Interface {
   private field: any;
   public _map: any;
   private options: IWindOptions;
   private renderer_: WindLayerRender;
+
+  // protected createRenderer(): LayerRenderer<Layer<Source>>;
 
   constructor(data: any, options: any) {
     const opt = assign({}, _options, options);
@@ -65,11 +71,11 @@ export class WindLayer extends Layer {
     return this.renderer_;
   }
 
-  hasRenderer() {
+  public hasRenderer() {
     return !!this.renderer_;
   }
 
-  private createRenderer() {
+  protected createRenderer() {
     return new WindLayerRender(this);
   }
 

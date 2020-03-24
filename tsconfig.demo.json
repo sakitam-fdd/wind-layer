@@ -17,8 +17,6 @@
     "noImplicitAny": true,
     "declaration": false,
     "allowSyntheticDefaultImports": true,
-    "outDir": "dist",
-    "declarationDir": "types",
     "module": "ESNext",
     "sourceMap": true,
     "rootDirs": [
