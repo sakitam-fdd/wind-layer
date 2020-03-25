@@ -71,6 +71,10 @@ export class WindLayer extends Layer implements Interface {
     return this.renderer_;
   }
 
+  public getWrapX(): boolean | undefined {
+    return this.get('wrapX');
+  }
+
   public hasRenderer() {
     return !!this.renderer_;
   }
@@ -132,9 +136,9 @@ export class WindLayer extends Layer implements Interface {
     });
 
     const renderer = this.getRenderer();
-    if (renderer && renderer.wind) {
+    if (renderer && renderer.oRender) {
       const windOptions = this.options.windOptions;
-      renderer.wind.setOptions(windOptions);
+      renderer.oRender.setOptions(windOptions);
     }
   }
 

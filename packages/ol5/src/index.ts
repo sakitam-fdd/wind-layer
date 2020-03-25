@@ -231,7 +231,7 @@ class OlWind extends ImageLayer {
    * @returns {BMapWind}
    */
   public setData (data: any) {
-    if (data && data.checkFields()) {
+    if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
       this.field = formatData(data);
