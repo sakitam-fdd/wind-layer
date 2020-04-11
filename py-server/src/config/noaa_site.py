@@ -5,14 +5,15 @@ GFS_TIME = "18"  # 起报时间 00, 06, 12, 18
 RES = "0p25"  # 数据分辨率 0p25: 0.25, 0p50:0.5 or 1p00:1
 BBOX = "leftlon=0&rightlon=360&toplat=90&bottomlat=-90"  # 数据范围
 LEVEL = "lev_10_m_above_ground=on"  # 数据层次
-VARIABLES = "var_UGRD=on&var_VGRD=on"  # 要素
+VARIABLES = "var_UGRD=on&var_VGRD=on&var_TMP=on"  # 要素
 GFS_URL = "https://nomads.ncep.noaa.gov/cgi-bin/" \
           "filter_gfs_${RES}.pl?file=gfs.t${GFS_TIME}z.pgrb2" \
           ".${RES}.f000&${LEVEL}&${VARIABLES}&${BBOX}&dir=%2Fgfs" \
           ".${GFS_DATE}%2F${GFS_TIME}"
 
-OUTPUT_BASE_DIR = os.getcwd()
-OUTPUT_DIR = '/static/data'
+# OUTPUT_BASE_DIR = os.getcwd()
+OUTPUT_BASE_DIR = ''
+OUTPUT_DIR = '/Users/dongdong.feng/Documents/gitlab/wind-layer/py-server/static/data'
 
 def get_noaa_config(date, gfs_time, res, bbox, level, variables):
   gfs_date = date or GFS_DATE

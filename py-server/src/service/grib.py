@@ -34,12 +34,13 @@ def download_data(date, gfs_time, res, bbox, level, variables, fileprefix):
 
 if __name__ == '__main__':
   download_data(
-    '20200322',
+    '20200402',
     '00',
     '1p00',
     'leftlon=0&rightlon=360&toplat=90&bottomlat=-90',
-    'lev_10_m_above_ground=on',
-    'var_UGRD=on&var_VGRD=on'
+    'height_above_ground=on',
+    'var_UGRD=on&var_VGRD=on&var_TMP=on',
+    ''
   )
 
   print('success')
