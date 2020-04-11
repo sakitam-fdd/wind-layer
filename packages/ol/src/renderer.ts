@@ -12,6 +12,7 @@ import {
   setFromArray as transformSetFromArray, Transform,
 } from 'ol/transform';
 import { containsExtent, intersects, getWidth, getIntersection, isEmpty, containsCoordinate } from 'ol/extent';
+// import Projection from 'ol/proj/Projection';
 
 import WindCore, { IOptions } from 'wind-core';
 
@@ -21,6 +22,44 @@ const ViewHint = {
   ANIMATING: 0,
   INTERACTING: 1
 };
+
+// export function getCenter(extent: number[]): [number, number] {
+//   return [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
+// }
+
+// export function wrapExtent(extent: Extent, projection: Projection) {
+//   const projectionExtent = projection.getExtent();
+//   const center = getCenter(extent);
+//   if (
+//     projection.canWrapX() &&
+//     (center[0] < projectionExtent[0] || center[0] >= projectionExtent[2])
+//   ) {
+//     const worldWidth = getWidth(projectionExtent);
+//     const worldsAway = Math.floor(
+//       (center[0] - projectionExtent[0]) / worldWidth
+//     );
+//     const offset = worldsAway * worldWidth;
+//     extent[0] -= offset;
+//     extent[2] -= offset;
+//   }
+//   return extent;
+// }
+
+// export function wrapCoordinates(coordinate: Coordinate, projection: Projection) {
+//   const projectionExtent = projection.getExtent();
+//   if (
+//     projection.canWrapX() &&
+//     (coordinate[0] < projectionExtent[0] ||
+//       coordinate[0] >= projectionExtent[2])
+//   ) {
+//     const worldWidth = getWidth(projectionExtent);
+//     const worldsAway = Math.floor(
+//       (coordinate[0] - projectionExtent[0]) / worldWidth
+//     );
+//     coordinate[0] -= worldsAway * worldWidth;
+//   }
+//   return coordinate;
+// }
 
 function transform2D(flatCoordinates: number[], offset: number, end: number, stride: number, transform: number[], opt_dest: any[]) {
   const dest = opt_dest ? opt_dest : [];
@@ -88,6 +127,7 @@ class Render {
     });
   }
 
+  // FIXME: 需要针对所有坐标进行批量计算，现在是由于单个计算时改变了缓存的矩阵造成后面坐标无法转换
   private repeatWorld(coordinates: number[], pixelCoordinates: number[], transform: number[]) {
     let pixel;
     if (pixelCoordinates && equals(transform, this.renderedTransform_)) {
@@ -240,6 +280,7 @@ export default class WindLayerRender extends CanvasLayerRenderer {
       while (startX < projectionExtent[0]) {
         --world;
         offsetX = worldWidth * world;
+        console.log('-', world);
         const transform = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, offsetX);
         this.oRender.execute(this.context, world, frameState, transform, transformOrigin, opt, data);
         startX += worldWidth;
@@ -249,6 +290,7 @@ export default class WindLayerRender extends CanvasLayerRenderer {
       while (startX > projectionExtent[2]) {
         ++world;
         offsetX = worldWidth * world;
+        console.log('+', world);
         const transform = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, offsetX);
         this.oRender.execute(this.context, world, frameState, transform, transformOrigin, opt, data);
         startX -= worldWidth;
