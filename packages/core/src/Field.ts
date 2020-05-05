@@ -448,16 +448,28 @@ export default class Field {
   /**
    * 生成粒子位置
    * @param o
+   * @param width
+   * @param height
    */
-  public randomize(o: IPosition = {}) {
-    // x = Math.round(Math.floor(Math.random() * bounds.width) + bounds.x);
-    // y = Math.round(Math.floor(Math.random() * bounds.height) + bounds.y)
+  public randomize(o: IPosition = {}, width?: number, height?: number) {
+    if (width && height) {
+      let x;
+      let y;
+      let safetyNet = 0;
+      do {
+        x = Math.round(Math.random() * width);
+        y = Math.round(Math.random() * height);
+      } while (!this.hasValueAt(x, y) && safetyNet++ < 30);
 
-    let i = (Math.random() * this.cols) | 0;
-    let j = (Math.random() * this.rows) | 0;
+      o.x = x;
+      o.y = y;
+    } else {
+      let i = (Math.random() * this.cols) | 0;
+      let j = (Math.random() * this.rows) | 0;
 
-    o.x = this.longitudeAtX(i);
-    o.y = this.latitudeAtY(j);
+      o.x = this.longitudeAtX(i);
+      o.y = this.latitudeAtY(j);
+    }
 
     return o;
   }

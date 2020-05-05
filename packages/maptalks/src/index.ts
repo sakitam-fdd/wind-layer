@@ -88,7 +88,7 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
 
   project(coordinate: [number, number]): [number, number] {
     const map = this.getMap();
-    const pixel = map.coordinateToContainerPoint(new Coordinate(...coordinate));
+    const pixel = map.coordinateToContainerPoint(new Coordinate(coordinate[0], coordinate[1]));
     return [
       pixel.x,
       pixel.y,
@@ -98,7 +98,7 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
   intersectsCoordinate(coordinate: [number, number]): boolean {
     const map = this.getMap();
     const mapExtent = map.getExtent();
-    return mapExtent.contains(new Coordinate(...coordinate)) as boolean;
+    return mapExtent.contains(new Coordinate(coordinate[0], coordinate[1])) as boolean;
     // return true;
   }
 
