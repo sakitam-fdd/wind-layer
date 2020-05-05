@@ -1,4 +1,5 @@
 import Field from './Field';
+// import isFunction from 'lodash/isFunction';
 import { isString, isNumber, isFunction } from './utils';
 
 export const defaultOptions = {
@@ -94,6 +95,7 @@ class BaseLayer {
   }
 
   private moveParticles() {
+    // const { width, height } = this.ctx.canvas;
     const particles = this.particles;
     // 清空组
     const maxAge = this.options.maxAge;
@@ -204,20 +206,13 @@ class BaseLayer {
   }
 
   private prepareParticlePaths() { // 由用户自行处理，不再自动修改粒子数
-    // var particleCount = Math.round(bounds.width * bounds.height * that.PARTICLE_MULTIPLIER);
-    // if (isMobile()) {
-    //   particleCount *= that.PARTICLE_REDUCTION;
-    // }
-    // var particles = [];
-    // for (var i = 0; i < particleCount; i++) {
-    //   particles.push(field.randomize({age: Math.floor(Math.random() * that.MAX_PARTICLE_AGE) + 0}));
-    // }
+    // const { width, height } = this.ctx.canvas;
     const particleCount = typeof this.options.paths === 'function' ? this.options.paths(this) : this.options.paths;
     const particles = [];
     if (!this.field) return [];
     let i = 0;
     for (; i < particleCount; i++) {
-      let p = this.field.randomize();
+      let p = this.field.randomize({});
       p.age = this.randomize();
       particles.push(p);
     }
