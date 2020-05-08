@@ -11,6 +11,8 @@ import WindCore, {
   IOptions,
 } from 'wind-core';
 
+import { containsCoordinate, Extent, transformExtent } from './utils';
+
 export interface IWindOptions extends IOptions {
   windOptions: Partial<IOptions>;
   [key: string]: any;
@@ -97,8 +99,10 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
 
   intersectsCoordinate(coordinate: [number, number]): boolean {
     const map = this.getMap();
-    const mapExtent = map.getExtent();
-    return mapExtent.contains(new Coordinate(coordinate[0], coordinate[1])) as boolean;
+    const projExtent = map.getProjExtent();
+    const extent = [projExtent.xmin, projExtent.ymin, projExtent.xmax, projExtent.ymax] as Extent;
+    const mapExtent = transformExtent(extent, 0) as Extent;
+    return containsCoordinate(mapExtent, [coordinate[0], coordinate[1]]) as boolean;
     // return true;
   }
 
