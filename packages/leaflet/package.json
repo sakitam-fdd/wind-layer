@@ -1,0 +1,53 @@
+{
+  "name": "leaflet-wind",
+  "version": "1.0.0-alpha.2",
+  "description": "leaflet wind",
+  "keywords": [],
+  "author": "sakitam-fdd <smilefdd@gmail.com>",
+  "license": "MIT",
+  "main": "dist/leaflet-wind.js",
+  "module": "dist/leaflet-wind.esm.js",
+  "unpkg": "dist/leaflet-wind.js",
+  "commonjs": "dist/leaflet-wind.cjs.js",
+  "namespace": "leafletWind",
+  "types": "types/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sakitam-fdd/wind-layer.git",
+    "directory": "packages/leaflet"
+  },
+  "scripts": {
+    "tsc": "tsc --project tsconfig.prod.json",
+    "clean": "rimraf dist",
+    "dev": "run-p dev:*",
+    "dev:rollup": "cross-env NODE_ENV=development modulePath=leaflet input=src/index.ts rollup -wm -c ../../rollup/dev.config.js",
+    "build": "run-p build:*",
+    "build:dev": "cross-env NODE_ENV=production modulePath=leaflet input=src/index.ts rollup -m -c ../../rollup/dev.config.js",
+    "build:prod": "cross-env NODE_ENV=production modulePath=leaflet input=src/index.ts rollup -c ../../rollup/prod.config.js",
+    "lint:ts": "run-p -c lint:ts-*",
+    "test": "jest",
+    "prepublishOnly": "run-p test",
+    "generate:docs": "typedoc --out docs --target es6 --theme minimal --mode file src"
+  },
+  "bugs": {
+    "url": "https://github.com/sakitam-fdd/wind-layer/issues"
+  },
+  "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
+  "dependencies": {
+    "wind-core": "^1.0.0-alpha.2"
+  },
+  "peerDependencies": {
+    "leaflet": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.5.12",
+    "leaflet": "^1.5.1"
+  },
+  "gitHead": "e824bcd617be03f89fcefdd59e12e1f534c5cca4"
+}

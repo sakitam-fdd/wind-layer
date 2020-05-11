@@ -95,7 +95,7 @@ class BaseLayer {
   }
 
   private moveParticles() {
-    // const { width, height } = this.ctx.canvas;
+    const { width, height } = this.ctx.canvas;
     const particles = this.particles;
     // 清空组
     const maxAge = this.options.maxAge;
@@ -112,20 +112,20 @@ class BaseLayer {
 
       if (particle.age > maxAge) {
         // restart, on a random x,y
-        this.field.randomize(particle);
+        this.field.randomize(particle, width, height);
         particle.age = 0;
       }
 
       const x = particle.x;
       const y = particle.y;
 
-      const vector = this.field.interpolatedValueAt(x, y);
+      const vector = this.field.valueAtPixel(x, y);
 
       if (vector === null) {
         particle.age = maxAge;
       } else {
         const xt = x + vector.u * velocityScale;
-        const yt = y + vector.v * velocityScale;
+        const yt = y + vector.v * velocityScale * -1;
 
         if (this.field.hasValueAt(xt, yt)) {
           // Path from (x,y) to (xt,yt) is visible, so add this particle to the appropriate draw bucket.
@@ -134,9 +134,9 @@ class BaseLayer {
           particle.m = vector.magnitude();
         } else {
           // Particle isn't visible, but it still moves through the field.
-          // particle.x = xt;
-          // particle.y = yt;
-          particle.age = maxAge;
+          particle.x = xt;
+          particle.y = yt;
+          // particle.age = maxAge;
         }
       }
 
@@ -144,12 +144,16 @@ class BaseLayer {
     }
   }
 
-  private drawParticles() {
-    const particles = this.particles;
+  private fadeIn() {
     const prev = this.ctx.globalCompositeOperation; // lighter
     this.ctx.globalCompositeOperation = 'destination-in';
     this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     this.ctx.globalCompositeOperation = prev;
+  }
+
+  private drawParticles() {
+    const particles = this.particles;
+    this.fadeIn();
     // this.ctx.globalAlpha = 0.9;
 
     this.ctx.fillStyle = `rgba(0, 0, 0, ${this.options.globalAlpha})`;
@@ -166,56 +170,91 @@ class BaseLayer {
     }
   }
 
-  private drawParticle(particle: any, min: number, max: number) {
+  drawParticle(particle: any, min: number, max: number) {
     // TODO 需要判断粒子是否超出视野
     // this.ctx.strokeStyle = color;
-    const source: [number, number] = [particle.x, particle.y];
+    const pointPrev: [number, number] = [particle.x, particle.y];
     // when xt isn't exit
-    const target: [number, number] = [particle.xt || source[0], particle.yt || source[1]];
+    const pointNext: [number, number] = [particle.xt, particle.yt];
 
-    if (
-      this.intersectsCoordinate(target)
-      && particle.age <= this.options.maxAge
-    ) {
-      const pointPrev = this.project(source);
-      const pointNext = this.project(target);
+    // const pointPrev = this.project(source);
+    // const pointNext = this.project(target);
 
-      if (pointPrev && pointNext) {
-        this.ctx.beginPath();
-        this.ctx.moveTo(pointPrev[0], pointPrev[1]);
-        this.ctx.lineTo(pointNext[0], pointNext[1]);
-        particle.x = particle.xt;
-        particle.y = particle.yt;
+    if (pointPrev && pointNext) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(pointPrev[0], pointPrev[1]);
+      this.ctx.lineTo(pointNext[0], pointNext[1]);
+      particle.x = particle.xt;
+      particle.y = particle.yt;
 
-        if (isFunction(this.options.colorScale)) {
-          // @ts-ignore
-          this.ctx.strokeStyle = this.options.colorScale(particle.m) as string;
-        } else if (Array.isArray(this.options.colorScale)) {
-          const colorIdx = indexFor(particle.m, min, max, this.options.colorScale);
-          this.ctx.strokeStyle = this.options.colorScale[colorIdx];
-        }
-
-        if (isFunction(this.options.lineWidth)) {
-          // @ts-ignore
-          this.ctx.lineWidth = this.options.lineWidth(particle.m) as number;
-        }
-
-        this.ctx.stroke();
+      if (isFunction(this.options.colorScale)) {
+        // @ts-ignore
+        this.ctx.strokeStyle = this.options.colorScale(particle.m) as string;
+      } else if (Array.isArray(this.options.colorScale)) {
+        const colorIdx = indexFor(particle.m, min, max, this.options.colorScale);
+        this.ctx.strokeStyle = this.options.colorScale[colorIdx];
       }
+
+      if (isFunction(this.options.lineWidth)) {
+        // @ts-ignore
+        this.ctx.lineWidth = this.options.lineWidth(particle.m) as number;
+      }
+
+      this.ctx.stroke();
     }
   }
 
+  // private drawParticle(particle: any, min: number, max: number) {
+  //   // TODO 需要判断粒子是否超出视野
+  //   // this.ctx.strokeStyle = color;
+  //   const source: [number, number] = [particle.x, particle.y];
+  //   // when xt isn't exit
+  //   const target: [number, number] = [particle.xt || source[0], particle.yt || source[1]];
+  //
+  //   if (
+  //     this.intersectsCoordinate(target)
+  //     && particle.age <= this.options.maxAge
+  //   ) {
+  //     const pointPrev = this.project(source);
+  //     const pointNext = this.project(target);
+  //
+  //     if (pointPrev && pointNext) {
+  //       this.ctx.beginPath();
+  //       this.ctx.moveTo(pointPrev[0], pointPrev[1]);
+  //       this.ctx.lineTo(pointNext[0], pointNext[1]);
+  //       particle.x = particle.xt;
+  //       particle.y = particle.yt;
+  //
+  //       if (isFunction(this.options.colorScale)) {
+  //         // @ts-ignore
+  //         this.ctx.strokeStyle = this.options.colorScale(particle.m) as string;
+  //       } else if (Array.isArray(this.options.colorScale)) {
+  //         const colorIdx = indexFor(particle.m, min, max, this.options.colorScale);
+  //         this.ctx.strokeStyle = this.options.colorScale[colorIdx];
+  //       }
+  //
+  //       if (isFunction(this.options.lineWidth)) {
+  //         // @ts-ignore
+  //         this.ctx.lineWidth = this.options.lineWidth(particle.m) as number;
+  //       }
+  //
+  //       this.ctx.stroke();
+  //     }
+  //   }
+  // }
+
   private prepareParticlePaths() { // 由用户自行处理，不再自动修改粒子数
-    // const { width, height } = this.ctx.canvas;
+    const { width, height } = this.ctx.canvas;
     const particleCount = typeof this.options.paths === 'function' ? this.options.paths(this) : this.options.paths;
     const particles = [];
     if (!this.field) return [];
     let i = 0;
     for (; i < particleCount; i++) {
-      let p = this.field.randomize({});
+      let p = this.field.randomize({}, width, height);
       p.age = this.randomize();
       particles.push(p);
     }
+    this.field.interpolate(width, height, this.project);
     return particles;
   }
 
