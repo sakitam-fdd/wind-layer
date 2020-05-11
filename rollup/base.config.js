@@ -10,6 +10,8 @@ import { resolve } from './utils';
 import { external as olExternal } from './external/ol';
 import { external as maptalksExternal } from './external/maptalks';
 import { external as openlayersExternal } from './external/openlayers';
+import { external as leafletExternal } from './external/leaflet';
+import { external as mapboxExternal } from './external/mapbox';
 
 const input = process.env.input;
 
@@ -54,5 +56,7 @@ export default {
     ...olExternal,
     ...maptalksExternal,
     ...openlayersExternal,
+    ...leafletExternal,
+    ...mapboxExternal,
   ]
 };

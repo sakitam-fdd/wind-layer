@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'/>
+  <title>mapbox wind</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'/>
+  <script src="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+      background: #202020;
+    }
+  </style>
+</head>
+<body>
+<div id='map'></div>
+<script src="../packages/mapbox-gl/dist/mapbox-wind.js"></script>
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA';
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: {
+      version: 8,
+      sources: {
+        carto: {
+          type: 'raster',
+          tiles: [
+            '//a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            '//b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            '//c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            '//d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+          ],
+          tileSize: 256,
+          // minzoom: 1,
+          // maxzoom: 18,
+        },
+      },
+      layers: [
+        {
+          id: 'carto',
+          type: 'raster',
+          source: 'carto',
+          // minzoom: 1,
+          // maxzoom: 22,
+          paint: {
+            'raster-resampling': 'nearest',
+            'raster-fade-duration': 0,
+          },
+        },
+        {
+          id: 'background',
+          type: 'background',
+          layout: {
+            visibility: 'none',
+          },
+        },
+      ],
+    },
+    center: [113.53450137499999, 34.44104525],
+    zoom: 4
+  });
+
+  map.on('load', function () {
+    fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
+    // fetch('./data/uv.json')
+      .then(res => res.json())
+      .then(data => {
+        console.log(data);
+
+        const windLayer = new mapboxWind.WindLayer('wind', data, {
+          windOptions: {
+            // colorScale: (m) => {
+            //   // console.log(m);
+            //   return '#fff';
+            // },
+            colorScale: [
+              "rgb(36,104, 180)",
+              "rgb(60,157, 194)",
+              "rgb(128,205,193 )",
+              "rgb(151,218,168 )",
+              "rgb(198,231,181)",
+              "rgb(238,247,217)",
+              "rgb(255,238,159)",
+              "rgb(252,217,125)",
+              "rgb(255,182,100)",
+              "rgb(252,150,75)",
+              "rgb(250,112,52)",
+              "rgb(245,64,32)",
+              "rgb(237,45,28)",
+              "rgb(220,24,32)",
+              "rgb(180,0,35)"
+            ],
+            // velocityScale: 1 / 20,
+            // paths: 5000,
+            frameRate: 16,
+            maxAge: 60,
+            globalAlpha: 0.9,
+            velocityScale: 0.5,
+            // paths: 10000,
+            generateParticleOption: true,
+            paths: 3782,
+          },
+        });
+
+        console.log(map, windLayer);
+
+        map.addLayer(windLayer);
+        // windLayer.addTo(map);
+      });
+  });
+</script>
+</body>
+</html>

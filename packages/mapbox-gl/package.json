@@ -1,0 +1,53 @@
+{
+  "name": "@sakitam-gis/mapbox-wind",
+  "version": "1.0.0-alpha.2",
+  "description": "mapboxgl wind",
+  "keywords": [],
+  "author": "sakitam-fdd <smilefdd@gmail.com>",
+  "license": "MIT",
+  "main": "dist/mapbox-wind.js",
+  "module": "dist/mapbox-wind.esm.js",
+  "unpkg": "dist/mapbox-wind.js",
+  "commonjs": "dist/mapbox-wind.cjs.js",
+  "namespace": "mapboxWind",
+  "types": "types/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sakitam-fdd/wind-layer.git",
+    "directory": "packages/mapbox-gl"
+  },
+  "scripts": {
+    "tsc": "tsc --project tsconfig.prod.json",
+    "clean": "rimraf dist",
+    "dev": "run-p dev:*",
+    "dev:rollup": "cross-env NODE_ENV=development modulePath=mapbox-gl input=src/index.ts rollup -wm -c ../../rollup/dev.config.js",
+    "build": "run-p build:*",
+    "build:dev": "cross-env NODE_ENV=production modulePath=mapbox-gl input=src/index.ts rollup -m -c ../../rollup/dev.config.js",
+    "build:prod": "cross-env NODE_ENV=production modulePath=mapbox-gl input=src/index.ts rollup -c ../../rollup/prod.config.js",
+    "lint:ts": "run-p -c lint:ts-*",
+    "test": "jest",
+    "prepublishOnly": "run-p test",
+    "generate:docs": "typedoc --out docs --target es6 --theme minimal --mode file src"
+  },
+  "bugs": {
+    "url": "https://github.com/sakitam-fdd/wind-layer/issues"
+  },
+  "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
+  "dependencies": {
+    "wind-core": "^1.0.0-alpha.2"
+  },
+  "peerDependencies": {
+    "mapbox-gl": ">=0.50.0"
+  },
+  "devDependencies": {
+    "@types/mapbox-gl": "^1.9.1",
+    "mapbox-gl": "^1.8.0"
+  },
+  "gitHead": "e824bcd617be03f89fcefdd59e12e1f534c5cca4"
+}

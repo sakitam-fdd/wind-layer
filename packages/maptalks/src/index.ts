@@ -1,5 +1,5 @@
 // @ts-ignore
-import { CanvasLayer, renderer, Coordinate } from 'maptalks/dist/maptalks.es.js';
+import { CanvasLayer, renderer, Coordinate, Point } from 'maptalks/dist/maptalks.es.js';
 
 import WindCore, {
   Field,
@@ -66,7 +66,7 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
 
         this.wind = new WindCore(this.context, opt, data);
 
-        this.wind.project = this.project.bind(this);
+        this.wind.project = this.unproject.bind(this);
         this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
         this.wind.postrender = () => {
           // @ts-ignore
@@ -95,6 +95,12 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
       pixel.x,
       pixel.y,
     ];
+  }
+
+  unproject(pixel: [number, number]): [number, number] {
+    const map = this.getMap();
+    const coordinates = map.containerPointToCoordinate(new Point(pixel[0], pixel[1]));
+    return coordinates.toArray();
   }
 
   intersectsCoordinate(coordinate: [number, number]): boolean {

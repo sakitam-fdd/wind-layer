@@ -1,5 +1,5 @@
-import Vector from './Vector';
 import { floorMod } from './utils';
+import Vector from './Vector';
 
 export interface IField {
   xmin: number; // 一般格点数据是按照矩形范围来切割，所以定义其经纬度范围
@@ -32,6 +32,7 @@ export default class Field {
   private readonly cols: number;
   private readonly rows: number;
   public grid: (Vector | null)[][];
+  public grids: any[][];
   private us: number[];
   private vs: number[];
   private isContinuous: boolean;
@@ -75,6 +76,8 @@ export default class Field {
 
     this.grid = this.buildGrid();
     this.range = this.calculateRange();
+
+    this.grids = [];
   }
 
   // from https://github.com/sakitam-fdd/wind-layer/blob/95368f9433/src/windy/windy.js#L110
@@ -259,6 +262,32 @@ export default class Field {
     return this.valueAtIndexes(ci, cj);
   }
 
+  public interpolate(width: number, height: number, unproject: any) {
+    this.grids = [];
+    for (let y = 0; y < height; y += 2) {
+      const row = [];
+      for (let x = 0; x < width; x += 2) {
+        const coord = unproject([x, y]);
+
+        const i = this.XAtLongitude(coord[0]);
+        const j = this.YAtLatitude(coord[1]);
+        if (i === null || j === null) {
+          row[x / 2] = null;
+        } else {
+          row[x / 2] = this.interpolateAtPoint(i, j);
+        }
+      }
+
+      this.grids[y / 2] = row;
+    }
+  }
+
+  public valueAtPixel(x: number, y: number) {
+    const row = this.grids[Math.round(y / 2)];
+    // eslint-disable-next-line no-mixed-operators
+    return row && row[Math.round(x / 2)] || null;
+  }
+
   /**
    * Get interpolated grid value lon-lat coordinates
    * 双线性插值
@@ -274,9 +303,26 @@ export default class Field {
 
   public hasValueAt(lon: number, lat: number) {
     let value = this.valueAt(lon, lat);
-    const hasValue = value !== null;
-    let included = true;
-    return hasValue && included;
+    return value !== null;
+  }
+
+  private interpolateAtPoint(indexX: any, indexY: any) {
+    if (!indexX || !indexY) {
+      return null;
+    }
+    const x = indexX.x;
+    const y = indexY.y;
+
+    const [
+      g00, g10, g01, g11
+    ] = [
+      this.getValueFormXY(x, y),
+      this.getValueFormXY(x + 1, y),
+      this.getValueFormXY(x, y + 1),
+      this.getValueFormXY(x + 1, y + 1),
+    ];
+
+    return this.bilinearInterpolateVector(indexX.deltaX, indexY.deltaY, g00, g10, g01, g11);
   }
 
   /**
@@ -398,6 +444,11 @@ export default class Field {
     return null;
   }
 
+  private getValueFormXY(x: number, y: number) {
+    const n = this.cols * y + x;
+    return new Vector(this.us[n], this.vs[n]);
+  }
+
   /**
    * Value for grid indexes
    * @param   {Number} i - column index (integer)
@@ -435,6 +486,18 @@ export default class Field {
     return lon;
   }
 
+  private XAtLongitude(lng: number) {
+    if (lng < this.xmin || lng > this.xmax) {
+      return null;
+    }
+    const x = Math.floor((lng - this.xmin) / this.deltaX);
+    const deltaX = (lng - (this.xmin + this.deltaX * x)) / this.deltaX;
+    return {
+      x,
+      deltaX,
+    };
+  }
+
   /**
    * Latitude for grid-index
    * @param   {Number} j - row index (integer)
@@ -443,6 +506,18 @@ export default class Field {
   private latitudeAtY(j: number) {
     let halfYPixel = this.deltaY / 2.0;
     return this.ymax - halfYPixel - j * this.deltaY;
+  }
+
+  private YAtLatitude(lat: number) {
+    if (lat < this.ymin || lat > this.ymax) {
+      return null;
+    }
+    const y = Math.floor((this.ymax - lat) / this.deltaY);
+    const deltaY = ((this.ymax - this.deltaY * y) - lat) / this.deltaY;
+    return {
+      y,
+      deltaY,
+    };
   }
 
   /**
@@ -474,6 +549,9 @@ export default class Field {
     return o;
   }
 
+  /**
+   * check is custom field
+   */
   public checkFields() {
     return this.isFields;
   }
