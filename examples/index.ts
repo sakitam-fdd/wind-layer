@@ -170,6 +170,7 @@ function initMap() {
 
   vectorSource.addFeature(new Feature(new Circle([5e6, 7e6], 1e6)));
 
+  // @ts-ignore
   const vectorLayer = new VectorLayer({
     source: vectorSource,
     // @ts-ignore
@@ -200,7 +201,7 @@ function initMap() {
         forceRender: false,
         windOptions: {
           // colorScale: scale,
-          velocityScale: 1 / 20,
+          velocityScale: 0.5,
           paths: 5000,
           // eslint-disable-next-line no-unused-vars
           colorScale: () => {
@@ -209,7 +210,6 @@ function initMap() {
           },
           width: 3,
           // colorScale: scale,
-          generateParticleOption: false
         },
         // map: map,
         // projection: 'EPSG:4326'

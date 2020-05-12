@@ -76,7 +76,7 @@
       .then(data => {
         console.log(data);
 
-        const windLayer = new mapboxWind.WindLayer('wind', data, {
+        window.windLayer = new mapboxWind.WindLayer('wind', data, {
           windOptions: {
             // colorScale: (m) => {
             //   // console.log(m);
@@ -106,15 +106,14 @@
             globalAlpha: 0.9,
             velocityScale: 0.5,
             // paths: 10000,
-            generateParticleOption: true,
             paths: 3782,
           },
         });
 
-        console.log(map, windLayer);
+        console.log(map, window.windLayer);
 
-        map.addLayer(windLayer);
-        // windLayer.addTo(map);
+        // map.addLayer(window.windLayer);
+        window.windLayer.addTo(map);
       });
   });
 </script>

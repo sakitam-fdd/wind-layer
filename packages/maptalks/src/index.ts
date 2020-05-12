@@ -66,7 +66,8 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
 
         this.wind = new WindCore(this.context, opt, data);
 
-        this.wind.project = this.unproject.bind(this);
+        this.wind.project = this.project.bind(this);
+        this.wind.unproject = this.unproject.bind(this);
         this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
         this.wind.postrender = () => {
           // @ts-ignore
@@ -77,10 +78,7 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
       }
 
       if (this.wind) {
-        if ('generateParticleOption' in opt) {
-          const flag = typeof opt.generateParticleOption === 'function' ? opt.generateParticleOption() : opt.generateParticleOption;
-          flag && this.wind.prerender();
-        }
+        this.wind.prerender()
 
         this.wind.render();
       }

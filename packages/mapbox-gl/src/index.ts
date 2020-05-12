@@ -36,15 +36,16 @@ class WindLayer extends Overlay {
     if (data) {
       this.setData(data);
     }
+
+    this.stop = this.stop.bind(this);
+    this.render = this.render.bind(this);
   }
 
   onAdd(map: mapboxgl.Map) {
-    console.log('addTo', map);
-
     super.onAdd(map);
 
     if (!this.map) {
-      console.log(this.map);
+      throw new Error('map is null');
       return;
     }
 
@@ -52,15 +53,42 @@ class WindLayer extends Overlay {
       // this._retina = window.devicePixelRatio >= 2;
 
       this.render();
+      this.registerEvents();
     }
   }
 
-  clearWind() {
+  registerEvents() {
+    this.map.on('resize', this.render);
+    this.map.on('movestart', this.stop);
+    this.map.on('moveend', this.render);
+    this.map.on('zoomstart', this.stop);
+    this.map.on('zoomend', this.render);
+    this.map.on('rotatestart', this.stop);
+    this.map.on('rotateend', this.render);
+    this.map.on('pitchstart', this.stop);
+    this.map.on('pitchend', this.render);
+  }
+
+  unregisterEvents() {
+    this.map.off('resize', this.render);
+    this.map.off('movestart', this.stop);
+    this.map.off('moveend', this.render);
+    this.map.off('zoomstart', this.stop);
+    this.map.off('zoomend', this.render);
+    this.map.off('rotatestart', this.stop);
+    this.map.off('rotateend', this.render);
+    this.map.off('pitchstart', this.stop);
+    this.map.off('pitchend', this.render);
+  }
+
+  stop() {
+    if (this.wind) {
+      this.wind.clearCanvas();
+    }
   }
 
   render() {
     if (!this.map) return;
-    console.log('render');
 
     const opt = this.getWindOptions();
     if (!this.wind && this.map && this.canvas !== null) {
@@ -75,16 +103,24 @@ class WindLayer extends Overlay {
       this.wind = new WindCore(ctx, opt, data);
 
       // @ts-ignore
-      this.wind.project = this.unproject.bind(this);
+      this.wind.project = this.project.bind(this);
+      // @ts-ignore
+      this.wind.unproject = this.unproject.bind(this);
       this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
       this.wind.postrender = () => {
         // @ts-ignore
         // this.setCanvasUpdated();
       };
-
-      this.wind.prerender();
     }
+
+    this.wind.prerender();
     this.wind.render();
+  }
+
+  remove() {
+    super.remove();
+
+    this.unregisterEvents();
   }
 
   pickWindOptions() {

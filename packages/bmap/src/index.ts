@@ -207,11 +207,7 @@ class BMapWind extends BMap.Overlay {
     }
 
     if (this.wind) {
-      if ('generateParticleOption' in opt) {
-        const flag = typeof opt.generateParticleOption === 'function' ? opt.generateParticleOption() : opt.generateParticleOption;
-        flag && this.wind.prerender();
-      }
-
+      this.wind.prerender();
       this.wind.render();
     }
 
@@ -307,6 +303,13 @@ class BMapWind extends BMap.Overlay {
     // FIXME: https://github.com/huiyan-fe/mapv/blob/master/src/map/baidu-map/Layer.js#L194
     // const pixel = this.map.pointToPixel(new BMap.Point(...coordinate));
     const mercatorCoordinates = this.transferToMercator(coordinate);
+    return this.projectInner(mercatorCoordinates);
+  }
+
+  public unproject(pixel: [number, number]): [number, number] {
+    // FIXME: https://github.com/huiyan-fe/mapv/blob/master/src/map/baidu-map/Layer.js#L194
+    // const pixel = this.map.pointToPixel(new BMap.Point(...coordinate));
+    const mercatorCoordinates = this.transferToMercator(pixel);
     return this.projectInner(mercatorCoordinates);
   }
 

@@ -42,6 +42,8 @@
       // const range = vectorField.range || [0.02, 28.21618329965979];
       // const scale = chroma.scale('OrRd').domain(range);
 
+      const velocityScale = [0.1, 0.2, 0.3, 0.4, 0.5];
+
       const windLayer = new leafletWind.WindLayer('wind', res, {
         windOptions: {
           // colorScale: (m) => {
@@ -70,10 +72,11 @@
           frameRate: 16,
           maxAge: 60,
           globalAlpha: 0.9,
-          velocityScale: 0.5,
+          velocityScale: () => {
+            return velocityScale[map.getZoom() - 5] || 0.5;
+          },
           // paths: 10000,
-          generateParticleOption: true,
-          paths: 3782,
+          paths: 1000,
         },
       });
 

@@ -1,7 +1,8 @@
 import { equals } from 'ol/array';
 import { FrameState } from 'ol/PluggableMap';
 import { Coordinate } from 'ol/coordinate';
-import { fromUserExtent, fromUserCoordinate, transform as transformProj } from 'ol/proj';
+import { Pixel } from 'ol/pixel';
+import { fromUserExtent, fromUserCoordinate, toUserCoordinate, transform as transformProj } from 'ol/proj';
 import CanvasLayerRenderer from 'ol/renderer/canvas/Layer';
 import {
   toString as transformToString,
@@ -95,16 +96,14 @@ class Render {
     renderedTransform: number[],
     opt: Partial<IOptions>,
     data: any,
-    ) {
+  ) {
     if (this.executors[index]) {
       const wind = this.executors[index];
       wind.project = this.getPixelFromCoordinateInternal.bind(this, frameState, transform);
+      wind.unproject = this.getCoordinateFromPixel.bind(this, frameState);
       wind.intersectsCoordinate = this.intersectsCoordinate.bind(this, frameState);
-      if ('generateParticleOption' in opt) {
-        const flag = typeof opt.generateParticleOption === 'function' ? opt.generateParticleOption() : opt.generateParticleOption;
-        flag && wind.prerender();
-      }
 
+      wind.prerender();
       wind.render();
     } else {
       const wind = new WindCore(context, opt, data);
@@ -112,6 +111,7 @@ class Render {
       this.executors[index] = wind;
 
       wind.project = this.getPixelFromCoordinateInternal.bind(this, frameState, transform);
+      wind.unproject = this.getCoordinateFromPixel.bind(this, frameState);
       wind.intersectsCoordinate = this.intersectsCoordinate.bind(this, frameState);
       wind.postrender = () => {};
       wind.prerender();
@@ -162,6 +162,26 @@ class Render {
     }
   }
 
+  private getCoordinateFromPixel(frameState: FrameState, pixel: Pixel): [number, number] | null {
+    const viewState = frameState.viewState;
+    // const pixelRatio = frameState.pixelRatio;
+    // const point = transformProj(coordinate, 'EPSG:4326', viewState.projection);
+    // const viewCoordinate = toUserCoordinate(point, viewState.projection);
+
+    if (!frameState) {
+      return null;
+    } else {
+      const viewCoordinate = applyTransform(frameState.pixelToCoordinateTransform, pixel.slice(0, 2));
+      // const pixel = this.repeatWorld(viewCoordinate.slice(0, 2), pixelCoordinates, transform);
+      const coordinate = toUserCoordinate(viewCoordinate, viewState.projection);
+      const point = transformProj(coordinate, viewState.projection, 'EPSG:4326');
+      return [
+        point[0],
+        point[1]
+      ];
+    }
+  }
+
   private intersectsCoordinate(frameState: FrameState, coordinate: Coordinate): boolean {
     const viewState = frameState.viewState;
     const point = transformProj(coordinate, 'EPSG:4326', viewState.projection);
@@ -205,7 +225,7 @@ export default class WindLayerRender extends CanvasLayerRenderer {
       renderedExtent = getIntersection(renderedExtent, fromUserExtent(layerState.extent, viewState.projection));
     }
 
-    if (!hints[ViewHint.ANIMATING] && !hints[ViewHint.INTERACTING] && !isEmpty(renderedExtent)) {
+    if (!hints[ViewHint.ANIMATING] && !frameState.animate && !hints[ViewHint.INTERACTING] && !isEmpty(renderedExtent)) {
       return true;
     } else {
       const layer = this.getLayer() as unknown as WindLayer;
@@ -280,7 +300,6 @@ export default class WindLayerRender extends CanvasLayerRenderer {
       while (startX < projectionExtent[0]) {
         --world;
         offsetX = worldWidth * world;
-        console.log('-', world);
         const transform = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, offsetX);
         this.oRender.execute(this.context, world, frameState, transform, transformOrigin, opt, data);
         startX += worldWidth;
@@ -290,7 +309,6 @@ export default class WindLayerRender extends CanvasLayerRenderer {
       while (startX > projectionExtent[2]) {
         ++world;
         offsetX = worldWidth * world;
-        console.log('+', world);
         const transform = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, offsetX);
         this.oRender.execute(this.context, world, frameState, transform, transformOrigin, opt, data);
         startX -= worldWidth;
