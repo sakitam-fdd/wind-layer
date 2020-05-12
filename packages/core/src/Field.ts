@@ -260,58 +260,6 @@ export default class Field {
     return this.valueAtIndexes(ci, cj);
   }
 
-  private interpolateColumn(y: number) {
-    const column = [];
-    const width = this.fieldConfig.width;
-    for (let x = 0; x <= width; x += 2) {
-      const coords = this.fieldConfig.unproject([x, y]);
-      if (coords) {
-        const [lng, lat] = coords;
-        if (isFinite(lng)) {
-          const wind = this.interpolatedValueAt(lng, lat);
-          if (wind) {
-            column[x / 2] = wind;
-          }
-        }
-      }
-    }
-    this.columns[y / 2] = column;
-  }
-
-  public startBatchInterpolate(width: number, height: number, unproject: any) {
-    this.columns = [];
-    this.fieldConfig = {
-      width,
-      height,
-      unproject,
-    };
-
-    this.batchInterpolate();
-  }
-
-  private batchInterpolate() {
-    const start = Date.now();
-    let y = 0;
-    while (y < this.fieldConfig.height) {
-      this.interpolateColumn(y);
-      y += 2;
-      if ((Date.now() - start) > 1000) { //MAX_TASK_TIME) {
-        setTimeout(this.batchInterpolate.bind(this), 25);
-        return;
-      }
-    }
-  }
-
-  /**
-   * 根据像素坐标查找向量
-   * @param x
-   * @param y
-   */
-  public valueAtPixel(x: number, y: number) {
-    const column = this.columns[Math.round(y / 2)];
-    return column && column[Math.round(x / 2)] || null;
-  }
-
   /**
    * Get interpolated grid value lon-lat coordinates
    * 双线性插值
@@ -503,24 +451,11 @@ export default class Field {
    * @param height
    */
   public randomize(o: IPosition = {}, width?: number, height?: number) {
-    if (width && height) {
-      let x;
-      let y;
-      let safetyNet = 0;
-      do {
-        x = Math.round(Math.random() * width);
-        y = Math.round(Math.random() * height);
-      } while (!this.valueAtPixel(x, y) && safetyNet++ < 30);
+    let i = (Math.random() * this.cols) | 0;
+    let j = (Math.random() * this.rows) | 0;
 
-      o.x = x;
-      o.y = y;
-    } else {
-      let i = (Math.random() * this.cols) | 0;
-      let j = (Math.random() * this.rows) | 0;
-
-      o.x = this.longitudeAtX(i);
-      o.y = this.latitudeAtY(j);
-    }
+    o.x = this.longitudeAtX(i);
+    o.y = this.latitudeAtY(j);
 
     return o;
   }
@@ -531,4 +466,6 @@ export default class Field {
   public checkFields() {
     return this.isFields;
   }
+
+  public startBatchInterpolate(width: number, height: number, unproject: (...args: any[]) => ([number, number] | null)) {}
 }
