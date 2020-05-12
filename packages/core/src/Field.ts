@@ -31,16 +31,17 @@ export default class Field {
   private readonly ymax: number;
   private readonly cols: number;
   private readonly rows: number;
+  private readonly us: number[];
+  private readonly vs: number[];
+  private readonly isContinuous: boolean;
+  private readonly deltaY: number;
+  private readonly deltaX: number;
+  private readonly wrappedX: undefined | boolean;
+  private readonly isFields: boolean;
   public grid: (Vector | null)[][];
-  public grids: any[][];
-  private us: number[];
-  private vs: number[];
-  private isContinuous: boolean;
-  private deltaY: number;
-  private deltaX: number;
-  private wrappedX: undefined | boolean;
   public range: (number | undefined)[] | undefined;
-  private isFields: boolean;
+  private columns: (Vector | null)[][];
+  private fieldConfig: { width: number; unproject: any; height: number };
 
   constructor(params: IField) {
     this.grid = [];
@@ -66,7 +67,7 @@ export default class Field {
     const rows = Math.ceil((this.ymax - this.ymin) / params.deltaY); // 行
 
     if (cols !== this.cols || rows !== this.rows) {
-      console.warn('The data grid is not available');
+      console.warn('The data grid not equal');
     }
 
     // Math.floor(ni * Δλ) >= 360;
@@ -76,8 +77,6 @@ export default class Field {
 
     this.grid = this.buildGrid();
     this.range = this.calculateRange();
-
-    this.grids = [];
   }
 
   // from https://github.com/sakitam-fdd/wind-layer/blob/95368f9433/src/windy/windy.js#L110
@@ -107,6 +106,7 @@ export default class Field {
 
   public release() {
     this.grid = [];
+    this.columns = [];
   }
 
   /**
@@ -235,10 +235,8 @@ export default class Field {
    * @param lat
    */
   public getDecimalIndexes(lon: number, lat: number) {
-    // var i = floorMod(lon - xmin, 360) / deltaX; // calculate longitude index in wrapped range [0, 360)
-    // var j = (ymax - lat) / deltaY; // calculate latitude index in direction +90 to -90
-    let i = floorMod(lon - this.xmin, 360) / this.deltaX;
-    let j = (this.ymax - lat) / this.deltaY;
+    const i = floorMod(lon - this.xmin, 360) / this.deltaX; // calculate longitude index in wrapped range [0, 360)
+    const j = (this.ymax - lat) / this.deltaY; // calculate latitude index in direction +90 to -90
     return [i, j];
   }
 
@@ -262,30 +260,56 @@ export default class Field {
     return this.valueAtIndexes(ci, cj);
   }
 
-  public interpolate(width: number, height: number, unproject: any) {
-    this.grids = [];
-    for (let y = 0; y < height; y += 2) {
-      const row = [];
-      for (let x = 0; x < width; x += 2) {
-        const coord = unproject([x, y]);
-
-        const i = this.XAtLongitude(coord[0]);
-        const j = this.YAtLatitude(coord[1]);
-        if (i === null || j === null) {
-          row[x / 2] = null;
-        } else {
-          row[x / 2] = this.interpolateAtPoint(i, j);
+  private interpolateColumn(x: number) {
+    const column = [];
+    const height = this.fieldConfig.height - 1;
+    for (let y = 0; y <= height; y += 2) {
+      const coords = this.fieldConfig.unproject([x, y]);
+      if (coords) {
+        const [lng, lat] = coords;
+        if (isFinite(lng)) {
+          const wind = this.interpolatedValueAt(lng, lat);
+          if (wind) {
+            column[y + 1] = column[y] = wind;
+          }
         }
       }
+    }
+    this.columns[x + 1] = this.columns[x] = column;
+  }
 
-      this.grids[y / 2] = row;
+  public startBatchInterpolate(width: number, height: number, unproject: any) {
+    this.columns = [];
+    this.fieldConfig = {
+      width,
+      height,
+      unproject,
+    };
+
+    this.batchInterpolate();
+  }
+
+  private batchInterpolate() {
+    const start = Date.now();
+    let x = 0;
+    while (x < this.fieldConfig.width) {
+      this.interpolateColumn(x);
+      x += 2;
+      if ((Date.now() - start) > 1000) { //MAX_TASK_TIME) {
+        setTimeout(this.batchInterpolate.bind(this), 25);
+        return;
+      }
     }
   }
 
+  /**
+   * 根据像素坐标查找向量
+   * @param x
+   * @param y
+   */
   public valueAtPixel(x: number, y: number) {
-    const row = this.grids[Math.round(y / 2)];
-    // eslint-disable-next-line no-mixed-operators
-    return row && row[Math.round(x / 2)] || null;
+    const column = this.columns[Math.round(y)];
+    return column && column[Math.round(x)] || null;
   }
 
   /**
@@ -294,7 +318,7 @@ export default class Field {
    * @param lon
    * @param lat
    */
-  interpolatedValueAt(lon: number, lat: number) {
+  public interpolatedValueAt(lon: number, lat: number) {
     if (!this.contains(lon, lat)) return null;
 
     let [i, j] = this.getDecimalIndexes(lon, lat);
@@ -304,25 +328,6 @@ export default class Field {
   public hasValueAt(lon: number, lat: number) {
     let value = this.valueAt(lon, lat);
     return value !== null;
-  }
-
-  private interpolateAtPoint(indexX: any, indexY: any) {
-    if (!indexX || !indexY) {
-      return null;
-    }
-    const x = indexX.x;
-    const y = indexY.y;
-
-    const [
-      g00, g10, g01, g11
-    ] = [
-      this.getValueFormXY(x, y),
-      this.getValueFormXY(x + 1, y),
-      this.getValueFormXY(x, y + 1),
-      this.getValueFormXY(x + 1, y + 1),
-    ];
-
-    return this.bilinearInterpolateVector(indexX.deltaX, indexY.deltaY, g00, g10, g01, g11);
   }
 
   /**
@@ -444,11 +449,6 @@ export default class Field {
     return null;
   }
 
-  private getValueFormXY(x: number, y: number) {
-    const n = this.cols * y + x;
-    return new Vector(this.us[n], this.vs[n]);
-  }
-
   /**
    * Value for grid indexes
    * @param   {Number} i - column index (integer)
@@ -486,18 +486,6 @@ export default class Field {
     return lon;
   }
 
-  private XAtLongitude(lng: number) {
-    if (lng < this.xmin || lng > this.xmax) {
-      return null;
-    }
-    const x = Math.floor((lng - this.xmin) / this.deltaX);
-    const deltaX = (lng - (this.xmin + this.deltaX * x)) / this.deltaX;
-    return {
-      x,
-      deltaX,
-    };
-  }
-
   /**
    * Latitude for grid-index
    * @param   {Number} j - row index (integer)
@@ -506,18 +494,6 @@ export default class Field {
   private latitudeAtY(j: number) {
     let halfYPixel = this.deltaY / 2.0;
     return this.ymax - halfYPixel - j * this.deltaY;
-  }
-
-  private YAtLatitude(lat: number) {
-    if (lat < this.ymin || lat > this.ymax) {
-      return null;
-    }
-    const y = Math.floor((this.ymax - lat) / this.deltaY);
-    const deltaY = ((this.ymax - this.deltaY * y) - lat) / this.deltaY;
-    return {
-      y,
-      deltaY,
-    };
   }
 
   /**
@@ -534,7 +510,7 @@ export default class Field {
       do {
         x = Math.round(Math.random() * width);
         y = Math.round(Math.random() * height);
-      } while (!this.hasValueAt(x, y) && safetyNet++ < 30);
+      } while (!this.valueAtPixel(x, y) && safetyNet++ < 30);
 
       o.x = x;
       o.y = y;
