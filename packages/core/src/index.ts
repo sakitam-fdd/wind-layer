@@ -111,9 +111,9 @@ class BaseLayer {
       const particle = particles[i];
 
       if (particle.age > maxAge) {
+        particle.age = 0;
         // restart, on a random x,y
         this.field.randomize(particle, width, height);
-        particle.age = 0;
       }
 
       const x = particle.x;
@@ -125,9 +125,9 @@ class BaseLayer {
         particle.age = maxAge;
       } else {
         const xt = x + vector.u * velocityScale;
-        const yt = y + vector.v * velocityScale * -1;
+        const yt = y + vector.v * -velocityScale;
 
-        if (this.field.hasValueAt(xt, yt)) {
+        if (this.field.valueAtPixel(xt, yt)) {
           // Path from (x,y) to (xt,yt) is visible, so add this particle to the appropriate draw bucket.
           particle.xt = xt;
           particle.yt = yt;
@@ -140,7 +140,7 @@ class BaseLayer {
         }
       }
 
-      particle.age += 1;
+      particle.age++;
     }
   }
 
@@ -184,8 +184,6 @@ class BaseLayer {
       this.ctx.beginPath();
       this.ctx.moveTo(pointPrev[0], pointPrev[1]);
       this.ctx.lineTo(pointNext[0], pointNext[1]);
-      particle.x = particle.xt;
-      particle.y = particle.yt;
 
       if (isFunction(this.options.colorScale)) {
         // @ts-ignore
@@ -199,6 +197,9 @@ class BaseLayer {
         // @ts-ignore
         this.ctx.lineWidth = this.options.lineWidth(particle.m) as number;
       }
+
+      particle.x = particle.xt;
+      particle.y = particle.yt;
 
       this.ctx.stroke();
     }
@@ -248,13 +249,13 @@ class BaseLayer {
     const particleCount = typeof this.options.paths === 'function' ? this.options.paths(this) : this.options.paths;
     const particles = [];
     if (!this.field) return [];
+    this.field.startBatchInterpolate(width, height, this.project);
     let i = 0;
     for (; i < particleCount; i++) {
-      let p = this.field.randomize({}, width, height);
-      p.age = this.randomize();
-      particles.push(p);
+      particles.push(this.field.randomize({
+        age: this.randomize()
+      }, width, height));
     }
-    this.field.interpolate(width, height, this.project);
     return particles;
   }
 
