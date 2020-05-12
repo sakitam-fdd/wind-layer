@@ -14,6 +14,7 @@ export const defaultOptions = {
   frameRate: 20,
   minVelocity: 0,
   maxVelocity: 10,
+  useCoordsDraw: true,
 };
 
 type emptyFunc = (v?: any) => number;
@@ -30,6 +31,7 @@ export interface IOptions {
   frameRate: number;
   minVelocity?: number;
   maxVelocity?: number;
+  useCoordsDraw?: boolean;
 }
 
 function indexFor (m: number, min: number, max: number, colorScale: string[]) {  // map velocity speed to a style
@@ -116,15 +118,15 @@ class BaseLayer {
       const x = particle.x;
       const y = particle.y;
 
-      const vector = this.field.valueAtPixel(x, y);
+      const vector = this.field.valueAt(x, y);
 
       if (vector === null) {
         particle.age = maxAge;
       } else {
         const xt = x + vector.u * velocityScale;
-        const yt = y + vector.v * -velocityScale;
+        const yt = y + vector.v * velocityScale;
 
-        if (this.field.valueAtPixel(xt, yt)) {
+        if (this.field.hasValueAt(xt, yt)) {
           // Path from (x,y) to (xt,yt) is visible, so add this particle to the appropriate draw bucket.
           particle.xt = xt;
           particle.yt = yt;
@@ -133,7 +135,7 @@ class BaseLayer {
           // Particle isn't visible, but it still moves through the field.
           particle.x = xt;
           particle.y = yt;
-          // particle.age = maxAge;
+          particle.age = maxAge;
         }
       }
 
@@ -162,12 +164,18 @@ class BaseLayer {
     if (this.field && len > 0) {
       const [min, max] = this.field.range as [number, number];
       for (; i < len; i++) {
-        this.drawParticle(particles[i], min, max);
+        this[this.options.useCoordsDraw ? 'drawCoordsParticle' : 'drawPixelParticle'](particles[i], min, max);
       }
     }
   }
 
-  drawParticle(particle: any, min: number, max: number) {
+  /**
+   * 用于绘制像素粒子
+   * @param particle
+   * @param min
+   * @param max
+   */
+  private drawPixelParticle(particle: any, min: number, max: number) {
     // TODO 需要判断粒子是否超出视野
     // this.ctx.strokeStyle = color;
     const pointPrev: [number, number] = [particle.x, particle.y];
@@ -202,51 +210,60 @@ class BaseLayer {
     }
   }
 
-  // private drawParticle(particle: any, min: number, max: number) {
-  //   // TODO 需要判断粒子是否超出视野
-  //   // this.ctx.strokeStyle = color;
-  //   const source: [number, number] = [particle.x, particle.y];
-  //   // when xt isn't exit
-  //   const target: [number, number] = [particle.xt || source[0], particle.yt || source[1]];
-  //
-  //   if (
-  //     this.intersectsCoordinate(target)
-  //     && particle.age <= this.options.maxAge
-  //   ) {
-  //     const pointPrev = this.project(source);
-  //     const pointNext = this.project(target);
-  //
-  //     if (pointPrev && pointNext) {
-  //       this.ctx.beginPath();
-  //       this.ctx.moveTo(pointPrev[0], pointPrev[1]);
-  //       this.ctx.lineTo(pointNext[0], pointNext[1]);
-  //       particle.x = particle.xt;
-  //       particle.y = particle.yt;
-  //
-  //       if (isFunction(this.options.colorScale)) {
-  //         // @ts-ignore
-  //         this.ctx.strokeStyle = this.options.colorScale(particle.m) as string;
-  //       } else if (Array.isArray(this.options.colorScale)) {
-  //         const colorIdx = indexFor(particle.m, min, max, this.options.colorScale);
-  //         this.ctx.strokeStyle = this.options.colorScale[colorIdx];
-  //       }
-  //
-  //       if (isFunction(this.options.lineWidth)) {
-  //         // @ts-ignore
-  //         this.ctx.lineWidth = this.options.lineWidth(particle.m) as number;
-  //       }
-  //
-  //       this.ctx.stroke();
-  //     }
-  //   }
-  // }
+  /**
+   * 用于绘制坐标粒子
+   * @param particle
+   * @param min
+   * @param max
+   */
+  private drawCoordsParticle(particle: any, min: number, max: number) {
+    // TODO 需要判断粒子是否超出视野
+    // this.ctx.strokeStyle = color;
+    const source: [number, number] = [particle.x, particle.y];
+    // when xt isn't exit
+    const target: [number, number] = [particle.xt, particle.yt];
+
+    if (
+      target && source &&
+      this.intersectsCoordinate(target)
+      && particle.age <= this.options.maxAge
+    ) {
+      const pointPrev = this.project(source);
+      const pointNext = this.project(target);
+
+      if (pointPrev && pointNext) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(pointPrev[0], pointPrev[1]);
+        this.ctx.lineTo(pointNext[0], pointNext[1]);
+        particle.x = particle.xt;
+        particle.y = particle.yt;
+
+        if (isFunction(this.options.colorScale)) {
+          // @ts-ignore
+          this.ctx.strokeStyle = this.options.colorScale(particle.m) as string;
+        } else if (Array.isArray(this.options.colorScale)) {
+          const colorIdx = indexFor(particle.m, min, max, this.options.colorScale);
+          this.ctx.strokeStyle = this.options.colorScale[colorIdx];
+        }
+
+        if (isFunction(this.options.lineWidth)) {
+          // @ts-ignore
+          this.ctx.lineWidth = this.options.lineWidth(particle.m) as number;
+        }
+
+        this.ctx.stroke();
+      }
+    }
+  }
 
   private prepareParticlePaths() { // 由用户自行处理，不再自动修改粒子数
     const { width, height } = this.ctx.canvas;
     const particleCount = typeof this.options.paths === 'function' ? this.options.paths(this) : this.options.paths;
     const particles = [];
     if (!this.field) return [];
-    this.field.startBatchInterpolate(width, height, this.unproject);
+    if ('startBatchInterpolate' in this.field) {
+      this.field.startBatchInterpolate(width, height, this.unproject);
+    }
     let i = 0;
     for (; i < particleCount; i++) {
       particles.push(this.field.randomize({
