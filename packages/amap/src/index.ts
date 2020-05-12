@@ -133,22 +133,17 @@ class AMapWind {
         this.wind = new WindCore(ctx, opt, data);
 
         this.wind.project = this.project.bind(this);
+        this.wind.unproject = this.unproject.bind(this);
         this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
         this.wind.postrender = () => {
           // @ts-ignore
           // this.setCanvasUpdated();
         };
-
-        this.wind.prerender();
       }
     }
 
     if (this.wind) {
-      if ('generateParticleOption' in opt) {
-        const flag = typeof opt.generateParticleOption === 'function' ? opt.generateParticleOption() : opt.generateParticleOption;
-        flag && this.wind.prerender();
-      }
-
+      this.wind.prerender();
       this.wind.render();
     }
 
@@ -213,7 +208,7 @@ class AMapWind {
    * @returns {*}
    */
   canvasFunction () {
-    const retina = AMap.Browser.retina;
+    const retina = AMap.Browser.retina ? 2 : 1;
     const [width, height]: [number, number] = [this.map.getSize().width, this.map.getSize().height];
     if (!this.canvas) {
       this.canvas = createCanvas(width, height, retina, null);
@@ -249,8 +244,8 @@ class AMapWind {
         return [item.getLng(), item.getLat()];
       });
       // const extent = getExtent(arrays);
-      southWest = new AMap.LngLat(...arrays[3]);
-      northEast = new AMap.LngLat(...arrays[1]);
+      southWest = new AMap.LngLat(arrays[3][0], arrays[3][1]);
+      northEast = new AMap.LngLat(arrays[1][0], arrays[1][1]);
     }
     return new AMap.Bounds(southWest, northEast);
   }
@@ -270,16 +265,24 @@ class AMapWind {
   }
 
   public project(coordinate: [number, number]): [number, number] {
-    const pixel = this.map.lngLatToContainer(new AMap.LngLat(...coordinate));
+    const pixel = this.map.lngLatToContainer(new AMap.LngLat(coordinate[0], coordinate[1]));
     return [
       pixel.x,
       pixel.y,
     ];
   }
 
+  public unproject(pixel: [number, number]): [number, number] {
+    const coordinate = this.map.pixelToLngLat(new AMap.Pixel(pixel[0], pixel[1]));
+    return [
+      coordinate.lng,
+      coordinate.lat,
+    ];
+  }
+
   public intersectsCoordinate(coordinate: [number, number]): boolean {
     const mapExtent = this._getBounds();
-    return mapExtent.contains(new AMap.LngLat(...coordinate)) as boolean;
+    return mapExtent.contains(new AMap.LngLat(coordinate[0], coordinate[1])) as boolean;
     // return true;
   }
 

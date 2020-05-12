@@ -103,15 +103,17 @@ const WindLayer = L.Layer.extend({
 
       this.wind = new WindCore(ctx, opt, data);
 
-      this.wind.project = this.unproject.bind(this);
+      this.wind.project = this.project.bind(this);
+      this.wind.unproject = this.unproject.bind(this);
       this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
       this.wind.postrender = () => {
         // @ts-ignore
         // this.setCanvasUpdated();
       };
-
-      this.wind.prerender();
     }
+
+    this.wind.prerender();
+
     this.wind.render();
   },
 

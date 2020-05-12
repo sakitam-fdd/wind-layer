@@ -260,22 +260,22 @@ export default class Field {
     return this.valueAtIndexes(ci, cj);
   }
 
-  private interpolateColumn(y: number) {
+  private interpolateColumn(x: number) {
     const column = [];
-    const width = this.fieldConfig.width;
-    for (let x = 0; x <= width; x += 2) {
+    const height = this.fieldConfig.height - 1;
+    for (let y = 0; y <= height; y += 2) {
       const coords = this.fieldConfig.unproject([x, y]);
       if (coords) {
         const [lng, lat] = coords;
         if (isFinite(lng)) {
           const wind = this.interpolatedValueAt(lng, lat);
           if (wind) {
-            column[x / 2] = wind;
+            column[y + 1] = column[y] = wind;
           }
         }
       }
     }
-    this.columns[y / 2] = column;
+    this.columns[x + 1] = this.columns[x] = column;
   }
 
   public startBatchInterpolate(width: number, height: number, unproject: any) {
@@ -291,10 +291,10 @@ export default class Field {
 
   private batchInterpolate() {
     const start = Date.now();
-    let y = 0;
-    while (y < this.fieldConfig.height) {
-      this.interpolateColumn(y);
-      y += 2;
+    let x = 0;
+    while (x < this.fieldConfig.width) {
+      this.interpolateColumn(x);
+      x += 2;
       if ((Date.now() - start) > 1000) { //MAX_TASK_TIME) {
         setTimeout(this.batchInterpolate.bind(this), 25);
         return;
@@ -406,13 +406,12 @@ export default class Field {
     let fi = Math.floor(i); // 左
     let ci = fi + 1; // 右
     // duplicate colum to simplify interpolation logic (wrapped value)
-    if (this.isContinuous && ci >= this.cols) {
-      ci = 0;
-    }
-    ci = this.clampColumnIndex(ci);
+    // if (this.isContinuous && ci >= this.cols) {
+    //   ci = 0;
+    // }
 
-    let fj = this.clampRowIndex(Math.floor(j)); // 上 纬度方向索引（取整）
-    let cj = this.clampRowIndex(fj + 1); // 下
+    let fj = Math.floor(j); // 上 纬度方向索引（取整）
+    let cj = fj + 1; // 下
 
     return [fi, ci, fj, cj];
   }
@@ -530,5 +529,73 @@ export default class Field {
    */
   public checkFields() {
     return this.isFields;
+  }
+
+  private interpolateAtPoint(indexX: any, indexY: any) {
+    if (!indexX || !indexY) {
+      return null;
+    }
+    const x = indexX.x;
+    const y = indexY.y;
+
+    const [
+      g00, g10, g01, g11
+    ] = [
+      this.getValueFormXY(x, y),
+      this.getValueFormXY(x + 1, y),
+      this.getValueFormXY(x, y + 1),
+      this.getValueFormXY(x + 1, y + 1),
+    ];
+
+    return this.bilinearInterpolateVector(indexX.deltaX, indexY.deltaY, g00, g10, g01, g11);
+  }
+
+  private getValueFormXY(x: number, y: number) {
+    const n = this.cols * y + x;
+    return new Vector(this.us[n], this.vs[n]);
+  }
+
+  private YAtLatitude(lat: number) {
+    if (lat < this.ymin || lat > this.ymax) {
+      return null;
+    }
+    const y = Math.floor((this.ymax - lat) / this.deltaY);
+    const deltaY = ((this.ymax - this.deltaY * y) - lat) / this.deltaY;
+    return {
+      y,
+      deltaY,
+    };
+  }
+
+  private XAtLongitude(lng: number) {
+    if (lng < this.xmin || lng > this.xmax) {
+      return null;
+    }
+    const x = Math.floor((lng - this.xmin) / this.deltaX);
+    const deltaX = (lng - (this.xmin + this.deltaX * x)) / this.deltaX;
+    return {
+      x,
+      deltaX,
+    };
+  }
+
+  public _interpolate(width: number, height: number, unproject: any) {
+    this.columns = [];
+    for (let y = 0; y < height; y += 2) {
+      const row = [];
+      for (let x = 0; x < width; x += 2) {
+        const coord = unproject([x, y]);
+
+        const i = this.XAtLongitude(coord[0]);
+        const j = this.YAtLatitude(coord[1]);
+        if (i === null || j === null) {
+          row[x / 2] = null;
+        } else {
+          row[x / 2] = this.interpolateAtPoint(i, j);
+        }
+      }
+
+      this.columns[y / 2] = row;
+    }
   }
 }

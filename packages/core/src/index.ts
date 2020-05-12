@@ -14,11 +14,9 @@ export const defaultOptions = {
   frameRate: 20,
   minVelocity: 0,
   maxVelocity: 10,
-  generateParticleOption: true,
 };
 
 type emptyFunc = (v?: any) => number;
-type emptyGenerateParticleFunc = (v?: any) => boolean;
 
 export interface IOptions {
   globalAlpha: number; // 全局透明度
@@ -32,7 +30,6 @@ export interface IOptions {
   frameRate: number;
   minVelocity?: number;
   maxVelocity?: number;
-  generateParticleOption?: boolean | emptyGenerateParticleFunc;
 }
 
 function indexFor (m: number, min: number, max: number, colorScale: string[]) {  // map velocity speed to a style
@@ -131,7 +128,7 @@ class BaseLayer {
           // Path from (x,y) to (xt,yt) is visible, so add this particle to the appropriate draw bucket.
           particle.xt = xt;
           particle.yt = yt;
-          particle.m = vector.magnitude();
+          particle.m = vector.m;
         } else {
           // Particle isn't visible, but it still moves through the field.
           particle.x = xt;
@@ -249,7 +246,7 @@ class BaseLayer {
     const particleCount = typeof this.options.paths === 'function' ? this.options.paths(this) : this.options.paths;
     const particles = [];
     if (!this.field) return [];
-    this.field.startBatchInterpolate(width, height, this.project);
+    this.field.startBatchInterpolate(width, height, this.unproject);
     let i = 0;
     for (; i < particleCount; i++) {
       particles.push(this.field.randomize({
@@ -265,11 +262,22 @@ class BaseLayer {
 
   // @ts-ignore
   project(...args: any[]): [number, number] | null {
-    throw new Error('must be overriden');
+    throw new Error('project must be overriden');
+  }
+
+  // @ts-ignore
+  unproject(...args: any[]): [number, number] | null {
+    throw new Error('unproject must be overriden');
   }
 
   intersectsCoordinate(coordinates: [number, number]): boolean {
     throw new Error('must be overriden');
+  }
+
+  public clearCanvas() {
+    this.stop();
+    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+    this.forceStop = false;
   }
 
   start() {
@@ -300,16 +308,9 @@ class BaseLayer {
    * 渲染前处理
    */
   prerender() {
-    const gen = isFunction(this.options.generateParticleOption) ?
-      // @ts-ignore
-      this.options.generateParticleOption() : this.options.generateParticleOption;
-    if (!gen && !this.generated) {
-      this.particles = this.prepareParticlePaths();
-      this.generated = true;
-    } else if (gen) {
-      this.particles = this.prepareParticlePaths();
-      this.generated = true;
-    }
+    this.generated = false;
+    this.particles = this.prepareParticlePaths();
+    this.generated = true;
 
     if (!this.starting && !this.forceStop) {
       this.starting = true;

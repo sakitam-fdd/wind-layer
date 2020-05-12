@@ -2,9 +2,13 @@
 export default class Vector {
   public u: number;
   public v: number;
+  public m: number;
+
   constructor(u: number, v: number) {
     this.u = u;
     this.v = v;
+
+    this.m = this.magnitude();
   }
 
   /**
