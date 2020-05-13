@@ -120,8 +120,8 @@ const WindLayer = L.Layer.extend({
   project(coordinate: [number, number]): [number, number] {
     const pixel = this._map.latLngToContainerPoint(new L.LatLng(coordinate[1], coordinate[0]));
     return [
-      pixel.x,
-      pixel.y,
+      pixel.x * this.devicePixelRatio,
+      pixel.y * this.devicePixelRatio,
     ];
   },
 

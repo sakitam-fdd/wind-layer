@@ -170,7 +170,7 @@ export default class Field {
         const vec = this.grid[j][i];
 
         if (vec !== null) {
-          const val = vec.magnitude();
+          const val = vec.m || vec.magnitude();
           // vectors.push();
           if (min === undefined) {
             min = val;
@@ -449,13 +449,20 @@ export default class Field {
    * @param o
    * @param width
    * @param height
+   * @param unproject
    */
-  public randomize(o: IPosition = {}, width?: number, height?: number) {
-    let i = (Math.random() * this.cols) | 0;
-    let j = (Math.random() * this.rows) | 0;
+  public randomize(o: IPosition = {}, width: number, height: number, unproject: (...args: any[]) => ([number, number] | null)) {
+    let i = (Math.random() * (width || this.cols)) | 0;
+    let j = (Math.random() * (height || this.rows)) | 0;
 
-    o.x = this.longitudeAtX(i);
-    o.y = this.latitudeAtY(j);
+    const coords = unproject([i, j]);
+    if (coords !== null) {
+      o.x = coords[0];
+      o.y = coords[1];
+    } else {
+      o.x = this.longitudeAtX(i);
+      o.y = this.latitudeAtY(j);
+    }
 
     return o;
   }

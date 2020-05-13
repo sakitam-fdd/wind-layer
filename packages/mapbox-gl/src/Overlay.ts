@@ -84,7 +84,10 @@ export default class Overlay {
       const lnglat = this.map.project(new mapboxgl.LngLat(coordinates[0], coordinates[1]));
       const x = Math.round(lnglat.x);
       const y = Math.round(lnglat.y);
-      return [x, y];
+      return [
+        x * this.devicePixelRatio,
+        y * this.devicePixelRatio,
+      ];
     }
     return coordinates;
   }

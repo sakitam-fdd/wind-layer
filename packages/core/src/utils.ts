@@ -189,6 +189,15 @@ export function floorMod (a: number, n: number) {
   return a - n * Math.floor(a / n);
 }
 
+/**
+ * 检查值是否合法
+ * @param val
+ * @returns {boolean}
+ */
+export function isValide(val: any) {
+  return val !== undefined && val !== null && !isNaN(val);
+}
+
 export interface IGFSItem {
   header: {
     parameterCategory: number | string;
@@ -246,7 +255,7 @@ export function formatData(data: IGFSItem[]) {
     rows: header.ny, // 行
     us: uComp.data, // U分量
     vs: vComp.data, // V分量
-    wrappedX: false,
+    // wrappedX: false,
   });
 
   if ((process.env.NODE_ENV as string) === ('development' as string)) {

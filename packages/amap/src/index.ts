@@ -265,10 +265,11 @@ class AMapWind {
   }
 
   public project(coordinate: [number, number]): [number, number] {
-    const pixel = this.map.lngLatToContainer(new AMap.LngLat(coordinate[0], coordinate[1]));
+    const retina = AMap.Browser.retina ? 2 : 1;
+    const pixel = this.map.lngLatToContainer(new AMap.LngLat(coordinate[0], coordinate[1], true));
     return [
-      pixel.x,
-      pixel.y,
+      pixel.x * retina,
+      pixel.y * retina,
     ];
   }
 
