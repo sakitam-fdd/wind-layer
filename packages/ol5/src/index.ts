@@ -1,27 +1,24 @@
+import { Map } from 'ol';
+import { Coordinate } from 'ol/coordinate';
+import { containsCoordinate, Extent as IExtent } from 'ol/extent';
+import { Image as ImageLayer } from 'ol/layer';
+import LayerType from 'ol/LayerType';
+import { Pixel as IPixel } from 'ol/pixel';
+import { ProjectionLike as IProjection, transform } from 'ol/proj';
+import { Size as ISize } from 'ol/size';
+import ImageCanvas, { Options as ImageCanvasOptions } from 'ol/source/ImageCanvas';
 import WindCore, {
-  Field,
-  isArray,
-  formatData,
-  warnLog,
   assign,
-  defaultOptions,
   createCanvas,
+  defaultOptions,
+  Field,
+  formatData,
   IOptions,
+  isArray,
+  warnLog,
 } from 'wind-core';
 
-import { Map } from 'ol';
-import LayerType from 'ol/LayerType';
-import { Size as ISize } from 'ol/size';
-import { Coordinate } from 'ol/coordinate';
-import { Extent as IExtent, containsCoordinate } from 'ol/extent';
-import { Image as ImageLayer } from 'ol/layer';
-import { ProjectionLike as IProjection, transform } from 'ol/proj';
-import ImageCanvas, { Options as ImageCanvasOptions } from 'ol/source/ImageCanvas';
-
-import {
-  PerfWindLayer,
-  WindLayerRender,
-} from './layer';
+import { PerfWindLayer, WindLayerRender } from './layer';
 
 export interface IWindOptions extends IOptions {
   opacity?: number;
@@ -162,20 +159,16 @@ class OlWind extends ImageLayer {
         this.wind = new WindCore(ctx, opt, data);
 
         this.wind.project = this.project.bind(this);
+        this.wind.unproject = this.unproject.bind(this);
         this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
         this.wind.postrender = () => {
           this.changed();
         };
-        this.wind.prerender();
       }
     }
 
     if (this.wind) {
-      if ('generateParticleOption' in opt) {
-        const flag = typeof opt.generateParticleOption === 'function' ? opt.generateParticleOption() : opt.generateParticleOption;
-        flag && this.wind.prerender();
-      }
-
+      this.wind.prerender();
       this.wind.render();
     }
 
@@ -189,6 +182,12 @@ class OlWind extends ImageLayer {
       pixel[0] * this.pixelRatio,
       pixel[1] * this.pixelRatio,
     ];
+  }
+
+  public unproject(pixel: IPixel): [number, number] {
+    const map = this.getMap();
+    const coordinates = map.getCoordinateFromPixel(pixel);
+    return transform(coordinates, this.viewProjection, 'EPSG:4326') as [number, number];
   }
 
   public intersectsCoordinate(coordinate: Coordinate): boolean {

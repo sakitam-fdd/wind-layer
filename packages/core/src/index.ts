@@ -1,6 +1,5 @@
 import Field from './Field';
-// import isFunction from 'lodash/isFunction';
-import { isString, isNumber, isFunction } from './utils';
+import { isString, isNumber, isFunction, isValide } from './utils';
 
 export const defaultOptions = {
   globalAlpha: 0.9, // 全局透明度
@@ -15,9 +14,13 @@ export const defaultOptions = {
   minVelocity: 0,
   maxVelocity: 10,
   useCoordsDraw: true,
+  gpet: true, // generate particle every times
+  showArrow: false,
+  showColorScale: false,
 };
 
 type emptyFunc = (v?: any) => number;
+type emptyGenerateParticleFunc = (v?: any) => boolean;
 
 export interface IOptions {
   globalAlpha: number; // 全局透明度
@@ -32,6 +35,9 @@ export interface IOptions {
   minVelocity?: number;
   maxVelocity?: number;
   useCoordsDraw?: boolean;
+  gpet?: boolean;
+  showArrow?: boolean;
+  showColorScale?: boolean;
 }
 
 function indexFor (m: number, min: number, max: number, colorScale: string[]) {  // map velocity speed to a style
@@ -112,13 +118,13 @@ class BaseLayer {
       if (particle.age > maxAge) {
         particle.age = 0;
         // restart, on a random x,y
-        this.field.randomize(particle, width, height);
+        this.field.randomize(particle, width, height, this.unproject);
       }
 
       const x = particle.x;
       const y = particle.y;
 
-      const vector = this.field.valueAt(x, y);
+      const vector = this.field.interpolatedValueAt(x, y);
 
       if (vector === null) {
         particle.age = maxAge;
@@ -182,10 +188,12 @@ class BaseLayer {
     // when xt isn't exit
     const pointNext: [number, number] = [particle.xt, particle.yt];
 
-    // const pointPrev = this.project(source);
-    // const pointNext = this.project(target);
-
-    if (pointPrev && pointNext) {
+    if (
+      pointNext && pointPrev && isValide(pointNext[0]) &&
+      isValide(pointNext[1]) && isValide(pointPrev[0]) &&
+      isValide(pointPrev[1])
+      && particle.age <= this.options.maxAge
+    ) {
       this.ctx.beginPath();
       this.ctx.moveTo(pointPrev[0], pointPrev[1]);
       this.ctx.lineTo(pointNext[0], pointNext[1]);
@@ -224,7 +232,9 @@ class BaseLayer {
     const target: [number, number] = [particle.xt, particle.yt];
 
     if (
-      target && source &&
+      target && source && isValide(target[0]) &&
+      isValide(target[1]) && isValide(source[0]) &&
+      isValide(source[1]) &&
       this.intersectsCoordinate(target)
       && particle.age <= this.options.maxAge
     ) {
@@ -268,7 +278,7 @@ class BaseLayer {
     for (; i < particleCount; i++) {
       particles.push(this.field.randomize({
         age: this.randomize()
-      }, width, height));
+      }, width, height, this.unproject));
     }
     return particles;
   }

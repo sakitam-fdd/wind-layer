@@ -201,8 +201,8 @@ function initMap() {
         forceRender: false,
         windOptions: {
           // colorScale: scale,
-          velocityScale: 0.5,
-          paths: 5000,
+          velocityScale: 0.005,
+          paths: 2000,
           // eslint-disable-next-line no-unused-vars
           colorScale: () => {
             // console.log(m);
