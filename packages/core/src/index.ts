@@ -15,8 +15,6 @@ export const defaultOptions = {
   maxVelocity: 10,
   useCoordsDraw: true,
   gpet: true, // generate particle every times
-  showArrow: false,
-  showColorScale: false,
 };
 
 type emptyFunc = (v?: any) => number;
@@ -36,8 +34,6 @@ export interface IOptions {
   maxVelocity?: number;
   useCoordsDraw?: boolean;
   gpet?: boolean;
-  showArrow?: boolean;
-  showColorScale?: boolean;
 }
 
 function indexFor (m: number, min: number, max: number, colorScale: string[]) {  // map velocity speed to a style
@@ -362,6 +358,7 @@ class BaseLayer {
 }
 
 export { default as Field } from './Field';
+export { default as ScalarField } from './ScalarField';
 export { default as Vector } from './Vector';
 export * from './utils';
 

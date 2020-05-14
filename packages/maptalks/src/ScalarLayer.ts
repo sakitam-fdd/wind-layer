@@ -1,40 +1,21 @@
 // @ts-ignore
 import { CanvasLayer, renderer, Coordinate, Point } from 'maptalks/dist/maptalks.es.js';
-
-import WindCore, {
-  Field,
-  isArray,
-  formatData,
-  warnLog,
-  assign,
-  defaultOptions,
-  IOptions,
-} from 'wind-core';
-
-import { ScalarLayer, ScalarLayerRenderer } from './ScalarLayer';
-
+import { assign, formatData, IOptions, isArray, ScalarField } from 'wind-core';
 import { containsCoordinate, Extent, transformExtent } from './utils';
-
-export interface IWindOptions extends IOptions {
-  windOptions: Partial<IOptions>;
-  [key: string]: any;
-}
 
 const _options = {
   renderer: 'canvas',
   doubleBuffer: false,
   animation: false,
-  windOptions: {},
 };
 
-export interface IWindLayerRenderer {}
-
-export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements IWindLayerRenderer {
+export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
+  public scalarRender: ScalarField;
   private _drawContext: CanvasRenderingContext2D;
   public canvas: HTMLCanvasElement | undefined;
   public layer: any;
   public context: CanvasRenderingContext2D;
-  private wind: WindCore;
+
   checkResources() {
     return [];
   }
@@ -62,27 +43,25 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
     const map = this.getMap();
     if (this.context) {
       const layer = this.layer;
-      const opt = layer.getWindOptions();
-      if (!this.wind && map) {
+      const opt = layer.getOptions();
+      if (!this.scalarRender && map) {
         const data = layer.getData();
 
-        this.wind = new WindCore(this.context, opt, data);
+        this.scalarRender = new ScalarField(this.context, opt, data);
 
-        this.wind.project = this.project.bind(this);
-        this.wind.unproject = this.unproject.bind(this);
-        this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
-        this.wind.postrender = () => {
+        this.scalarRender.project = this.project.bind(this);
+        this.scalarRender.unproject = this.unproject.bind(this);
+        this.scalarRender.intersectsCoordinate = this.intersectsCoordinate.bind(this);
+        this.scalarRender.postrender = () => {
           // @ts-ignore
           this.setCanvasUpdated();
         };
-
-        this.wind.prerender();
       }
 
-      if (this.wind) {
-        this.wind.prerender()
+      if (this.scalarRender) {
+        this.scalarRender.prerender();
 
-        this.wind.render();
+        this.scalarRender.render();
       }
     }
     this.completeRender();
@@ -117,44 +96,26 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
   }
 
   onZoomStart(...args: any[]) {
-    if (this.wind) {
-      this.wind.stop();
-    }
     super.onZoomStart.apply(this, args);
   }
 
   onZoomEnd(...args: any[]) {
-    if (this.wind) {
-      this.wind.start();
-    }
     super.onZoomEnd.apply(this, args);
   }
 
   onDragRotateStart(...args: any[]) {
-    if (this.wind) {
-      this.wind.stop();
-    }
     super.onDragRotateStart.apply(this, args);
   }
 
   onDragRotateEnd(...args: any[]) {
-    if (this.wind) {
-      this.wind.start();
-    }
     super.onDragRotateEnd.apply(this, args);
   }
 
   onMoveStart(...args: any[]) {
-    if (this.wind) {
-      this.wind.stop();
-    }
     super.onMoveStart.apply(this, args);
   }
 
   onMoveEnd(...args: any[]) {
-    if (this.wind) {
-      this.wind.start();
-    }
     super.onMoveEnd.apply(this, args);
   }
 
@@ -187,10 +148,10 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
   }
 }
 
-class MaptalksWind extends CanvasLayer {
+export class ScalarLayer extends CanvasLayer {
   private field: any;
   private _map: any;
-  private options: IWindOptions;
+  private options: any;
 
   constructor(id: string | number, data: any, options: any) {
     super(id, assign({}, _options, options));
@@ -199,23 +160,9 @@ class MaptalksWind extends CanvasLayer {
 
     this._map = null;
 
-    this.pickWindOptions();
-
     if (data) {
       this.setData(data);
     }
-  }
-
-  private pickWindOptions() {
-    Object.keys(defaultOptions).forEach((key: string) => {
-      if (key in this.options) {
-        if (this.options.windOptions === undefined) {
-          this.options.windOptions = {};
-        }
-        // @ts-ignore
-        this.options.windOptions[key] = this.options[key];
-      }
-    });
   }
 
   /**
@@ -241,32 +188,17 @@ class MaptalksWind extends CanvasLayer {
     return this;
   }
 
-  public updateParams(options : Partial<IOptions> = {}) {
-    warnLog('will move to setWindOptions');
-    this.setWindOptions(options);
-    return this;
-  }
-
-  public getParams() {
-    warnLog('will move to getWindOptions');
-    return this.getWindOptions();
-  }
-
-  public setWindOptions(options: Partial<IOptions>) {
-    const beforeOptions = this.options.windOptions || {};
-    this.options = assign(this.options, {
-      windOptions: assign(beforeOptions, options || {}),
-    });
+  public setOptions(options: Partial<IOptions>) {
+    this.options = assign(this.options, options || {});
 
     const renderer = this._getRenderer();
-    if (renderer && renderer.wind) {
-      const windOptions = this.options.windOptions;
-      renderer.wind.setOptions(windOptions);
+    if (renderer && renderer.scalarRender) {
+      renderer.scalarRender.setOptions(this.options);
     }
   }
 
-  public getWindOptions() {
-    return this.options.windOptions || {};
+  public getOptions() {
+    return this.options || {};
   }
 
   public draw() {
@@ -290,15 +222,4 @@ class MaptalksWind extends CanvasLayer {
 }
 
 // @ts-ignore
-MaptalksWind.registerRenderer('canvas', WindLayerRenderer);
-
-const WindLayer = MaptalksWind;
-
-export {
-  Field,
-  WindLayer,
-  ScalarLayer,
-  ScalarLayerRenderer,
-};
-
-export default MaptalksWind;
+ScalarLayer.registerRenderer('canvas', ScalarLayerRenderer);

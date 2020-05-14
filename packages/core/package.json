@@ -39,5 +39,8 @@
     "url": "https://github.com/sakitam-fdd/wind-layer/issues"
   },
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
+  "dependencies": {
+    "gl-matrix": "^3.3.0"
+  },
   "gitHead": "e824bcd617be03f89fcefdd59e12e1f534c5cca4"
 }
