@@ -1,7 +1,9 @@
+import { mat4 } from "gl-matrix";
 // @ts-ignore
 import { CanvasLayer, renderer, Coordinate, Point } from 'maptalks/dist/maptalks.es.js';
-import { assign, formatData, IOptions, isArray, ScalarField } from 'wind-core';
+import { assign, formatData, IOptions, isArray, ScalarField, createCanvas } from 'wind-core';
 import { containsCoordinate, Extent, transformExtent } from './utils';
+import { getGlContext } from 'wind-core/src/renderer/webgl/gl-utils';
 
 const _options = {
   renderer: 'canvas',
@@ -13,8 +15,10 @@ export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
   public scalarRender: ScalarField;
   private _drawContext: CanvasRenderingContext2D;
   public canvas: HTMLCanvasElement | undefined;
+  public canvas2: HTMLCanvasElement | undefined;
   public layer: any;
   public context: CanvasRenderingContext2D;
+  private gl: WebGLRenderingContext | null;
 
   checkResources() {
     return [];
@@ -39,6 +43,48 @@ export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
     this.draw();
   }
 
+  createContext() {
+    if (this.gl && this.gl.canvas === this.canvas || this.context) {
+      return;
+    }
+
+    // @ts-ignore
+    this.context = this.canvas.getContext('2d');
+    if (!this.context) {
+      return;
+    }
+
+    // @ts-ignore
+    this.gl = getGlContext(this.canvas2, this.layer.options.glOptions);
+
+    const dpr = this.getMap().getDevicePixelRatio();
+    if (dpr !== 1) {
+      this.context.scale(dpr, dpr);
+    }
+  }
+
+  createCanvas() {
+    if (!this.canvas) {
+      const map = this.getMap();
+      const size = map.getSize();
+      const retina = map.getDevicePixelRatio();
+      const [width, height] = [retina * size.width, retina * size.height];
+      this.canvas = createCanvas(width, height, retina, map.CanvasClass);
+      this.canvas2 = createCanvas(width, height, retina, map.CanvasClass);
+      this.layer.fire('canvascreate', { context: this.context, gl: this.gl });
+    }
+  }
+
+  getMatrix(): mat4 {
+    const map = this.getMap();
+    const extent = map._get2DExtent(map.getGLZoom());
+    const uMatrix = mat4.identity(new Float32Array(16));
+    mat4.translate(uMatrix, uMatrix, [extent.xmin, extent.ymax, 0]);
+    mat4.scale(uMatrix, uMatrix, [1, 1, 1]);
+    mat4.multiply(uMatrix, map.projViewMatrix, uMatrix);
+    return uMatrix;
+  }
+
   drawWind() {
     const map = this.getMap();
     if (this.context) {
@@ -53,15 +99,18 @@ export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
         this.scalarRender.unproject = this.unproject.bind(this);
         this.scalarRender.intersectsCoordinate = this.intersectsCoordinate.bind(this);
         this.scalarRender.postrender = () => {
+          if (this.context && this.gl) {
+            this.context.drawImage(this.gl.canvas, 0, 0);
+          }
           // @ts-ignore
           this.setCanvasUpdated();
         };
       }
 
       if (this.scalarRender) {
-        this.scalarRender.prerender();
+        this.scalarRender.prerender(this.getMatrix());
 
-        this.scalarRender.render();
+        this.scalarRender.render(this.getMatrix());
       }
     }
     this.completeRender();

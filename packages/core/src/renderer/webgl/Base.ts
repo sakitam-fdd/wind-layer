@@ -31,14 +31,14 @@ export default class Base {
   vertShader = '';
 
   fragShader = '';
-  private readonly gl: WebGLRenderingContext;
-  private count: number;
-  private readonly program: WebGLProgram | null;
-  private textureUnit: number;
-  private uniformSetters: UniformSetters;
-  private attribSetters: AttribSetters;
-  private transfromStack: (() => void)[];
-  private projection: mat3;
+  public readonly gl: WebGLRenderingContext;
+  public count: number;
+  public readonly program: WebGLProgram | null;
+  public textureUnit: number;
+  public uniformSetters: UniformSetters;
+  public attribSetters: AttribSetters;
+  public transfromStack: (() => void)[];
+  public projection: mat3;
 
   constructor(gl: WebGLRenderingContext, vShader: string, fShader: string) {
 
@@ -274,7 +274,7 @@ export default class Base {
     return attribSetters;
   }
 
-  setAttributes(attribs: AttribValues, setters: AttribSetters | any) {
+  setAttributes(attribs: AttribValues, setters?: AttribSetters | any) {
     if (setters) {
       setters = setters.attribSetters || setters;
     } else {
@@ -289,7 +289,7 @@ export default class Base {
     return this;
   }
 
-  setUniforms(values: UniformValues, setters: UniformSetters | any) {
+  setUniforms(values: UniformValues, setters?: UniformSetters | any) {
     if (setters) {
       setters = setters.uniformSetters || setters;
     } else {

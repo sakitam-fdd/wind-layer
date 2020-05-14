@@ -1,6 +1,7 @@
 // Config file for running Rollup in "normal" mode (non-watch)
 import json from '@rollup/plugin-json';
 // import babel from 'rollup-plugin-babel';
+import glslify from 'rollup-plugin-glslify';
 import buble from '@rollup/plugin-buble';
 import commonjs from '@rollup/plugin-commonjs';
 import nodeResolve from '@rollup/plugin-node-resolve';
@@ -19,6 +20,7 @@ export default {
   input: resolve(input),
   plugins: [
     replace({ 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV) }),
+    glslify(),
     json({
       indent: ' '
     }),
