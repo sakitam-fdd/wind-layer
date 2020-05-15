@@ -2,6 +2,8 @@
 
 a [openlayers](http://openlayers.org) | [bmap](https://map.baidu.com/) | [amap](https://ditu.amap.com/) | [maptalks](https://maptalks.org/) extension to show wind field。
 
+  [mapbox-gl](https://github.com/mapbox/mapbox-gl-js) | [leaflet](https://leafletjs.com/)
+  
 ### 介绍
 
   [wind-layer](./) 设计之初是来源于 [earth](http://earth.nullschool.net) [cambecc](https://github.com/cambecc/earth) 的一个气象数据的展示，他使用了流体场的方式去展示了全球的风速和风向富有很强的
@@ -33,6 +35,8 @@ a [openlayers](http://openlayers.org) | [bmap](https://map.baidu.com/) | [amap](
 | [@sakitam-gis/maptalks-wind](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/maptalks) | [![Npm package](https://img.shields.io/npm/v/@sakitam-gis/maptalks-wind.svg)](https://www.npmjs.org/package/@sakitam-gis/maptalks-wind) | [![NPM downloads](https://img.shields.io/npm/dm/@sakitam-gis/maptalks-wind.svg)](https://npmjs.org/package/@sakitam-gis/maptalks-wind) | [![](https://data.jsdelivr.com/v1/package/npm/@sakitam-gis/maptalks-wind/badge)](https://www.jsdelivr.com/package/npm/@sakitam-gis/maptalks-wind) | `maptalks` 风场扩展插件 |
 | [amap-wind](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/amap) | [![Npm package](https://img.shields.io/npm/v/amap-wind.svg)](https://www.npmjs.org/package/amap-wind) | [![NPM downloads](https://img.shields.io/npm/dm/amap-wind.svg)](https://npmjs.org/package/amap-wind) | [![](https://data.jsdelivr.com/v1/package/npm/amap-wind/badge)](https://www.jsdelivr.com/package/npm/amap-wind) | 高德地图风场扩展插件 |
 | [bmap-wind](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/bmap) | [![Npm package](https://img.shields.io/npm/v/bmap-wind.svg)](https://www.npmjs.org/package/bmap-wind) | [![NPM downloads](https://img.shields.io/npm/dm/bmap-wind.svg)](https://npmjs.org/package/bmap-wind) | [![](https://data.jsdelivr.com/v1/package/npm/bmap-wind/badge)](https://www.jsdelivr.com/package/npm/bmap-wind) | 百度地图风场扩展插件 |
+| [mapbox-wind](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/mapbox-gl) | [![Npm package](https://img.shields.io/npm/v/@sakitam-gis/mapbox-wind.svg)](https://www.npmjs.org/package/@sakitam-gis/mapbox-wind) | [![NPM downloads](https://img.shields.io/npm/dm/@sakitam-gis/mapbox-wind.svg)](https://npmjs.org/package/@sakitam-gis/mapbox-wind) | [![](https://data.jsdelivr.com/v1/package/npm/@sakitam-gis/mapbox-wind/badge)](https://www.jsdelivr.com/package/npm/@sakitam-gis/mapbox-wind) | mapbox-gl 风场扩展插件 |
+| [leaflet-wind](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/leaflet) | [![Npm package](https://img.shields.io/npm/v/leaflet-wind.svg)](https://www.npmjs.org/package/leaflet-wind) | [![NPM downloads](https://img.shields.io/npm/dm/leaflet-wind.svg)](https://npmjs.org/package/leaflet-wind) | [![](https://data.jsdelivr.com/v1/package/npm/leaflet-wind/badge)](https://www.jsdelivr.com/package/npm/leaflet-wind) | Leaflet风场扩展插件 |
 
 ### 安装
 
@@ -55,6 +59,8 @@ npm install openlayers-wind
 npm install @sakitam-gis/maptalks-wind
 npm install amap-wind
 npm install bmap-wind
+npm install leaflet-wind
+npm install @sakitam-gis/mapbox-wind
 
 # yarn
 yarn add wind-core
@@ -64,6 +70,8 @@ yarn add openlayers-wind
 yarn add @sakitam-gis/maptalks-wind
 yarn add amap-wind
 yarn add bmap-wind
+yarn add leaflet-wind
+yarn add @sakitam-gis/mapbox-wind
 ```
 
 #### 部分插件亦可以通过浏览器引入
@@ -81,6 +89,8 @@ yarn add bmap-wind
 | [@sakitam-gis/maptalks-wind](https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/) | https://unpkg.com/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js | https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js |
 | [amap-wind](https://cdn.jsdelivr.net/npm/amap-wind/dist/) | https://unpkg.com/amap-wind/dist/amap-wind.js | https://cdn.jsdelivr.net/npm/amap-wind/dist/amap-wind.js |
 | [bmap-wind](https://cdn.jsdelivr.net/npm/bmap-wind/dist/) | https://unpkg.com/bmap-wind/dist/bmap-wind.js | https://cdn.jsdelivr.net/npm/bmap-wind/dist/bmap-wind.js |
+| [leaflet-wind](https://cdn.jsdelivr.net/npm/leaflet-wind/dist/) | https://unpkg.com/leaflet-wind/dist/leaflet-wind.js | https://cdn.jsdelivr.net/npm/leaflet-wind/dist/leaflet-wind.js |
+| [@sakitam-gis/mapbox-wind](https://cdn.jsdelivr.net/npm/@sakitam-gis/mapbox-wind/dist/) | https://unpkg.com/@sakitam-gis/mapbox-wind/dist/mapbox-wind.js | https://cdn.jsdelivr.net/npm/@sakitam-gis/mapbox-wind/dist/mapbox-wind.js |
 
 ### 示例
 
