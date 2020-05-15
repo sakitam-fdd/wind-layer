@@ -3,12 +3,23 @@ import { terser } from 'rollup-plugin-terser';
 import { banner, pkg, resolve, handleMinEsm } from './utils';
 import baseConfig from './base.config';
 
+import { globals as olGlobals } from './external/ol';
+import { globals as maptalksGlobals } from './external/maptalks';
+import { globals as openlayersGlobals } from './external/openlayers';
+import { globals as leafletGlobals } from './external/leaflet';
+import { globals as mapboxGlobals } from './external/mapbox';
+
 const extend = process.env.extend;
 
 const common = {
   banner: banner,
   extend: !!extend,
   globals: {
+    ...olGlobals,
+    ...maptalksGlobals,
+    ...openlayersGlobals,
+    ...leafletGlobals,
+    ...mapboxGlobals,
   },
 };
 

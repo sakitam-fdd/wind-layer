@@ -1,6 +1,7 @@
 // Config file for running Rollup in "normal" mode (non-watch)
 import json from '@rollup/plugin-json';
 // import babel from 'rollup-plugin-babel';
+import glslify from 'rollup-plugin-glslify';
 import buble from '@rollup/plugin-buble';
 import commonjs from '@rollup/plugin-commonjs';
 import nodeResolve from '@rollup/plugin-node-resolve';
@@ -10,6 +11,8 @@ import { resolve } from './utils';
 import { external as olExternal } from './external/ol';
 import { external as maptalksExternal } from './external/maptalks';
 import { external as openlayersExternal } from './external/openlayers';
+import { external as leafletExternal } from './external/leaflet';
+import { external as mapboxExternal } from './external/mapbox';
 
 const input = process.env.input;
 
@@ -17,6 +20,7 @@ export default {
   input: resolve(input),
   plugins: [
     replace({ 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV) }),
+    glslify(),
     json({
       indent: ' '
     }),
@@ -54,5 +58,7 @@ export default {
     ...olExternal,
     ...maptalksExternal,
     ...openlayersExternal,
+    ...leafletExternal,
+    ...mapboxExternal,
   ]
 };

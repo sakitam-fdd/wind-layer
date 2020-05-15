@@ -1,3 +1,6 @@
+"""
+使用eccodes解析需要的字段
+"""
 def WindEnum():
     return [
         "discipline",
@@ -63,3 +66,12 @@ def WindEnum():
         "bitMapIndicator",
         "bitmapPresent"
     ]
+
+
+"""
+使用 `rasterio` 需要的结果字段
+"""
+def WindJSON():
+  return [
+    ''
+  ]

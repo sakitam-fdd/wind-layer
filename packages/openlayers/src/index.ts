@@ -9,7 +9,8 @@ import WindCore, {
   IOptions,
 } from 'wind-core';
 
-import ol, { olx } from 'openlayers';
+import * as ol from 'openlayers';
+import { olx } from 'openlayers';
 
 export interface IWindOptions extends IOptions {
   opacity?: number;
@@ -159,21 +160,17 @@ class OlWind extends ol.layer.Image {
         this.wind = new WindCore(ctx, opt, data);
 
         this.wind.project = this.project.bind(this);
-        // this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
-        this.wind.intersectsCoordinate = () => true;
+        this.wind.unproject = this.unproject.bind(this);
+        this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
+        // this.wind.intersectsCoordinate = () => true;
         this.wind.postrender = () => {
           this.changed();
         };
-
-        this.wind.prerender();
       }
     }
 
     if (this.wind) {
-      if ('generateParticleOption' in opt) {
-        const flag = typeof opt.generateParticleOption === 'function' ? opt.generateParticleOption() : opt.generateParticleOption;
-        flag && this.wind.prerender();
-      }
+      this.wind.prerender();
 
       this.wind.render();
     }
@@ -188,6 +185,12 @@ class OlWind extends ol.layer.Image {
       pixel[0] * this.pixelRatio,
       pixel[1] * this.pixelRatio,
     ];
+  }
+
+  public unproject(pixel: [number, number]): [number, number] {
+    const map = this.getMap();
+    const coordinates = map.getCoordinateFromPixel(pixel);
+    return ol.proj.transform(coordinates, this.viewProjection, 'EPSG:4326') as [number, number];
   }
 
   /**
