@@ -361,5 +361,6 @@ export { default as Field } from './Field';
 export { default as ScalarField } from './ScalarField';
 export { default as Vector } from './Vector';
 export * from './utils';
+export * from './renderer/webgl/gl-utils';
 
 export default BaseLayer;
