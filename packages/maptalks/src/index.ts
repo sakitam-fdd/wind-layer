@@ -1,5 +1,5 @@
 // @ts-ignore
-import { CanvasLayer, renderer, Coordinate } from 'maptalks/dist/maptalks.es.js';
+import { CanvasLayer, renderer, Coordinate, Point } from 'maptalks/dist/maptalks.es.js';
 
 import WindCore, {
   Field,
@@ -10,6 +10,10 @@ import WindCore, {
   defaultOptions,
   IOptions,
 } from 'wind-core';
+
+import { ScalarLayer, ScalarLayerRenderer } from './ScalarLayer';
+
+import { containsCoordinate, Extent, transformExtent } from './utils';
 
 export interface IWindOptions extends IOptions {
   windOptions: Partial<IOptions>;
@@ -29,7 +33,7 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
   private _drawContext: CanvasRenderingContext2D;
   public canvas: HTMLCanvasElement | undefined;
   public layer: any;
-  private context: CanvasRenderingContext2D;
+  public context: CanvasRenderingContext2D;
   private wind: WindCore;
   checkResources() {
     return [];
@@ -65,6 +69,7 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
         this.wind = new WindCore(this.context, opt, data);
 
         this.wind.project = this.project.bind(this);
+        this.wind.unproject = this.unproject.bind(this);
         this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
         this.wind.postrender = () => {
           // @ts-ignore
@@ -75,10 +80,7 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
       }
 
       if (this.wind) {
-        if ('generateParticleOption' in opt) {
-          const flag = typeof opt.generateParticleOption === 'function' ? opt.generateParticleOption() : opt.generateParticleOption;
-          flag && this.wind.prerender();
-        }
+        this.wind.prerender()
 
         this.wind.render();
       }
@@ -88,17 +90,25 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
 
   project(coordinate: [number, number]): [number, number] {
     const map = this.getMap();
-    const pixel = map.coordinateToContainerPoint(new Coordinate(...coordinate));
+    const pixel = map.coordinateToContainerPoint(new Coordinate(coordinate[0], coordinate[1]));
     return [
       pixel.x,
       pixel.y,
     ];
   }
 
+  unproject(pixel: [number, number]): [number, number] {
+    const map = this.getMap();
+    const coordinates = map.containerPointToCoordinate(new Point(pixel[0], pixel[1]));
+    return coordinates.toArray();
+  }
+
   intersectsCoordinate(coordinate: [number, number]): boolean {
     const map = this.getMap();
-    const mapExtent = map.getExtent();
-    return mapExtent.contains(new Coordinate(...coordinate)) as boolean;
+    const projExtent = map.getProjExtent();
+    const extent = [projExtent.xmin, projExtent.ymin, projExtent.xmax, projExtent.ymax] as Extent;
+    const mapExtent = transformExtent(extent, 0) as Extent;
+    return containsCoordinate(mapExtent, [coordinate[0], coordinate[1]]) as boolean;
     // return true;
   }
 
@@ -172,7 +182,7 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
     return super.prepareRender();
   }
 
-  private completeRender() {
+  public completeRender() {
     return super.completeRender();
   }
 }
@@ -287,6 +297,8 @@ const WindLayer = MaptalksWind;
 export {
   Field,
   WindLayer,
+  ScalarLayer,
+  ScalarLayerRenderer,
 };
 
 export default MaptalksWind;

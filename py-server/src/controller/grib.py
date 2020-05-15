@@ -185,6 +185,25 @@ def download_grib():
   return jsonify({})
 
 
+
+def read_grib(path):
+    with rasterio.open(path) as src:
+        bounds = src.bounds
+        width = src.width
+        height = src.height
+
+        ec_u = src.read(1)  # UGRD
+        ec_v = src.read(2)  # VGRD
+
+        return {
+            'u': ec_u.flatten(),
+            'v': ec_v.flatten(),
+            'dx': width,
+            'dy': height,
+            'bounds': bounds,
+        }
+
+
 def own_decode_data(input_path):
   # sample_id = codes_grib_new_from_samples("v-component_of_wind_height_above_ground")
   header = {}

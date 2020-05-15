@@ -1,5 +1,5 @@
-import Vector from './Vector';
 import { floorMod } from './utils';
+import Vector from './Vector';
 
 export interface IField {
   xmin: number; // 一般格点数据是按照矩形范围来切割，所以定义其经纬度范围
@@ -31,15 +31,17 @@ export default class Field {
   private readonly ymax: number;
   private readonly cols: number;
   private readonly rows: number;
+  private readonly us: number[];
+  private readonly vs: number[];
+  private readonly isContinuous: boolean;
+  private readonly deltaY: number;
+  private readonly deltaX: number;
+  private readonly wrappedX: undefined | boolean;
+  private readonly isFields: boolean;
   public grid: (Vector | null)[][];
-  private us: number[];
-  private vs: number[];
-  private isContinuous: boolean;
-  private deltaY: number;
-  private deltaX: number;
-  private wrappedX: undefined | boolean;
   public range: (number | undefined)[] | undefined;
-  private isFields: boolean;
+  private columns: (Vector | null)[][];
+  private fieldConfig: { width: number; unproject: any; height: number };
 
   constructor(params: IField) {
     this.grid = [];
@@ -65,7 +67,7 @@ export default class Field {
     const rows = Math.ceil((this.ymax - this.ymin) / params.deltaY); // 行
 
     if (cols !== this.cols || rows !== this.rows) {
-      console.warn('The data grid is not available');
+      console.warn('The data grid not equal');
     }
 
     // Math.floor(ni * Δλ) >= 360;
@@ -104,6 +106,7 @@ export default class Field {
 
   public release() {
     this.grid = [];
+    this.columns = [];
   }
 
   /**
@@ -167,7 +170,7 @@ export default class Field {
         const vec = this.grid[j][i];
 
         if (vec !== null) {
-          const val = vec.magnitude();
+          const val = vec.m || vec.magnitude();
           // vectors.push();
           if (min === undefined) {
             min = val;
@@ -232,10 +235,8 @@ export default class Field {
    * @param lat
    */
   public getDecimalIndexes(lon: number, lat: number) {
-    // var i = floorMod(lon - xmin, 360) / deltaX; // calculate longitude index in wrapped range [0, 360)
-    // var j = (ymax - lat) / deltaY; // calculate latitude index in direction +90 to -90
-    let i = floorMod(lon - this.xmin, 360) / this.deltaX;
-    let j = (this.ymax - lat) / this.deltaY;
+    const i = floorMod(lon - this.xmin, 360) / this.deltaX; // calculate longitude index in wrapped range [0, 360)
+    const j = (this.ymax - lat) / this.deltaY; // calculate latitude index in direction +90 to -90
     return [i, j];
   }
 
@@ -265,7 +266,7 @@ export default class Field {
    * @param lon
    * @param lat
    */
-  interpolatedValueAt(lon: number, lat: number) {
+  public interpolatedValueAt(lon: number, lat: number) {
     if (!this.contains(lon, lat)) return null;
 
     let [i, j] = this.getDecimalIndexes(lon, lat);
@@ -274,9 +275,7 @@ export default class Field {
 
   public hasValueAt(lon: number, lat: number) {
     let value = this.valueAt(lon, lat);
-    const hasValue = value !== null;
-    let included = true;
-    return hasValue && included;
+    return value !== null;
   }
 
   /**
@@ -448,21 +447,32 @@ export default class Field {
   /**
    * 生成粒子位置
    * @param o
+   * @param width
+   * @param height
+   * @param unproject
    */
-  public randomize(o: IPosition = {}) {
-    // x = Math.round(Math.floor(Math.random() * bounds.width) + bounds.x);
-    // y = Math.round(Math.floor(Math.random() * bounds.height) + bounds.y)
+  public randomize(o: IPosition = {}, width: number, height: number, unproject: (...args: any[]) => ([number, number] | null)) {
+    let i = (Math.random() * (width || this.cols)) | 0;
+    let j = (Math.random() * (height || this.rows)) | 0;
 
-    let i = (Math.random() * this.cols) | 0;
-    let j = (Math.random() * this.rows) | 0;
-
-    o.x = this.longitudeAtX(i);
-    o.y = this.latitudeAtY(j);
+    const coords = unproject([i, j]);
+    if (coords !== null) {
+      o.x = coords[0];
+      o.y = coords[1];
+    } else {
+      o.x = this.longitudeAtX(i);
+      o.y = this.latitudeAtY(j);
+    }
 
     return o;
   }
 
+  /**
+   * check is custom field
+   */
   public checkFields() {
     return this.isFields;
   }
+
+  public startBatchInterpolate(width: number, height: number, unproject: (...args: any[]) => ([number, number] | null)) {}
 }

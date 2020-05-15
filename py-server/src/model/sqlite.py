@@ -27,11 +27,11 @@ class DBPoll():
     return cursor
 
   # 不要存大json
-
-  def create_table(self):
+  # DROP TABLE IF EXISTS TableName
+  def create_table(self, tableName):
     cursor = self.get_cursor()
     cursor.execute("""
-    create table gribs(
+    CREATE TABLE IF NOT EXISTS ${tableName}(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT,
       create_time DATE,
@@ -44,7 +44,7 @@ class DBPoll():
       v_grib BLOB,
       parsed_json BLOB
     )
-    """)
+    """.replace('${tableName}', tableName))
 
     cursor.close()
 

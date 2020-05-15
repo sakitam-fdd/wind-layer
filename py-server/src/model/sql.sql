@@ -1,4 +1,4 @@
-create table gribs(
+CREATE TABLE IF NOT EXISTS gribs(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT,
   create_time DATE,
