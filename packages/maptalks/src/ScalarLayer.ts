@@ -102,12 +102,12 @@ export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
 
   getMatrix(): mat4 {
     const map = this.getMap();
-    const extent = map._get2DExtent(map.getGLZoom());
-    const uMatrix = mat4.identity(new Float32Array(16));
-    mat4.translate(uMatrix, uMatrix, [extent.xmin, extent.ymax, 0]);
-    mat4.scale(uMatrix, uMatrix, [1, 1, 1]);
-    mat4.multiply(uMatrix, map.projViewMatrix, uMatrix);
-    return uMatrix;
+    // const extent = map._get2DExtent(map.getGLZoom());
+    // const uMatrix = mat4.identity(new Float32Array(16));
+    // mat4.translate(uMatrix, uMatrix, [extent.xmin, extent.ymax, 0]);
+    // mat4.scale(uMatrix, uMatrix, [1, 1, 1]);
+    // mat4.multiply(uMatrix, map.projViewMatrix, uMatrix);
+    return map.projViewMatrix;
   }
 
   drawWind() {

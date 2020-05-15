@@ -110,27 +110,27 @@ class BMapWind extends BMap.Overlay {
   public bindEvent() {
     this.map.addEventListener('resize', this.handleResize);
 
-    // this.map.addEventListener('dragstart', this.stop);
-    // this.map.addEventListener('dragend', this.start);
+    this.map.addEventListener('dragstart', this.stop);
+    this.map.addEventListener('dragend', this.start);
     this.map.addEventListener('movestart', this.stop);
     this.map.addEventListener('moveend', this.start);
-    // this.map.addEventListener('zoomstart', this.stop);
-    // this.map.addEventListener('zoomend', this.start);
-    // this.map.addEventListener('touchstart', this.stop);
-    // this.map.addEventListener('touchend', this.start);
+    this.map.addEventListener('zoomstart', this.stop);
+    this.map.addEventListener('zoomend', this.start);
+    this.map.addEventListener('touchstart', this.stop);
+    this.map.addEventListener('touchend', this.start);
   }
 
   public unbindEvent() {
     this.map.removeEventListener('resize', this.handleResize);
 
-    // this.map.removeEventListener('dragstart', this.stop);
-    // this.map.removeEventListener('dragend', this.start);
+    this.map.removeEventListener('dragstart', this.stop);
+    this.map.removeEventListener('dragend', this.start);
     this.map.removeEventListener('movestart', this.stop);
     this.map.removeEventListener('moveend', this.start);
-    // this.map.removeEventListener('zoomstart', this.stop);
-    // this.map.removeEventListener('zoomend', this.start);
-    // this.map.removeEventListener('touchstart', this.stop);
-    // this.map.removeEventListener('touchend', this.start);
+    this.map.removeEventListener('zoomstart', this.stop);
+    this.map.removeEventListener('zoomend', this.start);
+    this.map.removeEventListener('touchstart', this.stop);
+    this.map.removeEventListener('touchend', this.start);
   }
 
   public start() {
@@ -197,12 +197,12 @@ class BMapWind extends BMap.Overlay {
         this.wind = new WindCore(ctx, opt, data);
 
         this.wind.project = this.project.bind(this);
+        this.wind.unproject = this.unproject.bind(this);
         this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
         this.wind.postrender = () => {
           // @ts-ignore
           // this.setCanvasUpdated();
         };
-        this.wind.prerender();
       }
     }
 
@@ -308,14 +308,13 @@ class BMapWind extends BMap.Overlay {
 
   public unproject(pixel: [number, number]): [number, number] {
     // FIXME: https://github.com/huiyan-fe/mapv/blob/master/src/map/baidu-map/Layer.js#L194
-    // const pixel = this.map.pointToPixel(new BMap.Point(...coordinate));
-    const mercatorCoordinates = this.transferToMercator(pixel);
-    return this.projectInner(mercatorCoordinates);
+    const coords = this.map.pixelToPoint(new BMap.Pixel(pixel[0], pixel[1]));
+    return [coords.lng, coords.lat];
   }
 
   public intersectsCoordinate(coordinate: [number, number]): boolean {
     const mapExtent = this.map.getBounds();
-    return mapExtent.containsPoint(new BMap.Point(...coordinate)) as boolean;
+    return mapExtent.containsPoint(new BMap.Point(coordinate[0], coordinate[1])) as boolean;
   }
 
   private pickWindOptions() {
