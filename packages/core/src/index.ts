@@ -155,7 +155,7 @@ class BaseLayer {
   private drawParticles() {
     const particles = this.particles;
     this.fadeIn();
-    // this.ctx.globalAlpha = 0.9;
+    this.ctx.globalAlpha = this.options.globalAlpha;
 
     this.ctx.fillStyle = `rgba(0, 0, 0, ${this.options.globalAlpha})`;
     this.ctx.lineWidth = (isNumber(this.options.lineWidth) ? this.options.lineWidth : 1) as number;

@@ -137,7 +137,7 @@ export default class ScalarField {
 
     if (this.ctx !== null && this.ctx instanceof WebGLRenderingContext) {
 
-      const transformCoords = typeof this.options.transformCoords === 'function' ? this.options.transformCoords : () => false;
+      // const transformCoords = typeof this.options.transformCoords === 'function' ? this.options.transformCoords : () => false;
 
       console.time('prerender');
       const { width, height } = this.ctx.canvas;
@@ -163,13 +163,9 @@ export default class ScalarField {
             // @ts-ignore
             color = getColor(color || 'rgba(255, 255, 255, 0)');
 
-            const projCoords = transformCoords(coords);
-
-            if (Array.isArray(projCoords)) {
-              positions.push(projCoords[0], projCoords[1]);
-              // @ts-ignore
-              colors.push(color[0], color[1], color[2], parseInt((color[3] || 0) * 255));
-            }
+            positions.push(x, y);
+            // @ts-ignore
+            colors.push(color[0], color[1], color[2], parseInt((color[3] || 0) * 255));
           }
         }
       }
@@ -182,7 +178,8 @@ export default class ScalarField {
           .active()
           // .resize(true)
           .setUniforms({
-            u_matrix: matrix,
+            u_pointSize: 1,
+            u_resolution: [width, height],
           })
           .setAttributes({
             a_position: {
@@ -236,10 +233,12 @@ export default class ScalarField {
   render(matrix: mat4) {
     console.time('render');
     if (this.options.useGl) {
+      const { width, height } = this.ctx.canvas;
       this.shape
         .clear([0, 0, 0, 0])
         .setUniforms({
-          u_matrix: matrix,
+          u_pointSize: 1,
+          u_resolution: [width, height],
         })
         .draw();
     } else if (this.ctx instanceof CanvasRenderingContext2D) {
