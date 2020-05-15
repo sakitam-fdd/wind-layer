@@ -18,7 +18,9 @@ export function resizeCanvasSize (canvas: HTMLCanvasElement | OffscreenCanvas, p
   if (!(canvas instanceof OffscreenCanvas)) {
     const width = canvas.clientWidth * pixelRatio;
     const height = canvas.clientHeight * pixelRatio;
-    if (canvas.width !== width ||
+    if (width <= 0 || height <= 0) {
+      return false;
+    } else if (canvas.width !== width ||
       canvas.height !== height) {
       canvas.width = width;
       canvas.height = height;

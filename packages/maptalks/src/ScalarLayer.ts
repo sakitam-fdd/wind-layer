@@ -1,14 +1,21 @@
 import { mat4 } from "gl-matrix";
 // @ts-ignore
 import { CanvasLayer, renderer, Coordinate, Point } from 'maptalks/dist/maptalks.es.js';
-import { assign, formatData, IOptions, isArray, ScalarField, createCanvas } from 'wind-core';
+import { assign, formatData, IOptions, isArray, ScalarField, createCanvas, getGlContext } from 'wind-core';
 import { containsCoordinate, Extent, transformExtent } from './utils';
-import { getGlContext } from 'wind-core/src/renderer/webgl/gl-utils';
 
 const _options = {
   renderer: 'canvas',
   doubleBuffer: false,
   animation: false,
+  glOptions: {
+    antialias: false,
+    depth: false,
+    stencil: false,
+    alpha: true,
+    premultipliedAlpha: true,
+    preserveDrawingBuffer: true,
+  },
 };
 
 export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
@@ -75,6 +82,24 @@ export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
     }
   }
 
+  resizeCanvas(canvasSize?: any) {
+    if (this.canvas && this.gl) {
+      const map = this.getMap();
+      const retina = map.getDevicePixelRatio();
+      const size = canvasSize || map.getSize();
+      this.canvas.height = retina * size.height;
+      this.canvas.width = retina * size.width;
+      if (this.canvas2) {
+        this.canvas2.width = retina * size.width;
+        this.canvas2.height = retina * size.height;
+
+        if (this.gl) {
+          this.gl.viewport(0, 0, this.canvas2.width, this.canvas2.height);
+        }
+      }
+    }
+  }
+
   getMatrix(): mat4 {
     const map = this.getMap();
     const extent = map._get2DExtent(map.getGLZoom());
@@ -87,19 +112,23 @@ export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
 
   drawWind() {
     const map = this.getMap();
-    if (this.context) {
+    if (this.context && this.gl !== null) {
       const layer = this.layer;
       const opt = layer.getOptions();
       if (!this.scalarRender && map) {
         const data = layer.getData();
 
-        this.scalarRender = new ScalarField(this.context, opt, data);
+        this.scalarRender = new ScalarField(this.layer.options.useGl ? this.gl : this.context, assign(opt, {
+          transformCoords: (coords: [number, number]) => {
+            return map.coordToPoint(new Coordinate(coords[0], coords[1]), map.getGLZoom()).toArray();
+          }
+        }), data);
 
         this.scalarRender.project = this.project.bind(this);
         this.scalarRender.unproject = this.unproject.bind(this);
         this.scalarRender.intersectsCoordinate = this.intersectsCoordinate.bind(this);
         this.scalarRender.postrender = () => {
-          if (this.context && this.gl) {
+          if (this.context && this.gl && this.layer.options.useGl) {
             this.context.drawImage(this.gl.canvas, 0, 0);
           }
           // @ts-ignore
