@@ -1,6 +1,6 @@
 {
   "name": "bmap-wind",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.2",
   "description": "baidu map wind",
   "keywords": [],
   "author": "sakitam-fdd <smilefdd@gmail.com>",
@@ -40,7 +40,7 @@
   },
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
   "dependencies": {
-    "wind-core": "^1.0.0-alpha.3"
+    "wind-core": "^1.0.0-alpha.2"
   },
-  "gitHead": "e824bcd617be03f89fcefdd59e12e1f534c5cca4"
+  "gitHead": "0cc9a01b20ab3e901d5ec7e9be3653892395d304"
 }
