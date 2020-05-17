@@ -62,9 +62,9 @@ class BaseLayer {
       throw new Error('ctx error');
     }
 
-    this.setOptions(options);
-
     this.animate = this.animate.bind(this);
+
+    this.setOptions(options);
 
     if (field) {
       this.updateData(field);

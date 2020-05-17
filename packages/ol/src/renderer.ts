@@ -123,7 +123,7 @@ class Render {
       const wind = this.executors[key];
       if (wind) {
         wind.setOptions(options);
-        wind.prerender();
+        // wind.prerender();
       }
     });
   }
