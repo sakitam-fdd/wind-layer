@@ -1,6 +1,6 @@
 {
   "name": "openlayers-wind",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.5",
   "description": "ol3-ol4 wind",
   "keywords": [],
   "author": "sakitam-fdd <smilefdd@gmail.com>",
@@ -40,7 +40,7 @@
   },
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
   "dependencies": {
-    "wind-core": "^1.0.0-alpha.4"
+    "wind-core": "^1.0.0-alpha.5"
   },
   "peerDependencies": {
     "openlayers": ">=3.0.0"
