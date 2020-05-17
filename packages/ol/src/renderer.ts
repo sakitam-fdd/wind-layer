@@ -123,6 +123,7 @@ class Render {
       const wind = this.executors[key];
       if (wind) {
         wind.setOptions(options);
+        wind.prerender();
       }
     });
   }
@@ -292,28 +293,28 @@ export default class WindLayerRender extends CanvasLayerRenderer {
 
     this.oRender.execute(this.context, 0, frameState, transformOrigin, transformOrigin, opt, data);
 
-    if (layer.getWrapX() && projection.canWrapX() && !containsExtent(projectionExtent, extent)) {
-      let startX = extent[0];
-      const worldWidth = getWidth(projectionExtent);
-      let world = 0;
-      let offsetX;
-      while (startX < projectionExtent[0]) {
-        --world;
-        offsetX = worldWidth * world;
-        const transform = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, offsetX);
-        this.oRender.execute(this.context, world, frameState, transform, transformOrigin, opt, data);
-        startX += worldWidth;
-      }
-      world = 0;
-      startX = extent[2];
-      while (startX > projectionExtent[2]) {
-        ++world;
-        offsetX = worldWidth * world;
-        const transform = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, offsetX);
-        this.oRender.execute(this.context, world, frameState, transform, transformOrigin, opt, data);
-        startX -= worldWidth;
-      }
-    }
+    // if (layer.getWrapX() && projection.canWrapX() && !containsExtent(projectionExtent, extent)) {
+    //   let startX = extent[0];
+    //   const worldWidth = getWidth(projectionExtent);
+    //   let world = 0;
+    //   let offsetX;
+    //   while (startX < projectionExtent[0]) {
+    //     --world;
+    //     offsetX = worldWidth * world;
+    //     const transform = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, offsetX);
+    //     this.oRender.execute(this.context, world, frameState, transform, transformOrigin, opt, data);
+    //     startX += worldWidth;
+    //   }
+    //   world = 0;
+    //   startX = extent[2];
+    //   while (startX > projectionExtent[2]) {
+    //     ++world;
+    //     offsetX = worldWidth * world;
+    //     const transform = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, offsetX);
+    //     this.oRender.execute(this.context, world, frameState, transform, transformOrigin, opt, data);
+    //     startX -= worldWidth;
+    //   }
+    // }
 
     if (clipped) {
       context.restore();

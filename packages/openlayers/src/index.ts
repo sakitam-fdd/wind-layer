@@ -273,6 +273,7 @@ class OlWind extends ol.layer.Image {
 
     if (this.wind) {
       this.wind.setOptions(this.options.windOptions);
+      this.wind.prerender();
     }
   }
 

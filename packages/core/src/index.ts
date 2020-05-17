@@ -85,6 +85,8 @@ class BaseLayer {
       // @ts-ignore
       this.options.paths = Math.round(width * height * this.options.particleMultiplier);
     }
+
+    this.prerender();
   }
 
   public getOptions() {

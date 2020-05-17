@@ -192,6 +192,57 @@ function initMap() {
   // @ts-ignore
   window.map = map;
 
+  function initGui(windLayer: WindLayer) {
+    const config = {
+      addLayer: true,
+      paths: 1000,
+      lineWidth: 3,
+      velocityScale: 0.005,
+      globalAlpha: 0.8,
+      maxAge: 90,
+    };
+
+    // @ts-ignore
+    const gui = new dat.GUI();
+    gui.add(config, 'addLayer').onChange(function () {
+      if (config.addLayer) {
+        // @ts-ignore
+        window.map.addLayer(windLayer);
+      } else {
+        // @ts-ignore
+        window.map.removeLayer(windLayer);
+      }
+    });
+    gui.add(config, 'globalAlpha', 0.01, 1).onChange(function () {
+      windLayer.setWindOptions({
+        globalAlpha: config.globalAlpha,
+      });
+    });
+    gui.add(config, 'maxAge', 1, 200).onChange(function () {
+      windLayer.setWindOptions({
+        maxAge: config.maxAge,
+      });
+    });
+
+    gui.add(config, 'paths', 500, 8000).onChange(function () {
+      windLayer.setWindOptions({
+        paths: config.paths,
+      });
+    });
+
+    gui.add(config, 'lineWidth', 1, 10).onChange(function () {
+      windLayer.setWindOptions({
+        lineWidth: config.lineWidth,
+      });
+    });
+
+    gui.add(config, 'velocityScale', 0.001, 0.1).onChange(function () {
+      windLayer.setWindOptions({
+        velocityScale: config.velocityScale,
+      });
+    });
+  }
+
   // fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
   fetch('https://sakitam-1255686840.cos.ap-beijing.myqcloud.com/public/codepen/json/out.json')
     .then(res => res.json())
@@ -208,7 +259,7 @@ function initMap() {
             // console.log(m);
             return '#ff473c';
           },
-          width: 3,
+          lineWidth: 3,
           // colorScale: scale,
         },
         // map: map,
@@ -219,6 +270,8 @@ function initMap() {
 
       // @ts-ignore
       map.addLayer(windLayer);
+
+      initGui(windLayer);
     });
 }
 

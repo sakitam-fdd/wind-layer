@@ -376,6 +376,7 @@ class BMapWind extends BMap.Overlay {
 
     if (this.wind) {
       this.wind.setOptions(this.options.windOptions);
+      this.wind.prerender();
     }
   }
 
