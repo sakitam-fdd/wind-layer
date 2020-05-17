@@ -18,6 +18,7 @@ export const globals = {
   'ol/size': 'ol.size',
   'ol/layer': 'ol.layer',
   'ol/proj': 'ol.proj',
+  'ol/transform': 'ol.transform',
   'ol/source/ImageCanvas': 'ol.source.ImageCanvas',
   'ol/PluggableMap': 'ol.PluggableMap',
   'ol/coordinate': 'ol.coordinate',

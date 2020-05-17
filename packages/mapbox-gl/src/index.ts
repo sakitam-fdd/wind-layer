@@ -167,6 +167,7 @@ class WindLayer extends Overlay {
     if (this.wind) {
       const windOptions = this.options.windOptions;
       this.wind.setOptions(windOptions);
+      this.wind.prerender();
     }
   }
 
