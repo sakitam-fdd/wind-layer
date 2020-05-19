@@ -82,8 +82,8 @@ export default class Overlay {
   project(coordinates: [number, number]) {
     if (this.map !== undefined) {
       const lnglat = this.map.project(new mapboxgl.LngLat(coordinates[0], coordinates[1]));
-      const x = Math.round(lnglat.x);
-      const y = Math.round(lnglat.y);
+      const x = lnglat.x;
+      const y = lnglat.y;
       return [
         x * this.devicePixelRatio,
         y * this.devicePixelRatio,
@@ -95,9 +95,7 @@ export default class Overlay {
   unproject(pixel: [number, number]) {
     if (this.map !== undefined) {
       const lnglat: mapboxgl.LngLat = this.map.unproject(new mapboxgl.Point(pixel[0], pixel[1]));
-      const lng = Math.round(lnglat.lng);
-      const lat = Math.round(lnglat.lat);
-      return [lng, lat];
+      return [lnglat.lng, lnglat.lat];
     }
     return pixel;
   }

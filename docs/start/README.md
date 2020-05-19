@@ -83,7 +83,6 @@ order: 0
                   "rgb(180,0,35)"
                 ],
                 // colorScale: scale,
-                generateParticleOption: false
               },
               // map: map,
               // projection: 'EPSG:4326'
@@ -195,7 +194,6 @@ order: 0
           globalAlpha: 0.9,
           velocityScale: 1 / 30,
           // paths: 10000,
-          generateParticleOption: true,
           paths: () => { // can be number or function
             const zoom = map.getZoom();
             return zoom * 1000;
