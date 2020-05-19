@@ -144,7 +144,6 @@ yarn add bmap-wind
           globalAlpha: 0.9,
           velocityScale: 1 / 30,
           // paths: 10000,
-          generateParticleOption: true,
           paths: () => { // can be number or function
             const zoom = map.getZoom();
             return zoom * 1000;
@@ -232,7 +231,6 @@ yarn add bmap-wind
                 ],
                 width: 3,
                 // colorScale: scale,
-                generateParticleOption: false
               },
               // map: map,
               // projection: 'EPSG:4326'

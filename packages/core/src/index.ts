@@ -11,8 +11,6 @@ export const defaultOptions = {
   // particleMultiplier: 1 / 300, // TODO: PATHS = Math.round(width * height * particleMultiplier);
   paths: 800,
   frameRate: 20,
-  minVelocity: 0,
-  maxVelocity: 10,
   useCoordsDraw: true,
   gpet: true, // generate particle every times
 };
@@ -166,7 +164,15 @@ class BaseLayer {
     let i = 0;
     let len = particles.length;
     if (this.field && len > 0) {
-      const [min, max] = this.field.range as [number, number];
+      let min: number;
+      let max: number;
+      // 如果配置了风速范围
+      if (isValide(this.options.minVelocity) && isValide(this.options.maxVelocity)) {
+        min = this.options.minVelocity as number;
+        max = this.options.maxVelocity as number;
+      } else { // 未配置风速范围取格点数据中的最大风速和最小风速
+        [min, max] = this.field.range as [number, number];
+      }
       for (; i < len; i++) {
         this[this.options.useCoordsDraw ? 'drawCoordsParticle' : 'drawPixelParticle'](particles[i], min, max);
       }

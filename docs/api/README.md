@@ -16,9 +16,10 @@ order: 0
 | `globalAlpha` | 全局透明度，主要影响粒子路径拖尾效果 | `number` | `0.9` |
 | `lineWidth` | 粒子路径宽度 | `number\|function` | `1`, 当为回调函数时，参数`function(m:对应点风速值) => number` |
 | `colorScale` | 粒子颜色配置 | `string\|function\|string[]` | `#fff`，当为回调函数时，参数`function(m:对应点风速值) => string` |
+| `minVelocity` | 粒子最小风速 | `number` | 配置此值主要影响当`colorScale`为颜色数组时的颜色索引，非必填 |
+| `maxVelocity` | 粒子最大风速 | `number` | 配置此值主要影响当`colorScale`为颜色数组时的颜色索引，必填 |
 | `velocityScale` | 速度级别 | `number` | `1 / 25` |
 | `maxAge \| particleAge(不推荐使用) ` | 粒子路径能够生成的最大帧数 | `number` | `90` |
-| `generateParticleOption` | 强制在地图交互后重新生成粒子路径（比如平移、旋转、缩放） | `boolean` | `false` |
 | `paths ` | 生成的粒子路径数量 | `number\|function` | `800`, 当为回调函数时，参数`function(m:对应点风速值) => number` |
 | `particleMultiplier` | 粒子路径数量的系数，不推荐使用（视野宽度 * 高度 * 系数） | `number` | `1 / 300` |
 | `frameRate` | 帧率（ms） | `number` | `20` |
@@ -46,7 +47,6 @@ order: 0
 | `colorScale` | 粒子颜色配置 | `string\|function\|string[]` | `#fff`，当为回调函数时，参数`function(m:对应点风速值) => string` |
 | `velocityScale` | 速度级别 | `number` | `1 / 25` |
 | `maxAge \| particleAge(不推荐使用) ` | 粒子路径能够生成的最大帧数 | `number` | `90` |
-| `generateParticleOption` | 强制在地图交互后重新生成粒子路径（比如平移、旋转、缩放） | `boolean` | `false` |
 | `paths ` | 生成的粒子路径数量 | `number\|function` | `800`, 当为回调函数时，参数`function(m:对应点风速值) => number` |
 | `particleMultiplier` | 粒子路径数量的系数，不推荐使用（视野宽度 * 高度 * 系数） | `number` | `1 / 300` |
 | `frameRate` | 帧率（ms） | `number` | `20` |
@@ -76,7 +76,6 @@ order: 0
 | `colorScale` | 粒子颜色配置 | `string\|function\|string[]` | `#fff`，当为回调函数时，参数`function(m:对应点风速值) => string` |
 | `velocityScale` | 速度级别 | `number` | `1 / 25` |
 | `maxAge \| particleAge(不推荐使用) ` | 粒子路径能够生成的最大帧数 | `number` | `90` |
-| `generateParticleOption` | 强制在地图交互后重新生成粒子路径（比如平移、旋转、缩放） | `boolean` | `false` |
 | `paths ` | 生成的粒子路径数量 | `number\|function` | `800`, 当为回调函数时，参数`function(m:对应点风速值) => number` |
 | `particleMultiplier` | 粒子路径数量的系数，不推荐使用（视野宽度 * 高度 * 系数） | `number` | `1 / 300` |
 | `frameRate` | 帧率（ms） | `number` | `20` |
@@ -105,7 +104,6 @@ order: 0
 | `colorScale` | 粒子颜色配置 | `string\|function\|string[]` | `#fff`，当为回调函数时，参数`function(m:对应点风速值) => string` |
 | `velocityScale` | 速度级别 | `number` | `1 / 25` |
 | `maxAge \| particleAge(不推荐使用) ` | 粒子路径能够生成的最大帧数 | `number` | `90` |
-| `generateParticleOption` | 强制在地图交互后重新生成粒子路径（比如平移、旋转、缩放） | `boolean` | `false` |
 | `paths ` | 生成的粒子路径数量 | `number\|function` | `800`, 当为回调函数时，参数`function(m:对应点风速值) => number` |
 | `particleMultiplier` | 粒子路径数量的系数，不推荐使用（视野宽度 * 高度 * 系数） | `number` | `1 / 300` |
 | `frameRate` | 帧率（ms） | `number` | `20` |
@@ -133,7 +131,6 @@ order: 0
 | `colorScale` | 粒子颜色配置 | `string\|function\|string[]` | `#fff`，当为回调函数时，参数`function(m:对应点风速值) => string` |
 | `velocityScale` | 速度级别 | `number` | `1 / 25` |
 | `maxAge \| particleAge(不推荐使用) ` | 粒子路径能够生成的最大帧数 | `number` | `90` |
-| `generateParticleOption` | 强制在地图交互后重新生成粒子路径（比如平移、旋转、缩放） | `boolean` | `false` |
 | `paths ` | 生成的粒子路径数量 | `number\|function` | `800`, 当为回调函数时，参数`function(m:对应点风速值) => number` |
 | `particleMultiplier` | 粒子路径数量的系数，不推荐使用（视野宽度 * 高度 * 系数） | `number` | `1 / 300` |
 | `frameRate` | 帧率（ms） | `number` | `20` |
@@ -161,7 +158,6 @@ order: 0
 | `colorScale` | 粒子颜色配置 | `string\|function\|string[]` | `#fff`，当为回调函数时，参数`function(m:对应点风速值) => string` |
 | `velocityScale` | 速度级别 | `number` | `1 / 25` |
 | `maxAge \| particleAge(不推荐使用) ` | 粒子路径能够生成的最大帧数 | `number` | `90` |
-| `generateParticleOption` | 强制在地图交互后重新生成粒子路径（比如平移、旋转、缩放） | `boolean` | `false` |
 | `paths ` | 生成的粒子路径数量 | `number\|function` | `800`, 当为回调函数时，参数`function(m:对应点风速值) => number` |
 | `particleMultiplier` | 粒子路径数量的系数，不推荐使用（视野宽度 * 高度 * 系数） | `number` | `1 / 300` |
 | `frameRate` | 帧率（ms） | `number` | `20` |
@@ -188,7 +184,6 @@ order: 0
 | `colorScale` | 粒子颜色配置 | `string\|function\|string[]` | `#fff`，当为回调函数时，参数`function(m:对应点风速值) => string` |
 | `velocityScale` | 速度级别 | `number` | `1 / 25` |
 | `maxAge \| particleAge(不推荐使用) ` | 粒子路径能够生成的最大帧数 | `number` | `90` |
-| `generateParticleOption` | 强制在地图交互后重新生成粒子路径（比如平移、旋转、缩放） | `boolean` | `false` |
 | `paths ` | 生成的粒子路径数量 | `number\|function` | `800`, 当为回调函数时，参数`function(m:对应点风速值) => number` |
 | `particleMultiplier` | 粒子路径数量的系数，不推荐使用（视野宽度 * 高度 * 系数） | `number` | `1 / 300` |
 | `frameRate` | 帧率（ms） | `number` | `20` |
