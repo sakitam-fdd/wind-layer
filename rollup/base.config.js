@@ -7,6 +7,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import replace from '@rollup/plugin-replace';
 import typescript from '@rollup/plugin-typescript';
+import webWorkerLoader from 'rollup-plugin-web-worker-loader';
 import { resolve } from './utils';
 import { external as olExternal } from './external/ol';
 import { external as maptalksExternal } from './external/maptalks';
@@ -23,6 +24,11 @@ export default {
     glslify(),
     json({
       indent: ' '
+    }),
+    webWorkerLoader({
+      sourcemap: true,
+      inline: true,
+      forceInline: true,
     }),
     // tslint({
     //   exclude: [

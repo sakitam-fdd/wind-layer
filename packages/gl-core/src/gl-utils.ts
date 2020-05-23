@@ -222,7 +222,7 @@ export function clearScene (gl: WebGLRenderingContext, color: number[]) {
  * @param src
  * @returns {Promise<Image>}
  */
-export function loadImage (src: string) {
+export function loadImage (src: string): Promise<HTMLImageElement> {
   return new Promise(((resolve, reject) => {
     if (!src) {
       reject(new Event('url is null'));

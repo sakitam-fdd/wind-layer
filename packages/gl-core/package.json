@@ -1,0 +1,46 @@
+{
+  "name": "wind-gl-core",
+  "version": "1.0.0-alpha.6",
+  "description": "wind layer webgl core",
+  "keywords": [],
+  "author": "sakitam-fdd <smilefdd@gmail.com>",
+  "license": "MIT",
+  "main": "dist/wind-gl-core.js",
+  "module": "dist/wind-gl-core.esm.js",
+  "unpkg": "dist/wind-gl-core.js",
+  "commonjs": "dist/wind-gl-core.cjs.js",
+  "namespace": "WindGl",
+  "types": "types/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sakitam-fdd/wind-layer.git",
+    "directory": "packages/gl-core"
+  },
+  "scripts": {
+    "tsc": "tsc --project tsconfig.prod.json",
+    "clean": "rimraf dist",
+    "dev": "run-p dev:*",
+    "dev:rollup": "cross-env NODE_ENV=development modulePath=core input=src/index.ts rollup -wm -c ../../rollup/dev.config.js",
+    "build": "run-p build:*",
+    "build:dev": "cross-env NODE_ENV=production modulePath=core input=src/index.ts rollup -m -c ../../rollup/dev.config.js",
+    "build:prod": "cross-env NODE_ENV=production modulePath=core input=src/index.ts rollup -c ../../rollup/prod.config.js",
+    "lint:ts": "run-p -c lint:ts-*",
+    "test": "jest",
+    "prepublishOnly": "run-p test",
+    "generate:docs": "typedoc --out docs --target es6 --theme minimal --mode file src"
+  },
+  "bugs": {
+    "url": "https://github.com/sakitam-fdd/wind-layer/issues"
+  },
+  "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
+  "dependencies": {
+    "@mapbox/mapbox-gl-style-spec": "^13.15.0"
+  },
+  "gitHead": "0cc9a01b20ab3e901d5ec7e9be3653892395d304"
+}

@@ -12,8 +12,8 @@ GFS_URL = "https://nomads.ncep.noaa.gov/cgi-bin/" \
           ".${GFS_DATE}%2F${GFS_TIME}"
 
 # OUTPUT_BASE_DIR = os.getcwd()
-OUTPUT_BASE_DIR = ''
-OUTPUT_DIR = './data'
+OUTPUT_BASE_DIR = '/Users/dongdong.feng/Documents/gitlab/wind-layer/py-server/static/data'
+OUTPUT_DIR = ''
 
 def get_noaa_config(date, gfs_time, res, bbox, level, variables):
   gfs_date = date or GFS_DATE
