@@ -1,25 +1,21 @@
 import Base from './Base';
 // @ts-ignore
-import RectFrag from './shaders/rect.frag.glsl';
+import FillFrag from './shaders/wind-fill.frag.glsl';
 // @ts-ignore
-import RectVert from './shaders/rect.vert.glsl';
+import FillVert from './shaders/wind-fill.vert.glsl';
 
-export class Rect extends Base {
-  vertShader = RectVert;
+export class WindFill extends Base {
+  vertShader = FillVert;
 
-  fragShader = RectFrag;
+  fragShader = FillFrag;
 
   constructor (gl: WebGLRenderingContext, vShader?: string, fShader?: string) {
-    super(gl, vShader || RectVert, fShader || RectFrag);
-  }
-
-  updateProjection() {
-    return this;
+    super(gl, vShader || FillVert, fShader || FillFrag);
   }
 
   draw() {
     // draw
-    const primitiveType = this.gl.POINTS;
+    const primitiveType = this.gl.TRIANGLES;
     this.gl.drawArrays(primitiveType, 0, this.count);
 
     return this;

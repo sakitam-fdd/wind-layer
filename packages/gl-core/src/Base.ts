@@ -1,4 +1,3 @@
-import { mat3 } from 'gl-matrix';
 import { createProgram, clearScene, resizeCanvasSize } from './gl-utils';
 
 export interface BufferComponents {
@@ -38,7 +37,6 @@ export default class Base {
   public uniformSetters: UniformSetters;
   public attribSetters: AttribSetters;
   public transfromStack: (() => void)[];
-  public projection: mat3;
 
   constructor(gl: WebGLRenderingContext, vShader: string, fShader: string) {
 
@@ -55,8 +53,6 @@ export default class Base {
     this.attribSetters = this.createAttributeSetters();
 
     this.transfromStack = []; // 矩阵变换调用栈
-
-    this.projection = mat3.create();
   }
 
   active() {
@@ -305,6 +301,16 @@ export default class Base {
     return this;
   }
 
+  bindTexture(texture: WebGLTexture, unit: GLenum, location: string) {
+    this.gl.activeTexture(this.gl.TEXTURE0 + (unit || 0));
+    this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+    if (location) {
+      this.setUniforms({
+        [location]: unit,
+      });
+    }
+  }
+
   /**
    * 可以override，默认使用此种方式清空画布
    * @param color
@@ -326,26 +332,9 @@ export default class Base {
     return this;
   }
 
-  /**
-   * 更新视图投影
-   * 默认应该被 override
-   * @returns {Base}
-   */
-  updateProjection() {
-    const { width, height } = this.gl.canvas;
-    // 正交投影
-    mat3.projection(this.projection, width, height);
-    // 透视投影
-    // mat4.perspective(this.projection, 80 / 180.0 * Math.PI, canvas.width / canvas.height, 0.1, 1000);
-    return this;
-  }
-
-  resize(flag: boolean) {
+  resize() {
     resizeCanvasSize(this.gl.canvas);
     this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
-    if (flag) {
-      this.updateProjection();
-    }
     return this;
   }
 
