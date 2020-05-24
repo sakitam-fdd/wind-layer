@@ -181,4 +181,6 @@ export {
   WindLayer,
 }
 
+export { default as ScalarFill } from './ScalarFill';
+
 export default WindLayer;

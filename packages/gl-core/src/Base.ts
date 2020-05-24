@@ -1,4 +1,4 @@
-import { createProgram, clearScene, resizeCanvasSize } from './gl-utils';
+import { createProgram, clearScene, resizeCanvasSize } from './utils/gl-utils';
 
 export interface BufferComponents {
   buffer: WebGLBuffer;
@@ -299,16 +299,6 @@ export default class Base {
     });
 
     return this;
-  }
-
-  bindTexture(texture: WebGLTexture, unit: GLenum, location: string) {
-    this.gl.activeTexture(this.gl.TEXTURE0 + (unit || 0));
-    this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
-    if (location) {
-      this.setUniforms({
-        [location]: unit,
-      });
-    }
   }
 
   /**

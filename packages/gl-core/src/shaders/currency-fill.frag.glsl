@@ -1,5 +1,3 @@
-#pragma glslify: mercatorToWGS84 = require(./mercatorToWGS84)
-
 precision mediump float;
 
 uniform sampler2D u_image;
@@ -38,6 +36,8 @@ float bilinear(const vec2 uv) {
 float getValue(const vec2 uv) {
   return mix(u_range.x, u_range.y, bilinear(uv));
 }
+
+#pragma glslify: mercatorToWGS84 = require(./mercatorToWGS84)
 
 void main () {
   vec2 globalWGS84 = mercatorToWGS84(v_tex_pos);

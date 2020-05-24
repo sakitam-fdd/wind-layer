@@ -1,11 +1,9 @@
-#pragma glslify: mercatorToWGS84 = require(./mercatorToWGS84)
-
 precision mediump float;
 
 uniform sampler2D u_wind;
 uniform sampler2D u_color_ramp;
 
-uniform vec2 u_wind_res;
+uniform vec2 u_image_res;
 uniform vec2 u_wind_min;
 uniform vec2 u_wind_max;
 uniform float u_opacity;
@@ -18,9 +16,9 @@ vec2 windTexture(const vec2 uv) {
 
 vec2 bilinearWind(const vec2 uv) {
   // return texture2D(u_wind, uv).rg; // lower-res hardware filtering
-  vec2 px = 1.0 / u_wind_res;
-  vec2 vc = (floor(uv * u_wind_res)) * px;
-  vec2 f = fract(uv * u_wind_res);
+  vec2 px = 1.0 / u_image_res;
+  vec2 vc = (floor(uv * u_image_res)) * px;
+  vec2 f = fract(uv * u_image_res);
   vec2 tl = windTexture(vc);
   vec2 tr = windTexture(vc + vec2(px.x, 0));
   vec2 bl = windTexture(vc + vec2(0, px.y));
@@ -35,6 +33,8 @@ vec2 windSpeed(const vec2 uv) {
 float windSpeedMagnitude(const vec2 uv) {
   return length(windSpeed(uv)) / length(u_wind_max);
 }
+
+#pragma glslify: mercatorToWGS84 = require(./mercatorToWGS84)
 
 void main () {
   vec2 globalWGS84 = mercatorToWGS84(v_tex_pos);
