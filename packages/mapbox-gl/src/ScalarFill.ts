@@ -29,6 +29,14 @@ export default class ScalarFill {
     this.options = options;
 
     this.data = data;
+
+    this.handleZoom = this.handleZoom.bind(this);
+  }
+
+  handleZoom() {
+    if (this.scalarFill) {
+      this.scalarFill.handleZoom();
+    }
   }
 
   initialize() {
@@ -44,6 +52,8 @@ export default class ScalarFill {
       });
 
       this.scalarFill.getMercatorCoordinate = getCoords;
+
+      this.map.on('zoom', this.handleZoom);
     }
 
     this.scalarFill.setData(this.data);
@@ -65,17 +75,11 @@ export default class ScalarFill {
     }
   }
 
-  zoom() {
-    // Object.entries(this._zoomUpdatable).forEach(([k, v]) => {
-    //   this._setPropertyValue(k, v);
-    // });
-  }
-
   // This is called when the map is destroyed or the gl context lost.
   onRemove(map: mapboxgl.Map) {
     delete this.gl;
     delete this.map;
-    map.off('zoom', this.zoom);
+    map.off('zoom', this.handleZoom);
   }
 
   render(gl: WebGLRenderingContext, matrix: number[]) {

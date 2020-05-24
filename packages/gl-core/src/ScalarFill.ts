@@ -89,6 +89,8 @@ export default class ScalarFill implements IScalarFill<any> {
     [key: string]: any;
   };
 
+  private opacity: number;
+
   private worker: Worker;
 
   private drawCommand: WindFill | Fill;
@@ -152,6 +154,15 @@ export default class ScalarFill implements IScalarFill<any> {
     this.zoomUpdatable = {};
 
     this.options = options;
+
+    this.opacity = this.options.opacity || 1;
+  }
+
+  public updateOptions(options: IOptions = {}) {
+    this.options = Object.assign(this.options, options);
+    Object.keys(this.styleSpec).forEach(spec => {
+      this.setProperty(spec, this.options.styleSpec[spec] || this.styleSpec[spec].default);
+    });
   }
 
   private setProperty(prop: string, value: any) {
@@ -189,10 +200,6 @@ export default class ScalarFill implements IScalarFill<any> {
 
   setFillColor(expr: any) {
     this.buildColorRamp(expr);
-  }
-
-  setOpacity(expr: any) {
-    // this.buildColorRamp(expr);
   }
 
   handleZoom() {
@@ -431,6 +438,7 @@ export default class ScalarFill implements IScalarFill<any> {
           }
 
           if (this.options.triggerRepaint) {
+            this.handleZoom();
             this.options.triggerRepaint();
           }
         })
@@ -452,7 +460,7 @@ export default class ScalarFill implements IScalarFill<any> {
 
   render(matrix: number[], offset?: number) {
     if (this.data && this.drawCommand && this.data.texture && this.colorRampTexture) {
-      const opacity = this.options.opacity;
+      const opacity = this.opacity;
 
       const uniforms: any = {
         u_opacity: isNumber(opacity) ? opacity : 1,
