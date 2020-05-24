@@ -114,6 +114,40 @@
       .then(data => {
         console.log(data);
 
+        const windInterpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
+
+        const fillLayer = new mapboxWind.ScalarFill('wind', {
+          // "type": "jsonArray",
+          // "data": data,
+          "type": "image",
+          "url": "./data/wind-uv.png",
+          "extent": [
+            [-180, 85.051129],
+            [-180, -85.051129],
+            [180, 85.051129],
+            [180, -85.051129],
+          ],
+          "width": 1440,
+          "height": 720,
+          "uMin": -33.57035827636719,
+          "uMax": 35.96963882446289,
+          "vMin": -27.76645851135254,
+          "vMax": 28.5035400390625,
+        }, {
+          styleSpec: {
+            'fill-color': [
+              'interpolate',
+              ['linear'],
+              ['get', 'value'],
+              ...windInterpolateColor
+            ],
+          },
+          renderForm: 'rg',
+          opacity: 0.4
+        });
+
+        map.addLayer(fillLayer);
+
         window.windLayer = new mapboxWind.WindLayer('wind', data, {
           windOptions: {
             // colorScale: (m) => {
@@ -153,38 +187,6 @@
         // map.addLayer(window.windLayer);
         window.windLayer.addTo(map);
       });
-
-    const windInterpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
-
-    const fillLayer = new mapboxWind.ScalarFill('wind', {
-      "type": "image",
-      "url": "./data/wind-uv.png",
-      "extent": [
-        [-180, 85.051129],
-        [-180, -85.051129],
-        [180, 85.051129],
-        [180, -85.051129],
-      ],
-      "width": 1440,
-      "height": 720,
-      "uMin": -33.57035827636719,
-      "uMax": 35.96963882446289,
-      "vMin": -27.76645851135254,
-      "vMax": 28.5035400390625,
-    }, {
-      styleSpec: {
-        'fill-color': [
-          'interpolate',
-          ['linear'],
-          ['get', 'value'],
-          ...windInterpolateColor
-        ],
-      },
-      renderForm: 'rg',
-      opacity: 0.9
-    });
-
-    map.addLayer(fillLayer);
   });
 </script>
 </body>

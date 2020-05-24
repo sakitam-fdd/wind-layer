@@ -80,17 +80,17 @@ export default class ScalarFill {
 
   render(gl: WebGLRenderingContext, matrix: number[]) {
     if (this.data && this.scalarFill) {
-      // const bounds = this.map.getBounds();
-      // const eastIter = Math.max(0, Math.ceil((bounds.getEast() - 180) / 360));
-      // const westIter = Math.max(0, Math.ceil((bounds.getWest() + 180) / -360));
+      const bounds = this.map.getBounds();
+      const eastIter = Math.max(0, Math.ceil((bounds.getEast() - 180) / 360));
+      const westIter = Math.max(0, Math.ceil((bounds.getWest() + 180) / -360));
       this.scalarFill.render(matrix, 0);
-      // for (let i = 1; i <= eastIter; i++) {
-      //   // this.wind.render(this.map, matrix, i);
-      //   this.draw(gl, matrix, i);
-      // }
-      // for (let i = 1; i <= westIter; i++) {
-      //   this.draw(gl, matrix, -i);
-      // }
+      for (let i = 1; i <= eastIter; i++) {
+        // this.wind.render(this.map, matrix, i);
+        this.scalarFill.render(matrix, i);
+      }
+      for (let i = 1; i <= westIter; i++) {
+        this.scalarFill.render(matrix, -i);
+      }
     }
   }
 }

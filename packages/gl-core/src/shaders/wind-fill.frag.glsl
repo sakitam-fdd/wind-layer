@@ -47,5 +47,5 @@ void main () {
   vec4 color = texture2D(u_color_ramp, ramp_pos);
 
   gl_FragColor = vec4(floor(255.0 * color * u_opacity) / 255.0);
-  //    gl_FragColor = vec4(1.0, 0.0, 0.0, 0.5);
+//      gl_FragColor = vec4(1.0, 0.0, 0.0, 0.5);
 }

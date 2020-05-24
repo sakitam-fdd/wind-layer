@@ -5,9 +5,9 @@ export function calcMinMax(array: number[]): [number, number] {
   for (let i = 0; i < array.length; i++) {
     const val = array[i];
 
-    if (min === undefined) {
+    if (min === Infinity) {
       min = val;
-    } else if (max === undefined) {
+    } else if (max === Infinity) {
       max = val;
       // update min max
       // 1. Pick 2 elements(a, b), compare them. (say a > b)

@@ -49,6 +49,7 @@ export interface IData {
 export interface IJsonArrayData {
   type: 'jsonArray',
   data: IGFSItem[];
+  extent?: [number, number][],
 }
 
 export interface IImageData {
@@ -191,7 +192,7 @@ export default class ScalarFill implements IScalarFill<any> {
   }
 
   setOpacity(expr: any) {
-    this.buildColorRamp(expr);
+    // this.buildColorRamp(expr);
   }
 
   handleZoom() {
@@ -317,16 +318,28 @@ export default class ScalarFill implements IScalarFill<any> {
           .catch(error => reject(error));
       } else if (data.type === 'jsonArray' && data.data) {
         const gfsData = data.data;
+        let pos;
+        if (data.extent) { // tip: fix extent
+          pos = [
+            ...this.getMercatorCoordinate(data.extent[0]),
+            ...this.getMercatorCoordinate(data.extent[1]),
+            ...this.getMercatorCoordinate(data.extent[2]),
 
-        const pos = [
-          ...this.getMercatorCoordinate([gfsData[0].header.lo1, gfsData[0].header.la1]),
-          ...this.getMercatorCoordinate([gfsData[0].header.lo1, gfsData[0].header.la2]),
-          ...this.getMercatorCoordinate([gfsData[0].header.lo2, gfsData[0].header.la1]),
+            ...this.getMercatorCoordinate(data.extent[2]),
+            ...this.getMercatorCoordinate(data.extent[1]),
+            ...this.getMercatorCoordinate(data.extent[3]),
+          ];
+        } else {
+          pos = [
+            ...this.getMercatorCoordinate([gfsData[0].header.lo1, gfsData[0].header.la1]),
+            ...this.getMercatorCoordinate([gfsData[0].header.lo1, gfsData[0].header.la2]),
+            ...this.getMercatorCoordinate([gfsData[0].header.lo2, gfsData[0].header.la1]),
 
-          ...this.getMercatorCoordinate([gfsData[0].header.lo2, gfsData[0].header.la1]),
-          ...this.getMercatorCoordinate([gfsData[0].header.lo1, gfsData[0].header.la2]),
-          ...this.getMercatorCoordinate([gfsData[0].header.lo2, gfsData[0].header.la2]),
-        ];
+            ...this.getMercatorCoordinate([gfsData[0].header.lo2, gfsData[0].header.la1]),
+            ...this.getMercatorCoordinate([gfsData[0].header.lo1, gfsData[0].header.la2]),
+            ...this.getMercatorCoordinate([gfsData[0].header.lo2, gfsData[0].header.la2]),
+          ];
+        }
 
         const processedData: IData = {
           width: gfsData[0].header.nx,
@@ -352,15 +365,15 @@ export default class ScalarFill implements IScalarFill<any> {
           this.worker = new DataProcess();
           this.worker.addEventListener('message', ({ data: payload }: any) => {
             if (this.options.renderForm === 'rg') {
-              processedData.uMin = payload[0];
-              processedData.uMax = payload[1];
-              processedData.vMin = payload[2];
-              processedData.vMax = payload[3];
-              processedData.texture = utils.createTexture(this.gl, this.gl.LINEAR, payload[4], processedData.width, processedData.height);
+              processedData.uMin = payload[1];
+              processedData.uMax = payload[2];
+              processedData.vMin = payload[3];
+              processedData.vMax = payload[4];
+              processedData.texture = utils.createTexture(this.gl, this.gl.LINEAR, payload[0], processedData.width, processedData.height);
             } else if (this.options.renderForm === 'r') {
-              processedData.min = payload[0];
-              processedData.max = payload[1];
-              processedData.texture = utils.createTexture(this.gl, this.gl.LINEAR, payload[2], processedData.width, processedData.height);
+              processedData.min = payload[1];
+              processedData.max = payload[2];
+              processedData.texture = utils.createTexture(this.gl, this.gl.LINEAR, payload[0], processedData.width, processedData.height);
             } else {
               console.warn('This type is not supported temporarily');
             }
@@ -394,12 +407,12 @@ export default class ScalarFill implements IScalarFill<any> {
           const u = new Float32Array(uComp.data);
           // @ts-ignore
           const v = new Float32Array(vComp.data);
-          this.worker.postMessage(['rg', u, v], [u, v]); // TIP: 需要确定transfer是否支持多个
+          this.worker.postMessage(['rg', u, v]); // TIP: 需要确定transfer是否支持多个
         } else if (this.options.renderForm === 'r') {
           // processedData.min = data.min;
           // processedData.max = data.max;
           const singleData = new Float32Array(gfsData[0].data);
-          this.worker.postMessage(['r', singleData], [singleData]);
+          this.worker.postMessage(['r', singleData]);
         } else {
           console.warn('This type is not supported temporarily');
         }
