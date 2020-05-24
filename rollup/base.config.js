@@ -29,6 +29,8 @@ export default {
       sourcemap: true,
       inline: true,
       forceInline: true,
+      extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      // pattern: //
     }),
     // tslint({
     //   exclude: [
