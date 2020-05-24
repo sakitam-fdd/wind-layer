@@ -1,10 +1,7 @@
-import mapboxgl from 'mapbox-gl';
+import * as mapboxgl from 'mapbox-gl';
+import { ScalarFill as ScalarCore } from 'wind-gl-core';
 
-function isValide(val) {
-  return val !== undefined && val !== null && !isNaN(val);
-}
-
-function getCoords(lng: number, lat: number) {
+function getCoords([lng, lat]: [number, number]): [number, number] {
   const mercatorCoordinate = mapboxgl.MercatorCoordinate.fromLngLat({
     lng,
     lat,
@@ -16,120 +13,77 @@ function getCoords(lng: number, lat: number) {
 }
 
 export default class ScalarFill {
-  constructor(id, options = {}) {
+  private gl: WebGLRenderingContext;
+  private map: mapboxgl.Map;
+  private id: string;
+  private type: string;
+  private renderingMode: '2d' | '3d';
+  private options: any;
+  private data: any;
+  private scalarFill: ScalarCore;
+
+  constructor(id: string, data: any, options = {}) {
     this.id = id;
     this.type = 'custom';
     this.renderingMode = '2d';
     this.options = options;
+
+    this.data = data;
   }
 
-  onAdd(map, gl) {
+  initialize() {
+    if (!this.scalarFill && this.gl) {
+      this.scalarFill = new ScalarCore(this.gl, {
+        opacity: this.options.opacity,
+        renderForm: this.options.renderForm,
+        styleSpec: this.options.styleSpec,
+        getZoom: () => this.map.getZoom(),
+        triggerRepaint: () => {
+          this.map.triggerRepaint();
+        }
+      });
+
+      this.scalarFill.getMercatorCoordinate = getCoords;
+    }
+
+    this.scalarFill.setData(this.data);
+  }
+
+  onAdd(map: mapboxgl.Map, gl: WebGLRenderingContext) {
     this.gl = gl;
     this.map = map;
 
-    if (this.data) {
-      this.initialize(map, gl);
-    }
-  }
-
-  getField(gl, data) {
-    let pos;
-    if (data.isGfs) {
-      const data1 = data[0];
-      const min = Math.min.apply(null, data1.data);
-      const max = Math.max.apply(null, data1.data);
-      const velocityData = [];
-      for (let i = 0; i < data1.data.length; i++) {
-        const r = Math.floor(255 * (data1.data[i] - min) / (max - min));
-        velocityData.push(r);
-        velocityData.push(0);
-        velocityData.push(0);
-        velocityData.push(255);
-      }
-
-      pos = [
-        ...getCoords(uData.header.lo1, uData.header.la1),
-        ...getCoords(uData.header.lo1, uData.header.la2),
-        ...getCoords(uData.header.lo2, uData.header.la1),
-
-        ...getCoords(uData.header.lo2, uData.header.la1),
-        ...getCoords(uData.header.lo1, uData.header.la2),
-        ...getCoords(uData.header.lo2, uData.header.la2),
-      ];
-
-      this.quadBuffer = util.createBuffer(
-        gl,
-        new Float32Array(pos),
-      );
-
-      return {
-        width: data.header.nx,
-        height: data.header.ny,
-        min,
-        max,
-        texture: util.createTexture(gl, gl.LINEAR, new Uint8Array(velocityData), uData.header.nx, uData.header.ny),
-      };
-    } else {
-      // const image = loadImage(data.url);
-      const image = data.image;
-      pos = [
-        ...getCoords(...data.extent[0]),
-        ...getCoords(...data.extent[1]),
-        ...getCoords(...data.extent[2]),
-
-        ...getCoords(...data.extent[2]),
-        ...getCoords(...data.extent[1]),
-        ...getCoords(...data.extent[3]),
-      ];
-
-      this.quadBuffer = util.createBuffer(
-        gl,
-        new Float32Array(pos),
-      );
-
-      return {
-        width: data.width,
-        height: data.height,
-        min: data.min,
-        max: data.max,
-        texture: util.createTexture(gl, gl.LINEAR, image, image.width, image.height),
-      };
-    }
-  }
-
-  setWind(data) {
-    if (this.gl) {
-      this.data = this.getField(this.gl, data);
-    }
     if (this.map) {
-      this.initialize(this.map, this.gl);
-      this.map.triggerRepaint();
+      this.initialize();
+    }
+  }
+
+  setData(data: any) {
+    this.data = data;
+    if (this.map) {
+      this.initialize();
     }
   }
 
   zoom() {
-    Object.entries(this._zoomUpdatable).forEach(([k, v]) => {
-      this._setPropertyValue(k, v);
-    });
-  }
-
-  draw() {
-
+    // Object.entries(this._zoomUpdatable).forEach(([k, v]) => {
+    //   this._setPropertyValue(k, v);
+    // });
   }
 
   // This is called when the map is destroyed or the gl context lost.
-  onRemove(map) {
+  onRemove(map: mapboxgl.Map) {
     delete this.gl;
     delete this.map;
     map.off('zoom', this.zoom);
   }
 
-  render(gl, matrix) {
-    if (this.data) {
+  render(gl: WebGLRenderingContext, matrix: number[]) {
+    if (this.data && this.scalarFill) {
       // const bounds = this.map.getBounds();
       // const eastIter = Math.max(0, Math.ceil((bounds.getEast() - 180) / 360));
       // const westIter = Math.max(0, Math.ceil((bounds.getWest() + 180) / -360));
-      this.draw(matrix, 0);
+      this.scalarFill.render(matrix, 0);
       // for (let i = 1; i <= eastIter; i++) {
       //   // this.wind.render(this.map, matrix, i);
       //   this.draw(gl, matrix, i);

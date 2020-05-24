@@ -7,7 +7,8 @@
         "typings/*",
         "types/*"
       ],
-      "maptalks": ["maptalks/dist/maptalks.es.js"]
+      "maptalks": ["maptalks/dist/maptalks.es.js"],
+      "@mapbox/mapbox-gl-style-spec": ["@mapbox/mapbox-gl-style-spec/dist/index.es.js"]
     },
     "rootDir": "./",
     "baseUrl": "./",
