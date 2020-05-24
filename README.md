@@ -23,11 +23,18 @@ extension to show wind field。
 * 线条宽度支持动态设置。
 * 抽离了核心渲染库，便于扩展到其他地图渲染库。
 
+### 关于webgl<并未包含粒子图层>
+
+  其中的大部分代码来自于 [webgl-wind](https://github.com/mapbox/webgl-wind) 和 [windgl](https://github.com/astrosat/windgl),
+并且目前只针对 `mapbox` 和 `maptalks` 做了相关适配, 相关示例请查看[mapbox](https://github.com/sakitam-fdd/wind-layer/examples/mapbox.html)和[maptalks](https://github.com/sakitam-fdd/wind-layer/examples/maptalks.html)。
+  其所使用的数据为单通道或者双通道图片，需要对原始grib做预处理。
+
 ### 扩展包
 
 | Project | Version | Npm | CDN | Description |
 |---------|---------|-----|------|-------------|
 | [wind-core](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/core) | [![Npm package](https://img.shields.io/npm/v/wind-core.svg)](https://www.npmjs.org/package/wind-core) | [![NPM downloads](https://img.shields.io/npm/dm/wind-core.svg)](https://npmjs.org/package/wind-core) | [![](https://data.jsdelivr.com/v1/package/npm/wind-core/badge)](https://www.jsdelivr.com/package/npm/wind-core) | 风场核心渲染，可扩展不可以直接使用 |
+| [wind-gl-core](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/gl-core) | [![Npm package](https://img.shields.io/npm/v/wind-gl-core.svg)](https://www.npmjs.org/package/wind-gl-core) | [![NPM downloads](https://img.shields.io/npm/dm/wind-gl-core.svg)](https://npmjs.org/package/wind-gl-core) | [![](https://data.jsdelivr.com/v1/package/npm/wind-gl-core/badge)](https://www.jsdelivr.com/package/npm/wind-gl-core) | 色斑图核心渲染，可扩展不可以直接使用 |
 | [ol-wind](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/ol) | [![Npm package](https://img.shields.io/npm/v/ol-wind.svg)](https://www.npmjs.org/package/ol-wind) | [![NPM downloads](https://img.shields.io/npm/dm/ol-wind.svg)](https://npmjs.org/package/ol-wind) | [![](https://data.jsdelivr.com/v1/package/npm/ol-wind/badge)](https://www.jsdelivr.com/package/npm/ol-wind) | `openlayers 6+` 风场扩展插件 |
 | [ol5-wind](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/ol5) | [![Npm package](https://img.shields.io/npm/v/ol5-wind.svg)](https://www.npmjs.org/package/ol5-wind) | [![NPM downloads](https://img.shields.io/npm/dm/ol5-wind.svg)](https://npmjs.org/package/ol5-wind) | [![](https://data.jsdelivr.com/v1/package/npm/ol5-wind/badge)](https://www.jsdelivr.com/package/npm/ol5-wind) | `openlayers 5` 风场扩展插件 |
 | [openlayers-wind](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/openlayers) | [![Npm package](https://img.shields.io/npm/v/openlayers-wind.svg)](https://www.npmjs.org/package/openlayers-wind) | [![NPM downloads](https://img.shields.io/npm/dm/openlayers-wind.svg)](https://npmjs.org/package/openlayers-wind) | [![](https://data.jsdelivr.com/v1/package/npm/openlayers-wind/badge)](https://www.jsdelivr.com/package/npm/openlayers-wind) | `openlayers 3/4` 风场扩展插件 |
@@ -52,6 +59,7 @@ extension to show wind field。
 ```bash
 # npm
 npm install wind-core
+npm install wind-gl-core
 npm install ol-wind
 npm install ol5-wind
 npm install openlayers-wind
@@ -63,6 +71,7 @@ npm install @sakitam-gis/mapbox-wind
 
 # yarn
 yarn add wind-core
+yarn add wind-gl-core
 yarn add ol-wind
 yarn add ol5-wind
 yarn add openlayers-wind
@@ -82,6 +91,7 @@ yarn add @sakitam-gis/mapbox-wind
 | Project | unpkg | jsdelivr |
 |---------|---------|-------------|
 | [wind-core](https://cdn.jsdelivr.net/npm/wind-core/dist/) | https://unpkg.com/wind-core/dist/wind-core.js | https://cdn.jsdelivr.net/npm/wind-core/dist/wind-core.js |
+| [wind-gl-core](https://cdn.jsdelivr.net/npm/wind-gl-core/dist/) | https://unpkg.com/wind-gl-core/dist/wind-gl-core.js | https://cdn.jsdelivr.net/npm/wind-gl-core/dist/wind-gl-core.js |
 | [ol-wind](https://cdn.jsdelivr.net/npm/ol-wind/dist/) 因 `ol6` 重构原因，无法直接使用，你可以自行构建<https://cdn.jsdelivr.net/npm/@sakitam-gis/ol6@6.3.3/dist/> | https://unpkg.com/ol-wind/dist/ol-wind.js | https://cdn.jsdelivr.net/npm/ol-wind/dist/ol-wind.js |
 | [ol5-wind](https://cdn.jsdelivr.net/npm/ol5-wind/dist/) | https://unpkg.com/ol5-wind/dist/ol-wind.js | https://cdn.jsdelivr.net/npm/ol5-wind/dist/ol-wind.js |
 | [openlayers-wind](https://cdn.jsdelivr.net/npm/openlayers-wind/dist/) | https://unpkg.com/openlayers-wind/dist/ol-wind.js | https://cdn.jsdelivr.net/npm/openlayers-wind/dist/ol-wind.js |
@@ -366,7 +376,8 @@ volumes:
 * https://github.com/Esri/wind-js
 * https://github.com/danwild/wind-js-leaflet
 * https://github.com/IHCantabria/Leaflet.CanvasLayer.Field
-
+* https://github.com/mapbox/webgl-wind
+* https://github.com/astrosat/windgl
 
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsakitam-fdd%2Fwind-layer.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsakitam-fdd%2Fwind-layer?ref=badge_large)

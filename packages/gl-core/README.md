@@ -1,15 +1,30 @@
-# `wind-core`
+# `wind-gl-core`
 
-> Wind field core
+> wind-gl-core core
 
 ## Usage
 
 ```js
-import WindCore from 'wind-core';
+import ScalarCore from 'wind-gl-core';
+this.scalarRender = new ScalarCore(this.gl, {
+  opacity: opt.opacity,
+  renderForm: opt.renderForm,
+  styleSpec: opt.styleSpec,
+  getZoom: () => this.getMap().getZoom(),
+  triggerRepaint: () => {
+    this._redraw();
+  }
+});
 
-const wind = new WindCore(this.context, opt, data);
+this.scalarRender.getMercatorCoordinate = ([lng, lat]: [number, number]) => {
+  const coords = map.coordToPoint(new Coordinate(lng, lat), map.getGLZoom());
+  return [
+    coords.x,
+    coords.y,
+  ];
+};
 
-wind.project = (coordinate) => pixel;
-wind.intersectsCoordinate = (coordinate) => true;
-wind.postrender = () => {};
+this.getMap().on('zoom', this.handleZoom, this);
+
+this.scalarRender.setData(data);
 ```
