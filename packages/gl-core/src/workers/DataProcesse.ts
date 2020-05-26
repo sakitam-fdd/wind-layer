@@ -13,7 +13,7 @@ ctx.addEventListener('message', async ({ data: payload }) => {
     for (let i = 0; i < uData.length; i++) {
       const r = 255 * (uData[i] - uMin) / (uMax - uMin);
       const g = 255 * (vData[i] - vMin) / (vMax - vMin);
-      velocityData.set([r, g, 0, 255], i);
+      velocityData.set([r, g, 0, 255], i * 4);
     }
 
     ctx.postMessage([velocityData, uMin, uMax, vMin, vMax]);
@@ -23,7 +23,7 @@ ctx.addEventListener('message', async ({ data: payload }) => {
     const velocityData = new Uint8Array(singleData.length * 4);
     for (let i = 0; i < singleData.length; i++) {
       const r = 255 * (singleData[i] - min) / (max - min);
-      velocityData.set([r, 0, 0, 255], i);
+      velocityData.set([r, 0, 0, 255], i * 4);
     }
 
     ctx.postMessage([velocityData, min, max]);

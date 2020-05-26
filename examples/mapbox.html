@@ -108,31 +108,45 @@
   };
 
   map.on('load', function () {
-    fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
-    // fetch('./data/uv.json')
+    // fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
+    fetch('./data/submit.json')
       .then(res => res.json())
       .then(data => {
         console.log(data);
 
+        data = data.map(item => {
+          item.header = Object.assign(item.header, {
+            nx: 360,
+            ny: 180,
+            lo1: -180,
+            la2: -85.051129,
+            lo2: 180,
+            la1: 85.051129,
+            dx: 1,
+            dy: 1
+          });
+          return item;
+        });
+
         const windInterpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
 
         const fillLayer = new mapboxWind.ScalarFill('wind', {
-          // "type": "jsonArray",
-          // "data": data,
-          "type": "image",
-          "url": "./data/wind-uv.png",
+          "type": "jsonArray",
+          "data": data,
+          // "type": "image",
+          // "url": "./data/2020052518_1p00_uv.png",
           "extent": [
             [-180, 85.051129],
             [-180, -85.051129],
             [180, 85.051129],
             [180, -85.051129],
           ],
-          "width": 1440,
-          "height": 720,
-          "uMin": -33.57035827636719,
-          "uMax": 35.96963882446289,
-          "vMin": -27.76645851135254,
-          "vMax": 28.5035400390625,
+          "width": 360,
+          "height": 180,
+          "uMin": -31.7573184967041,
+          "uMax": 25.202680587768555,
+          "vMin": -24.86174964904785,
+          "vMax": 23.438249588012695,
         }, {
           styleSpec: {
             'fill-color': [
@@ -146,7 +160,7 @@
               ['exponential', 0.5],
               ['zoom'],
               5,
-              0.5,
+              1,
               8,
               1
             ],
@@ -162,23 +176,23 @@
             //   // console.log(m);
             //   return '#fff';
             // },
-            colorScale: [
-              "rgb(36,104, 180)",
-              "rgb(60,157, 194)",
-              "rgb(128,205,193 )",
-              "rgb(151,218,168 )",
-              "rgb(198,231,181)",
-              "rgb(238,247,217)",
-              "rgb(255,238,159)",
-              "rgb(252,217,125)",
-              "rgb(255,182,100)",
-              "rgb(252,150,75)",
-              "rgb(250,112,52)",
-              "rgb(245,64,32)",
-              "rgb(237,45,28)",
-              "rgb(220,24,32)",
-              "rgb(180,0,35)"
-            ],
+            // colorScale: [
+            //   "rgb(36,104, 180)",
+            //   "rgb(60,157, 194)",
+            //   "rgb(128,205,193 )",
+            //   "rgb(151,218,168 )",
+            //   "rgb(198,231,181)",
+            //   "rgb(238,247,217)",
+            //   "rgb(255,238,159)",
+            //   "rgb(252,217,125)",
+            //   "rgb(255,182,100)",
+            //   "rgb(252,150,75)",
+            //   "rgb(250,112,52)",
+            //   "rgb(245,64,32)",
+            //   "rgb(237,45,28)",
+            //   "rgb(220,24,32)",
+            //   "rgb(180,0,35)"
+            // ],
             // velocityScale: 1 / 20,
             // paths: 5000,
             frameRate: 16,
