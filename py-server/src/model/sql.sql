@@ -35,3 +35,38 @@ insert into gribs(
         '202003220000',
         '202003220000'
       )
+
+
+INSERT INTO gribs (
+    level
+) SELECT
+	'2018032016204085',
+	'2431503022',
+	'wanghan',
+	'470',
+	NULL,
+	'2018-03-20 16:22:05',
+	'0',
+	'1300000',
+	'1',
+	'26',
+	'20180320162241705',
+	NULL,
+	NULL
+FROM
+	DUAL
+WHERE
+	NOT EXISTS (
+		SELECT
+			batchno,
+			payproid,
+			idserial,
+			payamt
+		FROM
+			pay_namelist
+		WHERE
+		batchno = '2018032016204085'
+		AND payproid = '470'
+		AND idserial = '161'
+		AND payamt = '1300000'
+	)
