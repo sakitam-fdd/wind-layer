@@ -8,17 +8,18 @@ import sqlite3
 logger = logging.getLogger(__name__)
 
 OUTPUT_BASE_DIR = os.getcwd()
-OUTPUT_DIR = '../../static/data'
+STATIC_DIR = 'static'
+BASE_DIR = os.path.abspath(os.path.join(OUTPUT_BASE_DIR, STATIC_DIR))
 
 
 class DBPoll():
-
-  def __init__(self):
-    self.db_path = '../../static/db/grib.db'
+  def __init__(self, db_name):
+    self.db_name = db_name
+    self.db_path = os.path.join(BASE_DIR, 'db/{db_name}.db'.format(db_name=db_name))
     self.connect = self.connect_db()
 
   def connect_db(self):
-    connect = sqlite3.connect(self.db_path)
+    connect = sqlite3.connect(self.db_path, check_same_thread=False)
     # con = sqlite3.connect(':memory') # 内存数据库
     return connect
 
@@ -28,27 +29,28 @@ class DBPoll():
 
   # 不要存大json
   # DROP TABLE IF EXISTS TableName
-  def create_table(self, tableName):
+  def create_table(self, sql_string, tableName):
     cursor = self.get_cursor()
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS ${tableName}(
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT,
-      create_time DATE,
-      update_time DATE,
-      data_time DATE,
-      level VARCHAR(20) NOT NULL,
-      extent VARCHAR(100) NOT NULL,
-      product VARCHAR(20) NOT NULL,
-      u_grib BLOB,
-      v_grib BLOB,
-      parsed_json BLOB
-    )
-    """.replace('${tableName}', tableName))
+    cursor.execute(sql_string.replace('${tableName}', tableName))
 
     cursor.close()
 
     self.connect.commit()
+
+  def execute_statement(self, sql_string, kwargs):
+    start = time.time()
+    cursor = self.get_cursor()
+    try:
+      cursor.execute(sql_string, kwargs)
+
+      logger.debug("select: %s" % (time.time() - start))
+      return ''
+    except Exception as e:
+      return e
+    finally:
+      cursor.close()
+
+      self.connect.commit()
 
   def append_grib_data(self):
     start = time.time()
@@ -81,24 +83,25 @@ class DBPoll():
         update_time
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
-        '2020032200_1p00',
-        '202003220000',
-        'lev_10_m_above_ground',
-        '[0, -90, 360, 90]',
-        '1p00',
-        sqlite3.Binary(u_grib),
-        sqlite3.Binary(v_grib),
-        sqlite3.Binary(compressed),
-        # json.dumps(utfgrid),
-        '202003220000',
-        '202003220000'
-      ))
+      '2020032200_1p00',
+      '202003220000',
+      'lev_10_m_above_ground',
+      '[0, -90, 360, 90]',
+      '1p00',
+      sqlite3.Binary(u_grib),
+      sqlite3.Binary(v_grib),
+      sqlite3.Binary(compressed),
+      # json.dumps(utfgrid),
+      '202003220000',
+      '202003220000'
+    ))
 
     cursor.close()
 
     self.connect.commit()
 
     logger.debug("select: %s" % (time.time() - start))
+
 
 if __name__ == '__main__':
   db = DBPoll()
