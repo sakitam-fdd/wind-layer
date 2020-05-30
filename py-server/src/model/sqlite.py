@@ -33,24 +33,34 @@ class DBPoll():
     cursor = self.get_cursor()
     cursor.execute(sql_string.replace('${tableName}', tableName))
 
-    cursor.close()
-
     self.connect.commit()
+    cursor.close()
 
   def execute_statement(self, sql_string, kwargs):
     start = time.time()
     cursor = self.get_cursor()
     try:
       cursor.execute(sql_string, kwargs)
-
+      # cursor.execute('SELECT * FROM grib WHERE id = ?', ('3'))
+      # values = cursor.fetchall()
       logger.debug("select: %s" % (time.time() - start))
-      return ''
+      self.connect.commit()
     except Exception as e:
       return e
     finally:
-      cursor.close()
+      rows = cursor.fetchall()
+      description = cursor.description
+      res = []
+      if len(rows) > 0:
+        for row in rows:
+          data = {}
+          for index, des in enumerate(description):
+            key = des[0]
+            data.__setitem__(key, row[index])
 
-      self.connect.commit()
+          res.append(data)
+      cursor.close()
+      return res
 
   def append_grib_data(self):
     start = time.time()
