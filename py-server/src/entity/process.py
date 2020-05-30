@@ -30,23 +30,66 @@ class ProcessTable():
     """, 'process')
 
 
-  def query_row(self, date, gfs_time, res, forecasts_time, bbox, level, variables, extent, file_name):
+  def query_grib(self, date, gfs_time, res, forecasts_time, bbox, level, variables, file_name):
     f_time = str_to_int(forecasts_time)
     date_time = datetime.strptime(date + gfs_time, '%Y%m%d%H%M')
     date_time += timedelta(hours=f_time)
-    return self.db.execute_statement(f"""
+
+    data = self.db.execute_statement(f"""
+      SELECT * FROM grib WHERE
+        date_time = ?
+        AND gfs_date = ?
+        AND gfs_time = ?
+        AND res = ?
+        AND forecasts_time = ?
+        AND bbox = ?
+        AND level = ?
+        AND variables = ?
+        AND file_name = ?
+      """, (
+      str(date_time),
+      str_to_int(date),
+      str_to_int(gfs_time),
+      res,
+      forecasts_time,
+      bbox,
+      level,
+      variables,
+      file_name
+    ))
+
+    return data
+
+
+  def query_process(self, date, gfs_time, res, forecasts_time, bbox, level, variables, file_name):
+    f_time = str_to_int(forecasts_time)
+    date_time = datetime.strptime(date + gfs_time, '%Y%m%d%H%M')
+    date_time += timedelta(hours=f_time)
+
+    data = self.db.execute_statement(f"""
       SELECT * FROM process WHERE
-        date_time = {date_time}
-        AND gfs_date = {date}
-        AND gfs_time = {gfs_time}
-        AND res = {res}
-        AND forecasts_time = {forecasts_time}
-        AND level = {level}
-        AND bbox = {bbox}
-        AND variables = {variables}
-        AND extent = {extent}
-        AND file_name = {file_name}
-      """)
+        date_time = ?
+        AND gfs_date = ?
+        AND gfs_time = ?
+        AND res = ?
+        AND forecasts_time = ?
+        AND bbox = ?
+        AND level = ?
+        AND variables = ?
+        AND file_name = ?
+      """, (
+      str(date_time),
+      str_to_int(date),
+      str_to_int(gfs_time),
+      res,
+      forecasts_time,
+      bbox,
+      level,
+      variables,
+      file_name
+    ))
+
+    return data
 
 
   def add_json(self, date, gfs_time, res, forecasts_time, bbox, level, variables, extent, file_name, json_file_path):
@@ -54,23 +97,36 @@ class ProcessTable():
     date_time = datetime.strptime(date + gfs_time, '%Y%m%d%H%M')
     date_time += timedelta(hours=f_time)
 
-    columns = self.query_row(date, gfs_time, res, forecasts_time, bbox, level, variables, extent, file_name)
+    columns = self.query_process(date, gfs_time, res, forecasts_time, bbox, level, variables, file_name)
 
     if columns:
       return self.db.execute_statement(f"""
         UPDATE process SET
-          json_file_path = {json_file_path}
-          WHERE date_time = {date_time}
-          AND gfs_date = {date}
-          AND gfs_time = {gfs_time}
-          AND res = {res}
-          AND forecasts_time = {forecasts_time}
-          AND level = {level}
-          AND bbox = {bbox}
-          AND variables = {variables}
-          AND extent = {extent}
-          AND file_name = {file_name}
-        """)
+          json_file_path = ?
+          WHERE date_time = ?
+          AND gfs_date = ?
+          AND gfs_time = ?
+          AND res = ?
+          AND forecasts_time = ?
+          AND level = ?
+          AND bbox = ?
+          AND variables = ?
+          AND extent = ?
+          AND file_name = ?
+        """, (
+        json_file_path,
+        date_time,
+        date,
+        gfs_time,
+        res,
+        forecasts_time,
+        level,
+        bbox,
+        variables,
+        extent,
+        file_name
+      )
+    )
     else:
       return self.db.execute_statement(f"""
       INSERT OR IGNORE INTO process (
@@ -84,8 +140,9 @@ class ProcessTable():
         variables,
         file_name,
         extent,
-        json_file_path
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        json_file_path,
+        raster_file_path
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       """, (
         date_time,
         date,
@@ -97,7 +154,8 @@ class ProcessTable():
         variables,
         file_name,
         extent,
-        json_file_path
+        json_file_path,
+        ''
       ))
 
   def add_raster(self, date, gfs_time, res, forecasts_time, bbox, level, variables, extent, file_name, raster_file_path):
@@ -105,23 +163,35 @@ class ProcessTable():
     date_time = datetime.strptime(date + gfs_time, '%Y%m%d%H%M')
     date_time += timedelta(hours=f_time)
 
-    columns = self.query_row(date, gfs_time, res, forecasts_time, bbox, level, variables, extent, file_name)
+    columns = self.query_process(date, gfs_time, res, forecasts_time, bbox, level, variables, file_name)
 
-    if columns:
+    if columns and len(columns) > 0:
       return self.db.execute_statement(f"""
         UPDATE process SET
-          raster_file_path = {raster_file_path}
-          WHERE date_time = {date_time}
-          AND gfs_date = {date}
-          AND gfs_time = {gfs_time}
-          AND res = {res}
-          AND forecasts_time = {forecasts_time}
-          AND level = {level}
-          AND bbox = {bbox}
-          AND variables = {variables}
-          AND extent = {extent}
-          AND file_name = {file_name}
-        """)
+          raster_file_path = ?
+          WHERE date_time = ?
+          AND gfs_date = ?
+          AND gfs_time = ?
+          AND res = ?
+          AND forecasts_time = ?
+          AND level = ?
+          AND bbox = ?
+          AND variables = ?
+          AND extent = ?
+          AND file_name = ?
+        """, (
+        raster_file_path,
+        date_time,
+        date,
+        gfs_time,
+        res,
+        forecasts_time,
+        level,
+        bbox,
+        variables,
+        extent,
+        file_name,
+      ))
     else:
       return self.db.execute_statement(f"""
       INSERT OR IGNORE INTO process (
@@ -135,8 +205,9 @@ class ProcessTable():
         variables,
         file_name,
         extent,
+        json_file_path,
         raster_file_path
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       """, (
         date_time,
         date,
@@ -148,6 +219,7 @@ class ProcessTable():
         variables,
         file_name,
         extent,
+        '',
         raster_file_path,
       ))
 

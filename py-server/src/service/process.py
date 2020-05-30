@@ -9,11 +9,13 @@ from mercantile import Tile
 from rasterio.plot import reshape_as_image
 from rasterio.enums import Resampling
 from rasterio.warp import reproject
-from src.config.grib import get_json_path, get_raster_path
+from src.config.grib import get_json_path, get_raster_path, BASE_DIR, BASE_JSON_DIR, BASE_RASTER_DIR
 from src.entity.process import ProcessTable
+from src.service.grib import download_data
 
 process_db = ProcessTable()
 logger = logging.getLogger(__name__)
+
 
 def write_image(filename, image):
   # os.makedirs(os.path.dirname(filename), exist_ok=True)
@@ -29,7 +31,9 @@ def prepare_gray_png_array(bands):
   # Convert coverage from 0->360 to -180->180
   # 沿着给定轴滚动数组元素。超出最后位置的元素将会滚动到第一个位置。
   # numpy.roll(a, shift, axis=None)
-  bands = np.roll(bands, int(0.5 * bands.shape[2]), 2)
+  shape_len = len(bands.shape)
+  bands = np.roll(bands, int(0.5 * bands.shape[shape_len - 1]), shape_len - 1)
+  # bands = np.roll(bands, int(0.5 * bands.shape[2]), 2)
 
   # rescale values from floats to uint8
   for i in range(0, bands.shape[0]):
@@ -98,12 +102,19 @@ def read_data(file_path, params):
       band_data = src.read(band_idx)
       data = np.concatenate((data, band_data.reshape((1, band_data.shape[0], band_data.shape[1]))), axis=0)
 
+      xmin = bounds.left - (bounds.right - bounds.left) / 2
+      xmax = bounds.right - (bounds.right - bounds.left) / 2
+      extent = [xmin, bounds.bottom, xmax, bounds.top]
+
       headers.append({
         'nx': width,
         'ny': height,
         'dx': (bounds.right - bounds.left) / width,
         'dy': (bounds.top - bounds.bottom) / height,
+        'min': band_data.min(),
+        'max': band_data.max(),
         'bounds': bounds,
+        'extent': extent,
         # 'extent': [bounds.left, bounds.bottom, bounds.right, bounds.top],
         'value': band_data,
         **band_messages,
@@ -146,16 +157,17 @@ def format_to_json(headers, params):
     # Convert coverage from 0->360 to -180->180
     # 沿着给定轴滚动数组元素。超出最后位置的元素将会滚动到第一个位置。
     # numpy.roll(a, shift, axis=None)
-    bands = np.roll(bands, int(0.5 * bands.shape[shape_len]), shape_len)
-    if header.has_key('value'):
-      header = header.pop('value')
+    bands = np.roll(bands, int(0.5 * bands.shape[shape_len - 1]), shape_len - 1)
+    if 'value' in header:
+      header.pop('value')
     extent = []
-    if header.has_key('bounds'):
+    if 'bounds' in header:
+      bounds = header['bounds']
       # 'extent': [bounds.left, bounds.bottom, bounds.right, bounds.top],
-      xmin = header.bounds.left - (header.bounds.right - header.bounds.left) / 2
-      xmax = header.bounds.right - (header.bounds.right - header.bounds.left) / 2
-      extent = [xmin, header.bounds.bottom, xmax, header.bounds.top]
-      header = header.pop('bounds')
+      xmin = bounds.left - (bounds.right - bounds.left) / 2
+      xmax = bounds.right - (bounds.right - bounds.left) / 2
+      extent = [xmin, bounds.bottom, xmax, bounds.top]
+      header.pop('bounds')
     data.append({
       'header': {
         'la1': extent[3],
@@ -168,7 +180,7 @@ def format_to_json(headers, params):
       'data': bands.flatten().tolist()
     })
 
-  if params['write_json'] == True and params['json_file']:
+  if 'write_json' in params and params['write_json'] == True and 'json_file' in params and params['json_file']:
     # file_path = f"{date}/{gfs_time}/{res}/{forecasts_time}/"
 
     file = get_json_path(params['json_file'], f"{params['file_name']}.json")
@@ -188,7 +200,7 @@ def format_to_json(headers, params):
           params['bbox'],
           params['level'],
           params['variables'],
-          params['extent'],
+          ','.join(params['extent']),
           params['file_name'],
           json_file_path,
         )
@@ -200,8 +212,16 @@ def format_to_json(headers, params):
 """
 
 
-def format_to_png(data, params):
+def format_to_png(data, headers, params):
   try:
+    data = []
+    raster_file_path = os.path.join(params['raster_file'], f"{params['file_name']}.png")
+    for header in headers:
+      data.append({
+        'header': header,
+        'data': raster_file_path
+      })
+
     bands = prepare_gray_png_array(data)
     image = reshape_as_image(bands)
     file = get_raster_path(params['raster_file'], f"{params['file_name']}.png")
@@ -210,43 +230,171 @@ def format_to_png(data, params):
       # return file
       logger.info('栅格文件已存在')
     else:
-      raster_file_path = os.path.join(params['raster_file'], f"{params['file_name']}.png")
       write_image(file_path, image)
+      json_file_path = file_path.replace('.png', '.json')
+      with open(json_file_path, 'w') as f:
+        json.dump(data, f)
       process_db.add_raster(
-          params['date'],
-          params['gfsTime'],
-          params['res'],
-          params['forecastsTime'],
-          params['bbox'],
-          params['level'],
-          params['variables'],
-          params['extent'],
-          params['file_name'],
-          raster_file_path,
-        )
+        params['date'],
+        params['gfsTime'],
+        params['res'],
+        params['forecastsTime'],
+        params['bbox'],
+        params['level'],
+        params['variables'],
+        ','.join(params['extent']),
+        params['file_name'],
+        raster_file_path,
+      )
   except Exception as e:
     return e
 
 
-def process_data(path, file_name, process_type=['json', 'raster']):
+def process_data(params):
   try:
-    data = read_data(path, {
-      'elementEnum': [
-        'UGRD',
-        'VGRD'
-      ]
-    })
-    if data is not None and data['headers']:
-      json = format_to_json(data['headers'], {})
-    elif data is not None and data['data']:
-      raster = format_to_png(data['data'], {})
+    cols = check_grib_exit(params)
+    # grib 文件下载过
+    if cols and len(cols) > 0:
+      col = cols[0]
+      if col['file_path']:
+        path = os.path.join(BASE_DIR, col['file_path'])
+        data = read_data(path, {
+          'elementEnum': [
+            'UGRD',
+            'VGRD'
+          ]
+        })
+        file_path = f"{params['date']}/{params['gfsTime']}/{params['res']}/{params['forecastsTime']}/"
+        params.__setitem__('write_json', True)
+        params.__setitem__('json_file', file_path)
+        params.__setitem__('raster_file', file_path)
+        json = []
+        raster = {}
+        if data is not None and data['headers']:
+          json = format_to_json(data['headers'], params)
+        if data is not None and 'data' in data:
+          raster = format_to_png(data['data'], data['headers'], params)
+        return {
+          'json': json,
+          'raster': raster
+        }
+
+    return {
+      'json': False,
+      'raster': False
+    }
+  except Exception as e:
+    return e
+
+
+"""
+检查grib文件是否下载过，若未下载过执行下载任务
+"""
+
+
+def check_grib_exit(params):
+  try:
+    cols = process_db.query_grib(
+      params['date'],
+      params['gfsTime'],
+      params['res'],
+      params['forecastsTime'],
+      params['bbox'],
+      params['level'],
+      params['variables'],
+      params['file_name']
+    )
+
+    if cols and len(cols) > 0:
+      col = cols[0]
+      if col['file_path']:
+        return col
+      else:
+        download_data(params['date'], params['gfsTime'], params['res'], params['forecastsTime'], params['bbox'],
+                      params['level'], params['variables'], params['file_name'])
+        print('重新下载')
+        return check_grib_exit(params)
+    else:
+      download_data(params['date'], params['gfsTime'], params['res'], params['forecastsTime'], params['bbox'],
+                    params['level'], params['variables'], params['file_name'])
+      print('执行下载任务')
+      return check_grib_exit(params)
+  except Exception as e:
+    return e
+
+
+def process_json(params):
+  try:
+    cols = process_db.query_process(
+      params['date'],
+      params['gfsTime'],
+      params['res'],
+      params['forecastsTime'],
+      params['bbox'],
+      params['level'],
+      params['variables'],
+      params['file_name']
+    )
+
+    data = []
+
+    # 此处表明grib文件已经下载过
+    if cols and len(cols) > 0:
+      col = cols[0]
+      # 当存在json路径，表明已经处理过，直接读取数据返回
+      if 'json_file_path' in col and col['json_file_path']:
+        path = os.path.join(BASE_JSON_DIR, col['json_file_path'])
+        with open(path) as json_file:
+          data = json.load(json_file)
+      else:
+        format_data = process_data(params)
+        if 'json' in format_data and format_data['json']:
+          data = format_data['json']
+        else:
+          data = '解析失败'
+    return data
+  except Exception as e:
+    return e
+
+
+def process_raster(params):
+  try:
+    cols = process_db.query_process(
+      params['date'],
+      params['gfsTime'],
+      params['res'],
+      params['forecastsTime'],
+      params['bbox'],
+      params['level'],
+      params['variables'],
+      params['file_name']
+    )
+
+    data = []
+
+    # 此处表明grib文件已经下载过
+    if cols and len(cols) > 0:
+      col = cols[0]
+      # 当存在json路径，表明已经处理过，直接读取数据返回
+      if 'raster_file_path' in col and col['raster_file_path']:
+        path = os.path.join(BASE_RASTER_DIR, col['raster_file_path'])
+        with open(path) as json_file:
+          data = json.load(json_file)
+      else:
+        format_data = process_data(params)
+        if 'raster' in format_data and format_data['raster']:
+          data = format_data['raster']
+        else:
+          data = '解析失败'
+    return data
   except Exception as e:
     return e
 
 
 if __name__ == '__main__':
   try:
-    OUTPUT = os.path.abspath(os.path.join(os.getcwd(), '../../static/data/20200529/00/1p00/f000/var_ugrd-var_vgrd.grib'))
+    OUTPUT = os.path.abspath(
+      os.path.join(os.getcwd(), '../../static/data/20200529/00/1p00/f000/var_ugrd-var_vgrd.grib'))
     # read_data(OUTPUT, '2020052518_1p00_uv.png')
     # gfd_to_tile(OUTPUT)
     read_data(OUTPUT, {

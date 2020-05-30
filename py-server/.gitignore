@@ -133,3 +133,4 @@ dmypy.json
 /static/data/**.*
 /static/data/
 /static/db/
+/static/raster/
