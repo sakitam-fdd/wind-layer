@@ -214,10 +214,10 @@ def format_to_json(headers, params):
 
 def format_to_png(data, headers, params):
   try:
-    data = []
+    dec_data = []
     raster_file_path = os.path.join(params['raster_file'], f"{params['file_name']}.png")
     for header in headers:
-      data.append({
+      dec_data.append({
         'header': header,
         'data': raster_file_path
       })
@@ -233,7 +233,7 @@ def format_to_png(data, headers, params):
       write_image(file_path, image)
       json_file_path = file_path.replace('.png', '.json')
       with open(json_file_path, 'w') as f:
-        json.dump(data, f)
+        json.dump(dec_data, f)
       process_db.add_raster(
         params['date'],
         params['gfsTime'],
@@ -246,38 +246,38 @@ def format_to_png(data, headers, params):
         params['file_name'],
         raster_file_path,
       )
+
+    return dec_data
   except Exception as e:
     return e
 
 
 def process_data(params):
   try:
-    cols = check_grib_exit(params)
+    col = check_grib_exit(params)
     # grib 文件下载过
-    if cols and len(cols) > 0:
-      col = cols[0]
-      if col['file_path']:
-        path = os.path.join(BASE_DIR, col['file_path'])
-        data = read_data(path, {
-          'elementEnum': [
-            'UGRD',
-            'VGRD'
-          ]
-        })
-        file_path = f"{params['date']}/{params['gfsTime']}/{params['res']}/{params['forecastsTime']}/"
-        params.__setitem__('write_json', True)
-        params.__setitem__('json_file', file_path)
-        params.__setitem__('raster_file', file_path)
-        json = []
-        raster = {}
-        if data is not None and data['headers']:
-          json = format_to_json(data['headers'], params)
-        if data is not None and 'data' in data:
-          raster = format_to_png(data['data'], data['headers'], params)
-        return {
-          'json': json,
-          'raster': raster
-        }
+    if col is not None and col['file_path']:
+      path = os.path.join(BASE_DIR, col['file_path'])
+      data = read_data(path, {
+        'elementEnum': [
+          'UGRD',
+          'VGRD'
+        ]
+      })
+      file_path = f"{params['date']}/{params['gfsTime']}/{params['res']}/{params['forecastsTime']}/"
+      params.__setitem__('write_json', True)
+      params.__setitem__('json_file', file_path)
+      params.__setitem__('raster_file', file_path)
+      json = []
+      raster = {}
+      if data is not None and data['headers']:
+        json = format_to_json(data['headers'], params)
+      if data is not None and 'data' in data:
+        raster = format_to_png(data['data'], data['headers'], params)
+      return {
+        'json': json,
+        'raster': raster
+      }
 
     return {
       'json': False,
@@ -310,83 +310,125 @@ def check_grib_exit(params):
       if col['file_path']:
         return col
       else:
-        download_data(params['date'], params['gfsTime'], params['res'], params['forecastsTime'], params['bbox'],
-                      params['level'], params['variables'], params['file_name'])
         print('重新下载')
-        return check_grib_exit(params)
+        res = download_data(params['date'], params['gfsTime'], params['res'], params['forecastsTime'], params['bbox'],
+                      params['level'], params['variables'], params['file_name'])
+        if 'code' in res and res['code'] != 200:
+          return res
+        else:
+          return check_grib_exit(params)
     else:
-      download_data(params['date'], params['gfsTime'], params['res'], params['forecastsTime'], params['bbox'],
-                    params['level'], params['variables'], params['file_name'])
       print('执行下载任务')
-      return check_grib_exit(params)
+      res = download_data(params['date'], params['gfsTime'], params['res'], params['forecastsTime'], params['bbox'],
+                    params['level'], params['variables'], params['file_name'])
+      if 'code' in res and res['code'] != 200:
+        return res
+      else:
+        return check_grib_exit(params)
   except Exception as e:
     return e
 
 
 def process_json(params):
   try:
-    cols = process_db.query_process(
-      params['date'],
-      params['gfsTime'],
-      params['res'],
-      params['forecastsTime'],
-      params['bbox'],
-      params['level'],
-      params['variables'],
-      params['file_name']
-    )
+    grib_col = check_grib_exit(params)
 
-    data = []
+    if grib_col is not None and grib_col['file_path']:
+      cols = process_db.query_process(
+        params['date'],
+        params['gfsTime'],
+        params['res'],
+        params['forecastsTime'],
+        params['bbox'],
+        params['level'],
+        params['variables'],
+        params['file_name']
+      )
 
-    # 此处表明grib文件已经下载过
-    if cols and len(cols) > 0:
-      col = cols[0]
-      # 当存在json路径，表明已经处理过，直接读取数据返回
-      if 'json_file_path' in col and col['json_file_path']:
-        path = os.path.join(BASE_JSON_DIR, col['json_file_path'])
-        with open(path) as json_file:
-          data = json.load(json_file)
+      data = []
+
+      # 此处表明grib文件已经下载过
+      if cols and len(cols) > 0:
+        col = cols[0]
+        # 当存在json路径，表明已经处理过，直接读取数据返回
+        if 'json_file_path' in col and col['json_file_path']:
+          path = os.path.join(BASE_JSON_DIR, col['json_file_path'])
+          with open(path) as json_file:
+            data = json.load(json_file)
+        else:
+          format_data = process_data(params)
+          if 'json' in format_data and format_data['json']:
+            data = format_data['json']
+          else:
+            data = '解析失败'
       else:
         format_data = process_data(params)
         if 'json' in format_data and format_data['json']:
           data = format_data['json']
         else:
           data = '解析失败'
-    return data
+      return data
+    elif grib_col is not None and 'code' in grib_col:
+      logger.info('任务出错')
+      if 'message' in grib_col and grib_col['message']:
+        return grib_col['message']
+      else:
+        return "处理出错"
+    else:
+      return "内部处理出错"
   except Exception as e:
     return e
 
 
 def process_raster(params):
   try:
-    cols = process_db.query_process(
-      params['date'],
-      params['gfsTime'],
-      params['res'],
-      params['forecastsTime'],
-      params['bbox'],
-      params['level'],
-      params['variables'],
-      params['file_name']
-    )
+    grib_col = check_grib_exit(params)
 
-    data = []
+    if grib_col is not None and grib_col['file_path']:
+      cols = process_db.query_process(
+        params['date'],
+        params['gfsTime'],
+        params['res'],
+        params['forecastsTime'],
+        params['bbox'],
+        params['level'],
+        params['variables'],
+        params['file_name']
+      )
 
-    # 此处表明grib文件已经下载过
-    if cols and len(cols) > 0:
-      col = cols[0]
-      # 当存在json路径，表明已经处理过，直接读取数据返回
-      if 'raster_file_path' in col and col['raster_file_path']:
-        path = os.path.join(BASE_RASTER_DIR, col['raster_file_path'])
-        with open(path) as json_file:
-          data = json.load(json_file)
+      data = []
+
+      # 此处表明grib文件已经下载过
+      if cols and len(cols) > 0:
+        col = cols[0]
+        # 当存在json路径，表明已经处理过，直接读取数据返回
+        if 'raster_file_path' in col and col['raster_file_path']:
+          path = os.path.join(BASE_RASTER_DIR, col['raster_file_path'])
+          path = path.replace('.png', '.json')
+          with open(path) as json_file:
+            data = json.load(json_file)
+        else:
+          format_data = process_data(params)
+          if 'raster' in format_data and format_data['raster']:
+            data = format_data['raster']
+          else:
+            data = '解析失败'
       else:
         format_data = process_data(params)
         if 'raster' in format_data and format_data['raster']:
           data = format_data['raster']
         else:
           data = '解析失败'
-    return data
+      return data
+    elif grib_col is not None and 'code' in grib_col:
+      logger.info('任务出错')
+      if 'message' in grib_col and grib_col['message']:
+        return grib_col['message']
+      else:
+        return "处理出错"
+    else:
+      return "内部处理出错"
+
   except Exception as e:
     return e
 
