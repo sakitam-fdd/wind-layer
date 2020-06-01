@@ -6,9 +6,10 @@ RES = "0p25"  # 数据分辨率 0p25: 0.25, 0p50:0.5 or 1p00:1
 BBOX = "leftlon=0&rightlon=360&toplat=90&bottomlat=-90"  # 数据范围
 LEVEL = "lev_10_m_above_ground=on"  # 数据层次
 VARIABLES = "var_UGRD=on&var_VGRD=on&var_TMP=on"  # 要素
+GRIB_DES = "pgrb2"  # 文件说明 默认为pgrb2 0.5分辨率的为pgrb2full
 FORECASTS_TIME = "f000"
 GFS_URL = "https://nomads.ncep.noaa.gov/cgi-bin/" \
-          "filter_gfs_${RES}.pl?file=gfs.t${GFS_TIME}z.pgrb2" \
+          "filter_gfs_${RES}.pl?file=gfs.t${GFS_TIME}z.${GRIB_DES}" \
           ".${RES}.${FORECASTS_TIME}&${LEVEL}&${VARIABLES}&${BBOX}&dir=%2Fgfs" \
           ".${GFS_DATE}%2F${GFS_TIME}"
 
@@ -33,11 +34,18 @@ def get_download_url(date, gfs_time, res, forecasts_time, bbox, level, variables
   bbox = bbox or BBOX
   level = level or LEVEL
   variables = variables or VARIABLES
+
+  grib_des = GRIB_DES
+
+  if res == "0p50":
+    grib_des = 'pgrb2full'
+
   gfs_url = GFS_URL\
     .replace("${RES}", res)\
     .replace("${FORECASTS_TIME}", forecasts_time)\
     .replace("${BBOX}", bbox)\
     .replace("${GFS_TIME}", gfs_time)\
+    .replace("${GRIB_DES}", grib_des)\
     .replace("${GFS_DATE}", gfs_date)\
     .replace("${LEVEL}", level)\
     .replace("${VARIABLES}", variables)
