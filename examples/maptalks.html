@@ -23,7 +23,8 @@
 <script src="https://cdn.jsdelivr.net/npm//axios/dist/axios.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
 <script src="//cdn.jsdelivr.net/npm/chroma-js@2.1.0/chroma.js"></script>
-<script src="../packages/maptalks/dist/maptalks-wind.js"></script>
+<!--<script src="../packages/maptalks/dist/maptalks-wind.js"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js"></script>
 <script>
   const map = new maptalks.Map('map', {
     // center: [113.53450137499999, 34.44104525],
@@ -37,11 +38,48 @@
     })
   });
 
-  fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
+  window.map = map;
+
+  // fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
+  fetch('./data/wind.json')
     .then(res => res.json())
     .then(res => {
       // const range = vectorField.range || [0.02, 28.21618329965979];
       // const scale = chroma.scale('OrRd').domain(range);
+
+      const velocityScales = {
+        0: 1 / 20,
+        1: 1 / 20,
+        2: 1 / 20,
+        3: 1 / 30,
+        4: 1 / 40,
+        5: 1 / 50,
+        6: 1 / 60,
+        7: 0.003,
+        8: 0.002,
+        9: 0.001,
+        10: 0.0005,
+        11: 0.0003,
+        12: 0.00015,
+        13: 0.0001,
+        14: 0.00005,
+        15: 0.000025,
+        16: 0.00001,
+        17: 0.000005,
+        18: 0.000002,
+        19: 0.000001,
+        20: 0.0000005,
+        21: 0.0000002,
+        22: 0.0000001,
+      };
+
+      res = res.map((item, idx) => {
+        item.header = Object.assign(item.header, {
+          parameterCategory: 1,
+          parameterNumber: idx === 0 ? 2 : 3,
+        });
+        return item;
+      });
 
       const windLayer = new MaptalksWind.WindLayer('wind', res, {
         windOptions: {
@@ -49,15 +87,35 @@
           //   // console.log(m);
           //   return '#fff';
           // },
+          // colorScale: [
+          //   "rgb(36,104, 180)",
+          //   "rgb(60,157, 194)",
+          //   "rgb(128,205,193 )",
+          //   "rgb(151,218,168 )",
+          //   "rgb(198,231,181)",
+          //   "rgb(238,247,217)",
+          //   "rgb(255,238,159)",
+          //   "rgb(252,217,125)",
+          //   "rgb(255,182,100)",
+          //   "rgb(252,150,75)",
+          //   "rgb(250,112,52)",
+          //   "rgb(245,64,32)",
+          //   "rgb(237,45,28)",
+          //   "rgb(220,24,32)",
+          //   "rgb(180,0,35)"
+          // ],
           colorScale: '#fff',
-          velocityScale: 1 / 40,
+          velocityScale: () => {
+            const zoom = map.getZoom();
+            return velocityScales[zoom] || 1 / 40;
+          },
           // paths: 5000,
-          frameRate: 20,
+          frameRate: 16,
           maxAge: 60,
           globalAlpha: 0.9,
           // velocityScale: 0.5,
           // paths: 10000,
-          paths: 1000,
+          paths: 3782,
         },
       });
 
@@ -105,7 +163,7 @@
         // "type": "jsonArray",
         // "data": data,
         "type": "image",
-        "url": "./data/wind-uv.png",
+        "url": "https://sakitam-1255686840.cos.ap-beijing.myqcloud.com/public/codepen/wind/20200620-0p50/raster/var_ugrd-var_vgrd.png",
         "extent": [
           [-180, 85.051129],
           [-180, -85.051129],
@@ -114,10 +172,10 @@
         ],
         "width": 1440,
         "height": 720,
-        "uMin": -33.57035827636719,
-        "uMax": 35.96963882446289,
-        "vMin": -27.76645851135254,
-        "vMax": 28.5035400390625,
+        "uMin": -21.34380340576172,
+        "uMax": 30.7261962890625,
+        "vMin": -23.916271209716797,
+        "vMax": 24.693727493286133,
       }, {
         styleSpec: {
           'fill-color': [
@@ -161,8 +219,60 @@
 
       console.log(map, windLayer);
 
+      function initGui(windLayer) {
+        const config = {
+          addLayer: true,
+          paths: 1000,
+          lineWidth: 3,
+          velocityScale: 0.005,
+          globalAlpha: 0.8,
+          maxAge: 90,
+        };
+
+        const gui = new dat.GUI();
+        // gui.add(config, 'addLayer').onChange(function () {
+        //   if (config.addLayer) {
+        //     // @ts-ignore
+        //     window.map.addLayer(windLayer);
+        //   } else {
+        //     // @ts-ignore
+        //     window.map.removeLayer(windLayer);
+        //   }
+        // });
+        gui.add(config, 'globalAlpha', 0.01, 1).onChange(function () {
+          windLayer.setWindOptions({
+            globalAlpha: config.globalAlpha,
+          });
+        });
+        gui.add(config, 'maxAge', 1, 200).onChange(function () {
+          windLayer.setWindOptions({
+            maxAge: config.maxAge,
+          });
+        });
+
+        gui.add(config, 'paths', 500, 8000).onChange(function () {
+          windLayer.setWindOptions({
+            paths: config.paths,
+          });
+        });
+
+        gui.add(config, 'lineWidth', 1, 10).onChange(function () {
+          windLayer.setWindOptions({
+            lineWidth: config.lineWidth,
+          });
+        });
+
+        gui.add(config, 'velocityScale', 0, 0.1).onChange(function () {
+          windLayer.setWindOptions({
+            velocityScale: config.velocityScale,
+          });
+        });
+      }
+
       map.addLayer(scalarLayer);
       map.addLayer(windLayer);
+
+      initGui(windLayer);
     });
 </script>
 </body>

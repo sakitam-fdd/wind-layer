@@ -229,6 +229,8 @@ export function loadImage (src: string): Promise<HTMLImageElement> {
     }
     const image = new Image();
 
+    image.crossOrigin = 'anonymous';
+
     image.onload = () => resolve(image);
     image.onerror = reject;
 

@@ -156,6 +156,9 @@ const WindLayer = L.Layer.extend({
   },
 
   onRemove() {
+    if (this.wind) {
+      this.wind.stop();
+    }
     this._map.getPanes().overlayPane.removeChild(this.layer);
 
     this._map.off(this.getEvents(), this);

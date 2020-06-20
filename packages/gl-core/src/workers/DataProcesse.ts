@@ -16,7 +16,7 @@ ctx.addEventListener('message', async ({ data: payload }) => {
       velocityData.set([r, g, 0, 255], i * 4);
     }
 
-    ctx.postMessage([velocityData, uMin, uMax, vMin, vMax]);
+    ctx.postMessage([velocityData, uMin, uMax, vMin, vMax], [velocityData.buffer]);
   } else {
     const singleData = payload[1];
     const [min, max] = calcMinMax(singleData);
@@ -26,6 +26,6 @@ ctx.addEventListener('message', async ({ data: payload }) => {
       velocityData.set([r, 0, 0, 255], i * 4);
     }
 
-    ctx.postMessage([velocityData, min, max]);
+    ctx.postMessage([velocityData, min, max], [velocityData.buffer]);
   }
 });

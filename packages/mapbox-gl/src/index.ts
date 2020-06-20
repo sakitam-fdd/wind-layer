@@ -120,6 +120,10 @@ class WindLayer extends Overlay {
   remove() {
     super.remove();
 
+    if (this.wind) {
+      this.wind.stop();
+    }
+
     this.unregisterEvents();
   }
 
