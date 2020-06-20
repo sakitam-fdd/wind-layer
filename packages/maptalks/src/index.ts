@@ -161,6 +161,9 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
   // onResize() {}
 
   remove() {
+    if (this.wind) {
+      this.wind.stop();
+    }
     delete this._drawContext;
     super.remove();
   }
@@ -205,6 +208,10 @@ class MaptalksWind extends CanvasLayer {
       this.setData(data);
     }
   }
+
+  // onAdd() {}
+
+  // onRemove() {}
 
   private pickWindOptions() {
     Object.keys(defaultOptions).forEach((key: string) => {

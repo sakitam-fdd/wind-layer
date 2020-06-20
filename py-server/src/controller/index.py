@@ -1,4 +1,5 @@
 from flask import abort, jsonify, request
+from flask_cors import cross_origin
 from src.app import app
 from src.enum.res import ResModel
 from src.utils.common import check_fields
@@ -12,6 +13,7 @@ from src.service.grib import download_data
 
 
 @app.route('/', methods=['GET', 'POST'])
+@cross_origin()
 def index():
   return jsonify(ResModel('success').success())
 
@@ -58,6 +60,7 @@ DOWNLOAD_PARAMS_ENUM = [
 
 @app.route('/download', methods=['GET', 'POST'])
 @app.errorhandler(400)
+@cross_origin()
 def start_download():
   method = request.method
   try:
@@ -106,6 +109,7 @@ GET_PARAMS_ENUM = [
 
 @app.route('/params', methods=['GET', 'POST'])
 @app.errorhandler(400)
+@cross_origin()
 def get_surfaces():
   method = request.method
   try:

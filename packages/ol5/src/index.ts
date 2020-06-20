@@ -291,6 +291,9 @@ class OlWind extends ImageLayer {
    * @param map
    */
   public setMap (map: any) {
+    if (!map && this.wind) {
+      this.wind.stop();
+    }
     this.set('originMap', map);
     this.viewProjection = this.getProjection();
     return super.setMap(map);

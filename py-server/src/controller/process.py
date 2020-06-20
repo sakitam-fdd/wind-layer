@@ -1,4 +1,5 @@
 from flask import abort, jsonify, request
+from flask_cors import cross_origin
 from src.app import app
 from src.enum.res import ResModel
 from src.utils.common import check_fields
@@ -47,6 +48,7 @@ PROCESS_JSON_PARAMS_ENUM = [
 
 @app.route('/json', methods=['GET', 'POST'])
 @app.errorhandler(400)
+@cross_origin()
 def process_json_controller():
   method = request.method
   try:
@@ -81,6 +83,7 @@ def process_json_controller():
 
 @app.route('/raster', methods=['GET', 'POST'])
 @app.errorhandler(400)
+@cross_origin()
 def process_raster_controller():
   method = request.method
   try:
