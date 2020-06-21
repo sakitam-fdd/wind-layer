@@ -376,11 +376,11 @@ export default class ScalarFill implements IScalarFill<any> {
               processedData.uMax = payload[2];
               processedData.vMin = payload[3];
               processedData.vMax = payload[4];
-              processedData.texture = utils.createTexture(this.gl, this.gl.LINEAR, payload[0], processedData.width, processedData.height);
+              processedData.texture = utils.createTexture(this.gl, this.gl.LINEAR, new Uint8Array(payload[0]), processedData.width, processedData.height);
             } else if (this.options.renderForm === 'r') {
               processedData.min = payload[1];
               processedData.max = payload[2];
-              processedData.texture = utils.createTexture(this.gl, this.gl.LINEAR, payload[0], processedData.width, processedData.height);
+              processedData.texture = utils.createTexture(this.gl, this.gl.LINEAR, new Uint8Array(payload[0]), processedData.width, processedData.height);
             } else {
               console.warn('This type is not supported temporarily');
             }

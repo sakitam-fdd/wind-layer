@@ -286,6 +286,22 @@ export function createCanvas(width: number, height: number, retina: number, Canv
   }
 }
 
+
+/**
+ * 移除 dom
+ * @param node
+ * @returns {removeDomNode}
+ */
+export function removeDomNode(node: HTMLElement | HTMLCanvasElement) {
+  if (!node) {
+    return null;
+  }
+  if (node.parentNode) {
+    node.parentNode.removeChild(node);
+  }
+  return node;
+}
+
 const keyword = /(\D+)/;
 const hex = /^#([a-f0-9]{6})([a-f0-9]{2})?$/i;
 // eslint-disable-next-line no-useless-escape

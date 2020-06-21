@@ -109,40 +109,40 @@
 
   map.on('load', function () {
     fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
-    // fetch('./data/submit.json')
+    // fetch('./data/wind.json')
       .then(res => res.json())
       .then(data => {
         console.log(data);
 
-        data = data.map((item, idx) => {
-          item.header = Object.assign(item.header, {
-            parameterCategory: 1,
-            parameterNumber: idx === 0 ? 2 : 3,
-          });
-          return item;
-        });
+        // data = data.map((item, idx) => {
+        //   item.header = Object.assign(item.header, {
+        //     parameterCategory: 1,
+        //     parameterNumber: idx === 0 ? 2 : 3,
+        //   });
+        //   return item;
+        // });
 
         const windInterpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
 
         const fillLayer = new mapboxWind.ScalarFill('wind', {
-          // "type": "jsonArray",
-          // "data": data,
-          "type": "image",
-          "url": "./data/var_tmp.png",
+          "type": "jsonArray",
+          "data": data,
+          // "type": "image",
+          // "url": "./data/var_tmp.png",
           "extent": [
             [-180, 85.051129],
             [-180, -85.051129],
             [180, 85.051129],
             [180, -85.051129],
           ],
-          "width": 1440,
-          "height": 720,
-          max: 42.25002441406252,
-          min: -50.84996643066404,
-          // "uMin": data[0]['header']['min'],
-          // "uMax": data[0]['header']['max'],
-          // "vMin": data[1]['header']['min'],
-          // "vMax": data[1]['header']['max'],
+          "width": data[0]['header']['nx'],
+          "height": data[0]['header']['ny'] - 1,
+          // max: 42.25002441406252,
+          // min: -50.84996643066404,
+          "uMin": data[0]['header']['min'],
+          "uMax": data[0]['header']['max'],
+          "vMin": data[1]['header']['min'],
+          "vMax": data[1]['header']['max'],
         }, {
           styleSpec: {
             'fill-color': [
@@ -161,7 +161,7 @@
               1
             ],
           },
-          renderForm: 'r',
+          renderForm: 'rg',
         });
 
         map.addLayer(fillLayer);
