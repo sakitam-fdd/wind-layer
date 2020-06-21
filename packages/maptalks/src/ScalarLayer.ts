@@ -243,7 +243,7 @@ export class ScalarLayer extends CanvasLayer {
   }
 
   public setOptions(options: any) {
-    this.options = Object.assign(this.options, options || {});
+    this.options = Object.assign({}, this.options, options || {});
 
     const renderer = this._getRenderer();
     if (renderer && renderer.scalarRender) {

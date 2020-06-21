@@ -23,8 +23,8 @@
 <script src="https://cdn.jsdelivr.net/npm//axios/dist/axios.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
 <script src="//cdn.jsdelivr.net/npm/chroma-js@2.1.0/chroma.js"></script>
-<script src="../packages/maptalks/dist/maptalks-wind.js"></script>
-<!--<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js"></script>-->
+<!--<script src="../packages/maptalks/dist/maptalks-wind.js"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js"></script>
 <script>
   const map = new maptalks.Map('map', {
     // center: [113.53450137499999, 34.44104525],
@@ -40,8 +40,8 @@
 
   window.map = map;
 
-  fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
-  // fetch('./data/wind.json')
+  // fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
+  fetch('./data/wind.json')
     .then(res => res.json())
     .then(res => {
       // const range = vectorField.range || [0.02, 28.21618329965979];
@@ -158,6 +158,7 @@
       };
 
       const windInterpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
+      const tempInterpolateColor = color.temp.reduce((result, item, key) => result.concat(item[0] - 273.15, 'rgba(' + item[1].join(',') + ')'), []);
 
       const scalarLayer = new MaptalksWind.ScalarLayer('scalar', {
         // "type": "jsonArray",
@@ -220,9 +221,59 @@
         //   'rgba(220, 24, 32, 0.5)',
         //   'rgba(180, 0, 35, 0.5)',
         // ],
-        // useGl: true,
-        // useInterpolated: false,
-        // opacity: 0.5
+      });
+
+      const tempLayer = new MaptalksWind.ScalarLayer('temp', {
+        // "type": "jsonArray",
+        // "data": res,
+        "type": "image",
+        "url": "./data/var_tmp.png",
+        "extent": [
+          [-180, 85.051129],
+          [-180, -85.051129],
+          [180, 85.051129],
+          [180, -85.051129],
+        ],
+        "width": 1440,
+        "height": 720,
+        "min": -50.84996643066404,
+        "max": 42.25002441406252,
+      }, {
+        styleSpec: {
+          'fill-color': [
+            'interpolate',
+            ['linear'],
+            ['get', 'value'],
+            ...tempInterpolateColor
+          ],
+          'opacity': [
+            'interpolate',
+            ['exponential', 0.5],
+            ['zoom'],
+            5,
+            0.5,
+            8,
+            1
+          ],
+        },
+        renderForm: 'r',
+        // colorScale: [
+        //   'rgba(36, 104, 180, 0.5)',
+        //   'rgba(60, 157, 194, 0.5)',
+        //   'rgba(128, 205, 193, 0.5)',
+        //   'rgba(151, 218, 168, 0.5)',
+        //   'rgba(198, 231, 181, 0.5)',
+        //   'rgba(238, 247, 217, 0.5)',
+        //   'rgba(255, 238, 159, 0.5)',
+        //   'rgba(252, 217, 125, 0.5)',
+        //   'rgba(255, 182, 100, 0.5)',
+        //   'rgba(252, 150, 75, 0.5)',
+        //   'rgba(250, 112, 52, 0.5)',
+        //   'rgba(245, 64, 32, 0.5)',
+        //   'rgba(237, 45, 28, 0.5)',
+        //   'rgba(220, 24, 32, 0.5)',
+        //   'rgba(180, 0, 35, 0.5)',
+        // ],
       });
 
       console.log(map, windLayer);
@@ -230,6 +281,8 @@
       function initGui(windLayer) {
         const config = {
           addLayer: true,
+          scalarLayer: false,
+          tempLayer: true,
           paths: 1000,
           lineWidth: 3,
           velocityScale: 0.005,
@@ -238,46 +291,68 @@
         };
 
         const gui = new dat.GUI();
-        // gui.add(config, 'addLayer').onChange(function () {
-        //   if (config.addLayer) {
-        //     // @ts-ignore
-        //     window.map.addLayer(windLayer);
-        //   } else {
-        //     // @ts-ignore
-        //     window.map.removeLayer(windLayer);
-        //   }
-        // });
-        gui.add(config, 'globalAlpha', 0.01, 1).onChange(function () {
+        const folder1 = gui.addFolder('粒子图层');
+        folder1.add(config, 'addLayer').onChange(function () {
+          if (config.addLayer) {
+            window.map.addLayer(windLayer);
+          } else {
+            window.map.removeLayer(windLayer);
+          }
+        });
+        folder1.add(config, 'globalAlpha', 0.01, 1).onChange(function () {
           windLayer.setWindOptions({
             globalAlpha: config.globalAlpha,
           });
         });
-        gui.add(config, 'maxAge', 1, 200).onChange(function () {
+        folder1.add(config, 'maxAge', 1, 200).onChange(function () {
           windLayer.setWindOptions({
             maxAge: config.maxAge,
           });
         });
 
-        gui.add(config, 'paths', 500, 8000).onChange(function () {
+        folder1.add(config, 'paths', 500, 8000).onChange(function () {
           windLayer.setWindOptions({
             paths: config.paths,
           });
         });
 
-        gui.add(config, 'lineWidth', 1, 10).onChange(function () {
+        folder1.add(config, 'lineWidth', 1, 10).onChange(function () {
           windLayer.setWindOptions({
             lineWidth: config.lineWidth,
           });
         });
 
-        gui.add(config, 'velocityScale', 0, 0.1).onChange(function () {
+        folder1.add(config, 'velocityScale', 0, 0.1).onChange(function () {
           windLayer.setWindOptions({
             velocityScale: config.velocityScale,
           });
         });
+
+        window.folder1 = folder1;
+
+        const folder2 = gui.addFolder('风色斑图');
+
+        folder2.add(config, 'scalarLayer').onChange(function () {
+          if (config.scalarLayer) {
+            window.map.addLayer(scalarLayer);
+          } else {
+            window.map.removeLayer(scalarLayer);
+          }
+        });
+
+        const folder3 = gui.addFolder('温度色斑图');
+
+        folder3.add(config, 'tempLayer').onChange(function () {
+          if (config.tempLayer) {
+            window.map.addLayer(tempLayer);
+          } else {
+            window.map.removeLayer(tempLayer);
+          }
+        });
       }
 
-      map.addLayer(scalarLayer);
+      map.addLayer(tempLayer);
+      // map.addLayer(scalarLayer);
       map.addLayer(windLayer);
 
       initGui(windLayer);
