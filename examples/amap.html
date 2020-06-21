@@ -22,7 +22,7 @@
 <script>
 
   var map = new AMap.Map('map', {
-    // viewMode: '3D',
+    viewMode: '3D',
     resizeEnable: true,
     zoom: 0,
     center: [113.53450137499999, 34.44104525],
@@ -39,10 +39,10 @@
         velocityScale: 0.05, // 风速的比例
         particleAge: 90, // 重绘之前生成的离子数量的最大帧数
         lineWidth: 1, // 绘制粒子的线宽
-        particleMultiplier: 0.01, // 离子数量
+        paths: 1000,
       };
 
-      var layer = new AMapWind.Layer(res, {
+      var layer = new AMapWind.WindLayer(res, {
         // projection: 'EPSG:4326',
         zIndex: 20,
         colorScale: "rgb(255, 255, 255)",
@@ -67,7 +67,7 @@
       gui.add(config, 'lineWidth', 1, 10).onChange(function (value) {
         layer.updateParams(config);
       });
-      gui.add(config, 'particleMultiplier', 0.01, 0.05).step(0.01).onFinishChange(function (value) {
+      gui.add(config, 'paths', 0, 5000).step(10).onFinishChange(function (value) {
         layer.updateParams(config);
       });
 
