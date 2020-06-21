@@ -5,6 +5,7 @@ import WindCore, {
   warnLog,
   assign,
   createCanvas,
+  removeDomNode,
   defaultOptions,
   IOptions,
 } from 'wind-core';
@@ -250,6 +251,9 @@ class AMapWind {
     this.map.off('resize', this.handleResize, this);
     this.map.off('mapmove', this.canvasFunction, this);
     this.map.off('zoomchange', this.canvasFunction, this);
+    if (this.canvas) {
+      removeDomNode(this.canvas);
+    }
     delete this.map;
     delete this.canvas;
   }

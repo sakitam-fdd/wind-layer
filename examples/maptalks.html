@@ -23,8 +23,8 @@
 <script src="https://cdn.jsdelivr.net/npm//axios/dist/axios.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
 <script src="//cdn.jsdelivr.net/npm/chroma-js@2.1.0/chroma.js"></script>
-<!--<script src="../packages/maptalks/dist/maptalks-wind.js"></script>-->
-<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js"></script>
+<script src="../packages/maptalks/dist/maptalks-wind.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js"></script>-->
 <script>
   const map = new maptalks.Map('map', {
     // center: [113.53450137499999, 34.44104525],
@@ -40,8 +40,8 @@
 
   window.map = map;
 
-  // fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
-  fetch('./data/wind.json')
+  fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
+  // fetch('./data/wind.json')
     .then(res => res.json())
     .then(res => {
       // const range = vectorField.range || [0.02, 28.21618329965979];
@@ -73,13 +73,13 @@
         22: 0.0000001,
       };
 
-      res = res.map((item, idx) => {
-        item.header = Object.assign(item.header, {
-          parameterCategory: 1,
-          parameterNumber: idx === 0 ? 2 : 3,
-        });
-        return item;
-      });
+      // res = res.map((item, idx) => {
+      //   item.header = Object.assign(item.header, {
+      //     parameterCategory: 1,
+      //     parameterNumber: idx === 0 ? 2 : 3,
+      //   });
+      //   return item;
+      // });
 
       const windLayer = new MaptalksWind.WindLayer('wind', res, {
         windOptions: {
@@ -161,15 +161,23 @@
 
       const scalarLayer = new MaptalksWind.ScalarLayer('scalar', {
         // "type": "jsonArray",
-        // "data": data,
+        // "data": res,
         "type": "image",
-        "url": "https://sakitam-1255686840.cos.ap-beijing.myqcloud.com/public/codepen/wind/20200620-0p50/raster/var_ugrd-var_vgrd.png",
+        "url": "./data/var_ugrd-var_vgrd.png",
         "extent": [
           [-180, 85.051129],
           [-180, -85.051129],
           [180, 85.051129],
           [180, -85.051129],
         ],
+        // "width": res[0]['header']['nx'],
+        // "height": res[0]['header']['ny'] - 1,
+        // max: 42.25002441406252,
+        // min: -50.84996643066404,
+        // "uMin": res[0]['header']['min'],
+        // "uMax": res[0]['header']['max'],
+        // "vMin": res[1]['header']['min'],
+        // "vMax": res[1]['header']['max'],
         "width": 1440,
         "height": 720,
         "uMin": -21.34380340576172,

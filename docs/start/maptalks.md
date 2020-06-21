@@ -12,7 +12,9 @@ order: 3
 :::demo 基础使用，不旋转不倾斜。
 
 ```demo
-<demo-maptalks-wind-base />  
+<ClientOnly>
+  <demo-maptalks-wind-base />
+</ClientOnly>    
 ```
 
 <<<@/examples/components/maptalks/base.vue

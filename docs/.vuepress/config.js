@@ -79,6 +79,8 @@ module.exports = {
                 'maptalks',
                 'amap',
                 'bmap',
+                'leaflet',
+                'mapbox-gl',
               ],
             }
           ],
@@ -130,6 +132,8 @@ module.exports = {
                 'maptalks',
                 'amap',
                 'bmap',
+                'leaflet',
+                'mapbox-gl',
               ],
             }
           ],

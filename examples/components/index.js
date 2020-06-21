@@ -19,6 +19,8 @@ import MaptalksWindBase from './maptalks/base'; // 基础地图加载
 
 import AMapWindBase from './amap/base';
 import BMapWindBase from './bmap/base';
+import LeafletWindBase from './leaflet/base';
+import MapboxWindBase from './mapbox-gl/base';
 
 const components = [
   OlWindBase,
@@ -36,6 +38,8 @@ const components = [
   MaptalksWindBase,
   AMapWindBase,
   BMapWindBase,
+  LeafletWindBase,
+  MapboxWindBase,
 ];
 
 const install = function (Vue) {
