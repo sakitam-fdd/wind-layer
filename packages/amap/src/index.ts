@@ -43,7 +43,6 @@ class AMapWind {
   private context: '2d';
   private field: Field | undefined;
   private map: any;
-  private layer_: any;
 
   constructor (data: any, options: Partial<IWindOptions> = {}) {
     this.options = assign({}, _options, options);
@@ -53,13 +52,6 @@ class AMapWind {
      * @type {null}
      */
     this.canvas = null;
-
-    /**
-     * canvas layer
-     * @type {null}
-     * @private
-     */
-    this.layer_ = null;
 
     /**
      * windy layer
@@ -74,7 +66,6 @@ class AMapWind {
     this.init = this.init.bind(this);
     this.handleResize = this.handleResize.bind(this);
     this.canvasFunction = this.canvasFunction.bind(this);
-    this._addReFreshHandle = this._addReFreshHandle.bind(this);
 
     this.pickWindOptions();
 
@@ -146,32 +137,15 @@ class AMapWind {
       this.wind.prerender();
       this.wind.render();
     }
-
-    // 2D视图时可以省略
-    this._addReFreshHandle();
     return this;
-  }
-
-  /**
-   * 3D模式下手动刷新
-   * @private
-   */
-  _addReFreshHandle () {
-    if (!this.map) return;
-    const type = this.map.getViewMode_();
-    if (type.toLowerCase() === '3d') {
-      this.layer_ && this.layer_.reFresh();
-      AMap.Util.requestAnimFrame(this._addReFreshHandle);
-    }
   }
 
   /**
    * get canvas layer
    */
   getCanvasLayer () {
-    if (!this.canvas && !this.layer_) {
+    if (!this.canvas) {
       const canvas = this.canvasFunction();
-      const bounds = this._getBounds();
 
       const ops: {
         canvas: HTMLCanvasElement | null,
@@ -181,7 +155,6 @@ class AMapWind {
         opacity?: number;
       } = {
         canvas: canvas,
-        bounds: this.options.bounds || bounds,
       };
 
       if (this.options.zooms) {
@@ -190,16 +163,27 @@ class AMapWind {
 
       if ('zIndex' in this.options && typeof this.options.zIndex === 'number') {
         ops.zIndex = this.options.zIndex;
+        canvas.style.zIndex = ops.zIndex as unknown as string;
       }
 
       if ('opacity' in this.options && typeof this.options.opacity === 'number') {
         ops.opacity = this.options.opacity;
       }
 
-      this.layer_ = new AMap.CanvasLayer(ops);
+      const container: HTMLDivElement = this.map.getContainer();
+      if (!container) {
+        console.error('map container not exit');
+        return;
+      }
+      const layerContainer: HTMLDivElement | null = container.querySelector('.amap-layers');
+
+      if (layerContainer) {
+        layerContainer.appendChild(canvas);
+      }
+
+
       this.map.on('mapmove', this.canvasFunction, this);
       this.map.on('zoomchange', this.canvasFunction, this);
-      this.layer_.setMap(this.map);
     }
   }
 
@@ -212,13 +196,18 @@ class AMapWind {
     const [width, height]: [number, number] = [this.map.getSize().width, this.map.getSize().height];
     if (!this.canvas) {
       this.canvas = createCanvas(width, height, retina, null);
+      this.canvas.style.position = 'absolute';
+      this.canvas.style.top = '0px';
+      this.canvas.style.left = '0px';
+      this.canvas.style.right = '0px';
+      this.canvas.style.bottom = '0px';
+      this.canvas.style.width = `${width}px`;
+      this.canvas.style.height = `${height}px`;
     } else {
+      this.canvas.style.width = `${width}px`;
+      this.canvas.style.height = `${height}px`;
       this.canvas.width = width * retina;
       this.canvas.height = height * retina;
-      const bounds = this._getBounds();
-      if (this.layer_) {
-        this.layer_.setBounds(this.options.bounds || bounds);
-      }
     }
 
     if (this.canvas) {
@@ -255,13 +244,18 @@ class AMapWind {
    */
   public removeLayer () {
     if (!this.map) return;
-    this.layer_.setMap(null);
+    if (this.wind) {
+      this.wind.stop();
+    }
     this.map.off('resize', this.handleResize, this);
     this.map.off('mapmove', this.canvasFunction, this);
     this.map.off('zoomchange', this.canvasFunction, this);
     delete this.map;
-    delete this.layer_;
     delete this.canvas;
+  }
+
+  public remove() {
+    this.removeLayer();
   }
 
   public project(coordinate: [number, number]): [number, number] {
@@ -273,12 +267,16 @@ class AMapWind {
     ];
   }
 
-  public unproject(pixel: [number, number]): [number, number] {
-    const coordinate = this.map.pixelToLngLat(new AMap.Pixel(pixel[0], pixel[1]));
-    return [
-      coordinate.lng,
-      coordinate.lat,
-    ];
+  public unproject(pixel: [number, number]): [number, number] | null {
+    const coordinate = this.map.containerToLngLat(new AMap.Pixel(pixel[0], pixel[1]));
+    if (coordinate) {
+      return [
+        coordinate.lng,
+        coordinate.lat,
+      ];
+    }
+
+    return null;
   }
 
   public intersectsCoordinate(coordinate: [number, number]): boolean {
@@ -370,7 +368,5 @@ export {
   Field,
   WindLayer,
 };
-
-export { default as Layer } from './Overlay';
 
 export default AMapWind;
