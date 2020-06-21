@@ -159,7 +159,7 @@ export default class ScalarFill implements IScalarFill<any> {
   }
 
   public updateOptions(options: IOptions = {}) {
-    this.options = Object.assign(this.options, options);
+    this.options = Object.assign({}, this.options, options);
     Object.keys(this.styleSpec).forEach(spec => {
       this.setProperty(spec, this.options.styleSpec[spec] || this.styleSpec[spec].default);
     });
