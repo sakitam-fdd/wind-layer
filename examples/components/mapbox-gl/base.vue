@@ -6,11 +6,6 @@
 </template>
 <script>
   import 'mapbox-gl/dist/mapbox-gl.css'
-  import mapboxgl from 'mapbox-gl';
-
-  import { WindLayer, ScalarFill } from '@sakitam-gis/mapbox-wind';
-
-  mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA';
 
   export default {
     name: 'mapbox-wind-base',
@@ -19,7 +14,13 @@
     },
     watch: {},
     methods: {
-      initMap() {
+      async initMap() {
+        const mapboxgl = await import('mapbox-gl').then(res => res.default);
+
+        const { WindLayer, ScalarFill } = await import('@sakitam-gis/mapbox-wind');
+
+        mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA';
+
         const map = new mapboxgl.Map({
           container: this.$refs.map,
           style: {

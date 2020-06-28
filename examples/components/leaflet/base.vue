@@ -6,9 +6,6 @@
 </template>
 <script>
   import 'leaflet/dist/leaflet.css'
-  import * as L from 'leaflet';
-
-  import { WindLayer } from 'leaflet-wind';
 
   export default {
     name: 'leaflet-wind-base',
@@ -17,7 +14,10 @@
     },
     watch: {},
     methods: {
-      initMap() {
+      async initMap() {
+        const L = await import('leaflet');
+        const { WindLayer } = await import('leaflet-wind');
+
         const map = new L.map(this.$refs.map, {
           // center: [113.53450137499999, 34.44104525],
           zoom: 5,
