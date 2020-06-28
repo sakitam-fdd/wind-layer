@@ -22,11 +22,13 @@ module.exports = {
     ['link', { rel: 'manifest', href: '/manifest.json' }],
     ['link', { rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/openlayers/dist/ol.css' }],
     ['link', { rel: 'stylesheet', href: 'https://cache.amap.com/lbs/static/main1119.css' }],
+    ['link', { rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.css' }],
     ['meta', { name: 'theme-color', content: '#3eaf7c' }],
     ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
     ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black' }],
     // ['link', { rel: 'stylesheet', href: '//at.alicdn.com/t/font_1125947_cnbcy1q7tzm.css' }],
     ['script', { src: 'https://cdn.jsdelivr.net/npm/proj4@2.6.0/dist/proj4.js' }],
+    ['script', { src: 'https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js' }],
     ['script', { src: 'https://cdn.jsdelivr.net/npm/openlayers/dist/ol.js' }],
     ['script', { src: 'https://api.map.baidu.com/api?v=3.0&ak=bxFuXXDt1oKdlgu6mXCCnK51cDgDGBLp' }],
   ],
@@ -161,6 +163,10 @@ module.exports = {
     resolve: {
       // alias: alias,
     },
+  },
+  chainWebpack: (config, isServer) => {
+    // config 是 ChainableConfig 的一个实例
+    // const babel = config.module.rule('babel');
   },
   plugins: [
     '@vuepress/nprogress',

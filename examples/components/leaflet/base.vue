@@ -68,7 +68,7 @@
                 maxAge: 60,
                 globalAlpha: 0.9,
                 velocityScale: () => {
-                  return velocityScale[map.getZoom() - 5] * 0.1 || 0.5;
+                  return velocityScale[map.getZoom() - 5] * 0.1 || 0.1;
                 },
                 // paths: 10000,
                 paths: 1000,

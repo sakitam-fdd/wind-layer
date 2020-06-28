@@ -21,7 +21,7 @@
     methods: {
       initMap() {
         const map = new mapboxgl.Map({
-          container: 'map',
+          container: this.$refs.map,
           style: {
             version: 8,
             sources: {
@@ -101,7 +101,7 @@
           ],
         };
 
-        map.on('load', function () {
+        map.on('load', () => {
           fetch(this.$withBase('/data/wind.json'))
             // fetch('./data/wind.json')
             .then(res => res.json())
