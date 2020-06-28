@@ -12,8 +12,8 @@
     "dev:demo": "rollup -wm -c rollup/demo.config.js",
     "build": "lerna run --parallel build",
     "build:declarations": "lerna run --parallel tsc",
-    "dev:docs": "vuepress dev docs",
-    "build:docs": "vuepress build docs",
+    "dev:docs": "vuepress dev docs --no-cache",
+    "build:docs": "vuepress build docs --no-cache",
     "postbuild": "yarn build:declarations",
     "prerelease": "yarn build",
     "bootstrap": "lerna bootstrap",
@@ -37,6 +37,7 @@
     "@sakitam-gis/ol5": "^5.3.3"
   },
   "devDependencies": {
+    "buffer": "^5.6.0",
     "@babel/cli": "^7.7.4",
     "@babel/core": "^7.7.4",
     "@babel/node": "^7.7.4",
