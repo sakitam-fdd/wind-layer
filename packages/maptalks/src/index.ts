@@ -113,7 +113,7 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
   }
 
   drawOnInteracting() {
-    this.draw();
+    // this.draw();
   }
 
   onZoomStart(...args: any[]) {
