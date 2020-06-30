@@ -15,7 +15,7 @@ import {
 import { containsExtent, intersects, getWidth, getIntersection, isEmpty, containsCoordinate } from 'ol/extent';
 // import Projection from 'ol/proj/Projection';
 
-import WindCore, { IOptions } from 'wind-core';
+import WindCore, { Field, IOptions } from 'wind-core';
 
 import { WindLayer } from './index';
 
@@ -123,6 +123,16 @@ class Render {
       const wind = this.executors[key];
       if (wind) {
         wind.setOptions(options);
+        // wind.prerender();
+      }
+    });
+  }
+
+  public setData(field: Field) {
+    Object.keys(this.executors).forEach((key: string) => {
+      const wind = this.executors[key];
+      if (wind) {
+        wind.updateData(field);
         // wind.prerender();
       }
     });

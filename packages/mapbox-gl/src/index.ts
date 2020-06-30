@@ -159,6 +159,9 @@ class WindLayer extends Overlay {
     } else {
       console.error('Illegal data');
     }
+
+    this?.wind?.updateData(this.field);
+
     return this;
   }
 

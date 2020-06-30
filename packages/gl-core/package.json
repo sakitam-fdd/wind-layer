@@ -12,7 +12,14 @@
   "namespace": "WindGl",
   "types": "types/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "src",
+    "types",
+    "typings",
+    "package.json",
+    "README.md",
+    "tsconfig.dev.json",
+    "tsconfig.prod.json"
   ],
   "publishConfig": {
     "access": "public"

@@ -22,7 +22,7 @@
     "test:prod": "npm run lint && npm run test -- --no-cache",
     "report-coverage": "cat ./coverage/lcov.info | coveralls",
     "precommit": "lint-staged",
-    "publish-packages": "lerna publish --force-publish",
+    "publish-packages": "lerna publish --force-publish --ignore-changes",
     "start": "node server/bin/www",
     "prd:server": "pm2 start server/bin/www"
   },
@@ -31,6 +31,9 @@
       "prettier --write",
       "git add"
     ]
+  },
+  "resolutions": {
+    "buffer": "5.6.0"
   },
   "dependencies": {
     "ol": "^6.2.1",
