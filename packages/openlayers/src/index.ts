@@ -248,6 +248,7 @@ class OlWind extends ol.layer.Image {
     const map = this.getMap();
 
     if (map && this.canvas && this.field) {
+      this?.wind?.updateData(this.field);
       this.render(this.canvas);
     }
 

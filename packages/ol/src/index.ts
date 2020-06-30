@@ -115,6 +115,12 @@ export class WindLayer extends Layer implements Interface {
     } else {
       console.error('Illegal data');
     }
+
+    const renderer = this.getRenderer();
+    if (renderer && renderer.oRender) {
+      renderer.oRender.setData(data);
+    }
+
     return this;
   }
 

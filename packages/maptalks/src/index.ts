@@ -245,6 +245,12 @@ class MaptalksWind extends CanvasLayer {
     } else {
       console.error('Illegal data');
     }
+
+    const renderer = this._getRenderer();
+    if (renderer && renderer.wind) {
+      renderer.wind.updateData(this.field);
+    }
+
     return this;
   }
 

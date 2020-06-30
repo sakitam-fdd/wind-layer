@@ -332,6 +332,7 @@ class AMapWind {
     }
 
     if (this.map && this.canvas && this.field) {
+      this?.wind?.updateData(this.field);
       this.render(this.canvas);
     }
 

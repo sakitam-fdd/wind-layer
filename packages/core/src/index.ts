@@ -93,6 +93,7 @@ class BaseLayer {
 
   public updateData(field: Field) {
     this.field = field;
+    this.particles = this.prepareParticlePaths();
   }
 
   private moveParticles() {
