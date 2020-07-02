@@ -93,6 +93,7 @@ class BaseLayer {
 
   public updateData(field: Field) {
     this.field = field;
+    if (!this.generated) return;
     this.particles = this.prepareParticlePaths();
   }
 
@@ -341,6 +342,7 @@ class BaseLayer {
    */
   prerender() {
     this.generated = false;
+    if (!this.field) return;
     this.particles = this.prepareParticlePaths();
     this.generated = true;
 

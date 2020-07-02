@@ -129,12 +129,18 @@
           "data": data,
           // "type": "image",
           // "url": "./data/var_tmp.png",
-          "extent": [
-            [-180, 85.051129],
-            [-180, -85.051129],
-            [180, 85.051129],
-            [180, -85.051129],
+          'extent': [
+            [data[0]['header'].lo1, data[0]['header'].la1],
+            [data[0]['header'].lo1, data[0]['header'].la2],
+            [data[0]['header'].lo2, data[0]['header'].la1],
+            [data[0]['header'].lo2, data[0]['header'].la2],
           ],
+          // "extent": [
+          //   [-180, 85.051129],
+          //   [-180, -85.051129],
+          //   [180, 85.051129],
+          //   [180, -85.051129],
+          // ],
           "width": data[0]['header']['nx'],
           "height": data[0]['header']['ny'] - 1,
           // max: 42.25002441406252,

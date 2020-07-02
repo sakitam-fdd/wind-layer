@@ -39,6 +39,7 @@ class WindLayer extends Overlay {
 
     this.stop = this.stop.bind(this);
     this.render = this.render.bind(this);
+    this.handleResize = this.handleResize.bind(this);
   }
 
   onAdd(map: mapboxgl.Map) {
@@ -57,8 +58,15 @@ class WindLayer extends Overlay {
     }
   }
 
+  handleResize() {
+    if (this.canvas) {
+      this.resizeCanvas(this.canvas);
+    }
+    this.render();
+  }
+
   registerEvents() {
-    this.map.on('resize', this.render);
+    this.map.on('resize', this.handleResize);
     this.map.on('movestart', this.stop);
     this.map.on('moveend', this.render);
     this.map.on('zoomstart', this.stop);
@@ -70,7 +78,7 @@ class WindLayer extends Overlay {
   }
 
   unregisterEvents() {
-    this.map.off('resize', this.render);
+    this.map.off('resize', this.handleResize);
     this.map.off('movestart', this.stop);
     this.map.off('moveend', this.render);
     this.map.off('zoomstart', this.stop);
