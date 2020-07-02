@@ -52,7 +52,23 @@ export default class Overlay {
   onAdd(map: mapboxgl.Map) {
     this.setMap(map);
     this.canvas = this.initialize();
-    this.canvas2 = this.initialize();
+    if (this.options.doubleBuffer) {
+      this.canvas2 = this.initialize();
+    }
+  }
+
+  resizeCanvas(canvas: HTMLCanvasElement) {
+    const mapboxCanvas = this.map.getCanvas();
+
+    // @ts-ignore
+    const { width, height } = this.map.transform;
+
+    const pixel = this.devicePixelRatio;
+
+    canvas.width = width * pixel;
+    canvas.height = height * pixel;
+    canvas.style.width = mapboxCanvas.style.width;
+    canvas.style.height = mapboxCanvas.style.height;
   }
 
   initialize() {
