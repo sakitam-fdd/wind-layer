@@ -43,7 +43,7 @@ class BaseLayer {
   private ctx: CanvasRenderingContext2D;
   private options: IOptions;
   private field: Field;
-  private particles: any[];
+  private particles: any[] = [];
 
   static Field = Field;
   private animationLoop: number;

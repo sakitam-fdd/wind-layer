@@ -118,6 +118,11 @@ export default class Overlay {
 
   intersectsCoordinate(coordinate: [number, number]): boolean {
     const bounds = this.map.getBounds();
+    // @ts-ignore
+    const latRange: [number, number] = this.map?.transform?.latRange;
+    if (latRange) {
+      if (coordinate[1] > latRange[1] || coordinate[1] < latRange[0]) return false;
+    }
     return bounds.contains(new mapboxgl.LngLat(coordinate[0], coordinate[1])) as boolean;
     // return true;
   }
