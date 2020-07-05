@@ -108,54 +108,61 @@
   };
 
   map.on('load', function () {
-    fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
-    // fetch('./data/wind.json')
+    // fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
+    fetch('./data/wind.json')
       .then(res => res.json())
       .then(data => {
         console.log(data);
 
-        // data = data.map((item, idx) => {
-        //   item.header = Object.assign(item.header, {
-        //     parameterCategory: 1,
-        //     parameterNumber: idx === 0 ? 2 : 3,
-        //   });
-        //   return item;
-        // });
+        data = data.map((item, idx) => {
+          item.header = Object.assign(item.header, {
+            parameterCategory: 1,
+            parameterNumber: idx === 0 ? 2 : 3,
+          });
+          return item;
+        });
 
         const windInterpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
+        const tempInterpolateColor = color.temp.reduce((result, item, key) => result.concat(item[0] - 273.15, 'rgba(' + item[1].join(',') + ')'), []);
 
         const fillLayer = new mapboxWind.ScalarFill('wind', {
-          "type": "jsonArray",
-          "data": data,
-          // "type": "image",
-          // "url": "./data/var_tmp.png",
-          'extent': [
-            [data[0]['header'].lo1, data[0]['header'].la1],
-            [data[0]['header'].lo1, data[0]['header'].la2],
-            [data[0]['header'].lo2, data[0]['header'].la1],
-            [data[0]['header'].lo2, data[0]['header'].la2],
-          ],
-          // "extent": [
-          //   [-180, 85.051129],
-          //   [-180, -85.051129],
-          //   [180, 85.051129],
-          //   [180, -85.051129],
+          // "type": "jsonArray",
+          // "data": data,
+          "type": "image",
+          "url": "./data/var_tmp.png",
+          // 'extent': [
+          //   [data[0]['header'].lo1, data[0]['header'].la1],
+          //   [data[0]['header'].lo1, data[0]['header'].la2],
+          //   [data[0]['header'].lo2, data[0]['header'].la1],
+          //   [data[0]['header'].lo2, data[0]['header'].la2],
           // ],
-          "width": data[0]['header']['nx'],
-          "height": data[0]['header']['ny'] - 1,
-          // max: 42.25002441406252,
-          // min: -50.84996643066404,
-          "uMin": data[0]['header']['min'],
-          "uMax": data[0]['header']['max'],
-          "vMin": data[1]['header']['min'],
-          "vMax": data[1]['header']['max'],
+          "extent": [
+            [-180, 85.051129],
+            [-180, -85.051129],
+            [180, 85.051129],
+            [180, -85.051129],
+          ],
+          "width": 1440,
+          "height": 720,
+          // "width": data[0]['header']['nx'],
+          // "height": data[0]['header']['ny'] - 1,
+          "min": -50.84996643066404,
+          "max": 42.25002441406252,
+          // "uMin": data[0]['header']['min'],
+          // "uMax": data[0]['header']['max'],
+          // "vMin": data[1]['header']['min'],
+          // "vMax": data[1]['header']['max'],
+          "uMin": -21.34380340576172,
+          "uMax": 30.7261962890625,
+          "vMin": -23.916271209716797,
+          "vMax": 24.693727493286133,
         }, {
           styleSpec: {
             'fill-color': [
               'interpolate',
               ['linear'],
               ['get', 'value'],
-              ...windInterpolateColor
+              ...tempInterpolateColor
             ],
             'opacity': [
               'interpolate',
@@ -167,7 +174,7 @@
               1
             ],
           },
-          renderForm: 'rg',
+          renderForm: 'r',
         });
 
         map.addLayer(fillLayer);

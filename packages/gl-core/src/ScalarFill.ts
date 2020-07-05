@@ -231,8 +231,7 @@ export default class ScalarFill implements IScalarFill<any> {
       const expression = expr.kind === 'constant' || expr.kind === 'source' ? {} : (typeof this.options.getZoom === 'function' ? {
         zoom: this.options.getZoom(),
       } : {});
-      const color = expr.evaluate(expression, { properties: { value: (i / 255) * range } },
-      );
+      const color = expr.evaluate(expression, { properties: { value: (i / 255) * range } });
       colors[i * 4 + 0] = color.r * 255;
       colors[i * 4 + 1] = color.g * 255;
       colors[i * 4 + 2] = color.b * 255;
@@ -249,12 +248,14 @@ export default class ScalarFill implements IScalarFill<any> {
   }
 
   initialize(gl: WebGLRenderingContext) {
-    if (this.options.renderForm === 'rg') {
-      this.drawCommand = new WindFill(gl);
-    } else if (this.options.renderForm === 'r') {
-      this.drawCommand = new Fill(gl);
-    } else {
-      console.warn('This type is not supported temporarily');
+    if (!this.drawCommand) {
+      if (this.options.renderForm === 'rg') {
+        this.drawCommand = new WindFill(gl);
+      } else if (this.options.renderForm === 'r') {
+        this.drawCommand = new Fill(gl);
+      } else {
+        console.warn('This type is not supported temporarily');
+      }
     }
 
     // This will initialize the default values
@@ -427,11 +428,13 @@ export default class ScalarFill implements IScalarFill<any> {
     }));
   }
 
-  setData(data: IJsonArrayData | IImageData) {
-    if (this.gl) {
+  setData(data: IJsonArrayData | IImageData, cb?: (args?: boolean) => void) {
+    if (this.gl && data) { // Error Prevention
       this.getTextureData(data)
         .then(data => {
           this.data = data;
+
+          cb && cb(true);
 
           if (this.data) {
             this.initialize(this.gl);
@@ -443,6 +446,7 @@ export default class ScalarFill implements IScalarFill<any> {
           }
         })
         .catch(error => {
+          cb && cb(false);
           console.error(error);
         });
     }

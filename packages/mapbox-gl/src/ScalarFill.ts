@@ -55,8 +55,9 @@ export default class ScalarFill {
 
       this.map.on('zoom', this.handleZoom);
     }
-
-    this.scalarFill.setData(this.data);
+    if (this.data) {
+      this.setData(this.data);
+    }
   }
 
   onAdd(map: mapboxgl.Map, gl: WebGLRenderingContext) {
@@ -69,10 +70,20 @@ export default class ScalarFill {
   }
 
   setData(data: any) {
-    this.data = data;
-    if (this.map) {
-      this.initialize();
-    }
+    return new Promise((resolve, reject) => {
+      this.data = data;
+      if (this.data && this.scalarFill) {
+        this.scalarFill.setData(this.data, (status) => {
+          if (status) {
+            resolve(true);
+          } else {
+            reject(false);
+          }
+        });
+      } else {
+        resolve(false);
+      }
+    });
   }
 
   // This is called when the map is destroyed or the gl context lost.

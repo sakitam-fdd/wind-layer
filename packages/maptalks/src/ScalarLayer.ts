@@ -234,12 +234,24 @@ export class ScalarLayer extends CanvasLayer {
   /**
    * set layer data
    * @param data
-   * @returns {WindLayer}
+   * @returns {Promise<any>>}
    */
   public setData (data: any) {
-    this.data = data;
-    this.draw();
-    return this;
+    return new Promise((resolve, reject) => {
+      this.data = data;
+      const renderer = this._getRenderer();
+      if (this.data && renderer && renderer.scalarFill) {
+        renderer.scalarFill.setData(this.data, (status: boolean) => {
+          if (status) {
+            resolve(true);
+          } else {
+            reject(false);
+          }
+        });
+      } else {
+        resolve(false);
+      }
+    });
   }
 
   public setOptions(options: any) {
