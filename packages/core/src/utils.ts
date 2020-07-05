@@ -246,9 +246,9 @@ export function formatData(data: IGFSItem[]) {
   const header = uComp.header;
   const vectorField = new Field({
     xmin: header.lo1, // 一般格点数据是按照矩形范围来切割，所以定义其经纬度范围
-    ymin: header.la2,
+    ymin: header.la1,
     xmax: header.lo2,
-    ymax: header.la1,
+    ymax: header.la2,
     deltaX: header.dx, // x（经度）增量
     deltaY: header.dy, // y（维度）增量
     cols: header.nx, // 列（可由 `(xmax - xmin) / deltaX` 得到）
