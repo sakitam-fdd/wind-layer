@@ -104,6 +104,12 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
   }
 
   intersectsCoordinate(coordinate: [number, number]): boolean {
+    // FIXME: 临时处理
+    if (!this.layer) return false;
+    const proj = this.layer?.getProjection();
+    if (proj && proj.code !== 'EPSG:3857') {
+      return true;
+    }
     const map = this.getMap();
     const projExtent = map.getProjExtent();
     const extent = [projExtent.xmin, projExtent.ymin, projExtent.xmax, projExtent.ymax] as Extent;
