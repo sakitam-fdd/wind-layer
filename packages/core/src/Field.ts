@@ -40,8 +40,6 @@ export default class Field {
   private readonly isFields: boolean;
   public grid: (Vector | null)[][];
   public range: (number | undefined)[] | undefined;
-  private columns: (Vector | null)[][];
-  private fieldConfig: { width: number; unproject: any; height: number };
 
   constructor(params: IField) {
     this.grid = [];
@@ -49,8 +47,8 @@ export default class Field {
     this.xmin = params.xmin;
     this.xmax = params.xmax;
 
-    this.ymin = Math.min(params.ymax, params.ymin);
-    this.ymax = Math.max(params.ymax, params.ymin);
+    this.ymin = params.ymin;
+    this.ymax = params.ymax;
 
     this.cols = params.cols; // 列数
     this.rows = params.rows; // 行数
@@ -61,13 +59,20 @@ export default class Field {
     this.deltaX = params.deltaX; // x 方向增量
     this.deltaY = params.deltaY; // y方向增量
 
+    if (this.deltaY < 0 && this.ymin < this.ymax) {
+      console.warn('[wind-core]: The data is flipY');
+    } else {
+      this.ymin = Math.min(params.ymax, params.ymin);
+      this.ymax = Math.max(params.ymax, params.ymin);
+    }
+
     this.isFields = true;
 
     const cols = Math.ceil((this.xmax - this.xmin) / params.deltaX); // 列
     const rows = Math.ceil((this.ymax - this.ymin) / params.deltaY); // 行
 
     if (cols !== this.cols || rows !== this.rows) {
-      console.warn('The data grid not equal');
+      console.warn('[wind-core]: The data grid not equal');
     }
 
     // Math.floor(ni * Δλ) >= 360;
@@ -106,7 +111,6 @@ export default class Field {
 
   public release() {
     this.grid = [];
-    this.columns = [];
   }
 
   /**
@@ -225,7 +229,12 @@ export default class Field {
   public contains(lon: number, lat: number) {
     const [xmin, xmax] = this.getWrappedLongitudes();
     let longitudeIn = lon >= xmin && lon <= xmax;
-    let latitudeIn = lat >= this.ymin && lat <= this.ymax;
+    let latitudeIn;
+    if (this.deltaY >= 0) {
+      latitudeIn = lat >= this.ymin && lat <= this.ymax;
+    } else {
+      latitudeIn = lat >= this.ymax && lat <= this.ymin;
+    }
     return longitudeIn && latitudeIn;
   }
 
