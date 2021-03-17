@@ -5,15 +5,15 @@ import FillFrag from './shaders/currency-fill.frag.glsl';
 import FillVert from './shaders/currency-fill.vert.glsl';
 
 export class Fill extends Base {
-  vertShader = FillVert;
+  public vertShader = FillVert;
 
-  fragShader = FillFrag;
+  public fragShader = FillFrag;
 
-  constructor (gl: WebGLRenderingContext, vShader?: string, fShader?: string) {
+  constructor(gl: WebGLRenderingContext, vShader?: string, fShader?: string) {
     super(gl, vShader || FillVert, fShader || FillFrag);
   }
 
-  draw() {
+  public draw() {
     // draw
     const primitiveType = this.gl.TRIANGLES;
     this.gl.drawArrays(primitiveType, 0, this.count);
@@ -21,15 +21,15 @@ export class Fill extends Base {
     return this;
   }
 
-  translate() {
+  public translate() {
     return this;
   }
 
-  rotate() {
+  public rotate() {
     return this;
   }
 
-  scale() {
+  public scale() {
     return this;
   }
 }

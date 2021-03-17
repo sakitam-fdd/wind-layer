@@ -13,7 +13,13 @@
       "avoid-template",
       "jsx-double"
     ],
-    "object-literal-sort-keys": false
+    "no-empty": false,
+    "no-console": false,
+    "prefer-for-of": false,
+    "no-unused-expression": false,
+    "object-literal-sort-keys": false,
+    "no-implicit-dependencies": false,
+    "no-submodule-imports": false
   },
   "include": [
     "packages/**"

@@ -1,15 +1,21 @@
 import * as mapboxgl from 'mapbox-gl';
-import { ScalarFill as ScalarCore } from 'wind-gl-core';
+import {
+  fp64LowPart,
+  getEye,
+  IOptions,
+  ScalarFill as ScalarCore,
+} from 'wind-gl-core';
+
+export interface IScalarFillOptions extends IOptions {
+  wrapX: boolean;
+}
 
 function getCoords([lng, lat]: [number, number]): [number, number] {
   const mercatorCoordinate = mapboxgl.MercatorCoordinate.fromLngLat({
     lng,
     lat,
   });
-  return [
-    mercatorCoordinate.x,
-    mercatorCoordinate.y,
-  ];
+  return [mercatorCoordinate.x, mercatorCoordinate.y];
 }
 
 export default class ScalarFill {
@@ -22,7 +28,7 @@ export default class ScalarFill {
   private data: any;
   private scalarFill: ScalarCore;
 
-  constructor(id: string, data: any, options = {}) {
+  constructor(id: string, data: any, options?: Partial<IScalarFillOptions>) {
     this.id = id;
     this.type = 'custom';
     this.renderingMode = '2d';
@@ -33,22 +39,23 @@ export default class ScalarFill {
     this.handleZoom = this.handleZoom.bind(this);
   }
 
-  handleZoom() {
+  public handleZoom() {
     if (this.scalarFill) {
       this.scalarFill.handleZoom();
     }
   }
 
-  initialize() {
+  public initialize() {
     if (!this.scalarFill && this.gl) {
       this.scalarFill = new ScalarCore(this.gl, {
         opacity: this.options.opacity,
         renderForm: this.options.renderForm,
         styleSpec: this.options.styleSpec,
+        displayRange: this.options.displayRange,
         getZoom: () => this.map.getZoom(),
         triggerRepaint: () => {
           this.map.triggerRepaint();
-        }
+        },
       });
 
       this.scalarFill.getMercatorCoordinate = getCoords;
@@ -60,7 +67,7 @@ export default class ScalarFill {
     }
   }
 
-  onAdd(map: mapboxgl.Map, gl: WebGLRenderingContext) {
+  public onAdd(map: mapboxgl.Map, gl: WebGLRenderingContext) {
     this.gl = gl;
     this.map = map;
 
@@ -69,7 +76,7 @@ export default class ScalarFill {
     }
   }
 
-  setData(data: any) {
+  public setData(data: any) {
     return new Promise((resolve, reject) => {
       this.data = data;
       if (this.data && this.scalarFill) {
@@ -87,24 +94,58 @@ export default class ScalarFill {
   }
 
   // This is called when the map is destroyed or the gl context lost.
-  onRemove(map: mapboxgl.Map) {
+  public onRemove(map: mapboxgl.Map) {
     delete this.gl;
     delete this.map;
     map.off('zoom', this.handleZoom);
   }
 
-  render(gl: WebGLRenderingContext, matrix: number[]) {
-    if (this.data && this.scalarFill) {
-      const bounds = this.map.getBounds();
-      const eastIter = Math.max(0, Math.ceil((bounds.getEast() - 180) / 360));
-      const westIter = Math.max(0, Math.ceil((bounds.getWest() + 180) / -360));
-      this.scalarFill.render(matrix, 0);
-      for (let i = 1; i <= eastIter; i++) {
-        // this.wind.render(this.map, matrix, i);
-        this.scalarFill.render(matrix, i);
+  public getWrappedWorlds() {
+    const result = [0];
+
+    if (this.options.wrapX) {
+      // @ts-ignore
+      const { width, height } = this.map.transform;
+      // @ts-ignore
+      const utl = this.map.transform.pointCoordinate(new mapboxgl.Point(0, 0));
+      // @ts-ignore
+      const utr = this.map.transform.pointCoordinate(
+        new mapboxgl.Point(width, 0),
+      );
+      // @ts-ignore
+      const ubl = this.map.transform.pointCoordinate(
+        new mapboxgl.Point(width, height),
+      );
+      // @ts-ignore
+      const ubr = this.map.transform.pointCoordinate(
+        new mapboxgl.Point(0, height),
+      );
+      const w0 = Math.floor(Math.min(utl.x, utr.x, ubl.x, ubr.x));
+      const w1 = Math.floor(Math.max(utl.x, utr.x, ubl.x, ubr.x));
+
+      const extraWorldCopy = 1;
+
+      for (let w = w0 - extraWorldCopy; w <= w1 + extraWorldCopy; w++) {
+        if (w === 0) {
+          continue;
+        }
+        result.push(w);
       }
-      for (let i = 1; i <= westIter; i++) {
-        this.scalarFill.render(matrix, -i);
+    }
+    return result;
+  }
+
+  public render(gl: WebGLRenderingContext, matrix: number[]) {
+    const cameraEye = getEye(matrix);
+    const cameraEye64Low = cameraEye.map((item: number) => fp64LowPart(item));
+    if (this.data && this.scalarFill) {
+      const worlds = this.getWrappedWorlds();
+      // tslint:disable-next-line:prefer-for-of
+      for (let i = 0; i < worlds.length; i++) {
+        this.scalarFill.render(matrix, worlds[i], {
+          cameraEye,
+          cameraEye64Low,
+        });
       }
     }
   }

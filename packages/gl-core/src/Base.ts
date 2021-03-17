@@ -1,4 +1,4 @@
-import { createProgram, clearScene, resizeCanvasSize } from './utils/gl-utils';
+import { clearScene, createProgram, resizeCanvasSize } from './utils/gl-utils';
 
 export interface BufferComponents {
   buffer: WebGLBuffer;
@@ -27,21 +27,24 @@ export interface AttribValues {
 }
 
 export default class Base {
-  vertShader = '';
+  public vertShader = '';
 
-  fragShader = '';
+  public fragShader = '';
   public readonly gl: WebGLRenderingContext;
   public count: number;
   public readonly program: WebGLProgram | null;
   public textureUnit: number;
   public uniformSetters: UniformSetters;
   public attribSetters: AttribSetters;
-  public transfromStack: (() => void)[];
+  public transfromStack: Array<() => void>;
 
   constructor(gl: WebGLRenderingContext, vShader: string, fShader: string) {
-
-    if (vShader) this.vertShader = vShader;
-    if (fShader) this.fragShader = fShader;
+    if (vShader) {
+      this.vertShader = vShader;
+    }
+    if (fShader) {
+      this.fragShader = fShader;
+    }
 
     this.program = createProgram(gl, this.vertShader, this.fragShader);
 
@@ -55,12 +58,12 @@ export default class Base {
     this.transfromStack = []; // 矩阵变换调用栈
   }
 
-  active() {
+  public active() {
     this.gl.useProgram(this.program);
     return this;
   }
 
-  deactive() {
+  public deactive() {
     this.gl.deleteProgram(this.program);
     return this;
   }
@@ -71,9 +74,13 @@ export default class Base {
    * @param type
    * @returns {GLenum|undefined}
    */
-  getBindPointForSamplerType(gl: WebGLRenderingContext, type: GLenum) {
-    if (type === gl.SAMPLER_2D)   return gl.TEXTURE_2D;        // eslint-disable-line
-    if (type === gl.SAMPLER_CUBE) return gl.TEXTURE_CUBE_MAP;  // eslint-disable-line
+  public getBindPointForSamplerType(gl: WebGLRenderingContext, type: GLenum) {
+    if (type === gl.SAMPLER_2D) {
+      return gl.TEXTURE_2D;
+    } // eslint-disable-line
+    if (type === gl.SAMPLER_CUBE) {
+      return gl.TEXTURE_CUBE_MAP;
+    } // eslint-disable-line
     return undefined;
   }
 
@@ -83,12 +90,16 @@ export default class Base {
    * @param uniformInfo
    * @returns {function(...[*]=)}
    */
-  createUniformSetter(program: WebGLProgram, uniformInfo: WebGLActiveInfo) {
+  public createUniformSetter(
+    program: WebGLProgram,
+    uniformInfo: WebGLActiveInfo,
+  ) {
     const { gl } = this;
     const location = gl.getUniformLocation(program, uniformInfo.name);
     const type = uniformInfo.type;
     // Check if this uniform is an array
-    const isArray = (uniformInfo.size > 1 && uniformInfo.name.substr(-3) === '[0]');
+    const isArray =
+      uniformInfo.size > 1 && uniformInfo.name.substr(-3) === '[0]';
     if (type === gl.FLOAT && isArray) {
       return function(v: Float32List) {
         gl.uniform1fv(location, v);
@@ -179,7 +190,7 @@ export default class Base {
       for (let ii = 0; ii < uniformInfo.size; ++ii) {
         units.push(this.textureUnit++);
       }
-      return function(bindPoint: GLenum | undefined, units) {
+      return (function(bindPoint: GLenum | undefined, units) {
         return function(textures: WebGLTexture[]) {
           gl.uniform1iv(location, units);
           textures.forEach(function(texture, index) {
@@ -189,10 +200,10 @@ export default class Base {
             }
           });
         };
-      }(this.getBindPointForSamplerType(gl, type), units);
+      })(this.getBindPointForSamplerType(gl, type), units);
     }
     if (type === gl.SAMPLER_2D || type === gl.SAMPLER_CUBE) {
-      return function(bindPoint: GLenum | undefined, unit) {
+      return (function(bindPoint: GLenum | undefined, unit) {
         return function(texture: WebGLTexture) {
           gl.uniform1i(location, unit);
           gl.activeTexture(gl.TEXTURE0 + unit);
@@ -200,25 +211,31 @@ export default class Base {
             gl.bindTexture(bindPoint, texture);
           }
         };
-      }(this.getBindPointForSamplerType(gl, type), this.textureUnit++);
+      })(this.getBindPointForSamplerType(gl, type), this.textureUnit++);
     }
-    throw ('unknown type: 0x' + type.toString(16)); // we should never get here.
+    throw new Error('unknown type: 0x' + type.toString(16)); // we should never get here.
   }
 
   /**
    * from webgl-utils
    * @returns {{}}
    */
-  createUniformSetters() {
+  public createUniformSetters() {
     const { gl } = this;
     this.textureUnit = 0;
     const uniformSetters: UniformSetters = {};
 
     if (this.program !== null) {
-      const numUniforms = gl.getProgramParameter(this.program, gl.ACTIVE_UNIFORMS);
+      const numUniforms = gl.getProgramParameter(
+        this.program,
+        gl.ACTIVE_UNIFORMS,
+      );
 
       for (let ii = 0; ii < numUniforms; ++ii) {
-        const uniformInfo: WebGLActiveInfo | null = gl.getActiveUniform(this.program, ii);
+        const uniformInfo: WebGLActiveInfo | null = gl.getActiveUniform(
+          this.program,
+          ii,
+        );
         if (!uniformInfo) {
           break;
         }
@@ -239,26 +256,38 @@ export default class Base {
    * from webgl-utils
    * @returns {function(...[*]=)}
    */
-  createAttribSetter(index: number) {
+  public createAttribSetter(index: number) {
     const { gl } = this;
     return function(b: BufferComponents) {
       gl.bindBuffer(gl.ARRAY_BUFFER, b.buffer);
       gl.enableVertexAttribArray(index);
       if (b.numComponents !== undefined || b.size !== undefined) {
         gl.vertexAttribPointer(
-          index, (b.numComponents || b.size) as number, b.type || gl.FLOAT, b.normalize || false, b.stride || 0, b.offset || 0);
+          index,
+          (b.numComponents || b.size) as number,
+          b.type || gl.FLOAT,
+          b.normalize || false,
+          b.stride || 0,
+          b.offset || 0,
+        );
       }
     };
   }
 
-  createAttributeSetters() {
+  public createAttributeSetters() {
     const { gl } = this;
     const attribSetters: AttribSetters = {};
 
     if (this.program !== null) {
-      const numAttribs = gl.getProgramParameter(this.program, gl.ACTIVE_ATTRIBUTES);
+      const numAttribs = gl.getProgramParameter(
+        this.program,
+        gl.ACTIVE_ATTRIBUTES,
+      );
       for (let ii = 0; ii < numAttribs; ++ii) {
-        const attribInfo: WebGLActiveInfo | null = gl.getActiveAttrib(this.program, ii);
+        const attribInfo: WebGLActiveInfo | null = gl.getActiveAttrib(
+          this.program,
+          ii,
+        );
         if (!attribInfo) {
           break;
         }
@@ -270,7 +299,7 @@ export default class Base {
     return attribSetters;
   }
 
-  setAttributes(attribs: AttribValues, setters?: AttribSetters | any) {
+  public setAttributes(attribs: AttribValues, setters?: AttribSetters | any) {
     if (setters) {
       setters = setters.attribSetters || setters;
     } else {
@@ -285,7 +314,7 @@ export default class Base {
     return this;
   }
 
-  setUniforms(values: UniformValues, setters?: UniformSetters | any) {
+  public setUniforms(values: UniformValues, setters?: UniformSetters | any) {
     if (setters) {
       setters = setters.uniformSetters || setters;
     } else {
@@ -306,7 +335,7 @@ export default class Base {
    * @param color
    * @returns {Base}
    */
-  clear(color: number[]) {
+  public clear(color: number[]) {
     clearScene(this.gl, color);
     this.transfromStack = [];
     return this;
@@ -317,30 +346,30 @@ export default class Base {
    * TODO: 目前没有好的方式去绑定顶点数量的关系
    * @param count
    */
-  runTimes(count: number) {
+  public runTimes(count: number) {
     this.count = count || 0;
     return this;
   }
 
-  resize() {
+  public resize() {
     resizeCanvasSize(this.gl.canvas);
     this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
     return this;
   }
 
-  draw() {
+  public draw() {
     throw new Error('should override');
   }
 
-  translate() {
+  public translate() {
     throw new Error('should override');
   }
 
-  rotate() {
+  public rotate() {
     throw new Error('should override');
   }
 
-  scale() {
+  public scale() {
     throw new Error('should override');
   }
 }
