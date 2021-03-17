@@ -47,7 +47,10 @@
   },
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
   "dependencies": {
-    "@mapbox/mapbox-gl-style-spec": "^13.15.0"
+    "color-string": "^1.5.5"
+  },
+  "devDependencies": {
+    "@types/color-string": "^1.5.0"
   },
   "gitHead": "0cc9a01b20ab3e901d5ec7e9be3653892395d304"
 }

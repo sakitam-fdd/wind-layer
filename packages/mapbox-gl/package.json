@@ -47,7 +47,8 @@
   },
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
   "dependencies": {
-    "wind-core": "^1.0.0-alpha.10"
+    "wind-core": "^1.0.0-alpha.10",
+    "wind-gl-core": "^1.0.0-alpha.10"
   },
   "peerDependencies": {
     "mapbox-gl": ">=0.50.0"

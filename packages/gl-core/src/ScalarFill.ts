@@ -1,11 +1,10 @@
 // @ts-ignore
-import { expression } from '@mapbox/mapbox-gl-style-spec/dist/index.es.js';
-import { WindFill } from './WindFill';
-import { Fill } from './Fill';
-import * as utils from './utils/gl-utils';
-import { isNumber } from './utils/common';
-// @ts-ignore
 import DataProcess from 'web-worker:./workers/DataProcesse';
+import { Fill } from './Fill';
+import { fp64LowPart, isNumber } from './utils/common';
+import * as utils from './utils/gl-utils';
+import { createLinearGradient, createZoom } from './utils/style-parser';
+import { WindFill } from './WindFill';
 
 export interface IGFSItem {
   header: {
@@ -26,10 +25,14 @@ export interface IGFSItem {
 
 export interface IOptions {
   renderForm?: 'rg' | 'r';
-  styleSpec?: any;
+  styleSpec?: {
+    'fill-color': any[];
+    opacity: number | any[];
+  };
   getZoom?: () => number;
   opacity?: number;
   triggerRepaint?: () => void;
+  displayRange: [number, number];
 }
 
 export interface IData {
@@ -43,19 +46,20 @@ export interface IData {
   max?: number;
   texCoordBuffer: WebGLBuffer | null;
   quadBuffer: WebGLBuffer | null;
+  quad64LowBuffer: WebGLBuffer | null;
   texture?: WebGLTexture | null;
 }
 
 export interface IJsonArrayData {
-  type: 'jsonArray',
+  type: 'jsonArray';
   data: IGFSItem[];
-  extent?: [number, number][],
+  extent?: Array<[number, number]>;
 }
 
 export interface IImageData {
-  type: 'image',
+  type: 'image';
   url: string;
-  extent: [number, number][],
+  extent: Array<[number, number]>;
   uMin?: number;
   uMax?: number;
   vMin?: number;
@@ -66,10 +70,40 @@ export interface IImageData {
 
 export const defaultOptions: IOptions = {
   renderForm: 'r',
+  styleSpec: {
+    'fill-color': [
+      'interpolate',
+      ['linear'],
+      ['get', 'value'],
+      0.0,
+      '#3288bd',
+      10,
+      '#66c2a5',
+      20,
+      '#abdda4',
+      30,
+      '#e6f598',
+      40,
+      '#fee08b',
+      50,
+      '#fdae61',
+      60,
+      '#f46d43',
+      100.0,
+      '#d53e4f',
+    ],
+    opacity: 1,
+  },
+  displayRange: [Infinity, Infinity],
 };
 
 export function checkUVData(data: IData) {
-  return isNumber(data.uMin) && isNumber(data.uMax) && isNumber(data.vMin) && isNumber(data.vMax);
+  return (
+    isNumber(data.uMin) &&
+    isNumber(data.uMax) &&
+    isNumber(data.vMin) &&
+    isNumber(data.vMax)
+  );
 }
 
 export function checkData(data: IData) {
@@ -83,171 +117,92 @@ interface IScalarFill<T> {
 export default class ScalarFill implements IScalarFill<any> {
   [index: string]: any;
 
+  public readonly gl: WebGLRenderingContext;
+  public data: IData;
+  public colorRampTexture: WebGLTexture | null;
+
   private options: IOptions;
-  private styleSpec: any;
-  private zoomUpdatable: {
-    [key: string]: any;
-  };
 
   private opacity: number;
+
+  private colorRange: [number, number];
 
   private worker: Worker;
 
   private drawCommand: WindFill | Fill;
 
-  public readonly gl: WebGLRenderingContext;
-  public data: IData;
-  public colorRampTexture: WebGLTexture | null;
-
-  constructor(gl: WebGLRenderingContext, options: IOptions = {}) {
+  constructor(gl: WebGLRenderingContext, options?: Partial<IOptions>) {
     this.gl = gl;
 
     if (!this.gl) {
       throw new Error('initialize error');
     }
 
-    this.styleSpec = {
-      'fill-color': {
-        type: 'color',
-        default: [
-          'interpolate',
-          ['linear'],
-          ['get', 'value'],
-          0.0,
-          '#3288bd',
-          10,
-          '#66c2a5',
-          20,
-          '#abdda4',
-          30,
-          '#e6f598',
-          40,
-          '#fee08b',
-          50,
-          '#fdae61',
-          60,
-          '#f46d43',
-          100.0,
-          '#d53e4f',
-        ],
-        doc: 'The color of each pixel of this layer',
-        expression: {
-          interpolated: true,
-          parameters: ['zoom', 'feature'],
-        },
-        'property-type': 'data-driven',
-      },
-      'opacity': {
-        type: 'number',
-        default: 1,
-        minimum: 0,
-        maximum: 1,
-        transition: true,
-        expression: {
-          interpolated: true,
-          parameters: ['zoom'],
-        },
-        'property-type': 'data-constant',
-      },
+    if (!options) {
+      options = {};
+    }
+
+    this.options = {
+      ...defaultOptions,
+      ...options,
     };
-
-    this.zoomUpdatable = {};
-
-    this.options = options;
 
     this.opacity = this.options.opacity || 1;
   }
 
-  public updateOptions(options: IOptions = {}) {
-    this.options = Object.assign({}, this.options, options);
-    Object.keys(this.styleSpec).forEach(spec => {
-      this.setProperty(spec, this.options.styleSpec[spec] || this.styleSpec[spec].default);
-    });
-  }
+  public updateOptions(options: Partial<IOptions>) {
+    this.options = {
+      ...this.options,
+      ...options,
+    };
 
-  private setProperty(prop: string, value: any) {
-    const spec = this.styleSpec[prop];
-    if (!spec) return;
-    const expr = expression.createPropertyExpression(value, spec);
-    if (expr.result === 'success') {
-      switch (expr.value.kind) {
-        case 'camera':
-        case 'composite':
-          // eslint-disable-next-line no-return-assign
-          return (this.zoomUpdatable[prop] = expr.value);
-        default:
-          return this.setPropertyValue(prop, expr.value);
-      }
-    } else {
-      throw new Error(expr.value);
+    this.buildColorRamp();
+
+    if (typeof this.options.getZoom === 'function') {
+      this.setOpacity(
+        createZoom(this.options.getZoom(), this.options.styleSpec?.opacity),
+      );
     }
   }
 
-  private setPropertyValue(prop: string, value: any) {
-    const name = prop
-      .split('-')
-      .map(a => a[0].toUpperCase() + a.slice(1))
-      .join('');
-    const setterName = `set${name}`;
-    if (this[setterName]) {
-      this[setterName](value);
-    } else if (typeof this.options.getZoom === 'function') {
-      this[name[0].toLowerCase() + name.slice(1)] = value.evaluate({
-        zoom: this.options.getZoom(),
-      });
+  public setFillColor() {
+    this.buildColorRamp();
+  }
+
+  public setOpacity(opacity: number) {
+    this.opacity = opacity;
+  }
+
+  public handleZoom() {
+    if (typeof this.options.getZoom === 'function') {
+      this.setOpacity(
+        createZoom(this.options.getZoom(), this.options.styleSpec?.opacity),
+      );
     }
   }
 
-  setFillColor(expr: any) {
-    this.buildColorRamp(expr);
-  }
-
-  handleZoom() {
-    Object.entries(this.zoomUpdatable).forEach(([k, v]) => {
-      this.setPropertyValue(k, v);
-    });
-  }
-
-  buildColorRamp(expr: any) {
-    const colors = new Uint8Array(256 * 4);
-    let range = 1;
-    if (expr.kind === 'source' || expr.kind === 'composite') {
-      if (this.options.renderForm === 'rg' && checkUVData(this.data)) {
-        // @ts-ignore
-        const u = this.data.uMax - this.data.uMin;
-        // @ts-ignore
-        const v = this.data.vMax - this.data.vMin;
-
-        range = Math.sqrt(u * u + v * v);
-      } else if (this.options.renderForm === 'r' && checkData(this.data)) {
-        // @ts-ignore
-        range = this.data.max - this.data.min;
-      } else {
-        console.warn('This type is not supported temporarily');
-      }
-    }
-
-    for (let i = 0; i < 256; i++) {
-      const expression = expr.kind === 'constant' || expr.kind === 'source' ? {} : (typeof this.options.getZoom === 'function' ? {
-        zoom: this.options.getZoom(),
-      } : {});
-      const color = expr.evaluate(expression, { properties: { value: (i / 255) * range } });
-      colors[i * 4 + 0] = color.r * 255;
-      colors[i * 4 + 1] = color.g * 255;
-      colors[i * 4 + 2] = color.b * 255;
-      colors[i * 4 + 3] = color.a * 255;
-    }
-
-    this.colorRampTexture = utils.createTexture(
-      this.gl,
-      this.gl.LINEAR,
-      colors,
-      16,
-      16,
+  public buildColorRamp() {
+    const { data, colorRange } = createLinearGradient(
+      [],
+      this.options.styleSpec?.['fill-color'] as any[],
     );
+
+    if (colorRange) {
+      this.colorRange = colorRange;
+    }
+
+    if (data) {
+      this.colorRampTexture = utils.createTexture(
+        this.gl,
+        this.gl.NEAREST,
+        data,
+        16,
+        16,
+      );
+    }
   }
 
-  initialize(gl: WebGLRenderingContext) {
+  public initialize(gl: WebGLRenderingContext) {
     if (!this.drawCommand) {
       if (this.options.renderForm === 'rg') {
         this.drawCommand = new WindFill(gl);
@@ -258,55 +213,81 @@ export default class ScalarFill implements IScalarFill<any> {
       }
     }
 
-    // This will initialize the default values
-    Object.keys(this.styleSpec).forEach(spec => {
-      this.setProperty(spec, this.options.styleSpec[spec] || this.styleSpec[spec].default);
-    });
+    this.buildColorRamp();
+
+    if (typeof this.options.getZoom === 'function') {
+      this.setOpacity(
+        createZoom(this.options.getZoom(), this.options.styleSpec?.opacity),
+      );
+    }
   }
 
-  getTextureData(data: IJsonArrayData | IImageData): Promise<IData> {
-    return new Promise(((resolve, reject) => {
+  public initializeVertex(coordinates: number[][]) {
+    let i = 0;
+    const len = coordinates.length;
+    const instancePositions = new Float32Array(len * 3);
+    const instancePositions64Low = new Float32Array(len * 3);
+
+    for (; i < len; i++) {
+      const coords = coordinates[i];
+      const mc = this.getMercatorCoordinate(coords as [number, number]);
+      instancePositions[i * 3] = mc[0];
+      instancePositions[i * 3 + 1] = mc[1];
+      instancePositions[i * 3 + 2] = 0;
+
+      instancePositions64Low[i * 3] = fp64LowPart(mc[0]);
+      instancePositions64Low[i * 3 + 1] = fp64LowPart(mc[1]);
+      instancePositions64Low[i * 3 + 2] = 0;
+    }
+
+    return {
+      quadBuffer: utils.createBuffer(this.gl, instancePositions),
+      quad64LowBuffer: utils.createBuffer(this.gl, instancePositions64Low),
+    };
+  }
+
+  public getTextureData(data: IJsonArrayData | IImageData): Promise<IData> {
+    return new Promise((resolve, reject) => {
       if (data.type === 'image' && data.url) {
-        utils.loadImage(data.url)
-          .then(image => {
-            const pos = [
-              ...this.getMercatorCoordinate(data.extent[0]),
-              ...this.getMercatorCoordinate(data.extent[1]),
-              ...this.getMercatorCoordinate(data.extent[2]),
-
-              ...this.getMercatorCoordinate(data.extent[2]),
-              ...this.getMercatorCoordinate(data.extent[1]),
-              ...this.getMercatorCoordinate(data.extent[3]),
-            ];
-
+        utils
+          .loadImage(data.url)
+          .then((image) => {
             const processedData: IData = {
               width: image.width,
               height: image.height,
-              quadBuffer: utils.createBuffer(
+              texCoordBuffer: utils.createBuffer(
                 this.gl,
-                new Float32Array(pos),
-              ),
-              texCoordBuffer: utils.createBuffer(this.gl, new Float32Array([
-                0.0, 0.0, // leftTop
-                0.0, 1.0, // leftBottom
-                1.0, 0.0, // rightTop
+                new Float32Array([
+                  0.0,
+                  0.0, // leftTop
+                  0.0,
+                  1.0, // leftBottom
+                  1.0,
+                  0.0, // rightTop
 
-                1.0, 0.0, // rightTop
-                0.0, 1.0, // leftBottom
-                1.0, 1.0, // rightBottom
-              ])),
-              // texture: this.regl.texture({
-              //   mag: 'linear',
-              //   min: 'linear',
-              //   data: new Uint8Array(velocityData),
-              //   width: uData.header.nx,
-              //   height: uData.header.ny,
-              //   wrapS: 'clamp',
-              //   wrapT: 'clamp',
-              //   format: 'rgba',
-              //   type: 'uint8',
-              // }),
-              texture: utils.createTexture(this.gl, this.gl.LINEAR, image, image.width, image.height),
+                  1.0,
+                  0.0, // rightTop
+                  0.0,
+                  1.0, // leftBottom
+                  1.0,
+                  1.0, // rightBottom
+                ]),
+              ),
+              texture: utils.createTexture(
+                this.gl,
+                this.gl.LINEAR,
+                image,
+                image.width,
+                image.height,
+              ),
+              ...this.initializeVertex([
+                data.extent[0],
+                data.extent[1],
+                data.extent[2],
+                data.extent[2],
+                data.extent[1],
+                data.extent[3],
+              ]),
             };
 
             if (this.options.renderForm === 'rg') {
@@ -323,51 +304,55 @@ export default class ScalarFill implements IScalarFill<any> {
 
             resolve(processedData);
           })
-          .catch(error => reject(error));
+          .catch((error) => reject(error));
       } else if (data.type === 'jsonArray' && data.data) {
         const gfsData = data.data;
         let pos;
-        if (data.extent) { // tip: fix extent
+        if (data.extent) {
+          // tip: fix extent
           pos = [
-            ...this.getMercatorCoordinate(data.extent[0]),
-            ...this.getMercatorCoordinate(data.extent[1]),
-            ...this.getMercatorCoordinate(data.extent[2]),
-
-            ...this.getMercatorCoordinate(data.extent[2]),
-            ...this.getMercatorCoordinate(data.extent[1]),
-            ...this.getMercatorCoordinate(data.extent[3]),
+            data.extent[0],
+            data.extent[1],
+            data.extent[2],
+            data.extent[2],
+            data.extent[1],
+            data.extent[3],
           ];
         } else {
           pos = [
-            ...this.getMercatorCoordinate([gfsData[0].header.lo1, gfsData[0].header.la1]),
-            ...this.getMercatorCoordinate([gfsData[0].header.lo1, gfsData[0].header.la2]),
-            ...this.getMercatorCoordinate([gfsData[0].header.lo2, gfsData[0].header.la1]),
+            [gfsData[0].header.lo1, gfsData[0].header.la1],
+            [gfsData[0].header.lo1, gfsData[0].header.la2],
+            [gfsData[0].header.lo2, gfsData[0].header.la1],
 
-            ...this.getMercatorCoordinate([gfsData[0].header.lo2, gfsData[0].header.la1]),
-            ...this.getMercatorCoordinate([gfsData[0].header.lo1, gfsData[0].header.la2]),
-            ...this.getMercatorCoordinate([gfsData[0].header.lo2, gfsData[0].header.la2]),
+            [gfsData[0].header.lo2, gfsData[0].header.la1],
+            [gfsData[0].header.lo1, gfsData[0].header.la2],
+            [gfsData[0].header.lo2, gfsData[0].header.la2],
           ];
         }
 
         const processedData: IData = {
           width: gfsData[0].header.nx,
           height: gfsData[0].header.ny,
-          quadBuffer: utils.createBuffer(
+          texCoordBuffer: utils.createBuffer(
             this.gl,
-            new Float32Array(pos),
+            new Float32Array([
+              0.0,
+              0.0, // leftTop
+              0.0,
+              1.0, // leftBottom
+              1.0,
+              0.0, // rightTop
+
+              1.0,
+              0.0, // rightTop
+              0.0,
+              1.0, // leftBottom
+              1.0,
+              1.0, // rightBottom
+            ]),
           ),
-          texCoordBuffer: utils.createBuffer(this.gl, new Float32Array([
-            0.0, 0.0, // leftTop
-            0.0, 1.0, // leftBottom
-            1.0, 0.0, // rightTop
-
-            1.0, 0.0, // rightTop
-            0.0, 1.0, // leftBottom
-            1.0, 1.0, // rightBottom
-          ])),
+          ...this.initializeVertex(pos),
         };
-
-        // const velocityData = new Uint8Array(gfsData[0].data.length * 4);
 
         if (!this.worker) {
           this.worker = new DataProcess();
@@ -377,11 +362,23 @@ export default class ScalarFill implements IScalarFill<any> {
               processedData.uMax = payload[2];
               processedData.vMin = payload[3];
               processedData.vMax = payload[4];
-              processedData.texture = utils.createTexture(this.gl, this.gl.LINEAR, new Uint8Array(payload[0]), processedData.width, processedData.height);
+              processedData.texture = utils.createTexture(
+                this.gl,
+                this.gl.LINEAR,
+                new Uint8Array(payload[0]),
+                processedData.width,
+                processedData.height,
+              );
             } else if (this.options.renderForm === 'r') {
               processedData.min = payload[1];
               processedData.max = payload[2];
-              processedData.texture = utils.createTexture(this.gl, this.gl.LINEAR, new Uint8Array(payload[0]), processedData.width, processedData.height);
+              processedData.texture = utils.createTexture(
+                this.gl,
+                this.gl.LINEAR,
+                new Uint8Array(payload[0]),
+                processedData.width,
+                processedData.height,
+              );
             } else {
               console.warn('This type is not supported temporarily');
             }
@@ -398,14 +395,18 @@ export default class ScalarFill implements IScalarFill<any> {
           //   console.time('format-data');
           // }
 
-          gfsData.forEach(function (record: IGFSItem) {
-            switch (record.header.parameterCategory + "," + record.header.parameterNumber) {
-              case "1,2":
-              case "2,2":
+          gfsData.forEach((record: IGFSItem) => {
+            switch (
+              record.header.parameterCategory +
+              ',' +
+              record.header.parameterNumber
+            ) {
+              case '1,2':
+              case '2,2':
                 uComp = record;
                 break;
-              case "1,3":
-              case "2,3":
+              case '1,3':
+              case '2,3':
                 vComp = record;
                 break;
             }
@@ -425,13 +426,17 @@ export default class ScalarFill implements IScalarFill<any> {
           console.warn('This type is not supported temporarily');
         }
       }
-    }));
+    });
   }
 
-  setData(data: IJsonArrayData | IImageData, cb?: (args?: boolean) => void) {
-    if (this.gl && data) { // Error Prevention
+  public setData(
+    data: IJsonArrayData | IImageData,
+    cb?: (args?: boolean) => void,
+  ) {
+    if (this.gl && data) {
+      // Error Prevention
       this.getTextureData(data)
-        .then(data => {
+        .then((data) => {
           this.data = data;
 
           cb && cb(true);
@@ -445,34 +450,53 @@ export default class ScalarFill implements IScalarFill<any> {
             this.options.triggerRepaint();
           }
         })
-        .catch(error => {
+        .catch((error) => {
           cb && cb(false);
           console.error(error);
         });
     }
   }
 
-  getData() {
+  public getData() {
     return this.data;
   }
 
-  getMercatorCoordinate([lng, lat]: [number, number]): [number, number] {
+  public getMercatorCoordinate([lng, lat]: [number, number]): [number, number] {
     return [lng, lat];
   }
 
-  prerender() {}
+  public prerender() {}
 
-  render(matrix: number[], offset?: number) {
-    if (this.data && this.drawCommand && this.data.texture && this.colorRampTexture) {
+  public render(
+    matrix: number[],
+    offset?: number,
+    cameraParams?: {
+      cameraEye: number[];
+      cameraEye64Low: number[];
+    },
+  ) {
+    if (
+      this.data &&
+      this.drawCommand &&
+      this.data.texture &&
+      this.colorRampTexture
+    ) {
       const opacity = this.opacity;
 
       const uniforms: any = {
         u_opacity: isNumber(opacity) ? opacity : 1,
         u_image_res: [this.data.width, this.data.height],
         u_matrix: matrix,
-        u_dateline_offset: isNumber(offset) ? offset : 0,
+        u_offset: isNumber(offset) ? offset : 0,
         u_color_ramp: this.colorRampTexture,
+        u_color_range: this.colorRange,
       };
+
+      if (cameraParams) {
+        uniforms.u_cameraEye = cameraParams.cameraEye;
+        uniforms.u_cameraEye64Low = cameraParams.cameraEye64Low;
+      }
+
       if (this.options.renderForm === 'rg') {
         uniforms.u_wind_min = [this.data.uMin, this.data.vMin];
         uniforms.u_wind_max = [this.data.uMax, this.data.vMax];
@@ -480,17 +504,23 @@ export default class ScalarFill implements IScalarFill<any> {
       } else if (this.options.renderForm === 'r') {
         uniforms.u_range = [this.data.min, this.data.max];
         uniforms.u_image = this.data.texture;
+        uniforms.u_display_range =
+          this.options.displayRange || uniforms.u_range;
       } else {
         console.warn('This type is not supported temporarily');
       }
       this.drawCommand
         .active()
-        // .resize()
+        .resize()
         .setUniforms(uniforms)
         .setAttributes({
-          a_position: {
+          instancePositions: {
             buffer: this.data.quadBuffer,
-            numComponents: 2,
+            numComponents: 3,
+          },
+          instancePositions64Low: {
+            buffer: this.data.quad64LowBuffer,
+            numComponents: 3,
           },
           a_texCoord: {
             buffer: this.data.texCoordBuffer,
@@ -502,5 +532,5 @@ export default class ScalarFill implements IScalarFill<any> {
     }
   }
 
-  postrender() {}
+  public postrender() {}
 }

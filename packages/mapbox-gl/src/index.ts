@@ -1,12 +1,12 @@
 import * as mapboxgl from 'mapbox-gl';
 
 import WindCore, {
-  Field,
-  isArray,
-  formatData,
   assign,
   defaultOptions,
+  Field,
+  formatData,
   IOptions,
+  isArray,
 } from 'wind-core';
 
 import Overlay from './Overlay';

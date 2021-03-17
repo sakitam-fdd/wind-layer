@@ -23,8 +23,8 @@
 </head>
 <body>
 <div id='map'></div>
-<!--<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/mapbox-wind@1.0.0-alpha.10/dist/mapbox-wind.js"></script>-->
-<script src="../packages/mapbox-gl/dist/mapbox-wind.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/mapbox-wind@1.0.0-alpha.10/dist/mapbox-wind.js"></script>
+<!--<script src="../packages/mapbox-gl/dist/mapbox-wind.js"></script>-->
 <script>
   mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA';
   const map = new mapboxgl.Map({
@@ -126,6 +126,10 @@
         const windInterpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
         const tempInterpolateColor = color.temp.reduce((result, item, key) => result.concat(item[0] - 273.15, 'rgba(' + item[1].join(',') + ')'), []);
 
+        console.log(tempInterpolateColor);
+
+
+
         const fillLayer = new mapboxWind.ScalarFill('wind', {
           // "type": "jsonArray",
           // "data": data,
@@ -158,7 +162,6 @@
           "vMin": -23.916271209716797,
           "vMax": 24.693727493286133,
         }, {
-          wrapX: true,
           styleSpec: {
             'fill-color': [
               'interpolate',
@@ -166,10 +169,17 @@
               ['get', 'value'],
               ...tempInterpolateColor
             ],
-            'opacity': 1,
+            'opacity': [
+              'interpolate',
+              ['exponential', 0.5],
+              ['zoom'],
+              5,
+              1,
+              8,
+              0
+            ],
           },
           renderForm: 'r',
-          // displayRange: [-60.84996643066404, -60],
         });
 
         map.addLayer(fillLayer);
