@@ -1,86 +1,18 @@
-// @ts-ignore
-import { CanvasLayer, Coordinate, renderer } from 'maptalks/dist/maptalks.es.js';
+import {
+  CanvasLayer,
+  Coordinate,
+  renderer,
+  // @ts-ignore
+} from 'maptalks/dist/maptalks.es.js';
 import {
   clearScene,
   fp64LowPart,
   getGlContext,
-  IPlaneBuffer,
   IOptions,
+  IPlaneBuffer,
   ScalarFill as ScalarCore,
 } from 'wind-gl-core';
 import { Extent, getWidth } from './utils';
-
-export function getPlaneBuffer(
-  startX: number,
-  endX: number,
-  startY: number,
-  endY: number,
-  widthSegments: number,
-  heightSegments: number,
-): IPlaneBuffer {
-  const width = Math.abs(endX - startX);
-  const height = Math.abs(endY - startY);
-  const widthHalf = width / 2;
-  const heightHalf = height / 2;
-
-  const gridX = Math.floor(widthSegments);
-  const gridY = Math.floor(heightSegments);
-
-  const gridX1 = gridX + 1;
-  const gridY1 = gridY + 1;
-
-  const segmentWidth = width / gridX;
-  const segmentHeight = height / gridY;
-
-  const indices = [];
-  const vertices = [];
-  const verticesLow = [];
-  const uvs = [];
-
-  for (let iy = 0; iy < gridY1; iy++) {
-    const y = iy * segmentHeight;
-    for (let ix = 0; ix < gridX1; ix++) {
-      const x = ix * segmentWidth;
-      const vx = startX + (x / widthHalf / 2) * width;
-      const vy = startY - (y / heightHalf / 2) * height;
-      vertices.push(vx, vy, 0);
-      verticesLow.push(fp64LowPart(vx), fp64LowPart(vy), 0);
-      // vertices.push(ix / gridX, 1 - (iy / gridY));
-      uvs.push(ix / gridX, iy / gridY);
-    }
-  }
-
-  for (let iy = 0; iy < gridY; iy++) {
-    for (let ix = 0; ix < gridX; ix++) {
-      const a = ix + gridX1 * iy;
-      const b = ix + gridX1 * (iy + 1);
-      const c = ix + 1 + gridX1 * (iy + 1);
-      const d = ix + 1 + gridX1 * iy;
-
-      indices.push(a, b, d);
-      indices.push(b, c, d);
-    }
-  }
-
-  return {
-    uvs: {
-      data: uvs,
-      size: 2,
-    },
-    elements: {
-      data: indices,
-      count: indices.length,
-    },
-    position: {
-      data: vertices,
-      size: 3,
-    },
-    positionLow: {
-      data: verticesLow,
-      size: 3,
-    },
-  };
-}
 
 export interface IScalarFillOptions extends IOptions {
   wrapX: boolean;
@@ -96,7 +28,7 @@ export interface IScalarFillOptions extends IOptions {
   };
 }
 
-const defaultOptions = {
+const defaultLayerOptions = {
   renderer: 'gl',
   doubleBuffer: false,
   animation: false,
@@ -112,41 +44,41 @@ const defaultOptions = {
 
 export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
   public scalarRender: ScalarCore;
-  private _drawContext: CanvasRenderingContext2D;
   public canvas: HTMLCanvasElement | undefined;
   public layer: any;
+  private _drawContext: CanvasRenderingContext2D;
   private gl: WebGLRenderingContext | null;
 
-  checkResources() {
+  public checkResources() {
     return [];
   }
 
-  getDrawParams() {
+  public getDrawParams() {
     return [];
   }
 
-  hitDetect() {
+  public hitDetect() {
     return false;
   }
 
-  draw() {
+  public draw() {
     this.prepareCanvas();
     this.prepareDrawContext();
     this.drawWind();
   }
 
-  _redraw() {
+  public _redraw() {
     this.prepareRender();
     this.draw();
   }
 
-  clearCanvas() {
+  public clearCanvas() {
     if (this.gl) {
       clearScene(this.gl, [0, 0, 0, 0]);
     }
   }
 
-  createContext() {
+  public createContext() {
     if (this.gl && this.gl.canvas === this.canvas) {
       return;
     }
@@ -155,7 +87,7 @@ export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
     this.gl = getGlContext(this.canvas, this.layer.options.glOptions);
   }
 
-  resizeCanvas(canvasSize?: any) {
+  public resizeCanvas(canvasSize?: any) {
     if (this.canvas && this.gl) {
       const map = this.getMap();
       const retina = map.getDevicePixelRatio();
@@ -168,7 +100,7 @@ export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
     }
   }
 
-  getMatrix(): number[] {
+  public getMatrix(): number[] {
     const map = this.getMap();
     // const extent = map._get2DExtent(map.getGLZoom());
     // const uMatrix = mat4.identity(new Float32Array(16));
@@ -178,13 +110,13 @@ export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
     return map.projViewMatrix;
   }
 
-  handleZoom() {
+  public handleZoom() {
     if (this.scalarRender) {
       this.scalarRender.handleZoom();
     }
   }
 
-  drawWind() {
+  public drawWind() {
     const map = this.getMap();
     if (this.gl !== null) {
       const layer = this.layer;
@@ -199,6 +131,8 @@ export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
           mappingRange: opt.mappingRange,
           widthSegments: opt.widthSegments,
           heightSegments: opt.heightSegments,
+          createPlaneBuffer: opt.createPlaneBuffer,
+          depthRange: opt.depthRange || [0.0, 1.0],
           getZoom: () => this.getMap().getZoom(),
           triggerRepaint: () => {
             this._redraw();
@@ -213,58 +147,17 @@ float transformZ(float value, vec3 pos) {
 gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
     `,
           },
-          createPlaneBuffer: (points, widthSegments, heightSegments) => {
-            const [startX, endX, startY, endY] = [
-              points[0][0],
-              points[2][0],
-              points[0][1],
-              points[1][1],
-            ];
-            // return {
-            //   uvs: {
-            //     data: [
-            //       // 0, 0,
-            //       // 0, 1,
-            //       // 1, 0,
-            //       // 1, 1,
-            //       0, 0, 1, 0, 0, 1, 1, 1
-            //     ],
-            //     size: 2,
-            //   },
-            //   elements: {
-            //     data: [0, 1, 2, 2, 1, 3],
-            //     count: 6,
-            //   },
-            //   position: {
-            //     data,
-            //     size: 3,
-            //   },
-            //   positionLow: {
-            //     data: Array.from({
-            //         length: 12,
-            //       },
-            //       (p) => 0,
-            //     ),
-            //     size: 3,
-            //   },
-            // };
-            return getPlaneBuffer(
-              startX,
-              endX,
-              startY,
-              endY,
-              widthSegments,
-              heightSegments,
-            );
-          },
         });
 
-        this.scalarRender.getMercatorCoordinate = ([lng, lat]: [number, number]) => {
-          const coords = map.coordToPoint(new Coordinate(lng, lat), map.getGLZoom());
-          return [
-            coords.x,
-            coords.y,
-          ];
+        this.scalarRender.getMercatorCoordinate = ([lng, lat]: [
+          number,
+          number,
+        ]) => {
+          const coords = map.coordToPoint(
+            new Coordinate(lng, lat),
+            map.getGLZoom(),
+          );
+          return [coords.x, coords.y];
         };
 
         this.getMap().on('zoom', this.handleZoom, this);
@@ -277,9 +170,14 @@ gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
         const cameraEye = [
           // ...map.cameraPosition,
           // 1,
-          0, 0, 0, 1,
+          0,
+          0,
+          0,
+          1,
         ];
-        const cameraEye64Low = cameraEye.map((item: number) => fp64LowPart(item));
+        const cameraEye64Low = cameraEye.map((item: number) =>
+          fp64LowPart(item),
+        );
 
         const worlds = this.getWrappedWorlds();
         // tslint:disable-next-line:prefer-for-of
@@ -297,12 +195,22 @@ gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
   public getWrappedWorlds() {
     const map = this.getMap();
     const projObject = map.getProjection().fullExtent;
-    const projectionExtent = [projObject.left, projObject.bottom, projObject.right, projObject.top] as Extent;
+    const projectionExtent = [
+      projObject.left,
+      projObject.bottom,
+      projObject.right,
+      projObject.top,
+    ] as Extent;
     const projExtent = map.getProjExtent();
-    const extent = [projExtent.xmin, projExtent.ymin, projExtent.xmax, projExtent.ymax];
+    const extent = [
+      projExtent.xmin,
+      projExtent.ymin,
+      projExtent.xmax,
+      projExtent.ymax,
+    ];
     let startX = extent[0];
     const worldWidth = getWidth(projectionExtent);
-    const projWorldWidth =
+    const projWorldWidth = Math.abs(
       map.coordToPoint(
         map
           .getProjection()
@@ -310,18 +218,20 @@ gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
             new Coordinate([projectionExtent[0], projectionExtent[1]]),
           ),
         map.getGLZoom(),
-      ).x - map.coordToPoint(
-      map
-        .getProjection()
-        .unprojectCoords(
-          new Coordinate([projectionExtent[2], projectionExtent[3]]),
-        ),
-      map.getGLZoom(),
-      ).x;
+      ).x -
+        map.coordToPoint(
+          map
+            .getProjection()
+            .unprojectCoords(
+              new Coordinate([projectionExtent[2], projectionExtent[3]]),
+            ),
+          map.getGLZoom(),
+        ).x,
+    );
     let world = 0;
     let offsetX;
 
-    const result = [0];
+    const result = [];
 
     const layer = this.layer;
     const opt = layer.getOptions();
@@ -342,40 +252,42 @@ gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
       }
     }
 
+    result.push(0);
+
     return result;
   }
 
-  drawOnInteracting() {
+  public drawOnInteracting() {
     this.draw();
   }
 
-  onZoomStart(...args: any[]) {
+  public onZoomStart(...args: any[]) {
     super.onZoomStart.apply(this, args);
   }
 
-  onZoomEnd(...args: any[]) {
+  public onZoomEnd(...args: any[]) {
     super.onZoomEnd.apply(this, args);
   }
 
-  onDragRotateStart(...args: any[]) {
+  public onDragRotateStart(...args: any[]) {
     super.onDragRotateStart.apply(this, args);
   }
 
-  onDragRotateEnd(...args: any[]) {
+  public onDragRotateEnd(...args: any[]) {
     super.onDragRotateEnd.apply(this, args);
   }
 
-  onMoveStart(...args: any[]) {
+  public onMoveStart(...args: any[]) {
     super.onMoveStart.apply(this, args);
   }
 
-  onMoveEnd(...args: any[]) {
+  public onMoveEnd(...args: any[]) {
     super.onMoveEnd.apply(this, args);
   }
 
   // onResize() {}
 
-  remove() {
+  public remove() {
     delete this._drawContext;
     super.remove();
   }
@@ -384,10 +296,13 @@ gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
     return super.getMap();
   }
 
+  public completeRender() {
+    return super.completeRender();
+  }
+
   private prepareCanvas() {
     return super.prepareCanvas();
   }
-
 
   private prepareDrawContext() {
     super.prepareDrawContext();
@@ -395,10 +310,6 @@ gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
 
   private prepareRender() {
     return super.prepareRender();
-  }
-
-  public completeRender() {
-    return super.completeRender();
   }
 }
 
@@ -413,7 +324,7 @@ export class ScalarLayer extends CanvasLayer {
     options?: Partial<IScalarFillOptions>,
   ) {
     super(id, {
-      ...defaultOptions,
+      ...defaultLayerOptions,
       ...options,
     });
 
@@ -429,7 +340,7 @@ export class ScalarLayer extends CanvasLayer {
   /**
    * get wind layer data
    */
-  public getData () {
+  public getData() {
     return this.data;
   }
 
@@ -438,7 +349,7 @@ export class ScalarLayer extends CanvasLayer {
    * @param data
    * @returns {Promise<any>>}
    */
-  public setData (data: any) {
+  public setData(data: any) {
     return new Promise((resolve, reject) => {
       this.data = data;
       const renderer = this._getRenderer();

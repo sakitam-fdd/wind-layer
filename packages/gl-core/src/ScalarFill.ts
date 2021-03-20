@@ -44,6 +44,7 @@ export interface IOptions {
   };
   displayRange?: [number, number];
   mappingRange?: [number, number];
+  depthRange?: [number, number];
   widthSegments?: number;
   heightSegments?: number;
 }
@@ -110,6 +111,7 @@ export const defaultOptions: IOptions = {
   },
   displayRange: [Infinity, Infinity],
   mappingRange: [0, 0],
+  depthRange: [0, 1],
   widthSegments: 1,
   heightSegments: 1,
   createPlaneBuffer: (
@@ -117,13 +119,11 @@ export const defaultOptions: IOptions = {
     widthSegments: number,
     heightSegments: number,
   ) => {
-    const x = points.map((item) => item[0]);
-    const y = points.map((item) => item[1]);
     const [startX, endX, startY, endY] = [
-      Math.min(...x),
-      Math.max(...x),
-      Math.min(...y),
-      Math.max(...y),
+      points[0][0],
+      points[2][0],
+      points[0][1],
+      points[1][1],
     ];
 
     return utils.getPlaneBuffer(
@@ -283,7 +283,9 @@ export default class ScalarFill implements IScalarFill<any> {
     }
 
     // @ts-ignore
-    const buffers = this.options.createPlaneBuffer(
+    const buffers = (
+      this.options.createPlaneBuffer || defaultOptions.createPlaneBuffer
+    )(
       points,
       (this.options.widthSegments as number) || 1,
       (this.options.heightSegments as number) || 1,
@@ -528,7 +530,7 @@ export default class ScalarFill implements IScalarFill<any> {
             this.data.uMax * this.data.uMax + this.data.vMin * this.data.vMin,
           ),
         ];
-        const min = Math.min(...speeds);
+        const min = 0;
         const max = Math.max(...speeds);
         uniforms.u_display_range = this.options.displayRange || [min, max];
       } else if (this.options.renderForm === 'r') {
@@ -543,10 +545,22 @@ export default class ScalarFill implements IScalarFill<any> {
         console.warn('This type is not supported temporarily');
       }
 
-      const blendingEnabled = this.gl.isEnabled(this.gl.BLEND);
-      this.gl.disable(this.gl.BLEND);
-      this.gl.disable(this.gl.DEPTH_TEST);
-      this.gl.disable(this.gl.STENCIL_TEST);
+      const depthEnabled = this.gl.isEnabled(this.gl.DEPTH_TEST);
+      this.gl.enable(this.gl.DEPTH_TEST);
+      this.gl.depthMask(false);
+      this.gl.depthFunc(this.gl.LEQUAL);
+      if (
+        this.options.depthRange &&
+        Array.isArray(this.options.depthRange) &&
+        this.options.depthRange.length === 2
+      ) {
+        this.gl.depthRange(
+          this.options.depthRange[0],
+          this.options.depthRange[1],
+        );
+      } else {
+        this.gl.depthRange(0.05, 0.99);
+      }
 
       this.drawCommand
         .active()
@@ -574,8 +588,8 @@ export default class ScalarFill implements IScalarFill<any> {
         })
         .draw();
 
-      if (blendingEnabled) {
-        this.gl.enable(this.gl.BLEND);
+      if (!depthEnabled) {
+        this.gl.disable(this.gl.DEPTH_TEST);
       }
     }
   }

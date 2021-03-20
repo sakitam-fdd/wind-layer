@@ -384,8 +384,8 @@ export function getPlaneBuffer(
     const y = iy * segmentHeight;
     for (let ix = 0; ix < gridX1; ix++) {
       const x = ix * segmentWidth;
-      const vx = (x / widthHalf / 2) * width - startX;
-      const vy = (y / heightHalf / 2) * height - startY;
+      const vx = startX + (x / widthHalf / 2) * width;
+      const vy = startY + (y / heightHalf / 2) * height;
       vertices.push(vx, vy, 0);
       verticesLow.push(fp64LowPart(vx), fp64LowPart(vy), 0);
       // vertices.push(ix / gridX, 1 - (iy / gridY));
