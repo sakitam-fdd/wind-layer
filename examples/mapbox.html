@@ -67,7 +67,7 @@
       ],
     },
     center: [113.53450137499999, 34.44104525],
-    zoom: 4
+    zoom: 0
   });
 
   const color = {
@@ -84,28 +84,6 @@
       [294,[243,183,4,255]],
       [303,[232,83,25,255]],
       [320,[71,14,0,255]]],
-    wind: [
-      [0,[98,113,183,255]],
-      [1,[57,97,159,255]],
-      [3,[74,148,169,255]],
-      [5,[77,141,123,255]],
-      [7,[83,165,83,255]],
-      [9,[53,159,53,255]],
-      [11,[167,157,81,255]],
-      [13,[159,127,58,255]],
-      [15,[161,108,92,255]],
-      [17,[129,58,78,255]],
-      [19,[175,80,136,255]],
-      [21,[117,74,147,255]],
-      [24,[109,97,163,255]],
-      [27,[68,105,141,255]],
-      [29,[92,144,152,255]],
-      [36,[125,68,165,255]],
-      [46,[231,215,215,255]],
-      [51,[219,212,135,255]],
-      [77,[205,202,112,255]],
-      [104,[128,128,128,255]]
-    ],
   };
 
   map.on('load', function () {
@@ -123,7 +101,6 @@
           return item;
         });
 
-        const windInterpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
         const tempInterpolateColor = color.temp.reduce((result, item, key) => result.concat(item[0] - 273.15, 'rgba(' + item[1].join(',') + ')'), []);
 
         const fillLayer = new mapboxWind.ScalarFill('wind', {
@@ -148,15 +125,9 @@
           // "width": data[0]['header']['nx'],
           // "height": data[0]['header']['ny'] - 1,
           "min": -50.84996643066404,
+          // "min": -63.83,
           "max": 42.25002441406252,
-          // "uMin": data[0]['header']['min'],
-          // "uMax": data[0]['header']['max'],
-          // "vMin": data[1]['header']['min'],
-          // "vMax": data[1]['header']['max'],
-          "uMin": -21.34380340576172,
-          "uMax": 30.7261962890625,
-          "vMin": -23.916271209716797,
-          "vMax": 24.693727493286133,
+          // "max": 36.86,
         }, {
           wrapX: true,
           styleSpec: {
@@ -166,10 +137,24 @@
               ['get', 'value'],
               ...tempInterpolateColor
             ],
-            'opacity': 1,
+            'opacity': [
+              'interpolate',
+              ['exponential', 0.5],
+              ['zoom'],
+              1,
+              1,
+              2,
+              0
+            ],
           },
           renderForm: 'r',
-          // displayRange: [-60.84996643066404, -60],
+          // widthSegments: 720,
+          // heightSegments: 360,
+          widthSegments: 1,
+          heightSegments: 1,
+          // displayRange: [0, 80],
+          // mappingRange: [0, 1000000],
+          mappingRange: [0, 0],
         });
 
         map.addLayer(fillLayer);

@@ -52,6 +52,9 @@ export default class ScalarFill {
         renderForm: this.options.renderForm,
         styleSpec: this.options.styleSpec,
         displayRange: this.options.displayRange,
+        mappingRange: this.options.mappingRange,
+        widthSegments: this.options.widthSegments,
+        heightSegments: this.options.heightSegments,
         getZoom: () => this.map.getZoom(),
         triggerRepaint: () => {
           this.map.triggerRepaint();

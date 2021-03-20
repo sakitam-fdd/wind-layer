@@ -8,6 +8,7 @@ export class Fill extends Base {
   public vertShader = FillVert;
 
   public fragShader = FillFrag;
+  private checkExt: OES_element_index_uint | null;
 
   constructor(gl: WebGLRenderingContext, vShader?: string, fShader?: string) {
     super(gl, vShader || FillVert, fShader || FillFrag);
@@ -15,8 +16,27 @@ export class Fill extends Base {
 
   public draw() {
     // draw
-    const primitiveType = this.gl.TRIANGLES;
-    this.gl.drawArrays(primitiveType, 0, this.count);
+    if (this.checkExt !== undefined) {
+      const primitiveType = this.primitive || this.gl.TRIANGLES;
+      // gl.UNSIGNED_BYTE对应Uint8Array，gl.UNSIGNED_SHORT对应Uint16Array
+      if (this.checkExt) {
+        this.gl.drawElements(
+          primitiveType,
+          this.count,
+          this.gl.UNSIGNED_INT,
+          0,
+        );
+      } else {
+        this.gl.drawElements(
+          primitiveType,
+          this.count,
+          this.gl.UNSIGNED_SHORT,
+          0,
+        );
+      }
+    } else {
+      this.checkExt = this.gl.getExtension('OES_element_index_uint');
+    }
 
     return this;
   }

@@ -1,7 +1,7 @@
 // @ts-ignore
 import DataProcess from 'web-worker:./workers/DataProcesse';
 import { Fill } from './Fill';
-import { fp64LowPart, isNumber } from './utils/common';
+import { isNumber } from './utils/common';
 import * as utils from './utils/gl-utils';
 import { createLinearGradient, createZoom } from './utils/style-parser';
 import { WindFill } from './WindFill';
@@ -32,7 +32,10 @@ export interface IOptions {
   getZoom?: () => number;
   opacity?: number;
   triggerRepaint?: () => void;
-  displayRange: [number, number];
+  displayRange?: [number, number];
+  mappingRange?: [number, number];
+  widthSegments?: number;
+  heightSegments?: number;
 }
 
 export interface IData {
@@ -48,6 +51,7 @@ export interface IData {
   quadBuffer: WebGLBuffer | null;
   quad64LowBuffer: WebGLBuffer | null;
   texture?: WebGLTexture | null;
+  indexes?: number[] | number[][];
 }
 
 export interface IJsonArrayData {
@@ -95,6 +99,9 @@ export const defaultOptions: IOptions = {
     opacity: 1,
   },
   displayRange: [Infinity, Infinity],
+  mappingRange: [0, 0],
+  widthSegments: 1,
+  heightSegments: 1,
 };
 
 export function checkUVData(data: IData) {
@@ -225,24 +232,45 @@ export default class ScalarFill implements IScalarFill<any> {
   public initializeVertex(coordinates: number[][]) {
     let i = 0;
     const len = coordinates.length;
-    const instancePositions = new Float32Array(len * 3);
-    const instancePositions64Low = new Float32Array(len * 3);
-
+    const x = [];
+    const y = [];
     for (; i < len; i++) {
       const coords = coordinates[i];
       const mc = this.getMercatorCoordinate(coords as [number, number]);
-      instancePositions[i * 3] = mc[0];
-      instancePositions[i * 3 + 1] = mc[1];
-      instancePositions[i * 3 + 2] = 0;
-
-      instancePositions64Low[i * 3] = fp64LowPart(mc[0]);
-      instancePositions64Low[i * 3 + 1] = fp64LowPart(mc[1]);
-      instancePositions64Low[i * 3 + 2] = 0;
+      x.push(mc[0]);
+      y.push(mc[1]);
     }
 
+    const [startX, endX, startY, endY] = [
+      Math.min(...x),
+      Math.max(...x),
+      Math.min(...y),
+      Math.max(...y),
+    ];
+
+    const buffers = utils.getPlaneBuffer(
+      startX,
+      endX,
+      startY,
+      endY,
+      this.options.widthSegments as number,
+      this.options.heightSegments as number,
+    );
+
     return {
-      quadBuffer: utils.createBuffer(this.gl, instancePositions),
-      quad64LowBuffer: utils.createBuffer(this.gl, instancePositions64Low),
+      indexes: buffers.elements.data,
+      quadBuffer: utils.createBuffer(
+        this.gl,
+        new Float32Array(buffers.position.data),
+      ),
+      quad64LowBuffer: utils.createBuffer(
+        this.gl,
+        new Float32Array(buffers.positionLow.data),
+      ),
+      texCoordBuffer: utils.createBuffer(
+        this.gl,
+        new Float32Array(buffers.uvs.data),
+      ),
     };
   }
 
@@ -252,27 +280,10 @@ export default class ScalarFill implements IScalarFill<any> {
         utils
           .loadImage(data.url)
           .then((image) => {
+            // this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
             const processedData: IData = {
               width: image.width,
               height: image.height,
-              texCoordBuffer: utils.createBuffer(
-                this.gl,
-                new Float32Array([
-                  0.0,
-                  0.0, // leftTop
-                  0.0,
-                  1.0, // leftBottom
-                  1.0,
-                  0.0, // rightTop
-
-                  1.0,
-                  0.0, // rightTop
-                  0.0,
-                  1.0, // leftBottom
-                  1.0,
-                  1.0, // rightBottom
-                ]),
-              ),
               texture: utils.createTexture(
                 this.gl,
                 this.gl.LINEAR,
@@ -280,14 +291,7 @@ export default class ScalarFill implements IScalarFill<any> {
                 image.width,
                 image.height,
               ),
-              ...this.initializeVertex([
-                data.extent[0],
-                data.extent[1],
-                data.extent[2],
-                data.extent[2],
-                data.extent[1],
-                data.extent[3],
-              ]),
+              ...this.initializeVertex(data.extent),
             };
 
             if (this.options.renderForm === 'rg') {
@@ -310,22 +314,12 @@ export default class ScalarFill implements IScalarFill<any> {
         let pos;
         if (data.extent) {
           // tip: fix extent
-          pos = [
-            data.extent[0],
-            data.extent[1],
-            data.extent[2],
-            data.extent[2],
-            data.extent[1],
-            data.extent[3],
-          ];
+          pos = data.extent;
         } else {
           pos = [
             [gfsData[0].header.lo1, gfsData[0].header.la1],
             [gfsData[0].header.lo1, gfsData[0].header.la2],
             [gfsData[0].header.lo2, gfsData[0].header.la1],
-
-            [gfsData[0].header.lo2, gfsData[0].header.la1],
-            [gfsData[0].header.lo1, gfsData[0].header.la2],
             [gfsData[0].header.lo2, gfsData[0].header.la2],
           ];
         }
@@ -333,24 +327,6 @@ export default class ScalarFill implements IScalarFill<any> {
         const processedData: IData = {
           width: gfsData[0].header.nx,
           height: gfsData[0].header.ny,
-          texCoordBuffer: utils.createBuffer(
-            this.gl,
-            new Float32Array([
-              0.0,
-              0.0, // leftTop
-              0.0,
-              1.0, // leftBottom
-              1.0,
-              0.0, // rightTop
-
-              1.0,
-              0.0, // rightTop
-              0.0,
-              1.0, // leftBottom
-              1.0,
-              1.0, // rightBottom
-            ]),
-          ),
           ...this.initializeVertex(pos),
         };
 
@@ -490,6 +466,7 @@ export default class ScalarFill implements IScalarFill<any> {
         u_offset: isNumber(offset) ? offset : 0,
         u_color_ramp: this.colorRampTexture,
         u_color_range: this.colorRange,
+        u_mapping_range: this.options.mappingRange || [0, 0], // 映射高度
       };
 
       if (cameraParams) {
@@ -501,17 +478,47 @@ export default class ScalarFill implements IScalarFill<any> {
         uniforms.u_wind_min = [this.data.uMin, this.data.vMin];
         uniforms.u_wind_max = [this.data.uMax, this.data.vMax];
         uniforms.u_wind = this.data.texture;
+        const speeds = [
+          Math.sqrt(
+            // @ts-ignore
+            this.data.uMin * this.data.uMin + this.data.vMin * this.data.vMin,
+          ),
+          Math.sqrt(
+            // @ts-ignore
+            this.data.uMin * this.data.uMin + this.data.vMax * this.data.vMax,
+          ),
+          Math.sqrt(
+            // @ts-ignore
+            this.data.uMax * this.data.uMax + this.data.vMax * this.data.vMax,
+          ),
+          Math.sqrt(
+            // @ts-ignore
+            this.data.uMax * this.data.uMax + this.data.vMin * this.data.vMin,
+          ),
+        ];
+        const min = Math.min(...speeds);
+        const max = Math.max(...speeds);
+        uniforms.u_display_range = this.options.displayRange || [min, max];
       } else if (this.options.renderForm === 'r') {
         uniforms.u_range = [this.data.min, this.data.max];
         uniforms.u_image = this.data.texture;
-        uniforms.u_display_range =
-          this.options.displayRange || uniforms.u_range;
+        // 如果不指定，使用数据范围，并简单做一个数据 buffer
+        uniforms.u_display_range = this.options.displayRange || [
+          uniforms.u_range[0] - 1,
+          uniforms.u_range[1] + 1,
+        ];
       } else {
         console.warn('This type is not supported temporarily');
       }
+
+      // const blendingEnabled = this.gl.isEnabled(this.gl.BLEND);
+      // this.gl.disable(this.gl.BLEND);
+      // this.gl.disable(this.gl.DEPTH_TEST);
+      // this.gl.disable(this.gl.STENCIL_TEST);
+
       this.drawCommand
         .active()
-        .resize()
+        // .resize()
         .setUniforms(uniforms)
         .setAttributes({
           instancePositions: {
@@ -527,8 +534,17 @@ export default class ScalarFill implements IScalarFill<any> {
             numComponents: 2,
           },
         })
-        .runTimes(6)
+        .elements({
+          data: new Uint32Array(this.data.indexes as number[]),
+          primitive: this.gl.TRIANGLES,
+          count: this.data.indexes?.length,
+          usage: this.gl.STATIC_DRAW,
+        })
         .draw();
+
+      // if (blendingEnabled) {
+      //   this.gl.enable(this.gl.BLEND);
+      // }
     }
   }
 

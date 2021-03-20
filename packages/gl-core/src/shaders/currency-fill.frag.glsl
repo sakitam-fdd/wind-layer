@@ -9,7 +9,7 @@ uniform vec2 u_color_range;
 uniform vec2 u_display_range;
 uniform float u_opacity;
 
-varying vec2 v_tex_pos;// the position in the texture to find
+varying vec2 v_tex_pos;
 
 // 单通道返回的是浮点数或者整数
 float calcTexture(const vec2 uv) {
@@ -42,8 +42,7 @@ float getValue(const vec2 uv) {
 void main () {
   vec2 globalWGS84 = mercatorToWGS84(v_tex_pos);
   float value = getValue(globalWGS84);
-  value = floor((value * 10.0 + 0.5)) / 10.0;
-  float value_t = value - u_color_range.x / (u_color_range.y - u_color_range.x);
+  float value_t = (value - u_color_range.x) / (u_color_range.y - u_color_range.x);
   // color ramp is./ encoded in a 16x16 texture
   vec2 ramp_pos = vec2(fract(16.0 * value_t), floor(16.0 * value_t) / 16.0);
 
@@ -56,6 +55,4 @@ void main () {
   } else {
     gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
   }
-
-//  gl_FragColor = vec4(floor(255.0 * texture2D(u_image, v_tex_pos) * u_opacity) / 255.0);
 }
