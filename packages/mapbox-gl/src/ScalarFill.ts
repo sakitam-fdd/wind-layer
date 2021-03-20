@@ -31,8 +31,10 @@ export default class ScalarFill {
   constructor(id: string, data: any, options?: Partial<IScalarFillOptions>) {
     this.id = id;
     this.type = 'custom';
-    this.renderingMode = '2d';
-    this.options = options;
+    this.renderingMode = '3d';
+    this.options = {
+      ...(options || {}),
+    };
 
     this.data = data;
 
@@ -55,6 +57,8 @@ export default class ScalarFill {
         mappingRange: this.options.mappingRange,
         widthSegments: this.options.widthSegments,
         heightSegments: this.options.heightSegments,
+        createPlaneBuffer: this.options.createPlaneBuffer,
+        depthRange: this.options.depthRange || [0.05, 0.99],
         getZoom: () => this.map.getZoom(),
         triggerRepaint: () => {
           this.map.triggerRepaint();
