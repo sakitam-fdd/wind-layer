@@ -26,6 +26,17 @@ export interface AttribValues {
   [key: string]: any;
 }
 
+export type ElementsDataType = Uint8Array | Uint16Array;
+
+export type ElementsData = Uint8Array | Uint16Array | Uint32Array;
+
+export interface IElementsOptions {
+  data?: ElementsData | null;
+  usage?: GLenum;
+  primitive?: GLenum;
+  count?: number;
+}
+
 export default class Base {
   public vertShader = '';
 
@@ -37,6 +48,8 @@ export default class Base {
   public uniformSetters: UniformSetters;
   public attribSetters: AttribSetters;
   public transfromStack: Array<() => void>;
+  public elementsBuffer: WebGLBuffer | null;
+  public primitive: GLenum;
 
   constructor(gl: WebGLRenderingContext, vShader: string, fShader: string) {
     if (vShader) {
@@ -330,6 +343,29 @@ export default class Base {
     return this;
   }
 
+  public elements(element: IElementsOptions) {
+    if (!this.elementsBuffer) {
+      this.elementsBuffer = this.gl.createBuffer();
+    }
+    this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.elementsBuffer);
+    if (element.data) {
+      this.gl.bufferData(
+        this.gl.ELEMENT_ARRAY_BUFFER,
+        element.data,
+        element?.usage || this.gl.STATIC_DRAW,
+      );
+    }
+    if (element.count !== undefined) {
+      this.runTimes(element.count);
+    }
+
+    if (element.primitive) {
+      this.setPrimitive(element.primitive);
+    }
+
+    return this;
+  }
+
   /**
    * 可以override，默认使用此种方式清空画布
    * @param color
@@ -349,6 +385,10 @@ export default class Base {
   public runTimes(count: number) {
     this.count = count || 0;
     return this;
+  }
+
+  public setPrimitive(primitive?: GLenum) {
+    this.primitive = primitive || this.gl.TRIANGLES;
   }
 
   public resize() {

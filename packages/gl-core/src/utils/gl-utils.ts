@@ -1,3 +1,4 @@
+import { fp64LowPart } from './common';
 // 大量代码来自于 [webgl-utils](https://github.com/gfxfundamentals/webgl-fundamentals/blob/master/webgl/resources/webgl-utils.js)
 
 export function getDevicePixelRatio() {
@@ -309,11 +310,15 @@ export function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 export function getPlaneBuffer(
-  width: number,
-  height: number,
+  startX: number,
+  endX: number,
+  startY: number,
+  endY: number,
   widthSegments: number,
   heightSegments: number,
 ) {
+  const width = endX - startX;
+  const height = endY - startY;
   const widthHalf = width / 2;
   const heightHalf = height / 2;
 
@@ -328,15 +333,19 @@ export function getPlaneBuffer(
 
   const indices = [];
   const vertices = [];
+  const verticesLow = [];
   const uvs = [];
 
   for (let iy = 0; iy < gridY1; iy++) {
     const y = iy * segmentHeight;
     for (let ix = 0; ix < gridX1; ix++) {
       const x = ix * segmentWidth;
-      vertices.push(x / widthHalf / 2, y / heightHalf / 2);
+      const vx = (x / widthHalf / 2) * width - startX;
+      const vy = (y / heightHalf / 2) * height - startY;
+      vertices.push(vx, vy, 0);
+      verticesLow.push(fp64LowPart(vx), fp64LowPart(vy), 0);
       // vertices.push(ix / gridX, 1 - (iy / gridY));
-      uvs.push(ix / gridX, 1 - iy / gridY);
+      uvs.push(ix / gridX, iy / gridY);
     }
   }
 
@@ -363,7 +372,11 @@ export function getPlaneBuffer(
     },
     position: {
       data: vertices,
-      size: 2,
+      size: 3,
+    },
+    positionLow: {
+      data: verticesLow,
+      size: 3,
     },
   };
 }
