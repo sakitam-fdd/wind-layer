@@ -246,24 +246,14 @@
                   1
                 ],
               },
+              wrapX: true,
               renderForm: 'r',
-              // colorScale: [
-              //   'rgba(36, 104, 180, 0.5)',
-              //   'rgba(60, 157, 194, 0.5)',
-              //   'rgba(128, 205, 193, 0.5)',
-              //   'rgba(151, 218, 168, 0.5)',
-              //   'rgba(198, 231, 181, 0.5)',
-              //   'rgba(238, 247, 217, 0.5)',
-              //   'rgba(255, 238, 159, 0.5)',
-              //   'rgba(252, 217, 125, 0.5)',
-              //   'rgba(255, 182, 100, 0.5)',
-              //   'rgba(252, 150, 75, 0.5)',
-              //   'rgba(250, 112, 52, 0.5)',
-              //   'rgba(245, 64, 32, 0.5)',
-              //   'rgba(237, 45, 28, 0.5)',
-              //   'rgba(220, 24, 32, 0.5)',
-              //   'rgba(180, 0, 35, 0.5)',
-              // ],
+              widthSegments: 720,
+              heightSegments: 360,
+              // widthSegments: 1,
+              // heightSegments: 1,
+              // displayRange: [0, 80],
+              mappingRange: [0, 20000],
             });
 
             console.log(map, windLayer);
