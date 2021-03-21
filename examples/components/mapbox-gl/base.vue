@@ -155,6 +155,12 @@
                   ],
                 },
                 renderForm: 'rg',
+                widthSegments: 720,
+                heightSegments: 360,
+                // widthSegments: 1,
+                // heightSegments: 1,
+                displayRange: [0, 150],
+                mappingRange: [0, 100000],
               });
 
               map.addLayer(fillLayer);
