@@ -1,9 +1,102 @@
 // @ts-ignore
-import { CanvasLayer, renderer, Coordinate } from 'maptalks/dist/maptalks.es.js';
-import { ScalarFill as ScalarCore, getGlContext, clearScene } from 'wind-gl-core';
-import { getWidth, Extent } from './utils';
+import { CanvasLayer, Coordinate, renderer } from 'maptalks/dist/maptalks.es.js';
+import {
+  clearScene,
+  fp64LowPart,
+  getGlContext,
+  IPlaneBuffer,
+  IOptions,
+  ScalarFill as ScalarCore,
+} from 'wind-gl-core';
+import { Extent, getWidth } from './utils';
 
-const _options = {
+export function getPlaneBuffer(
+  startX: number,
+  endX: number,
+  startY: number,
+  endY: number,
+  widthSegments: number,
+  heightSegments: number,
+): IPlaneBuffer {
+  const width = Math.abs(endX - startX);
+  const height = Math.abs(endY - startY);
+  const widthHalf = width / 2;
+  const heightHalf = height / 2;
+
+  const gridX = Math.floor(widthSegments);
+  const gridY = Math.floor(heightSegments);
+
+  const gridX1 = gridX + 1;
+  const gridY1 = gridY + 1;
+
+  const segmentWidth = width / gridX;
+  const segmentHeight = height / gridY;
+
+  const indices = [];
+  const vertices = [];
+  const verticesLow = [];
+  const uvs = [];
+
+  for (let iy = 0; iy < gridY1; iy++) {
+    const y = iy * segmentHeight;
+    for (let ix = 0; ix < gridX1; ix++) {
+      const x = ix * segmentWidth;
+      const vx = startX + (x / widthHalf / 2) * width;
+      const vy = startY - (y / heightHalf / 2) * height;
+      vertices.push(vx, vy, 0);
+      verticesLow.push(fp64LowPart(vx), fp64LowPart(vy), 0);
+      // vertices.push(ix / gridX, 1 - (iy / gridY));
+      uvs.push(ix / gridX, iy / gridY);
+    }
+  }
+
+  for (let iy = 0; iy < gridY; iy++) {
+    for (let ix = 0; ix < gridX; ix++) {
+      const a = ix + gridX1 * iy;
+      const b = ix + gridX1 * (iy + 1);
+      const c = ix + 1 + gridX1 * (iy + 1);
+      const d = ix + 1 + gridX1 * iy;
+
+      indices.push(a, b, d);
+      indices.push(b, c, d);
+    }
+  }
+
+  return {
+    uvs: {
+      data: uvs,
+      size: 2,
+    },
+    elements: {
+      data: indices,
+      count: indices.length,
+    },
+    position: {
+      data: vertices,
+      size: 3,
+    },
+    positionLow: {
+      data: verticesLow,
+      size: 3,
+    },
+  };
+}
+
+export interface IScalarFillOptions extends IOptions {
+  wrapX: boolean;
+  doubleBuffer: boolean;
+  animation: boolean;
+  glOptions: {
+    antialias?: boolean;
+    depth?: boolean;
+    stencil?: boolean;
+    alpha?: boolean;
+    premultipliedAlpha?: boolean;
+    preserveDrawingBuffer?: boolean;
+  };
+}
+
+const defaultOptions = {
   renderer: 'gl',
   doubleBuffer: false,
   animation: false,
@@ -102,10 +195,68 @@ export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
           opacity: opt.opacity,
           renderForm: opt.renderForm,
           styleSpec: opt.styleSpec,
+          displayRange: opt.displayRange,
+          mappingRange: opt.mappingRange,
+          widthSegments: opt.widthSegments,
+          heightSegments: opt.heightSegments,
           getZoom: () => this.getMap().getZoom(),
           triggerRepaint: () => {
             this._redraw();
-          }
+          },
+          injectShaderModules: {
+            '#modules-transformZ': `
+float transformZ(float value, vec3 pos) {
+  return value;
+}
+    `,
+            '#modules-project': `
+gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
+    `,
+          },
+          createPlaneBuffer: (points, widthSegments, heightSegments) => {
+            const [startX, endX, startY, endY] = [
+              points[0][0],
+              points[2][0],
+              points[0][1],
+              points[1][1],
+            ];
+            // return {
+            //   uvs: {
+            //     data: [
+            //       // 0, 0,
+            //       // 0, 1,
+            //       // 1, 0,
+            //       // 1, 1,
+            //       0, 0, 1, 0, 0, 1, 1, 1
+            //     ],
+            //     size: 2,
+            //   },
+            //   elements: {
+            //     data: [0, 1, 2, 2, 1, 3],
+            //     count: 6,
+            //   },
+            //   position: {
+            //     data,
+            //     size: 3,
+            //   },
+            //   positionLow: {
+            //     data: Array.from({
+            //         length: 12,
+            //       },
+            //       (p) => 0,
+            //     ),
+            //     size: 3,
+            //   },
+            // };
+            return getPlaneBuffer(
+              startX,
+              endX,
+              startY,
+              endY,
+              widthSegments,
+              heightSegments,
+            );
+          },
         });
 
         this.scalarRender.getMercatorCoordinate = ([lng, lat]: [number, number]) => {
@@ -122,32 +273,76 @@ export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
       }
 
       if (this.scalarRender) {
-        const projObject = map.getProjection().fullExtent;
-        const projectionExtent = [projObject.left, projObject.bottom, projObject.right, projObject.top] as Extent;
-        const projExtent = map.getProjExtent();
-        const extent = [projExtent.xmin, projExtent.ymin, projExtent.xmax, projExtent.ymax];
-        let startX = extent[0];
-        const worldWidth = getWidth(projectionExtent);
-        let world = 0;
-        let offsetX;
-        this.scalarRender.render(this.getMatrix(), 0);
-        while (startX < projectionExtent[0]) {
-          --world;
-          offsetX = worldWidth * world;
-          this.scalarRender.render(this.getMatrix(), world);
-          startX += worldWidth;
-        }
-        world = 0;
-        startX = extent[2];
-        while (startX > projectionExtent[2]) {
-          ++world;
-          offsetX = worldWidth * world;
-          this.scalarRender.render(this.getMatrix(), world);
-          startX -= worldWidth;
+        const matrix = this.getMatrix();
+        const cameraEye = [
+          // ...map.cameraPosition,
+          // 1,
+          0, 0, 0, 1,
+        ];
+        const cameraEye64Low = cameraEye.map((item: number) => fp64LowPart(item));
+
+        const worlds = this.getWrappedWorlds();
+        // tslint:disable-next-line:prefer-for-of
+        for (let i = 0; i < worlds.length; i++) {
+          this.scalarRender.render(matrix, worlds[i], {
+            cameraEye,
+            cameraEye64Low,
+          });
         }
       }
     }
     this.completeRender();
+  }
+
+  public getWrappedWorlds() {
+    const map = this.getMap();
+    const projObject = map.getProjection().fullExtent;
+    const projectionExtent = [projObject.left, projObject.bottom, projObject.right, projObject.top] as Extent;
+    const projExtent = map.getProjExtent();
+    const extent = [projExtent.xmin, projExtent.ymin, projExtent.xmax, projExtent.ymax];
+    let startX = extent[0];
+    const worldWidth = getWidth(projectionExtent);
+    const projWorldWidth =
+      map.coordToPoint(
+        map
+          .getProjection()
+          .unprojectCoords(
+            new Coordinate([projectionExtent[0], projectionExtent[1]]),
+          ),
+        map.getGLZoom(),
+      ).x - map.coordToPoint(
+      map
+        .getProjection()
+        .unprojectCoords(
+          new Coordinate([projectionExtent[2], projectionExtent[3]]),
+        ),
+      map.getGLZoom(),
+      ).x;
+    let world = 0;
+    let offsetX;
+
+    const result = [0];
+
+    const layer = this.layer;
+    const opt = layer.getOptions();
+    if (opt.wrapX) {
+      while (startX < projectionExtent[0]) {
+        --world;
+        offsetX = worldWidth * world;
+        result.push(world * projWorldWidth);
+        startX += worldWidth;
+      }
+      world = 0;
+      startX = extent[2];
+      while (startX > projectionExtent[2]) {
+        ++world;
+        offsetX = worldWidth * world;
+        result.push(world * projWorldWidth);
+        startX -= worldWidth;
+      }
+    }
+
+    return result;
   }
 
   drawOnInteracting() {
@@ -212,8 +407,15 @@ export class ScalarLayer extends CanvasLayer {
   private _map: any;
   private options: any;
 
-  constructor(id: string | number, data: any, options: any) {
-    super(id, Object.assign({}, _options, options));
+  constructor(
+    id: string | number,
+    data: any,
+    options?: Partial<IScalarFillOptions>,
+  ) {
+    super(id, {
+      ...defaultOptions,
+      ...options,
+    });
 
     this.data = null;
 
@@ -255,7 +457,10 @@ export class ScalarLayer extends CanvasLayer {
   }
 
   public setOptions(options: any) {
-    this.options = Object.assign({}, this.options, options || {});
+    this.options = {
+      ...this.options,
+      ...(options || {}),
+    };
 
     const renderer = this._getRenderer();
     if (renderer && renderer.scalarRender) {

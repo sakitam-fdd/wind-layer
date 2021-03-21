@@ -10,8 +10,15 @@ export class Fill extends Base {
   public fragShader = FillFrag;
   private checkExt: OES_element_index_uint | null;
 
-  constructor(gl: WebGLRenderingContext, vShader?: string, fShader?: string) {
-    super(gl, vShader || FillVert, fShader || FillFrag);
+  constructor(
+    gl: WebGLRenderingContext,
+    vShader?: string,
+    fShader?: string,
+    modules?: {
+      [key: string]: string;
+    },
+  ) {
+    super(gl, vShader || FillVert, fShader || FillFrag, modules || {});
   }
 
   public draw() {

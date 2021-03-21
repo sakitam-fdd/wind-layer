@@ -2,6 +2,8 @@
 import DataProcess from 'web-worker:./workers/DataProcesse';
 import { Fill } from './Fill';
 import { isNumber } from './utils/common';
+import { IPlaneBuffer } from './utils/gl-utils';
+// tslint:disable-next-line:no-duplicate-imports
 import * as utils from './utils/gl-utils';
 import { createLinearGradient, createZoom } from './utils/style-parser';
 import { WindFill } from './WindFill';
@@ -32,6 +34,14 @@ export interface IOptions {
   getZoom?: () => number;
   opacity?: number;
   triggerRepaint?: () => void;
+  createPlaneBuffer?: (
+    points: number[][],
+    widthSegments: number,
+    heightSegments: number,
+  ) => IPlaneBuffer;
+  injectShaderModules: {
+    [key: string]: string;
+  };
   displayRange?: [number, number];
   mappingRange?: [number, number];
   widthSegments?: number;
@@ -102,6 +112,39 @@ export const defaultOptions: IOptions = {
   mappingRange: [0, 0],
   widthSegments: 1,
   heightSegments: 1,
+  createPlaneBuffer: (
+    points: number[][],
+    widthSegments: number,
+    heightSegments: number,
+  ) => {
+    const x = points.map((item) => item[0]);
+    const y = points.map((item) => item[1]);
+    const [startX, endX, startY, endY] = [
+      Math.min(...x),
+      Math.max(...x),
+      Math.min(...y),
+      Math.max(...y),
+    ];
+
+    return utils.getPlaneBuffer(
+      startX,
+      endX,
+      startY,
+      endY,
+      widthSegments,
+      heightSegments,
+    );
+  },
+  injectShaderModules: {
+    '#modules-transformZ': `
+float transformZ(float value, vec3 pos) {
+  return 0.0;
+}
+    `,
+    '#modules-project': `
+gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
+    `,
+  },
 };
 
 export function checkUVData(data: IData) {
@@ -212,9 +255,9 @@ export default class ScalarFill implements IScalarFill<any> {
   public initialize(gl: WebGLRenderingContext) {
     if (!this.drawCommand) {
       if (this.options.renderForm === 'rg') {
-        this.drawCommand = new WindFill(gl);
+        this.drawCommand = new WindFill(gl, undefined, undefined, this.options.injectShaderModules);
       } else if (this.options.renderForm === 'r') {
-        this.drawCommand = new Fill(gl);
+        this.drawCommand = new Fill(gl, undefined, undefined, this.options.injectShaderModules);
       } else {
         console.warn('This type is not supported temporarily');
       }
@@ -232,27 +275,16 @@ export default class ScalarFill implements IScalarFill<any> {
   public initializeVertex(coordinates: number[][]) {
     let i = 0;
     const len = coordinates.length;
-    const x = [];
-    const y = [];
+    const points = [];
     for (; i < len; i++) {
       const coords = coordinates[i];
       const mc = this.getMercatorCoordinate(coords as [number, number]);
-      x.push(mc[0]);
-      y.push(mc[1]);
+      points.push([mc[0], mc[1]]);
     }
 
-    const [startX, endX, startY, endY] = [
-      Math.min(...x),
-      Math.max(...x),
-      Math.min(...y),
-      Math.max(...y),
-    ];
-
-    const buffers = utils.getPlaneBuffer(
-      startX,
-      endX,
-      startY,
-      endY,
+    // @ts-ignore
+    const buffers = this.options.createPlaneBuffer(
+      points,
       this.options.widthSegments as number,
       this.options.heightSegments as number,
     );
@@ -445,7 +477,7 @@ export default class ScalarFill implements IScalarFill<any> {
 
   public render(
     matrix: number[],
-    offset?: number,
+    offsetX?: number,
     cameraParams?: {
       cameraEye: number[];
       cameraEye64Low: number[];
@@ -463,7 +495,7 @@ export default class ScalarFill implements IScalarFill<any> {
         u_opacity: isNumber(opacity) ? opacity : 1,
         u_image_res: [this.data.width, this.data.height],
         u_matrix: matrix,
-        u_offset: isNumber(offset) ? offset : 0,
+        u_offset: isNumber(offsetX) ? offsetX : 0,
         u_color_ramp: this.colorRampTexture,
         u_color_range: this.colorRange,
         u_mapping_range: this.options.mappingRange || [0, 0], // 映射高度
@@ -511,10 +543,10 @@ export default class ScalarFill implements IScalarFill<any> {
         console.warn('This type is not supported temporarily');
       }
 
-      // const blendingEnabled = this.gl.isEnabled(this.gl.BLEND);
-      // this.gl.disable(this.gl.BLEND);
-      // this.gl.disable(this.gl.DEPTH_TEST);
-      // this.gl.disable(this.gl.STENCIL_TEST);
+      const blendingEnabled = this.gl.isEnabled(this.gl.BLEND);
+      this.gl.disable(this.gl.BLEND);
+      this.gl.disable(this.gl.DEPTH_TEST);
+      this.gl.disable(this.gl.STENCIL_TEST);
 
       this.drawCommand
         .active()
@@ -542,9 +574,9 @@ export default class ScalarFill implements IScalarFill<any> {
         })
         .draw();
 
-      // if (blendingEnabled) {
-      //   this.gl.enable(this.gl.BLEND);
-      // }
+      if (blendingEnabled) {
+        this.gl.enable(this.gl.BLEND);
+      }
     }
   }
 

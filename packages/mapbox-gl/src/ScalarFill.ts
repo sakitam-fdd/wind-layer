@@ -59,6 +59,38 @@ export default class ScalarFill {
         triggerRepaint: () => {
           this.map.triggerRepaint();
         },
+        injectShaderModules: {
+          '#modules-transformZ': `
+const float MATH_PI = 3.141592653589793;
+const float earthRadius = 6371008.8;
+const float earthCircumfrence = 2.0 * MATH_PI * earthRadius;
+
+            float latFromMercatorY(float y) {
+  float y2 = 180.0 - y * 360.0;
+  return 360.0 / MATH_PI * atan(exp(y2 * MATH_PI / 180.0)) - 90.0;
+}
+
+float circumferenceAtLatitude(float latitude) {
+  return earthCircumfrence * cos(latitude * MATH_PI / 180.0);
+}
+
+float mercatorScale(float lat) {
+  return 1.0 / cos(lat * MATH_PI / 180.0);
+}
+
+float transformZ(float value, vec3 pos) {
+  float mercatorY = pos.y;
+  //  float scale = circumferenceAtLatitude(latFromMercatorY(mercatorY));
+  float scale = earthCircumfrence * mercatorScale(latFromMercatorY(mercatorY));
+
+  return value / scale;
+}
+          `,
+          '#modules-project': `
+gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, pos.w);
+gl_Position.w += u_cameraEye.w;
+    `,
+        },
       });
 
       this.scalarFill.getMercatorCoordinate = getCoords;
