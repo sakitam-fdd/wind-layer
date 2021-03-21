@@ -285,8 +285,8 @@ export default class ScalarFill implements IScalarFill<any> {
     // @ts-ignore
     const buffers = this.options.createPlaneBuffer(
       points,
-      this.options.widthSegments as number,
-      this.options.heightSegments as number,
+      (this.options.widthSegments as number) || 1,
+      (this.options.heightSegments as number) || 1,
     );
 
     return {
