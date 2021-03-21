@@ -29,6 +29,14 @@ extension to show wind field。
 并且目前只针对 `mapbox` 和 `maptalks` 做了相关适配, 相关示例请查看[mapbox](https://github.com/sakitam-fdd/wind-layer/examples/mapbox.html)和[maptalks](https://github.com/sakitam-fdd/wind-layer/examples/maptalks.html)。
   其所使用的数据为单通道或者双通道图片，需要对原始grib做预处理。
 
+### 示例图片
+
+![mapbox](https://sakitam-fdd.github.io/wind-layer/mapbox.gif)
+
+![maptalks](https://sakitam-fdd.github.io/wind-layer/maptalks.gif)
+
+![wind](https://sakitam-fdd.github.io/wind-layer/wind.png)
+
 ### 扩展包
 
 | Project | Version | Npm | CDN | Description |

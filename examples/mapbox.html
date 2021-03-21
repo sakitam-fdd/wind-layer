@@ -153,7 +153,7 @@
           // widthSegments: 1,
           // heightSegments: 1,
           // displayRange: [0, 80],
-          mappingRange: [0, 1000000],
+          mappingRange: [0, 5000000],
           // mappingRange: [0, 0],
         });
 
@@ -194,6 +194,29 @@
         });
 
         console.log(map, window.windLayer);
+
+        function draw(now) {
+          var avg = 0;
+          // for (var i = 0; i < bins; i++) {
+          //   avg += dataArray[i];
+          //   map.setPaintProperty(
+          //     '3d-buildings-' + i,
+          //     'fill-extrusion-height',
+          //     10 + 4 * i + dataArray[i]
+          //   );
+          // }
+          // avg /= bins;
+
+          fillLayer.scalarFill.updateOptions({
+            mappingRange: [0, Math.sin((now / 30 * Math.PI) / 90) * 5000000]
+          });
+
+          map.setBearing(now / 100);
+
+          requestAnimationFrame(draw);
+        }
+
+        requestAnimationFrame(draw);
 
         // map.addLayer(window.windLayer);
         // window.windLayer.addTo(map);
