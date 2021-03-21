@@ -80,6 +80,31 @@ export function getGlContext(canvas: HTMLCanvasElement, glOptions = {}) {
 }
 
 /**
+ * defines
+ * @param shader
+ * @param defines
+ */
+export function defineShader(shader: string, defines: any) {
+  return Object.keys(defines).reduce((str, key) => {
+    return defines[key] ? str + `#define ${key} ${defines[key]}\n` : '';
+  }, '');
+}
+
+/**
+ * inject shader module
+ * @param shader
+ * @param modules
+ */
+export function injectShaderModule(shader: string, modules: any) {
+  Object.keys(modules).map((key) => {
+    if (modules[key]) {
+      shader = shader.replace(new RegExp(key, 'g'), `${modules[key]} \n`);
+    }
+  });
+  return shader;
+}
+
+/**
  * create shader and compile shader
  * @param gl
  * @param type
@@ -309,6 +334,25 @@ export function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
+export interface IPlaneBuffer {
+  uvs: {
+    data: number[];
+    size: number;
+  };
+  elements: {
+    data: number[];
+    count: number;
+  };
+  position: {
+    data: number[];
+    size: number;
+  };
+  positionLow: {
+    data: number[];
+    size: number;
+  };
+}
+
 export function getPlaneBuffer(
   startX: number,
   endX: number,
@@ -316,7 +360,7 @@ export function getPlaneBuffer(
   endY: number,
   widthSegments: number,
   heightSegments: number,
-) {
+): IPlaneBuffer {
   const width = endX - startX;
   const height = endY - startY;
   const widthHalf = width / 2;

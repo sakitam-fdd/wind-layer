@@ -1,4 +1,9 @@
-import { clearScene, createProgram, resizeCanvasSize } from './utils/gl-utils';
+import {
+  clearScene,
+  createProgram,
+  injectShaderModule,
+  resizeCanvasSize,
+} from './utils/gl-utils';
 
 export interface BufferComponents {
   buffer: WebGLBuffer;
@@ -51,7 +56,14 @@ export default class Base {
   public elementsBuffer: WebGLBuffer | null;
   public primitive: GLenum;
 
-  constructor(gl: WebGLRenderingContext, vShader: string, fShader: string) {
+  constructor(
+    gl: WebGLRenderingContext,
+    vShader: string,
+    fShader: string,
+    modules: {
+      [key: string]: string;
+    },
+  ) {
     if (vShader) {
       this.vertShader = vShader;
     }
@@ -59,7 +71,11 @@ export default class Base {
       this.fragShader = fShader;
     }
 
-    this.program = createProgram(gl, this.vertShader, this.fragShader);
+    this.program = createProgram(
+      gl,
+      injectShaderModule(this.vertShader, modules),
+      this.fragShader,
+    );
 
     this.gl = gl;
 
