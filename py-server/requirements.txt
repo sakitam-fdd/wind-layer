@@ -194,7 +194,7 @@ python-engineio==3.12.1
 python-socketio==4.5.1
 pytz==2019.1
 PyWavelets==1.0.3
-PyYAML==5.1.1
+PyYAML==5.4
 pyzmq==18.0.0
 QtAwesome==0.5.7
 qtconsole==4.5.1
