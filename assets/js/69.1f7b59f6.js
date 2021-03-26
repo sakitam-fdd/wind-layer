@@ -1,15 +1,15 @@
 (window.webpackJsonp=window.webpackJsonp||[]).push([[69],{833:function(t,i,e){"use strict";e.r(i),e.d(i,"Field",(function(){return u})),e.d(i,"WindLayer",(function(){return y}));var n=e(134),o=(e(132),e(6),e(198),e(98),e(99),e(199),e(200),e(201),e(95),e(96),e(202),e(203),e(204),e(197),e(818));
 /*!
  * author: sakitam-fdd <smilefdd@gmail.com> 
- * leaflet-wind v1.0.0-alpha.10
- * build-time: 2021-3-26 15:23
+ * leaflet-wind v1.1.0-alpha.0
+ * build-time: 2021-3-21 18:42
  * LICENSE: MIT
  * (c) 2017-2021 https://github.com/sakitam-fdd/wind-layer#readme
  */
 /*!
  * author: sakitam-fdd <smilefdd@gmail.com> 
- * wind-core v1.0.0-alpha.10
- * build-time: 2021-3-26 15:21
+ * wind-core v1.1.0-alpha.0
+ * build-time: 2021-3-21 18:42
  * LICENSE: MIT
  * (c) 2017-2021 https://github.com/sakitam-fdd/wind-layer#readme
  */
