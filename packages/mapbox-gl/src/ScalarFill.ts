@@ -57,8 +57,9 @@ export default class ScalarFill {
         mappingRange: this.options.mappingRange,
         widthSegments: this.options.widthSegments,
         heightSegments: this.options.heightSegments,
+        wireframe: this.options.wireframe,
         createPlaneBuffer: this.options.createPlaneBuffer,
-        depthRange: this.options.depthRange || [0.05, 0.99],
+        depthRange: this.options.depthRange || [0.0, 1.0],
         getZoom: () => this.map.getZoom(),
         triggerRepaint: () => {
           this.map.triggerRepaint();
