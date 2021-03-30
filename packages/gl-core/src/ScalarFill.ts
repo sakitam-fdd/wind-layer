@@ -47,6 +47,7 @@ export interface IOptions {
   depthRange?: [number, number];
   widthSegments?: number;
   heightSegments?: number;
+  wireframe?: boolean;
 }
 
 export interface IData {
@@ -63,6 +64,7 @@ export interface IData {
   quad64LowBuffer: WebGLBuffer | null;
   texture?: WebGLTexture | null;
   indexes?: number[] | number[][];
+  wireframeIndexes?: number[] | number[][];
 }
 
 export interface IJsonArrayData {
@@ -114,6 +116,7 @@ export const defaultOptions: IOptions = {
   depthRange: [0, 1],
   widthSegments: 1,
   heightSegments: 1,
+  wireframe: false,
   createPlaneBuffer: (
     points: number[][],
     widthSegments: number,
@@ -293,6 +296,7 @@ export default class ScalarFill implements IScalarFill<any> {
 
     return {
       indexes: buffers.elements.data,
+      wireframeIndexes: buffers.wireframeElements.data,
       quadBuffer: utils.createBuffer(
         this.gl,
         new Float32Array(buffers.position.data),
@@ -545,9 +549,14 @@ export default class ScalarFill implements IScalarFill<any> {
         console.warn('This type is not supported temporarily');
       }
 
+      const cullFaceEnabled = this.gl.isEnabled(this.gl.CULL_FACE);
+      const cullFaceMode = this.gl.getParameter(this.gl.CULL_FACE_MODE);
+      this.gl.enable(this.gl.CULL_FACE);
+      this.gl.cullFace(this.gl.BACK);
+
       const depthEnabled = this.gl.isEnabled(this.gl.DEPTH_TEST);
       this.gl.enable(this.gl.DEPTH_TEST);
-      this.gl.depthMask(false);
+      this.gl.depthMask(true);
       this.gl.depthFunc(this.gl.LEQUAL);
       if (
         this.options.depthRange &&
@@ -559,8 +568,12 @@ export default class ScalarFill implements IScalarFill<any> {
           this.options.depthRange[1],
         );
       } else {
-        this.gl.depthRange(0.05, 0.99);
+        this.gl.depthRange(0.0, 1);
       }
+
+      const data = this.options.wireframe
+        ? this.data.wireframeIndexes
+        : this.data.indexes;
 
       this.drawCommand
         .active()
@@ -581,9 +594,9 @@ export default class ScalarFill implements IScalarFill<any> {
           },
         })
         .elements({
-          data: new Uint32Array(this.data.indexes as number[]),
-          primitive: this.gl.TRIANGLES,
-          count: this.data.indexes?.length,
+          data: new Uint32Array(data as number[]),
+          primitive: this.options.wireframe ? this.gl.LINES : this.gl.TRIANGLES,
+          count: data?.length,
           usage: this.gl.STATIC_DRAW,
         })
         .draw();
@@ -591,6 +604,12 @@ export default class ScalarFill implements IScalarFill<any> {
       if (!depthEnabled) {
         this.gl.disable(this.gl.DEPTH_TEST);
       }
+
+      if (!cullFaceEnabled) {
+        this.gl.disable(this.gl.CULL_FACE);
+      }
+
+      this.gl.cullFace(cullFaceMode);
     }
   }
 

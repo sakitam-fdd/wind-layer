@@ -191,13 +191,14 @@
         },
         wrapX: true,
         renderForm: 'r',
-        widthSegments: 720,
-        heightSegments: 360,
+        widthSegments: 180,
+        heightSegments: 180,
         // widthSegments: 1,
         // heightSegments: 1,
         // displayRange: [0, 80],
         mappingRange: [0, 20000],
         // mappingRange: [0, 0],
+        wireframe: false,
       });
 
       function initGui(windLayer) {
@@ -210,6 +211,7 @@
           velocityScale: 0.005,
           globalAlpha: 0.8,
           maxAge: 90,
+          wireframe: false,
         };
 
         const gui = new dat.GUI();
@@ -231,6 +233,11 @@
           } else {
             window.map.removeLayer(tempLayer);
           }
+        });
+        folder3.add(config, 'wireframe').onChange(function (val) {
+          tempLayer.setOptions({
+            wireframe: val,
+          })
         });
       }
 

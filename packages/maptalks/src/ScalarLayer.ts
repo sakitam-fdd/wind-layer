@@ -33,9 +33,9 @@ const defaultLayerOptions = {
   doubleBuffer: false,
   animation: false,
   glOptions: {
-    antialias: false,
-    depth: false,
-    stencil: false,
+    antialias: true,
+    depth: true,
+    stencil: true,
     alpha: true,
     premultipliedAlpha: true,
     preserveDrawingBuffer: true,
@@ -132,6 +132,7 @@ export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
           widthSegments: opt.widthSegments,
           heightSegments: opt.heightSegments,
           createPlaneBuffer: opt.createPlaneBuffer,
+          wireframe: opt.wireframe,
           depthRange: opt.depthRange || [0.0, 1.0],
           getZoom: () => this.getMap().getZoom(),
           triggerRepaint: () => {
@@ -376,6 +377,7 @@ export class ScalarLayer extends CanvasLayer {
     const renderer = this._getRenderer();
     if (renderer && renderer.scalarRender) {
       renderer.scalarRender.updateOptions(this.options);
+      renderer.setToRedraw();
     }
   }
 

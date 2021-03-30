@@ -343,6 +343,10 @@ export interface IPlaneBuffer {
     data: number[];
     count: number;
   };
+  wireframeElements: {
+    data: number[];
+    count: number;
+  };
   position: {
     data: number[];
     size: number;
@@ -376,6 +380,7 @@ export function getPlaneBuffer(
   const segmentHeight = height / gridY;
 
   const indices = [];
+  const wireframeIndexes = [];
   const vertices = [];
   const verticesLow = [];
   const uvs = [];
@@ -405,6 +410,13 @@ export function getPlaneBuffer(
     }
   }
 
+  for (let i = 0, l = indices.length; i < l; i += 3) {
+    const a = indices[i];
+    const b = indices[i + 1];
+    const c = indices[i + 2];
+    wireframeIndexes.push(a, b, b, c, c, a);
+  }
+
   return {
     uvs: {
       data: uvs,
@@ -413,6 +425,10 @@ export function getPlaneBuffer(
     elements: {
       data: indices,
       count: indices.length,
+    },
+    wireframeElements: {
+      data: wireframeIndexes,
+      count: wireframeIndexes.length,
     },
     position: {
       data: vertices,
