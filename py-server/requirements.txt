@@ -64,7 +64,7 @@ fastcache==1.1.0
 filelock==3.0.12
 Fiona==1.8.13.post1
 Flask==1.1.1
-Flask-Cors==3.0.8
+Flask-Cors==3.0.9
 Flask-HTTPAuth==3.3.0
 flask-marshmallow==0.11.0
 Flask-RESTful==0.3.8
