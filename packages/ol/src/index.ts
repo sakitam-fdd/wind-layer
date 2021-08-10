@@ -118,7 +118,7 @@ export class WindLayer extends Layer implements Interface {
 
     const renderer = this.getRenderer();
     if (renderer && renderer.oRender) {
-      renderer.oRender.setData(data);
+      renderer.oRender.setData(this.field);
     }
 
     return this;
