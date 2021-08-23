@@ -102,7 +102,7 @@ jupyter==1.0.0
 jupyter-client==5.3.1
 jupyter-console==6.0.0
 jupyter-core==4.5.0
-jupyterlab==1.0.2
+jupyterlab==1.2.21
 jupyterlab-server==1.0.0
 keyring==18.0.0
 kiwisolver==1.1.0
