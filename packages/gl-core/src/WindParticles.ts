@@ -16,7 +16,7 @@ import {
 import { Raf } from './utils/raf';
 import { createLinearGradient, createZoom } from './utils/style-parser';
 
-export interface IOptions {
+export interface IWindOptions {
   opacity: number;
   fadeOpacity: number;
   speedFactor: number;
@@ -60,7 +60,7 @@ export interface IData {
   texture?: WebGLTexture | null;
 }
 
-export const defaultOptions = {
+const defaultOptions = {
   styleSpec: {
     color: [
       'interpolate',
@@ -121,12 +121,12 @@ export default class WindParticles {
   private fbo: WebGLFramebuffer | null;
   private colorRampTexture: WebGLTexture | null;
 
-  private options: IOptions;
+  private options: IWindOptions;
   private opacity: number;
   private fade: number;
   private colorRange: [number, number];
 
-  constructor(gl: WebGLRenderingContext, options: Partial<IOptions> = {}) {
+  constructor(gl: WebGLRenderingContext, options: Partial<IWindOptions> = {}) {
     this.gl = gl;
 
     if (!this.gl) {
@@ -182,6 +182,9 @@ export default class WindParticles {
   }
 
   set numParticles(numParticles: number) {
+    if (numParticles === undefined) {
+      return;
+    }
     const gl = this.gl;
     // we create a square texture where each pixel will hold a particle position encoded as RGBA
     const particleRes = Math.ceil(Math.sqrt(numParticles));
@@ -220,7 +223,7 @@ export default class WindParticles {
     return this.privateNumParticles;
   }
 
-  public updateOptions(options: Partial<IOptions>) {
+  public updateOptions(options: Partial<IWindOptions>) {
     this.options = {
       ...this.options,
       ...options,
@@ -380,8 +383,10 @@ export default class WindParticles {
           u_drop_rate: this.options.dropRate,
           u_drop_rate_bump: this.options.dropRateBump,
           u_speed_factor: [
-            this.options.speedFactor * 0.0001,
-            this.options.speedFactor * 0.0001,
+            // this.options.speedFactor * 0.0001,
+            // this.options.speedFactor * 0.0001,
+            0,
+            0.0001,
           ],
           u_wind: this.data.texture,
           u_particles: this.particleStateTexture1,
@@ -585,5 +590,7 @@ export default class WindParticles {
     return [lng, lat];
   }
 
-  public destroyed() {}
+  public destroyed() {
+    console.log('destroyed');
+  }
 }

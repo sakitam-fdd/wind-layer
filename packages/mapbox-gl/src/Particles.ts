@@ -52,6 +52,8 @@ export default class Particles {
         triggerRepaint: () => {
           this.map.triggerRepaint();
         },
+        dropRate: 0.003,
+        dropRateBump: 0.002,
       });
 
       this.layer.getMercatorCoordinate = getCoords;

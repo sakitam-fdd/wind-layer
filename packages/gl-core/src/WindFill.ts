@@ -58,7 +58,5 @@ export class WindFill extends Base {
     return this;
   }
 
-  public destroyed() {
-
-  }
+  public destroyed() {}
 }

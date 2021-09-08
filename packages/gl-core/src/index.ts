@@ -1,16 +1,22 @@
-export {
+import {
   default as ScalarFill,
   defaultOptions,
-  IOptions,
-  IJsonArrayData,
   IGFSItem,
+  IJsonArrayData,
+  IOptions,
 } from './ScalarFill';
 
-export {
-  default as WindParticles,
-  defaultOptions as windOptions,
-  IOptions as IWindOptions,
-} from './WindParticles';
+import { default as WindParticles, IWindOptions } from './WindParticles';
 
 export * from './utils/gl-utils';
 export * from './utils/common';
+
+export {
+  ScalarFill,
+  WindParticles,
+  defaultOptions,
+  IOptions,
+  IGFSItem,
+  IJsonArrayData,
+  IWindOptions,
+};

@@ -163,19 +163,23 @@
 
         const particles = new mapboxWind.Particles('particles', {
           "type": "image",
-          "url": "./data/var_ugrd-var_vgrd.png",
+          "url": "./data/wind-mc.png",
           "extent": [
             [-180, 85.051129],
             [-180, -85.051129],
             [180, 85.051129],
             [180, -85.051129],
           ],
-          "width": 1440,
-          "height": 720,
-          "uMin": -21.34380340576172,
-          "uMax": 30.7261962890625,
-          "vMin": -23.916271209716797,
-          "vMax": 24.693727493286133,
+          "width": 1024,
+          "height": 1024,
+          // maxVal: 41.008583
+          // minVal: -39.26169
+          // maxVal: 37.988686
+          // minVal: -41.68313
+          "uMin": -39.26169,
+          "uMax": 41.008583,
+          "vMin": -41.68313,
+          "vMax": 37.988686,
         }, {
           wrapX: true,
           styleSpec: {

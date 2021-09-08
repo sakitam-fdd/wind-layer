@@ -17,7 +17,7 @@ varying vec2 v_tex_pos;
 #pragma glslify: toRGBA = require(../encode)
 #pragma glslify: fromRGBA = require(../decode)
 #pragma glslify: rand = require(../random)
-#pragma glslify: mercatorToWGS84 = require(../mercatorToWGS84)
+//#pragma glslify: mercatorToWGS84 = require(../mercatorToWGS84)
 
 vec2 decodeValue(sampler2D tex, const vec2 uv) {
     vec4 color = texture2D(tex, uv);
@@ -47,10 +47,10 @@ void main() {
     vec4 color = texture2D(u_particles, v_tex_pos);
     vec2 pos = fromRGBA(color);
 
-    vec2 velocity = lookup_wind(mercatorToWGS84(pos));
+    vec2 velocity = lookup_wind(pos);
 
     float speed_t = length(velocity);
-    vec2 offset =  vec2(velocity.x, -velocity.y) * u_speed_factor * 0.001;
+    vec2 offset =  vec2(velocity.x, -velocity.y) * u_speed_factor;
     // 更新粒子位置
     pos = fract(1.0 + pos + offset);
 

@@ -7,9 +7,15 @@ import WindCore, {
   formatData,
   IOptions,
   isArray,
+  // @ts-ignore
 } from 'wind-core';
 
 import Overlay from './Overlay';
+
+export { Field, WindLayer };
+
+export { default as ScalarFill } from './ScalarFill';
+export { default as Particles } from './Particles';
 
 export interface IWindOptions extends IOptions {
   windOptions: Partial<IOptions>;
@@ -22,12 +28,12 @@ const defaultConfig = {
 };
 
 class WindLayer extends Overlay {
+  public options: IWindOptions;
   private field: any;
   private wind: WindCore;
-  public options: IWindOptions;
 
   constructor(id: string | number, data: any, options = {}) {
-    super(id, Object.assign({}, defaultConfig, options));
+    super(id, { ...defaultConfig, ...options });
 
     this.field = null;
 
@@ -42,7 +48,7 @@ class WindLayer extends Overlay {
     this.handleResize = this.handleResize.bind(this);
   }
 
-  onAdd(map: mapboxgl.Map) {
+  public onAdd(map: mapboxgl.Map) {
     super.onAdd(map);
 
     if (!this.map) {
@@ -58,14 +64,14 @@ class WindLayer extends Overlay {
     }
   }
 
-  handleResize() {
+  public handleResize() {
     if (this.canvas) {
       this.resizeCanvas(this.canvas);
     }
     this.render();
   }
 
-  registerEvents() {
+  public registerEvents() {
     this.map.on('resize', this.handleResize);
     this.map.on('movestart', this.stop);
     this.map.on('moveend', this.render);
@@ -77,7 +83,7 @@ class WindLayer extends Overlay {
     this.map.on('pitchend', this.render);
   }
 
-  unregisterEvents() {
+  public unregisterEvents() {
     this.map.off('resize', this.handleResize);
     this.map.off('movestart', this.stop);
     this.map.off('moveend', this.render);
@@ -89,14 +95,16 @@ class WindLayer extends Overlay {
     this.map.off('pitchend', this.render);
   }
 
-  stop() {
+  public stop() {
     if (this.wind) {
       this.wind.clearCanvas();
     }
   }
 
-  render() {
-    if (!this.map) return;
+  public render() {
+    if (!this.map) {
+      return;
+    }
 
     const opt = this.getWindOptions();
     if (!this.wind && this.map && this.canvas !== null) {
@@ -125,7 +133,7 @@ class WindLayer extends Overlay {
     this.wind.render();
   }
 
-  remove() {
+  public remove() {
     super.remove();
 
     if (this.wind) {
@@ -135,7 +143,7 @@ class WindLayer extends Overlay {
     this.unregisterEvents();
   }
 
-  pickWindOptions() {
+  public pickWindOptions() {
     Object.keys(defaultOptions).forEach((key: string) => {
       if (key in this.options) {
         if (this.options.windOptions === undefined) {
@@ -150,7 +158,7 @@ class WindLayer extends Overlay {
   /**
    * get wind layer data
    */
-  getData() {
+  public getData() {
     return this.field;
   }
 
@@ -159,7 +167,7 @@ class WindLayer extends Overlay {
    * @param data
    * @returns {WindLayer}
    */
-  setData(data: any) {
+  public setData(data: any) {
     if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
@@ -173,7 +181,7 @@ class WindLayer extends Overlay {
     return this;
   }
 
-  setWindOptions(options: Partial<IOptions>) {
+  public setWindOptions(options: Partial<IOptions>) {
     const beforeOptions = this.options.windOptions || {};
     this.options = assign(this.options, {
       windOptions: assign(beforeOptions, options || {}),
@@ -186,17 +194,9 @@ class WindLayer extends Overlay {
     }
   }
 
-  getWindOptions() {
+  public getWindOptions() {
     return this.options.windOptions || {};
   }
 }
-
-export {
-  Field,
-  WindLayer,
-}
-
-export { default as ScalarFill } from './ScalarFill';
-export { default as Particles } from './Particles';
 
 export default WindLayer;

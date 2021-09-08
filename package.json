@@ -33,6 +33,7 @@
     ]
   },
   "resolutions": {
+    "acorn": "7.1.0",
     "buffer": "5.6.0",
     "@babel/compat-data": "7.13.12",
     "@babel/preset-env": "7.13.12"

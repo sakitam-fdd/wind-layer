@@ -10,6 +10,7 @@ export class Raf {
   public options: IOptions;
   private raf: number;
   private animating: boolean;
+  private isVisible: boolean;
 
   constructor(options: Partial<IOptions> = {}) {
     this.options = {
@@ -18,10 +19,12 @@ export class Raf {
     };
 
     this.animate = this.animate.bind(this);
+    this.onVisibilityChange = this.onVisibilityChange.bind(this);
   }
 
   public reset() {
     this.animating = false;
+    this.isVisible = true;
     if (this.raf !== undefined) {
       cancelAnimationFrame(this.raf);
     }
@@ -32,18 +35,37 @@ export class Raf {
       return;
     }
     this.animating = true;
+    document.addEventListener(
+      'visibilitychange',
+      this.onVisibilityChange,
+      false,
+    );
     this.raf = requestAnimationFrame(this.animate);
   }
 
   public stop() {
     this.reset();
+    document.removeEventListener(
+      'visibilitychange',
+      this.onVisibilityChange,
+      false,
+    );
   }
 
   private animate() {
-    if (!this.animating) {
+    if (!this.animating || !this.isVisible) {
       return;
     }
     this.options.callback((performance || Date).now());
     this.raf = requestAnimationFrame(this.animate);
+  }
+
+  private onVisibilityChange() {
+    this.isVisible = !document.hidden;
+
+    if (this.isVisible) {
+      this.reset();
+      this.start();
+    }
   }
 }
