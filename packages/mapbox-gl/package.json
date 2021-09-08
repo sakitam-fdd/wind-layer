@@ -57,5 +57,5 @@
     "@types/mapbox-gl": "^1.9.1",
     "mapbox-gl": "^1.8.0"
   },
-  "gitHead": "0cc9a01b20ab3e901d5ec7e9be3653892395d304"
+  "gitHead": "8d9cae334f4f841ebf168118a0990dabe9f1e65a"
 }

@@ -1,7 +1,5 @@
 import Base from './Base';
-// @ts-ignore
 import FillFrag from './shaders/wind-fill.frag.glsl';
-// @ts-ignore
 import FillVert from './shaders/wind-fill.vert.glsl';
 
 export class WindFill extends Base {
@@ -58,5 +56,9 @@ export class WindFill extends Base {
 
   public scale() {
     return this;
+  }
+
+  public destroyed() {
+
   }
 }

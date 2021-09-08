@@ -95,7 +95,7 @@ export function defineShader(shader: string, defines: any) {
  * @param shader
  * @param modules
  */
-export function injectShaderModule(shader: string, modules: any) {
+export function injectShaderModule(shader: string, modules: any = {}) {
   Object.keys(modules).map((key) => {
     if (modules[key]) {
       shader = shader.replace(new RegExp(key, 'g'), `${modules[key]} \n`);
@@ -120,8 +120,9 @@ export function createShader(
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    const log = gl.getShaderInfoLog(shader) || '';
     gl.deleteShader(shader);
-    throw new Error(gl.getShaderInfoLog(shader) || '');
+    throw new Error(log);
   }
   return shader;
 }
@@ -277,8 +278,8 @@ export function bindAttribute(
  */
 export function bindFramebuffer(
   gl: WebGLRenderingContext,
-  framebuffer: WebGLFramebuffer,
-  texture: WebGLTexture,
+  framebuffer: WebGLFramebuffer | null,
+  texture?: WebGLTexture,
 ) {
   // 创建一个帧缓冲
   gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);

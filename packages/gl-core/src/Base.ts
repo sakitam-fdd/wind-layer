@@ -5,7 +5,7 @@ import {
   resizeCanvasSize,
 } from './utils/gl-utils';
 
-export interface BufferComponents {
+export interface IBufferComponents {
   buffer: WebGLBuffer;
   numComponents?: number;
   size?: number;
@@ -15,19 +15,19 @@ export interface BufferComponents {
   offset?: number;
 }
 
-export interface UniformSetters {
+export interface IUniformSetters {
   [key: string]: (arg: any) => void;
 }
 
-export interface UniformValues {
+export interface IUniformValues {
   [key: string]: any;
 }
 
-export interface AttribSetters {
+export interface IAttribSetters {
   [key: string]: (arg: any) => void;
 }
 
-export interface AttribValues {
+export interface IAttribValues {
   [key: string]: any;
 }
 
@@ -50,8 +50,8 @@ export default class Base {
   public count: number;
   public readonly program: WebGLProgram | null;
   public textureUnit: number;
-  public uniformSetters: UniformSetters;
-  public attribSetters: AttribSetters;
+  public uniformSetters: IUniformSetters;
+  public attribSetters: IAttribSetters;
   public transfromStack: Array<() => void>;
   public elementsBuffer: WebGLBuffer | null;
   public primitive: GLenum;
@@ -60,7 +60,7 @@ export default class Base {
     gl: WebGLRenderingContext,
     vShader: string,
     fShader: string,
-    modules: {
+    modules?: {
       [key: string]: string;
     },
   ) {
@@ -252,7 +252,7 @@ export default class Base {
   public createUniformSetters() {
     const { gl } = this;
     this.textureUnit = 0;
-    const uniformSetters: UniformSetters = {};
+    const uniformSetters: IUniformSetters = {};
 
     if (this.program !== null) {
       const numUniforms = gl.getProgramParameter(
@@ -287,7 +287,7 @@ export default class Base {
    */
   public createAttribSetter(index: number) {
     const { gl } = this;
-    return function(b: BufferComponents) {
+    return function(b: IBufferComponents) {
       gl.bindBuffer(gl.ARRAY_BUFFER, b.buffer);
       gl.enableVertexAttribArray(index);
       if (b.numComponents !== undefined || b.size !== undefined) {
@@ -305,7 +305,7 @@ export default class Base {
 
   public createAttributeSetters() {
     const { gl } = this;
-    const attribSetters: AttribSetters = {};
+    const attribSetters: IAttribSetters = {};
 
     if (this.program !== null) {
       const numAttribs = gl.getProgramParameter(
@@ -328,7 +328,7 @@ export default class Base {
     return attribSetters;
   }
 
-  public setAttributes(attribs: AttribValues, setters?: AttribSetters | any) {
+  public setAttributes(attribs: IAttribValues, setters?: IAttribSetters | any) {
     if (setters) {
       setters = setters.attribSetters || setters;
     } else {
@@ -343,7 +343,7 @@ export default class Base {
     return this;
   }
 
-  public setUniforms(values: UniformValues, setters?: UniformSetters | any) {
+  public setUniforms(values: IUniformValues, setters?: IUniformSetters | any) {
     if (setters) {
       setters = setters.uniformSetters || setters;
     } else {
@@ -368,7 +368,7 @@ export default class Base {
       this.gl.bufferData(
         this.gl.ELEMENT_ARRAY_BUFFER,
         element.data,
-        element?.usage || this.gl.STATIC_DRAW,
+        element.usage || this.gl.STATIC_DRAW,
       );
     }
     if (element.count !== undefined) {
@@ -405,11 +405,16 @@ export default class Base {
 
   public setPrimitive(primitive?: GLenum) {
     this.primitive = primitive || this.gl.TRIANGLES;
+    return this;
   }
 
-  public resize() {
-    resizeCanvasSize(this.gl.canvas);
-    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
+  public resize(width?: number, height?: number) {
+    if (width === undefined || height === undefined) {
+      resizeCanvasSize(this.gl.canvas);
+      this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
+    } else {
+      this.gl.viewport(0, 0, width, height);
+    }
     return this;
   }
 
@@ -426,6 +431,10 @@ export default class Base {
   }
 
   public scale() {
+    throw new Error('should override');
+  }
+
+  public destroyed() {
     throw new Error('should override');
   }
 }

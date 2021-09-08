@@ -1,4 +1,5 @@
 // Config file for running Rollup in "normal" mode (non-watch)
+import path from 'path';
 import json from '@rollup/plugin-json';
 // import babel from 'rollup-plugin-babel';
 import glslify from 'rollup-plugin-glslify';
@@ -39,7 +40,7 @@ export default {
     // }),
     typescript({
       // clean: true,
-      // useTsconfigDeclarationDir: true,
+      tsconfig: path.resolve(process.cwd(), `tsconfig.${process.env.NODE_ENV === 'production' ? 'prod' : 'dev'}.json`)
     }),
     replace({ 'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV) }),
     json({

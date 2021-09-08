@@ -2,9 +2,13 @@
 import DataProcess from 'web-worker:./workers/DataProcesse';
 import { Fill } from './Fill';
 import { isNumber } from './utils/common';
-import { IPlaneBuffer } from './utils/gl-utils';
-// tslint:disable-next-line:no-duplicate-imports
-import * as utils from './utils/gl-utils';
+import {
+  createBuffer,
+  createTexture,
+  getPlaneBuffer,
+  IPlaneBuffer,
+  loadImage,
+} from './utils/gl-utils';
 import { createLinearGradient, createZoom } from './utils/style-parser';
 import { WindFill } from './WindFill';
 
@@ -129,7 +133,7 @@ export const defaultOptions: IOptions = {
       points[1][1],
     ];
 
-    return utils.getPlaneBuffer(
+    return getPlaneBuffer(
       startX,
       endX,
       startY,
@@ -245,7 +249,7 @@ export default class ScalarFill implements IScalarFill<any> {
     }
 
     if (data) {
-      this.colorRampTexture = utils.createTexture(
+      this.colorRampTexture = createTexture(
         this.gl,
         this.gl.NEAREST,
         data,
@@ -258,9 +262,19 @@ export default class ScalarFill implements IScalarFill<any> {
   public initialize(gl: WebGLRenderingContext) {
     if (!this.drawCommand) {
       if (this.options.renderForm === 'rg') {
-        this.drawCommand = new WindFill(gl, undefined, undefined, this.options.injectShaderModules);
+        this.drawCommand = new WindFill(
+          gl,
+          undefined,
+          undefined,
+          this.options.injectShaderModules,
+        );
       } else if (this.options.renderForm === 'r') {
-        this.drawCommand = new Fill(gl, undefined, undefined, this.options.injectShaderModules);
+        this.drawCommand = new Fill(
+          gl,
+          undefined,
+          undefined,
+          this.options.injectShaderModules,
+        );
       } else {
         console.warn('This type is not supported temporarily');
       }
@@ -297,32 +311,28 @@ export default class ScalarFill implements IScalarFill<any> {
     return {
       indexes: buffers.elements.data,
       wireframeIndexes: buffers.wireframeElements.data,
-      quadBuffer: utils.createBuffer(
+      quadBuffer: createBuffer(
         this.gl,
         new Float32Array(buffers.position.data),
       ),
-      quad64LowBuffer: utils.createBuffer(
+      quad64LowBuffer: createBuffer(
         this.gl,
         new Float32Array(buffers.positionLow.data),
       ),
-      texCoordBuffer: utils.createBuffer(
-        this.gl,
-        new Float32Array(buffers.uvs.data),
-      ),
+      texCoordBuffer: createBuffer(this.gl, new Float32Array(buffers.uvs.data)),
     };
   }
 
   public getTextureData(data: IJsonArrayData | IImageData): Promise<IData> {
     return new Promise((resolve, reject) => {
       if (data.type === 'image' && data.url) {
-        utils
-          .loadImage(data.url)
+        loadImage(data.url)
           .then((image) => {
             // this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
             const processedData: IData = {
               width: image.width,
               height: image.height,
-              texture: utils.createTexture(
+              texture: createTexture(
                 this.gl,
                 this.gl.LINEAR,
                 image,
@@ -376,7 +386,7 @@ export default class ScalarFill implements IScalarFill<any> {
               processedData.uMax = payload[2];
               processedData.vMin = payload[3];
               processedData.vMax = payload[4];
-              processedData.texture = utils.createTexture(
+              processedData.texture = createTexture(
                 this.gl,
                 this.gl.LINEAR,
                 new Uint8Array(payload[0]),
@@ -386,7 +396,7 @@ export default class ScalarFill implements IScalarFill<any> {
             } else if (this.options.renderForm === 'r') {
               processedData.min = payload[1];
               processedData.max = payload[2];
-              processedData.texture = utils.createTexture(
+              processedData.texture = createTexture(
                 this.gl,
                 this.gl.LINEAR,
                 new Uint8Array(payload[0]),
@@ -450,8 +460,8 @@ export default class ScalarFill implements IScalarFill<any> {
     if (this.gl && data) {
       // Error Prevention
       this.getTextureData(data)
-        .then((data) => {
-          this.data = data;
+        .then((d) => {
+          this.data = d;
 
           cb && cb(true);
 
@@ -614,4 +624,8 @@ export default class ScalarFill implements IScalarFill<any> {
   }
 
   public postrender() {}
+
+  public destroyed() {
+
+  }
 }

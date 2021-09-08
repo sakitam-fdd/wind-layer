@@ -1,7 +1,5 @@
 import Base from './Base';
-// @ts-ignore
 import FillFrag from './shaders/currency-fill.frag.glsl';
-// @ts-ignore
 import FillVert from './shaders/currency-fill.vert.glsl';
 
 export class Fill extends Base {

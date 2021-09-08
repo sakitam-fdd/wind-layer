@@ -112,9 +112,56 @@
 
         const windInterpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
 
-        const fillLayer = new mapboxWind.ScalarFill('wind', {
-          // "type": "jsonArray",
-          // "data": data,
+        // const fillLayer = new mapboxWind.ScalarFill('wind', {
+        //   // "type": "jsonArray",
+        //   // "data": data,
+        //   "type": "image",
+        //   "url": "./data/var_ugrd-var_vgrd.png",
+        //   "extent": [
+        //     [-180, 85.051129],
+        //     [-180, -85.051129],
+        //     [180, 85.051129],
+        //     [180, -85.051129],
+        //   ],
+        //   "width": 1440,
+        //   "height": 720,
+        //   "uMin": -21.34380340576172,
+        //   "uMax": 30.7261962890625,
+        //   "vMin": -23.916271209716797,
+        //   "vMax": 24.693727493286133,
+        // }, {
+        //   wrapX: true,
+        //   styleSpec: {
+        //     'fill-color': [
+        //       'interpolate',
+        //       ['linear'],
+        //       ['get', 'value'],
+        //       ...windInterpolateColor
+        //     ],
+        //     'opacity': [
+        //       'interpolate',
+        //       ['exponential', 0.5],
+        //       ['zoom'],
+        //       1,
+        //       1,
+        //       2,
+        //       1
+        //     ],
+        //   },
+        //   renderForm: 'rg',
+        //   widthSegments: 720,
+        //   heightSegments: 360,
+        //   // widthSegments: 1,
+        //   // heightSegments: 1,
+        //   // displayRange: [0, 150],
+        //   mappingRange: [0, 500000],
+        //   // mappingRange: [0, 0],
+        //   wireframe: false,
+        // });
+        //
+        // map.addLayer(fillLayer);
+
+        const particles = new mapboxWind.Particles('particles', {
           "type": "image",
           "url": "./data/var_ugrd-var_vgrd.png",
           "extent": [
@@ -132,7 +179,7 @@
         }, {
           wrapX: true,
           styleSpec: {
-            'fill-color': [
+            'color': [
               'interpolate',
               ['linear'],
               ['get', 'value'],
@@ -148,18 +195,9 @@
               1
             ],
           },
-          renderForm: 'rg',
-          widthSegments: 720,
-          heightSegments: 360,
-          // widthSegments: 1,
-          // heightSegments: 1,
-          // displayRange: [0, 150],
-          mappingRange: [0, 500000],
-          // mappingRange: [0, 0],
-          wireframe: false,
         });
 
-        map.addLayer(fillLayer);
+        map.addLayer(particles);
 
         window.windLayer = new mapboxWind.WindLayer('wind', data, {
           windOptions: {

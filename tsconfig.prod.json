@@ -4,10 +4,8 @@
     "noEmit": false,
     "emitDeclarationOnly": true,
     "declaration": true,
-    "rootDir": "./",
     "baseUrl": "./"
   },
-  "include": [],
   "exclude": [
     "dist",
     "**/__tests__/**/*",

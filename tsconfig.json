@@ -10,13 +10,12 @@
       "maptalks": ["maptalks/dist/maptalks.es.js"],
       "@mapbox/mapbox-gl-style-spec": ["@mapbox/mapbox-gl-style-spec/dist/index.es.js"]
     },
-    "rootDir": "./",
     "baseUrl": "./",
     "noEmit": true,
     "strict": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": false,
-    "target": "ESNext",
+    "target": "es5",
     "lib": [
       "es5",
       "es6",
@@ -35,6 +34,7 @@
   },
   "include": [
     "packages/**/src",
+    "packages/**/typings",
     "node_modules/@types/node/globals.d.ts"
   ],
   "exclude": [
