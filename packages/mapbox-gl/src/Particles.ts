@@ -33,12 +33,33 @@ export default class Particles {
 
     this.data = data;
 
+    this.resize = this.resize.bind(this);
     this.handleZoom = this.handleZoom.bind(this);
+    this.handleMovestart = this.handleMovestart.bind(this);
+    this.handleMoveend = this.handleMoveend.bind(this);
   }
 
   public handleZoom() {
     if (this.layer) {
       this.layer.handleZoom();
+    }
+  }
+
+  public resize() {
+    if (this.layer) {
+      this.layer.resize();
+    }
+  }
+
+  public handleMovestart() {
+    if (this.layer) {
+      this.layer.handleMovestart();
+    }
+  }
+
+  public handleMoveend() {
+    if (this.layer) {
+      this.layer.handleMoveend();
     }
   }
 
@@ -59,6 +80,9 @@ export default class Particles {
       this.layer.getMercatorCoordinate = getCoords;
 
       this.map.on('zoom', this.handleZoom);
+      this.map.on('movestart', this.handleMovestart);
+      this.map.on('resize', this.resize);
+      this.map.on('moveend', this.handleMoveend);
     }
     if (this.data) {
       this.setData(this.data);
@@ -147,11 +171,8 @@ export default class Particles {
           cameraEye,
           cameraEye64Low,
         });
-        this.layer.render(matrix, worlds[i], {
-          cameraEye,
-          cameraEye64Low,
-        });
       }
+      this.layer.render(matrix);
     }
   }
 }

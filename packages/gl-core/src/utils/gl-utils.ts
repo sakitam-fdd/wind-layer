@@ -208,6 +208,32 @@ export function createTexture(
   return texture;
 }
 
+export function resizeTexture(
+  gl: WebGLRenderingContext,
+  texture: WebGLTexture,
+  width: number,
+  height: number,
+  data: TexImageSource | Uint8Array,
+) {
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  if (data instanceof Uint8Array) {
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      width,
+      height,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      data,
+    );
+  } else {
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, data);
+  }
+  gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
 /**
  * bind texture
  * @param gl
@@ -252,6 +278,18 @@ export function createBuffer(gl: WebGLRenderingContext, data: any) {
   return buffer;
 }
 
+export function updateBufferData(
+  gl: WebGLRenderingContext,
+  buffer: WebGLBuffer,
+  data: any,
+) {
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  if (data) {
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+  }
+  return buffer;
+}
+
 /**
  * bind attribute
  * @param gl
@@ -279,6 +317,27 @@ export function bindAttribute(
 export function bindFramebuffer(
   gl: WebGLRenderingContext,
   framebuffer: WebGLFramebuffer | null,
+  texture?: WebGLTexture,
+) {
+  // 创建一个帧缓冲
+  gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+  if (texture) {
+    // 绑定纹理到帧缓冲
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      texture,
+      0,
+    );
+  }
+}
+
+export function resizeFramebuffer(
+  gl: WebGLRenderingContext,
+  framebuffer: WebGLFramebuffer | null,
+  width: number,
+  height: number,
   texture?: WebGLTexture,
 ) {
   // 创建一个帧缓冲

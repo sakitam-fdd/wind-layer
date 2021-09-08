@@ -3,10 +3,11 @@ precision highp float;
 uniform sampler2D u_wind;
 uniform sampler2D u_particles;
 
+uniform vec4 u_bbox;
 uniform vec2 u_wind_res;
-uniform float u_rand_seed;
-
 uniform vec4 u_wind_range;
+uniform float u_rand_seed;
+uniform float u_nodata;
 
 uniform float u_drop_rate;
 uniform float u_drop_rate_bump;
@@ -19,13 +20,28 @@ varying vec2 v_tex_pos;
 #pragma glslify: rand = require(../random)
 //#pragma glslify: mercatorToWGS84 = require(../mercatorToWGS84)
 
-vec2 decodeValue(sampler2D tex, const vec2 uv) {
-    vec4 color = texture2D(tex, uv);
+// pseudo-random generator
+const vec3 rand_constants = vec3(12.9898, 78.233, 4375.85453);
+float rand(const vec2 co) {
+    float t = dot(rand_constants.xy, co);
+    return fract(sin(t) * (rand_constants.z + t));
+}
 
-    float u = u_wind_range[0] + ((u_wind_range[2] - u_wind_range[0]) * color.r);
-    float v = u_wind_range[1] + ((u_wind_range[3] - u_wind_range[1]) * color.g);
+vec2 decodeValue(const vec2 uv) {
+    vec4 u_color = texture2D(u_wind, uv);
+    float u = u_wind_range[0] + ((u_wind_range[1] - u_wind_range[0]) * (u_color.r * 255.0 - 1.0)) / 254.0;
+    float v = u_wind_range[2] + ((u_wind_range[3] - u_wind_range[2]) * (u_color.g * 255.0 - 1.0)) / 254.0;
 
     return vec2(u, v);
+}
+
+vec2 getColor(const vec2 uv) {
+    vec2 px = 1.0 / (u_wind_res);
+    vec2 vc = (floor(uv * (u_wind_res))) * px;
+
+    vec4 u_color = texture2D(u_wind, vc);
+
+    return vec2(u_color.r, u_color.g);
 }
 
 // wind speed lookup; use manual bilinear filtering based on 4 adjacent pixels for smooth interpolation
@@ -34,10 +50,10 @@ vec2 lookup_wind(const vec2 uv) {
   vec2 px = 1.0 / u_wind_res;
   vec2 vc = (floor(uv * u_wind_res)) * px;
   vec2 f = fract(uv * u_wind_res);
-  vec2 tl = decodeValue(u_wind, vc);
-  vec2 tr = decodeValue(u_wind, vc + vec2(px.x, 0));
-  vec2 bl = decodeValue(u_wind, vc + vec2(0, px.y));
-  vec2 br = decodeValue(u_wind, vc + px);
+  vec2 tl = decodeValue(vc);
+  vec2 tr = decodeValue(vc + vec2(px.x, 0));
+  vec2 bl = decodeValue(vc + vec2(0, px.y));
+  vec2 br = decodeValue(vc + px);
   // mix(x, y, level)
   // dest = x * (1 - level) + y * level;
   return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
