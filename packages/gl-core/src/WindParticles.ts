@@ -34,9 +34,10 @@ export interface IWindOptions {
   };
   getZoom: () => number;
   triggerRepaint?: () => void;
-  getSize: () => number[];
-  getExtent: () => number[];
-  pixelsToGLUnits: () => [number, number];
+  getSize: () => [number, number];
+  getExtent: () => [number, number, number, number];
+  interacting: () => boolean;
+  getWorlds: () => number[];
 }
 
 export interface IImageData {
@@ -95,11 +96,11 @@ const defaultOptions = {
     opacity: 1,
   },
   opacity: 1,
-  lineWidth: 1.5,
-  speedFactor: 0.25,
-  fadeOpacity: 0.9,
-  dropRate: 0.03,
-  dropRateBump: 0.01,
+  lineWidth: 2,
+  speedFactor: 1,
+  fadeOpacity: 0.93,
+  dropRate: 0.003,
+  dropRateBump: 0.002,
   numParticles: 65535,
 };
 
@@ -107,8 +108,6 @@ export default class WindParticles {
   public gl: WebGLRenderingContext;
 
   public data: IData;
-
-  private checkExt: OES_element_index_uint | null;
 
   private privateNumParticles: number;
 
@@ -133,7 +132,6 @@ export default class WindParticles {
 
   private options: IWindOptions;
   private opacity: number;
-  private fade: number;
   private colorRange: [number, number];
   private size: number[];
   private renderExtent: number[];
@@ -154,7 +152,7 @@ export default class WindParticles {
 
     this.opacity = this.options.opacity || 1;
     this.visible = this.options.visible !== undefined || true;
-    this.alpha = 0.8;
+    this.alpha = 0.9;
     this.frameTime = 0;
     this.lastTime = 0;
 
@@ -328,7 +326,7 @@ export default class WindParticles {
     }
   }
 
-  public drawTexture(matrix: number[], offset: number) {
+  public drawTexture(matrix: number[]) {
     if (this.fbo && this.screenTexture && this.nextParticleStateTexture) {
       bindFramebuffer(this.gl, this.fbo, this.screenTexture);
 
@@ -363,7 +361,7 @@ export default class WindParticles {
         this.gl.enable(this.gl.BLEND);
       }
 
-      this.drawParticles(matrix, offset);
+      this.drawParticles(matrix);
 
       bindFramebuffer(this.gl, null);
 
@@ -374,7 +372,7 @@ export default class WindParticles {
     }
   }
 
-  public drawScreen(matrix: number[]) {
+  public drawScreen() {
     const depthEnabled = this.gl.isEnabled(this.gl.DEPTH_TEST);
     const blendingEnabled = this.gl.isEnabled(this.gl.BLEND);
     this.gl.disable(this.gl.DEPTH_TEST);
@@ -384,7 +382,6 @@ export default class WindParticles {
       .active()
       .resize()
       .setUniforms({
-        u_matrix: matrix,
         u_screen: this.screenTexture,
         u_opacity: this.visible ? this.opacity : 0,
         u_fade: this.alpha,
@@ -416,8 +413,11 @@ export default class WindParticles {
       this.nextParticleStateTexture
     ) {
       bindFramebuffer(this.gl, this.fbo, this.nextParticleStateTexture);
-      const timeScale = this.options.speedFactor * 5.0;
-      const units = this.options.pixelsToGLUnits();
+      const timeScale = this.options.speedFactor * 2.5;
+      const depthEnabled = this.gl.isEnabled(this.gl.DEPTH_TEST);
+      const blendingEnabled = this.gl.isEnabled(this.gl.BLEND);
+      this.gl.disable(this.gl.DEPTH_TEST);
+      this.gl.disable(this.gl.BLEND);
       this.updateCommand
         .active()
         .resize(this.particleStateResolution, this.particleStateResolution)
@@ -438,11 +438,10 @@ export default class WindParticles {
             0,
             0.0001,
           ],
-          u_units_to_pixels: [1 / units[0], 1 / units[1]],
           u_wind: this.data.texture,
           u_bbox: this.renderExtent,
           nodata: this.data.nodata,
-          u_particles: this.nextParticleStateTexture,
+          u_particles: this.currentParticleStateTexture,
         })
         .setAttributes({
           a_pos: {
@@ -452,6 +451,13 @@ export default class WindParticles {
         })
         .setPrimitive(this.gl.TRIANGLE_STRIP)
         .draw();
+      if (depthEnabled) {
+        this.gl.enable(this.gl.DEPTH_TEST);
+      }
+      if (blendingEnabled) {
+        this.gl.enable(this.gl.BLEND);
+      }
+      // bindFramebuffer(this.gl, null);
       // swap the particle state textures so the new one becomes the current one
       [this.currentParticleStateTexture, this.nextParticleStateTexture] = [
         this.nextParticleStateTexture,
@@ -460,7 +466,7 @@ export default class WindParticles {
     }
   }
 
-  public drawParticles(matrix: number[], offset: number) {
+  public drawParticles(matrix: number[]) {
     if (
       this.particleIndexBuffer &&
       this.currentParticleStateTexture &&
@@ -471,6 +477,7 @@ export default class WindParticles {
       this.gl.disable(this.gl.DEPTH_TEST);
       this.gl.enable(this.gl.BLEND);
       this.gl.blendEquation(this.gl.FUNC_ADD);
+      this.gl.blendColor(0, 0, 0, 0);
       this.gl.blendFuncSeparate(
         this.gl.SRC_ALPHA,
         this.gl.ONE_MINUS_SRC_ALPHA,
@@ -478,29 +485,32 @@ export default class WindParticles {
         1,
       );
       const zoom = this.options.getZoom();
-      this.drawCommand
-        .active()
-        .setUniforms({
-          u_width: this.options.lineWidth,
-          u_world: this.size,
-          u_matrix: matrix,
-          u_zoom: zoom,
-          u_bbox: this.renderExtent,
-          u_offset: offset,
-          u_aspectRatio: this.size[0] / this.size[1],
-          u_particles_current: this.currentParticleStateTexture,
-          u_particles_next: this.nextParticleStateTexture,
-          u_particles_res: this.particleStateResolution,
-        })
-        .setAttributes({
-          a_index: {
-            buffer: this.particleIndexBuffer,
-            numComponents: 1,
-          },
-        })
-        .setPrimitive(this.gl.TRIANGLES)
-        .runTimes(this.particleStateResolution ** 2 * 6)
-        .draw();
+      const worlds = this.options.getWorlds();
+      for (let i = 0; i < worlds.length; i++) {
+        this.drawCommand
+          .active()
+          .setUniforms({
+            u_width: this.options.lineWidth,
+            u_world: this.size,
+            u_matrix: matrix,
+            u_zoom: zoom,
+            u_bbox: this.renderExtent,
+            u_offset: worlds[i],
+            u_aspectRatio: this.size[0] / this.size[1],
+            u_particles_current: this.currentParticleStateTexture,
+            u_particles_next: this.nextParticleStateTexture,
+            u_particles_res: this.particleStateResolution,
+          })
+          .setAttributes({
+            a_index: {
+              buffer: this.particleIndexBuffer,
+              numComponents: 1,
+            },
+          })
+          .setPrimitive(this.gl.TRIANGLES)
+          .runTimes(this.particleStateResolution ** 2 * 6)
+          .draw();
+      }
 
       if (!blendingEnabled) {
         this.gl.disable(this.gl.BLEND);
@@ -582,10 +592,10 @@ export default class WindParticles {
     }
   }
 
-  public prerender(matrix: number[], offset: number) {
+  public prerender(matrix: number[]) {
     if (this.data) {
       this.updateParticles();
-      this.drawTexture(matrix, offset);
+      this.drawTexture(matrix);
 
       const now = 0.001 * Date.now();
       this.frameTime = Math.min(now - (this.lastTime || 0), 0.05);
@@ -593,9 +603,18 @@ export default class WindParticles {
     }
   }
 
-  public render(matrix: number[]) {
+  public render() {
     if (this.data) {
-      this.drawScreen(matrix);
+      if (this.options.interacting()) {
+        if (this.alpha < 1) {
+          this.alpha += 3 * this.frameTime;
+
+          if (this.alpha > 1 || !this.frameTime) {
+            this.alpha = 1;
+          }
+        }
+      }
+      this.drawScreen();
     }
     return this;
   }

@@ -1,7 +1,7 @@
 import * as mapboxgl from 'mapbox-gl';
 import { fp64LowPart, getEye, WindParticles } from 'wind-gl-core';
 
-export interface IScalarFillOptions {
+export interface IParticlesOptions {
   wrapX: boolean;
 }
 
@@ -15,7 +15,7 @@ function getCoords([lng, lat]: [number, number]): [number, number] {
 
 export default class Particles {
   private gl: WebGLRenderingContext;
-  private map: mapboxgl.Map;
+  private map: any;
   private id: string;
   private type: string;
   private renderingMode: '2d' | '3d';
@@ -23,10 +23,10 @@ export default class Particles {
   private data: any;
   private layer: any;
 
-  constructor(id: string, data: any, options?: Partial<IScalarFillOptions>) {
+  constructor(id: string, data: any, options?: Partial<IParticlesOptions>) {
     this.id = id;
     this.type = 'custom';
-    this.renderingMode = '3d';
+    this.renderingMode = '2d';
     this.options = {
       ...(options || {}),
     };
@@ -65,11 +65,10 @@ export default class Particles {
 
   public initialize() {
     if (!this.layer && this.gl) {
-      // @ts-ignore
       this.layer = new WindParticles(this.gl, {
         opacity: this.options.opacity,
         styleSpec: this.options.styleSpec,
-        getZoom: () => this.map.getZoom(),
+        getZoom: () => this.map.getZoom() as number,
         triggerRepaint: () => {
           this.map.triggerRepaint();
         },
@@ -120,28 +119,26 @@ export default class Particles {
     if (this.layer) {
       this.layer.destroyed();
     }
+    map.off('zoom', this.handleZoom);
+    map.off('movestart', this.handleMovestart);
+    map.off('resize', this.resize);
+    map.off('moveend', this.handleMoveend);
     delete this.gl;
     delete this.map;
-    map.off('zoom', this.handleZoom);
   }
 
   public getWrappedWorlds() {
     const result = [0];
 
     if (this.options.wrapX) {
-      // @ts-ignore
       const { width, height } = this.map.transform;
-      // @ts-ignore
       const utl = this.map.transform.pointCoordinate(new mapboxgl.Point(0, 0));
-      // @ts-ignore
       const utr = this.map.transform.pointCoordinate(
         new mapboxgl.Point(width, 0),
       );
-      // @ts-ignore
       const ubl = this.map.transform.pointCoordinate(
         new mapboxgl.Point(width, height),
       );
-      // @ts-ignore
       const ubr = this.map.transform.pointCoordinate(
         new mapboxgl.Point(0, height),
       );

@@ -359,14 +359,33 @@ export function resizeFramebuffer(
  * @param gl
  * @param color
  */
-export function clearScene(gl: WebGLRenderingContext, color: number[]) {
+export function clearScene(
+  gl: WebGLRenderingContext,
+  color: number[],
+  depth = 1,
+  stencil = 0,
+  fbo?: WebGLFramebuffer,
+) {
   const [r, g, b, a] = color;
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+  let clearFlags = 0;
   gl.clearColor(r, g, b, a);
-  gl.clearDepth(1);
+
   // tslint:disable-next-line:no-bitwise
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.enable(gl.DEPTH_TEST);
+  clearFlags |= gl.COLOR_BUFFER_BIT;
+
+  if (depth !== undefined) {
+    gl.clearDepth(depth);
+    // tslint:disable-next-line:no-bitwise
+    clearFlags |= gl.DEPTH_BUFFER_BIT;
+  }
+  if (stencil !== undefined) {
+    // tslint:disable-next-line:no-bitwise
+    gl.clearStencil(stencil | 0);
+    // tslint:disable-next-line:no-bitwise
+    clearFlags |= gl.STENCIL_BUFFER_BIT;
+  }
+  // tslint:disable-next-line:no-bitwise
+  gl.clear(clearFlags);
 }
 
 /**

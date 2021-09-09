@@ -66,8 +66,9 @@
         },
       ],
     },
-    center: [113.53450137499999, 34.44104525],
-    zoom: 0
+    center: { lng: 105.70150033978689, lat: 22.76021405309811 }, // starting position [lng, lat]
+    zoom: 1.5, // starting zoom
+    antialias: true,
   });
 
   const color = {
@@ -182,6 +183,7 @@
           "vMax": 37.988686,
         }, {
           wrapX: true,
+          lineWidth: 2.2,
           styleSpec: {
             'color': [
               'interpolate',
@@ -202,6 +204,10 @@
         });
 
         map.addLayer(particles);
+
+        // setTimeout(() => {
+        //   map.removeLayer('particles');
+        // }, 1000)
 
         window.windLayer = new mapboxWind.WindLayer('wind', data, {
           windOptions: {

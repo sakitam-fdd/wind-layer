@@ -58,7 +58,7 @@ vec4 getPosWithProject(vec2 current_pos, vec2 next_pos, float v_index) {
 
     // 超过最大速度和小于最小速度的可以考虑移除
     if(d > 20.0 || d < 0.01) {
-        pos.xy += u_world * pow(2.0, u_zoom);
+        pos.xy += u_world * pow(2.0, u_zoom + 1.0);
     }
 
     return pos;

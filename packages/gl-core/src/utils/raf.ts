@@ -18,6 +18,8 @@ export class Raf {
       ...options,
     };
 
+    this.reset();
+
     this.animate = this.animate.bind(this);
     this.onVisibilityChange = this.onVisibilityChange.bind(this);
   }
