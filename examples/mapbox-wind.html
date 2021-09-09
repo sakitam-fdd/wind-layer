@@ -114,8 +114,6 @@
         const windInterpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
 
         const fillLayer = new mapboxWind.ScalarFill('wind', {
-          // "type": "jsonArray",
-          // "data": data,
           "type": "image",
           "url": "./data/var_ugrd-var_vgrd.png",
           "extent": [
@@ -331,7 +329,7 @@
         });
 
         // map.addLayer(window.windLayer);
-        window.windLayer.addTo(map);
+        // window.windLayer.addTo(map);
       });
   });
 </script>

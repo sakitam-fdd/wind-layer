@@ -50,9 +50,10 @@ def download_data(date, gfs_time, res, forecasts_time, bbox, level, variables, f
 
 if __name__ == '__main__':
   download_data(
-    '20200526',
-    '00',
-    '1p00',
+    '20220927',
+    '12',
+    '0p25',
+    'f000',
     'leftlon=0&rightlon=360&toplat=90&bottomlat=-90',
     # 'lev_80_m_above_ground=on',
     'lev_10_m_above_ground=on',

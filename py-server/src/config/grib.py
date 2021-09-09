@@ -11,7 +11,7 @@ FORECASTS_TIME = "f000"
 GFS_URL = "https://nomads.ncep.noaa.gov/cgi-bin/" \
           "filter_gfs_${RES}.pl?file=gfs.t${GFS_TIME}z.${GRIB_DES}" \
           ".${RES}.${FORECASTS_TIME}&${LEVEL}&${VARIABLES}&${BBOX}&dir=%2Fgfs" \
-          ".${GFS_DATE}%2F${GFS_TIME}"
+          ".${GFS_DATE}%2F${GFS_TIME}%2Fatmos"
 
 GRS_PAGE = "https://nomads.ncep.noaa.gov/cgi-bin/" \
           "filter_gfs_${RES}.pl?dir=%2Fgfs" \

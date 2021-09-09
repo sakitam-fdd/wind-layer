@@ -210,7 +210,40 @@ def format_to_json(headers, params):
 """
 转换为多通道png
 """
+def rp(data, params):
+  width = 1024
+  height = 1024
 
+  try:
+    west, south, east, north = mercantile.bounds(0, 0, 0)
+    left, bottom, right, top = mercantile.xy_bounds(0, 0, 0)
+    dst_transform = rasterio.transform.from_bounds(
+      left, bottom, right, top, height, width)
+
+    src_transform = rasterio.transform.from_bounds(
+      west, south, east, north, data.shape[1], data.shape[0])
+
+    dst = np.zeros((height, width), np.int32)
+    reproject(data,
+              dst,
+              src_transform=src_transform,
+              src_crs='EPSG:4326',
+              dst_transform=dst_transform,
+              dst_crs='EPSG:3857',
+              resampling=Resampling.nearest,
+              num_threads=2)
+
+    bands = prepare_gray_png_array(dst)
+    image = reshape_as_image(bands)
+    file = get_raster_path(params['raster_file'], f"{params['file_name_mc']}.png")
+    file_path = file.get('path')
+    if file.get('exist') == True:
+      # return file
+      logger.info('栅格文件已存在')
+    else:
+      write_image(file_path, image)
+  except Exception as e:
+    return e
 
 def format_to_png(data, headers, params):
   try:
@@ -221,6 +254,8 @@ def format_to_png(data, headers, params):
         'header': header,
         'data': raster_file_path
       })
+
+    rp(data, params)
 
     bands = prepare_gray_png_array(data)
     image = reshape_as_image(bands)
@@ -234,18 +269,18 @@ def format_to_png(data, headers, params):
       json_file_path = file_path.replace('.png', '.json')
       with open(json_file_path, 'w') as f:
         json.dump(dec_data, f)
-      process_db.add_raster(
-        params['date'],
-        params['gfsTime'],
-        params['res'],
-        params['forecastsTime'],
-        params['bbox'],
-        params['level'],
-        params['variables'],
-        ','.join(params['extent']),
-        params['file_name'],
-        raster_file_path,
-      )
+      # process_db.add_raster(
+      #   params['date'],
+      #   params['gfsTime'],
+      #   params['res'],
+      #   params['forecastsTime'],
+      #   params['bbox'],
+      #   params['level'],
+      #   params['variables'],
+      #   ','.join(params['extent']),
+      #   params['file_name'],
+      #   raster_file_path,
+      # )
 
     return dec_data
   except Exception as e:
@@ -436,15 +471,20 @@ def process_raster(params):
 if __name__ == '__main__':
   try:
     OUTPUT = os.path.abspath(
-      os.path.join(os.getcwd(), '../../static/data/20200529/00/1p00/f000/var_ugrd-var_vgrd.grib'))
+      os.path.join(os.getcwd(), './static/data/20220927/12/0p25/f000/uv.grib'))
     # read_data(OUTPUT, '2020052518_1p00_uv.png')
     # gfd_to_tile(OUTPUT)
-    read_data(OUTPUT, {
+    data = read_data(OUTPUT, {
       'elementEnum': [
         'UGRD',
         'VGRD'
       ]
     })
+    params = {}
+    params.__setitem__('raster_file', '/Users/sakitam-fdd/workspace/vis-project/wind-layer/py-server/static/raster')
+    params.__setitem__('file_name', 'uv')
+    params.__setitem__('file_name_mc', 'uv-mc')
+    format_to_png(data['data'], data['headers'], params)
     a = np.zeros((1, 2, 2))
     np.concatenate((a, np.zeros((1, 2, 2))), axis=0)
     print(a)

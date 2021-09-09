@@ -7,7 +7,7 @@ import sqlite3
 
 logger = logging.getLogger(__name__)
 
-OUTPUT_BASE_DIR = os.getcwd()
+OUTPUT_BASE_DIR = '/Users/sakitam-fdd/workspace/vis-project/wind-layer/py-server'
 STATIC_DIR = 'static'
 BASE_DIR = os.path.abspath(os.path.join(OUTPUT_BASE_DIR, STATIC_DIR))
 
