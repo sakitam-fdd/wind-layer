@@ -48,7 +48,6 @@ export interface IOptions {
   };
   displayRange?: [number, number];
   mappingRange?: [number, number];
-  depthRange?: [number, number];
   widthSegments?: number;
   heightSegments?: number;
   wireframe?: boolean;
@@ -117,7 +116,6 @@ export const defaultOptions: IOptions = {
   },
   displayRange: [Infinity, Infinity],
   mappingRange: [0, 0],
-  depthRange: [0, 1],
   widthSegments: 1,
   heightSegments: 1,
   wireframe: false,
@@ -559,27 +557,10 @@ export default class ScalarFill implements IScalarFill<any> {
         console.warn('This type is not supported temporarily');
       }
 
-      const cullFaceEnabled = this.gl.isEnabled(this.gl.CULL_FACE);
-      const cullFaceMode = this.gl.getParameter(this.gl.CULL_FACE_MODE);
-      this.gl.enable(this.gl.CULL_FACE);
-      this.gl.cullFace(this.gl.BACK);
-
       const depthEnabled = this.gl.isEnabled(this.gl.DEPTH_TEST);
       this.gl.enable(this.gl.DEPTH_TEST);
       this.gl.depthMask(true);
       this.gl.depthFunc(this.gl.LEQUAL);
-      if (
-        this.options.depthRange &&
-        Array.isArray(this.options.depthRange) &&
-        this.options.depthRange.length === 2
-      ) {
-        this.gl.depthRange(
-          this.options.depthRange[0],
-          this.options.depthRange[1],
-        );
-      } else {
-        this.gl.depthRange(0.0, 1);
-      }
 
       const data = this.options.wireframe
         ? this.data.wireframeIndexes
@@ -614,18 +595,41 @@ export default class ScalarFill implements IScalarFill<any> {
       if (!depthEnabled) {
         this.gl.disable(this.gl.DEPTH_TEST);
       }
-
-      if (!cullFaceEnabled) {
-        this.gl.disable(this.gl.CULL_FACE);
-      }
-
-      this.gl.cullFace(cullFaceMode);
     }
   }
 
   public postrender() {}
 
-  public destroyed() {
+  public destroyData() {
+    if (this.data) {
+      const {
+        texture,
+        quadBuffer,
+        quad64LowBuffer,
+        texCoordBuffer,
+      } = this.data;
+      if (texture) {
+        this.gl.deleteTexture(texture);
+      }
+      if (quadBuffer) {
+        this.gl.deleteBuffer(quadBuffer);
+      }
 
+      if (quad64LowBuffer) {
+        this.gl.deleteBuffer(quad64LowBuffer);
+      }
+
+      if (texCoordBuffer) {
+        this.gl.deleteBuffer(texCoordBuffer);
+      }
+      delete this.data;
+    }
+  }
+
+  public destroyed() {
+    this.destroyData();
+    if (this.worker) {
+      this.worker.terminate();
+    }
   }
 }

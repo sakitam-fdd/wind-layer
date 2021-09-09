@@ -25,6 +25,7 @@
 <div id='map'></div>
 <!--<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/mapbox-wind@1.0.0-alpha.10/dist/mapbox-wind.js"></script>-->
 <script src="../packages/mapbox-gl/dist/mapbox-wind.js"></script>
+<script src="https://unpkg.com/dat.gui@0.7.9/build/dat.gui.min.js"></script>
 <script>
   mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA';
   const map = new mapboxgl.Map({
@@ -39,6 +40,7 @@
             '//b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
             '//c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
             '//d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            // 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           ],
           tileSize: 256,
           // minzoom: 1,
@@ -53,8 +55,8 @@
           // minzoom: 1,
           // maxzoom: 22,
           paint: {
-            'raster-resampling': 'nearest',
-            'raster-fade-duration': 0,
+            // 'raster-resampling': 'nearest',
+            // 'raster-fade-duration': 0,
           },
         },
         {
@@ -101,8 +103,6 @@
     fetch('./data/wind.json')
       .then(res => res.json())
       .then(data => {
-        console.log(data);
-
         data = data.map((item, idx) => {
           item.header = Object.assign(item.header, {
             parameterCategory: 1,
@@ -113,54 +113,65 @@
 
         const windInterpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
 
-        // const fillLayer = new mapboxWind.ScalarFill('wind', {
-        //   // "type": "jsonArray",
-        //   // "data": data,
-        //   "type": "image",
-        //   "url": "./data/var_ugrd-var_vgrd.png",
-        //   "extent": [
-        //     [-180, 85.051129],
-        //     [-180, -85.051129],
-        //     [180, 85.051129],
-        //     [180, -85.051129],
-        //   ],
-        //   "width": 1440,
-        //   "height": 720,
-        //   "uMin": -21.34380340576172,
-        //   "uMax": 30.7261962890625,
-        //   "vMin": -23.916271209716797,
-        //   "vMax": 24.693727493286133,
-        // }, {
-        //   wrapX: true,
-        //   styleSpec: {
-        //     'fill-color': [
-        //       'interpolate',
-        //       ['linear'],
-        //       ['get', 'value'],
-        //       ...windInterpolateColor
-        //     ],
-        //     'opacity': [
-        //       'interpolate',
-        //       ['exponential', 0.5],
-        //       ['zoom'],
-        //       1,
-        //       1,
-        //       2,
-        //       1
-        //     ],
-        //   },
-        //   renderForm: 'rg',
-        //   widthSegments: 720,
-        //   heightSegments: 360,
-        //   // widthSegments: 1,
-        //   // heightSegments: 1,
-        //   // displayRange: [0, 150],
-        //   mappingRange: [0, 500000],
-        //   // mappingRange: [0, 0],
-        //   wireframe: false,
-        // });
-        //
+        const fillLayer = new mapboxWind.ScalarFill('wind', {
+          // "type": "jsonArray",
+          // "data": data,
+          "type": "image",
+          "url": "./data/var_ugrd-var_vgrd.png",
+          "extent": [
+            [-180, 85.051129],
+            [-180, -85.051129],
+            [180, 85.051129],
+            [180, -85.051129],
+          ],
+          "width": 1440,
+          "height": 720,
+          "uMin": -21.34380340576172,
+          "uMax": 30.7261962890625,
+          "vMin": -23.916271209716797,
+          "vMax": 24.693727493286133,
+        }, {
+          wrapX: true,
+          styleSpec: {
+            'fill-color': [
+              'interpolate',
+              ['linear'],
+              ['get', 'value'],
+              ...windInterpolateColor
+            ],
+            'opacity': [
+              'interpolate',
+              ['exponential', 0.5],
+              ['zoom'],
+              1,
+              1,
+              2,
+              1
+            ],
+          },
+          renderForm: 'rg',
+          widthSegments: 720,
+          heightSegments: 360,
+          // widthSegments: 1,
+          // heightSegments: 1,
+          displayRange: [0, 150],
+          // mappingRange: [0, 500000],
+          mappingRange: [0, 0],
+          wireframe: true,
+        });
+
         // map.addLayer(fillLayer);
+
+        const particlesConfig = {
+          wrapX: true,
+          numParticles: 65535,
+          speedFactor: 1,
+          fadeOpacity: 0.93,
+          dropRate: 0.003,
+          dropRateBump: 0.002,
+          lineWidth: 2.1,
+          opacity: 1,
+        }
 
         const particles = new mapboxWind.Particles('particles', {
           "type": "image",
@@ -184,30 +195,106 @@
         }, {
           wrapX: true,
           lineWidth: 2.2,
-          styleSpec: {
-            'color': [
-              'interpolate',
-              ['linear'],
-              ['get', 'value'],
-              ...windInterpolateColor
-            ],
-            'opacity': [
-              'interpolate',
-              ['exponential', 0.5],
-              ['zoom'],
-              1,
-              1,
-              2,
-              1
-            ],
-          },
+          // styleSpec: {
+          //   'color': [
+          //     'interpolate',
+          //     ['linear'],
+          //     ['get', 'value'],
+          //     ...windInterpolateColor
+          //   ],
+          //   'opacity': [
+          //     'interpolate',
+          //     ['exponential', 0.5],
+          //     ['zoom'],
+          //     1,
+          //     1,
+          //     5,
+          //     0
+          //   ],
+          // },
         });
 
         map.addLayer(particles);
 
-        // setTimeout(() => {
-        //   map.removeLayer('particles');
-        // }, 1000)
+        const gui = new dat.GUI();
+
+        gui.add({
+          add: true,
+        }, 'add').onChange(function (state) {
+          if (state) {
+            map.addLayer(particles);
+          } else {
+            map.removeLayer('particles');
+          }
+        });
+
+        gui.add({
+          colorful: false,
+        }, 'colorful').onChange(function (state) {
+          if (!state) {
+            particles.updateOptions({
+              styleSpec: {
+                color: [
+                  'interpolate',
+                  ['linear'],
+                  ['get', 'value'],
+                  0.0,
+                  '#fff',
+                  100.0,
+                  '#fff',
+                ],
+                opacity: 1,
+              },
+            });
+          } else {
+            particles.updateOptions({
+              styleSpec: {
+                'color': [
+                  'interpolate',
+                  ['linear'],
+                  ['get', 'value'],
+                  ...windInterpolateColor
+                ],
+                'opacity': [
+                  'interpolate',
+                  ['exponential', 1],
+                  ['zoom'],
+                  1, 1,
+                  5, 0.8,
+                  10, 0
+                ],
+              },
+            });
+          }
+        });
+
+        gui.add(particlesConfig, 'numParticles', 0, 65535).onChange(function () {
+          particles.updateOptions(particlesConfig);
+        });
+
+        gui.add(particlesConfig, 'speedFactor', 0, 2).onChange(function () {
+          particles.updateOptions(particlesConfig);
+        });
+
+        gui.add(particlesConfig, 'fadeOpacity', 0, 1).onChange(function () {
+          particles.updateOptions(particlesConfig);
+        });
+
+        gui.add(particlesConfig, 'dropRate', 0, 0.1).onChange(function () {
+          particles.updateOptions(particlesConfig);
+        });
+
+        gui.add(particlesConfig, 'dropRateBump', 0, 0.1).onChange(function () {
+          particles.updateOptions(particlesConfig);
+        });
+
+        gui.add(particlesConfig, 'lineWidth', 0, 10).onChange(function () {
+          particles.updateOptions(particlesConfig);
+        });
+
+        gui.add(particlesConfig, 'wrapX').onChange(function () {
+          particles.updateOptions(particlesConfig);
+        });
 
         window.windLayer = new mapboxWind.WindLayer('wind', data, {
           windOptions: {
@@ -243,10 +330,8 @@
           },
         });
 
-        console.log(map, window.windLayer);
-
         // map.addLayer(window.windLayer);
-        // window.windLayer.addTo(map);
+        window.windLayer.addTo(map);
       });
   });
 </script>

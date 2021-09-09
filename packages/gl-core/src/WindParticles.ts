@@ -50,6 +50,7 @@ export interface IImageData {
   vMax?: number;
   min?: number;
   max?: number;
+  nodata?: number;
 }
 
 export interface IData {
@@ -77,21 +78,9 @@ const defaultOptions = {
       ['linear'],
       ['get', 'value'],
       0.0,
-      '#3288bd',
-      10,
-      '#66c2a5',
-      20,
-      '#abdda4',
-      30,
-      '#e6f598',
-      40,
-      '#fee08b',
-      50,
-      '#fdae61',
-      60,
-      '#f46d43',
+      '#fff',
       100.0,
-      '#d53e4f',
+      '#fff',
     ],
     opacity: 1,
   },
@@ -272,6 +261,8 @@ export default class WindParticles {
 
     this.buildColorRamp();
 
+    this.numParticles = this.options.numParticles;
+
     if (typeof this.options.getZoom === 'function') {
       this.setOpacity(
         createZoom(this.options.getZoom(), this.options.styleSpec?.opacity),
@@ -289,12 +280,11 @@ export default class WindParticles {
 
   public handleMoveend() {
     this.updateRenderState();
-    this.numParticles = this.privateNumParticles;
     clearScene(this.gl, [0, 0, 0, 0]);
   }
 
   public handleMovestart() {
-    this.alpha = 0;
+    this.alpha = 0.0;
   }
 
   public handleZoom() {
@@ -377,7 +367,8 @@ export default class WindParticles {
     const blendingEnabled = this.gl.isEnabled(this.gl.BLEND);
     this.gl.disable(this.gl.DEPTH_TEST);
     this.gl.enable(this.gl.BLEND);
-    this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+    this.gl.blendColor(0, 0, 0, 0);
+    this.gl.blendFunc(this.gl.ONE, this.gl.ONE_MINUS_SRC_ALPHA);
     this.screenCommand
       .active()
       .resize()
@@ -475,15 +466,7 @@ export default class WindParticles {
       const depthEnabled = this.gl.isEnabled(this.gl.DEPTH_TEST);
       const blendingEnabled = this.gl.isEnabled(this.gl.BLEND);
       this.gl.disable(this.gl.DEPTH_TEST);
-      this.gl.enable(this.gl.BLEND);
-      this.gl.blendEquation(this.gl.FUNC_ADD);
-      this.gl.blendColor(0, 0, 0, 0);
-      this.gl.blendFuncSeparate(
-        this.gl.SRC_ALPHA,
-        this.gl.ONE_MINUS_SRC_ALPHA,
-        1,
-        1,
-      );
+      this.gl.disable(this.gl.BLEND);
       const zoom = this.options.getZoom();
       const worlds = this.options.getWorlds();
       for (let i = 0; i < worlds.length; i++) {
@@ -496,6 +479,15 @@ export default class WindParticles {
             u_zoom: zoom,
             u_bbox: this.renderExtent,
             u_offset: worlds[i],
+            u_wind: this.data.texture,
+            u_wind_range: [
+              this.data.uMin,
+              this.data.uMax,
+              this.data.vMin,
+              this.data.vMax,
+            ],
+            u_color_ramp: this.colorRampTexture,
+            u_color_range: this.colorRange,
             u_aspectRatio: this.size[0] / this.size[1],
             u_particles_current: this.currentParticleStateTexture,
             u_particles_next: this.nextParticleStateTexture,
@@ -512,8 +504,8 @@ export default class WindParticles {
           .draw();
       }
 
-      if (!blendingEnabled) {
-        this.gl.disable(this.gl.BLEND);
+      if (blendingEnabled) {
+        this.gl.enable(this.gl.BLEND);
       }
 
       if (depthEnabled) {
@@ -666,6 +658,7 @@ export default class WindParticles {
                 image.width,
                 image.height,
               ),
+              nodata: data.nodata || 0,
               ...this.initializeVertex(data.extent),
             };
 

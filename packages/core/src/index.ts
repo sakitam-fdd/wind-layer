@@ -1,5 +1,5 @@
 import Field from './Field';
-import {isFunction, isNumber, isString, isValide} from './utils';
+import { isFunction, isNumber, isString, isValide } from './utils';
 
 export { default as Field } from './Field';
 export { default as Vector } from './Vector';

@@ -1,7 +1,7 @@
 import * as mapboxgl from 'mapbox-gl';
-import { fp64LowPart, getEye, WindParticles } from 'wind-gl-core';
+import { IWindOptions, WindParticles } from 'wind-gl-core';
 
-export interface IParticlesOptions {
+export interface IParticlesOptions extends IWindOptions {
   wrapX: boolean;
 }
 
@@ -39,6 +39,16 @@ export default class Particles {
     this.handleMoveend = this.handleMoveend.bind(this);
   }
 
+  public updateOptions(options: Partial<IWindOptions>) {
+    this.options = {
+      ...this.options,
+      ...(options || {}),
+    };
+    if (this.layer) {
+      this.layer.updateOptions(options);
+    }
+  }
+
   public handleZoom() {
     if (this.layer) {
       this.layer.handleZoom();
@@ -66,8 +76,6 @@ export default class Particles {
   public initialize() {
     if (!this.layer && this.gl) {
       this.layer = new WindParticles(this.gl, {
-        opacity: this.options.opacity,
-        styleSpec: this.options.styleSpec,
         getZoom: () => this.map.getZoom() as number,
         triggerRepaint: () => {
           this.map.triggerRepaint();
@@ -118,6 +126,7 @@ export default class Particles {
   public onRemove(map: mapboxgl.Map) {
     if (this.layer) {
       this.layer.destroyed();
+      this.layer = null;
     }
     map.off('zoom', this.handleZoom);
     map.off('movestart', this.handleMovestart);

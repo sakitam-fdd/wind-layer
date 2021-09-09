@@ -26,7 +26,7 @@ export default class ScalarFill {
   private renderingMode: '2d' | '3d';
   private options: any;
   private data: any;
-  private scalarFill: ScalarCore;
+  private scalarFill: ScalarCore | null;
 
   constructor(id: string, data: any, options?: Partial<IScalarFillOptions>) {
     this.id = id;
@@ -59,7 +59,6 @@ export default class ScalarFill {
         heightSegments: this.options.heightSegments,
         wireframe: this.options.wireframe,
         createPlaneBuffer: this.options.createPlaneBuffer,
-        depthRange: this.options.depthRange || [0.0, 1.0],
         getZoom: () => this.map.getZoom(),
         triggerRepaint: () => {
           this.map.triggerRepaint();
@@ -107,6 +106,16 @@ gl_Position.w += u_cameraEye.w;
     }
   }
 
+  public updateOptions(options: Partial<IScalarFillOptions>) {
+    this.options = {
+      ...this.options,
+      ...(options || {}),
+    };
+    if (this.scalarFill) {
+      this.scalarFill.updateOptions(options);
+    }
+  }
+
   public onAdd(map: mapboxgl.Map, gl: WebGLRenderingContext) {
     this.gl = gl;
     this.map = map;
@@ -137,6 +146,7 @@ gl_Position.w += u_cameraEye.w;
   public onRemove(map: mapboxgl.Map) {
     if (this.scalarFill) {
       this.scalarFill.destroyed();
+      this.scalarFill = null;
     }
     delete this.gl;
     delete this.map;

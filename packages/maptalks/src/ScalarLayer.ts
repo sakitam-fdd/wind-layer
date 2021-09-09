@@ -9,10 +9,20 @@ import {
   fp64LowPart,
   getGlContext,
   IOptions,
-  IPlaneBuffer,
   ScalarFill as ScalarCore,
 } from 'wind-gl-core';
 import { Extent, getWidth } from './utils';
+
+function getGLRes(map: any) {
+  return map.getGLRes ? map.getGLRes() : map.getGLZoom();
+}
+
+function coordinateToPoint(map: any, coordinate: any, res: number, out?: any) {
+  if (map.coordToPointAtRes) {
+    return map.coordToPointAtRes(coordinate, res, out);
+  }
+  return map.coordinateToPoint(coordinate, res, out);
+}
 
 export interface IScalarFillOptions extends IOptions {
   wrapX: boolean;
@@ -133,7 +143,6 @@ export class ScalarLayerRenderer extends renderer.CanvasLayerRenderer {
           heightSegments: opt.heightSegments,
           createPlaneBuffer: opt.createPlaneBuffer,
           wireframe: opt.wireframe,
-          depthRange: opt.depthRange || [0.0, 1.0],
           getZoom: () => this.getMap().getZoom(),
           triggerRepaint: () => {
             this._redraw();
@@ -154,9 +163,10 @@ gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
           number,
           number,
         ]) => {
-          const coords = map.coordToPoint(
+          const coords = coordinateToPoint(
+            map,
             new Coordinate(lng, lat),
-            map.getGLZoom(),
+            getGLRes(map),
           );
           return [coords.x, coords.y];
         };
@@ -212,21 +222,23 @@ gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
     let startX = extent[0];
     const worldWidth = getWidth(projectionExtent);
     const projWorldWidth = Math.abs(
-      map.coordToPoint(
+      coordinateToPoint(
+        map,
         map
           .getProjection()
           .unprojectCoords(
             new Coordinate([projectionExtent[0], projectionExtent[1]]),
           ),
-        map.getGLZoom(),
+        getGLRes(map),
       ).x -
-        map.coordToPoint(
+        coordinateToPoint(
+          map,
           map
             .getProjection()
             .unprojectCoords(
               new Coordinate([projectionExtent[2], projectionExtent[3]]),
             ),
-          map.getGLZoom(),
+          getGLRes(map),
         ).x,
     );
     let world = 0;

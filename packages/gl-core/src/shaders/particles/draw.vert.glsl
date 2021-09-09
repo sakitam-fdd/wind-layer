@@ -13,7 +13,7 @@ uniform float u_width;
 uniform float u_aspectRatio;
 uniform mat4 u_matrix;
 
-varying vec2 v_tex_pos;
+varying vec2 v_particle_pos;
 
 #pragma glslify: fromRGBA = require(../decode)
 
@@ -73,6 +73,8 @@ void main() {
 
     vec2 v_current_particle_pos = fromRGBA(current_color);
     vec2 v_next_particle_pos = fromRGBA(next_color);
+
+    v_particle_pos = v_current_particle_pos;
 
     // 裁切掉超出视图的粒子
     v_current_particle_pos = clamp(u_bbox.xy + v_current_particle_pos * (u_bbox.zw - u_bbox.xy), 0.0, 1.0) + vec2(u_offset, 0.0);
