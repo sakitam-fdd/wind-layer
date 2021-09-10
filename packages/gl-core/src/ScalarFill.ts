@@ -602,27 +602,27 @@ export default class ScalarFill implements IScalarFill<any> {
 
   public destroyData() {
     if (this.data) {
-      const {
-        texture,
-        quadBuffer,
-        quad64LowBuffer,
-        texCoordBuffer,
-      } = this.data;
-      if (texture) {
-        this.gl.deleteTexture(texture);
-      }
-      if (quadBuffer) {
-        this.gl.deleteBuffer(quadBuffer);
-      }
-
-      if (quad64LowBuffer) {
-        this.gl.deleteBuffer(quad64LowBuffer);
-      }
-
-      if (texCoordBuffer) {
-        this.gl.deleteBuffer(texCoordBuffer);
-      }
-      delete this.data;
+      // const {
+      //   texture,
+      //   quadBuffer,
+      //   quad64LowBuffer,
+      //   texCoordBuffer,
+      // } = this.data;
+      // if (texture) {
+      //   this.gl.deleteTexture(texture);
+      // }
+      // if (quadBuffer) {
+      //   this.gl.deleteBuffer(quadBuffer);
+      // }
+      //
+      // if (quad64LowBuffer) {
+      //   this.gl.deleteBuffer(quad64LowBuffer);
+      // }
+      //
+      // if (texCoordBuffer) {
+      //   this.gl.deleteBuffer(texCoordBuffer);
+      // }
+      // delete this.data;
     }
   }
 

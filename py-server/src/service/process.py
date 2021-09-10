@@ -221,9 +221,9 @@ def rp(data, params):
       left, bottom, right, top, height, width)
 
     src_transform = rasterio.transform.from_bounds(
-      west, south, east, north, data.shape[1], data.shape[0])
+      west, south, east, north, data.shape[2], data.shape[1])
 
-    dst = np.zeros((height, width), np.int32)
+    dst = np.zeros((2, height, width), np.float64)
     reproject(data,
               dst,
               src_transform=src_transform,
@@ -481,7 +481,7 @@ if __name__ == '__main__':
       ]
     })
     params = {}
-    params.__setitem__('raster_file', '/Users/sakitam-fdd/workspace/vis-project/wind-layer/py-server/static/raster')
+    params.__setitem__('raster_file', './static/raster')
     params.__setitem__('file_name', 'uv')
     params.__setitem__('file_name_mc', 'uv-mc')
     format_to_png(data['data'], data['headers'], params)

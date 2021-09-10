@@ -74,11 +74,14 @@ void main() {
     vec2 v_current_particle_pos = fromRGBA(current_color);
     vec2 v_next_particle_pos = fromRGBA(next_color);
 
-    v_particle_pos = v_current_particle_pos;
+    vec2 vc_pos = u_bbox.xy + v_current_particle_pos * (u_bbox.zw - u_bbox.xy);
+    vec2 nc_pos = u_bbox.xy + v_next_particle_pos * (u_bbox.zw - u_bbox.xy);
+
+    v_particle_pos = mix(vc_pos, nc_pos, 0.5);
 
     // 裁切掉超出视图的粒子
-    v_current_particle_pos = clamp(u_bbox.xy + v_current_particle_pos * (u_bbox.zw - u_bbox.xy), 0.0, 1.0) + vec2(u_offset, 0.0);
-    v_next_particle_pos = clamp(u_bbox.xy + v_next_particle_pos * (u_bbox.zw - u_bbox.xy), 0.0, 1.0) + vec2(u_offset, 0.0);
+    v_current_particle_pos = clamp(vc_pos, 0.0, 1.0) + vec2(u_offset, 0.0);
+    v_next_particle_pos = clamp(nc_pos, 0.0, 1.0) + vec2(u_offset, 0.0);
 
     gl_PointSize = 1.0;
 

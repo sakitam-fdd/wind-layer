@@ -480,6 +480,7 @@ export default class WindParticles {
             u_bbox: this.renderExtent,
             u_offset: worlds[i],
             u_wind: this.data.texture,
+            u_wind_res: [this.data.width, this.data.height],
             u_wind_range: [
               this.data.uMin,
               this.data.uMax,

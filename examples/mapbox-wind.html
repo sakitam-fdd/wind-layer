@@ -115,7 +115,7 @@
 
         const fillLayer = new mapboxWind.ScalarFill('wind', {
           "type": "image",
-          "url": "./data/var_ugrd-var_vgrd.png",
+          "url": "./data/uv.png",
           "extent": [
             [-180, 85.051129],
             [-180, -85.051129],
@@ -124,10 +124,10 @@
           ],
           "width": 1440,
           "height": 720,
-          "uMin": -21.34380340576172,
-          "uMax": 30.7261962890625,
-          "vMin": -23.916271209716797,
-          "vMax": 24.693727493286133,
+          "uMin": -34.37186050415039,
+          "uMax": 46.51813888549805,
+          "vMin": -42.12305450439453,
+          "vMax": 49.66694259643555,
         }, {
           wrapX: true,
           styleSpec: {
@@ -148,17 +148,17 @@
             ],
           },
           renderForm: 'rg',
-          widthSegments: 720,
-          heightSegments: 360,
-          // widthSegments: 1,
-          // heightSegments: 1,
+          // widthSegments: 720,
+          // heightSegments: 360,
+          widthSegments: 1,
+          heightSegments: 1,
           displayRange: [0, 150],
           // mappingRange: [0, 500000],
           mappingRange: [0, 0],
-          wireframe: true,
+          wireframe: false,
         });
 
-        // map.addLayer(fillLayer);
+        map.addLayer(fillLayer);
 
         const particlesConfig = {
           wrapX: true,
@@ -173,7 +173,7 @@
 
         const particles = new mapboxWind.Particles('particles', {
           "type": "image",
-          "url": "./data/wind-mc.png",
+          "url": "./data/uv-mc.png",
           "extent": [
             [-180, 85.051129],
             [-180, -85.051129],
@@ -182,14 +182,10 @@
           ],
           "width": 1024,
           "height": 1024,
-          // maxVal: 41.008583
-          // minVal: -39.26169
-          // maxVal: 37.988686
-          // minVal: -41.68313
-          "uMin": -39.26169,
-          "uMax": 41.008583,
-          "vMin": -41.68313,
-          "vMax": 37.988686,
+          "uMin": -34.37186050415039,
+          "uMax": 46.51813888549805,
+          "vMin": -42.12305450439453,
+          "vMax": 49.66694259643555,
         }, {
           wrapX: true,
           lineWidth: 2.2,
@@ -217,12 +213,26 @@
         const gui = new dat.GUI();
 
         gui.add({
-          add: true,
-        }, 'add').onChange(function (state) {
+          addParticles: true,
+        }, 'addParticles').onChange(function (state) {
           if (state) {
             map.addLayer(particles);
           } else {
             map.removeLayer('particles');
+          }
+        });
+
+        gui.add({
+          addScalarFill: true,
+        }, 'addScalarFill').onChange(function (state) {
+          if (state) {
+            if (map.getLayer('particles')) {
+              map.addLayer(fillLayer, 'particles');
+            } else {
+              map.addLayer(fillLayer);
+            }
+          } else {
+            map.removeLayer('wind');
           }
         });
 
@@ -293,43 +303,6 @@
         gui.add(particlesConfig, 'wrapX').onChange(function () {
           particles.updateOptions(particlesConfig);
         });
-
-        window.windLayer = new mapboxWind.WindLayer('wind', data, {
-          windOptions: {
-            // colorScale: (m) => {
-            //   // console.log(m);
-            //   return '#fff';
-            // },
-            // colorScale: [
-            //   "rgb(36,104, 180)",
-            //   "rgb(60,157, 194)",
-            //   "rgb(128,205,193 )",
-            //   "rgb(151,218,168 )",
-            //   "rgb(198,231,181)",
-            //   "rgb(238,247,217)",
-            //   "rgb(255,238,159)",
-            //   "rgb(252,217,125)",
-            //   "rgb(255,182,100)",
-            //   "rgb(252,150,75)",
-            //   "rgb(250,112,52)",
-            //   "rgb(245,64,32)",
-            //   "rgb(237,45,28)",
-            //   "rgb(220,24,32)",
-            //   "rgb(180,0,35)"
-            // ],
-            // velocityScale: 1 / 20,
-            // paths: 5000,
-            frameRate: 16,
-            maxAge: 60,
-            globalAlpha: 0.9,
-            velocityScale: 0.01,
-            // paths: 10000,
-            paths: 3782,
-          },
-        });
-
-        // map.addLayer(window.windLayer);
-        // window.windLayer.addTo(map);
       });
   });
 </script>
