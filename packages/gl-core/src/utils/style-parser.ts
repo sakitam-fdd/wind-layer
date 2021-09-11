@@ -154,7 +154,7 @@ export function interpolateNumber(a: number, b: number, t: number) {
   return a * (1 - t) + b * t;
 }
 
-let cachedStyle:
+export type CachedStyleItem =
   | {
       operator: any;
       interpolation: any;
@@ -162,16 +162,38 @@ let cachedStyle:
     }
   | { operator?: undefined; interpolation?: undefined; input?: undefined };
 
+const cachedStyle: {
+  [key: string]: CachedStyleItem;
+} = {};
+
 export function createZoom(
+  uid: string,
   zoom: number,
-  styleAttrField?: any[] | number,
+  key: string,
+  styles: any,
+  clearCache?: boolean,
 ): number {
-  if (styleAttrField && Array.isArray(styleAttrField)) {
-    cachedStyle = parseZoomStyle(styleAttrField);
+  const ukey = `${uid}_${key}`;
+  const styleAttrField = styles[key] as any[] | number;
+
+  if (isNumber(styleAttrField)) {
+    if (cachedStyle[ukey]) {
+      delete cachedStyle[ukey];
+    }
+    return styleAttrField as number;
   }
 
-  if (cachedStyle) {
-    const { input: interpolateZoom, interpolation } = cachedStyle || {};
+  if (
+    styleAttrField &&
+    Array.isArray(styleAttrField) &&
+    (!cachedStyle[ukey] || clearCache)
+  ) {
+    cachedStyle[ukey] = parseZoomStyle(styleAttrField);
+    console.log(cachedStyle);
+  }
+
+  if (cachedStyle[ukey]) {
+    const { input: interpolateZoom, interpolation } = cachedStyle[ukey] || {};
     if (interpolateZoom && Array.isArray(interpolateZoom)) {
       const labels = interpolateZoom.map((i) => i.key);
       const outputs = interpolateZoom.map((i) => i.value);
@@ -200,5 +222,5 @@ export function createZoom(
       return 1;
     }
   }
-  return isNumber(styleAttrField) ? (styleAttrField as number) : 1;
+  return 1;
 }

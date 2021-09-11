@@ -25,12 +25,12 @@ export interface IWindOptions {
   speedFactor: number;
   dropRate: number;
   dropRateBump: number;
-  numParticles: number;
   lineWidth: number;
   visible?: boolean;
   styleSpec?: {
     color: any[];
     opacity: number | any[];
+    numParticles: number | any[];
   };
   getZoom: () => number;
   triggerRepaint?: () => void;
@@ -83,6 +83,7 @@ const defaultOptions = {
       '#fff',
     ],
     opacity: 1,
+    numParticles: 65535,
   },
   opacity: 1,
   lineWidth: 2,
@@ -90,8 +91,9 @@ const defaultOptions = {
   fadeOpacity: 0.93,
   dropRate: 0.003,
   dropRateBump: 0.002,
-  numParticles: 65535,
 };
+
+let uid = 0;
 
 export default class WindParticles {
   public gl: WebGLRenderingContext;
@@ -129,6 +131,9 @@ export default class WindParticles {
 
   constructor(gl: WebGLRenderingContext, options: Partial<IWindOptions> = {}) {
     this.gl = gl;
+
+    this.uid = `WindParticles_${uid}`;
+    uid++;
 
     if (!this.gl) {
       throw new Error('initialize error');
@@ -176,11 +181,17 @@ export default class WindParticles {
 
     this.buildColorRamp();
 
-    this.numParticles = this.options.numParticles;
-
     if (typeof this.options.getZoom === 'function') {
+      const zoom = this.options.getZoom();
       this.setOpacity(
-        createZoom(this.options.getZoom(), this.options.styleSpec?.opacity),
+        createZoom(this.uid, zoom, 'opacity', this.options.styleSpec),
+      );
+
+      this.numParticles = createZoom(
+        this.uid,
+        zoom,
+        'numParticles',
+        this.options.styleSpec,
       );
     }
 
@@ -254,18 +265,33 @@ export default class WindParticles {
   }
 
   public updateOptions(options: Partial<IWindOptions>) {
+    const styleSpec = (options.styleSpec || {}) as {
+      color: any[];
+      opacity: number | any[];
+      numParticles: number | any[];
+    };
     this.options = {
       ...this.options,
       ...options,
+      styleSpec: {
+        ...this.options.styleSpec,
+        ...styleSpec,
+      },
     };
 
     this.buildColorRamp();
 
-    this.numParticles = this.options.numParticles;
-
     if (typeof this.options.getZoom === 'function') {
+      const zoom = this.options.getZoom();
       this.setOpacity(
-        createZoom(this.options.getZoom(), this.options.styleSpec?.opacity),
+        createZoom(this.uid, zoom, 'opacity', this.options.styleSpec),
+      );
+
+      this.numParticles = createZoom(
+        this.uid,
+        zoom,
+        'numParticles',
+        this.options.styleSpec,
       );
     }
   }
@@ -289,8 +315,17 @@ export default class WindParticles {
 
   public handleZoom() {
     if (typeof this.options.getZoom === 'function') {
+      const zoom = this.options.getZoom();
       this.setOpacity(
-        createZoom(this.options.getZoom(), this.options.styleSpec?.opacity),
+        createZoom(this.uid, zoom, 'opacity', this.options.styleSpec, true),
+      );
+
+      this.numParticles = createZoom(
+        this.uid,
+        zoom,
+        'numParticles',
+        this.options.styleSpec,
+        true,
       );
     }
   }
@@ -326,7 +361,7 @@ export default class WindParticles {
       this.gl.disable(this.gl.BLEND);
       this.screenCommand
         .active()
-        .resize()
+        .resize(...this.size)
         .setUniforms({
           u_screen: this.backgroundTexture,
           u_opacity: this.options.fadeOpacity,

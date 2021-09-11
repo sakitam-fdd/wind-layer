@@ -3,9 +3,12 @@
 <head>
   <meta charset='utf-8'/>
   <title>mapbox wind</title>
-  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'/>
-  <script src="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.js"></script>
-  <link href="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+  <meta name="renderer" content="webkit"/>
+  <meta name="force-rendering" content="webkit"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <script src="http://localhost:3000/mapbox-gl-dev.js"></script>
+  <link rel="stylesheet" href="//html5.mojicb.com/fe-public/lib/mapbox-moji/v1.22.1/mapbox-gl.css">
   <style>
     body {
       margin: 0;
@@ -113,6 +116,53 @@
 
         const windInterpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
 
+        const fillLayer1 = new mapboxWind.ScalarFill('wind1', {
+          "type": "image",
+          "url": "./data/uv.png",
+          "extent": [
+            [-180, 85.051129],
+            [-180, -85.051129],
+            [180, 85.051129],
+            [180, -85.051129],
+          ],
+          "width": 1440,
+          "height": 720,
+          "uMin": -34.37186050415039,
+          "uMax": 46.51813888549805,
+          "vMin": -42.12305450439453,
+          "vMax": 49.66694259643555,
+        }, {
+          wrapX: true,
+          styleSpec: {
+            'fill-color': [
+              'interpolate',
+              ['linear'],
+              ['get', 'value'],
+              ...windInterpolateColor
+            ],
+            'opacity': [
+              'interpolate',
+              ['exponential', 0.5],
+              ['zoom'],
+              0,
+              1,
+              10,
+              0
+            ],
+          },
+          renderForm: 'rg',
+          // widthSegments: 720,
+          // heightSegments: 360,
+          widthSegments: 1,
+          heightSegments: 1,
+          displayRange: [0, 150],
+          // mappingRange: [0, 500000],
+          mappingRange: [0, 0],
+          wireframe: false,
+        });
+
+        map.addLayer(fillLayer1);
+
         const fillLayer = new mapboxWind.ScalarFill('wind', {
           "type": "image",
           "url": "./data/uv.png",
@@ -142,8 +192,8 @@
               ['exponential', 0.5],
               ['zoom'],
               1,
-              1,
-              2,
+              0,
+              10,
               1
             ],
           },
@@ -162,7 +212,6 @@
 
         const particlesConfig = {
           wrapX: true,
-          numParticles: 65535,
           speedFactor: 1,
           fadeOpacity: 0.93,
           dropRate: 0.003,
@@ -189,23 +238,35 @@
         }, {
           wrapX: true,
           lineWidth: 2.2,
-          // styleSpec: {
-          //   'color': [
-          //     'interpolate',
-          //     ['linear'],
-          //     ['get', 'value'],
-          //     ...windInterpolateColor
-          //   ],
-          //   'opacity': [
-          //     'interpolate',
-          //     ['exponential', 0.5],
-          //     ['zoom'],
-          //     1,
-          //     1,
-          //     5,
-          //     0
-          //   ],
-          // },
+          styleSpec: {
+            'color': [
+              'interpolate',
+              ['linear'],
+              ['get', 'value'],
+              0.0,
+              '#fff',
+              100.0,
+              '#fff',
+            ],
+            'opacity': [
+              'interpolate',
+              ['exponential', 0.5],
+              ['zoom'],
+              1, // zoom
+              1, // opacity
+              5, // zoom
+              0.8 // opacity
+            ],
+            'numParticles': [
+              'interpolate',
+              ['exponential', 0.5],
+              ['zoom'],
+              0, // zoom
+              65535, // numParticles
+              8, // zoom
+              512 // numParticles
+            ],
+          },
         });
 
         map.addLayer(particles);
@@ -250,8 +311,7 @@
                   '#fff',
                   100.0,
                   '#fff',
-                ],
-                opacity: 1,
+                ]
               },
             });
           } else {
@@ -262,22 +322,20 @@
                   ['linear'],
                   ['get', 'value'],
                   ...windInterpolateColor
-                ],
-                'opacity': [
-                  'interpolate',
-                  ['exponential', 1],
-                  ['zoom'],
-                  1, 1,
-                  5, 0.8,
-                  10, 0
-                ],
+                ]
               },
             });
           }
         });
 
-        gui.add(particlesConfig, 'numParticles', 0, 65535).onChange(function () {
-          particles.updateOptions(particlesConfig);
+        gui.add({
+          numParticles: 65535,
+        }, 'numParticles', 0, 65535).onChange(function (num) {
+          particles.updateOptions({
+            styleSpec: {
+              numParticles: num
+            },
+          });
         });
 
         gui.add(particlesConfig, 'speedFactor', 0, 2).onChange(function () {

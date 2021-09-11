@@ -169,6 +169,8 @@ interface IScalarFill<T> {
   [key: string]: T;
 }
 
+let uid = 0;
+
 export default class ScalarFill implements IScalarFill<any> {
   [index: string]: any;
 
@@ -176,6 +178,7 @@ export default class ScalarFill implements IScalarFill<any> {
   public data: IData;
   public colorRampTexture: WebGLTexture | null;
 
+  private uid: string;
   private options: IOptions;
 
   private opacity: number;
@@ -188,6 +191,8 @@ export default class ScalarFill implements IScalarFill<any> {
 
   constructor(gl: WebGLRenderingContext, options?: Partial<IOptions>) {
     this.gl = gl;
+    this.uid = `ScalarFill_${uid}`;
+    uid++;
 
     if (!this.gl) {
       throw new Error('initialize error');
@@ -215,7 +220,13 @@ export default class ScalarFill implements IScalarFill<any> {
 
     if (typeof this.options.getZoom === 'function') {
       this.setOpacity(
-        createZoom(this.options.getZoom(), this.options.styleSpec?.opacity),
+        createZoom(
+          this.uid,
+          this.options.getZoom(),
+          'opacity',
+          this.options.styleSpec,
+          true,
+        ),
       );
     }
   }
@@ -231,7 +242,12 @@ export default class ScalarFill implements IScalarFill<any> {
   public handleZoom() {
     if (typeof this.options.getZoom === 'function') {
       this.setOpacity(
-        createZoom(this.options.getZoom(), this.options.styleSpec?.opacity),
+        createZoom(
+          this.uid,
+          this.options.getZoom(),
+          'opacity',
+          this.options.styleSpec,
+        ),
       );
     }
   }
@@ -282,7 +298,12 @@ export default class ScalarFill implements IScalarFill<any> {
 
     if (typeof this.options.getZoom === 'function') {
       this.setOpacity(
-        createZoom(this.options.getZoom(), this.options.styleSpec?.opacity),
+        createZoom(
+          this.uid,
+          this.options.getZoom(),
+          'opacity',
+          this.options.styleSpec,
+        ),
       );
     }
   }
