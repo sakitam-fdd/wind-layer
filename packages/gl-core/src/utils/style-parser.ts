@@ -189,7 +189,6 @@ export function createZoom(
     (!cachedStyle[ukey] || clearCache)
   ) {
     cachedStyle[ukey] = parseZoomStyle(styleAttrField);
-    console.log(cachedStyle);
   }
 
   if (cachedStyle[ukey]) {
