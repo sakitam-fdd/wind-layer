@@ -71,7 +71,7 @@ export interface IData {
   texture?: WebGLTexture | null;
 }
 
-const defaultOptions = {
+export const defaultOptions = {
   styleSpec: {
     color: [
       'interpolate',
@@ -129,7 +129,14 @@ export default class WindParticles {
   private visible: boolean;
   private alpha: number;
 
-  constructor(gl: WebGLRenderingContext, options: Partial<IWindOptions> = {}) {
+  private frameTime: number;
+  private lastTime: number;
+  private readonly uid: string;
+  constructor(
+    gl: WebGLRenderingContext,
+    // tslint:disable-next-line:no-object-literal-type-assertion
+    options: IWindOptions = {} as IWindOptions,
+  ) {
     this.gl = gl;
 
     this.uid = `WindParticles_${uid}`;
@@ -284,7 +291,7 @@ export default class WindParticles {
     if (typeof this.options.getZoom === 'function') {
       const zoom = this.options.getZoom();
       this.setOpacity(
-        createZoom(this.uid, zoom, 'opacity', this.options.styleSpec),
+        createZoom(this.uid, zoom, 'opacity', this.options.styleSpec, true),
       );
 
       this.numParticles = createZoom(
@@ -292,6 +299,7 @@ export default class WindParticles {
         zoom,
         'numParticles',
         this.options.styleSpec,
+        true,
       );
     }
   }
@@ -317,7 +325,7 @@ export default class WindParticles {
     if (typeof this.options.getZoom === 'function') {
       const zoom = this.options.getZoom();
       this.setOpacity(
-        createZoom(this.uid, zoom, 'opacity', this.options.styleSpec, true),
+        createZoom(this.uid, zoom, 'opacity', this.options.styleSpec),
       );
 
       this.numParticles = createZoom(
@@ -325,7 +333,6 @@ export default class WindParticles {
         zoom,
         'numParticles',
         this.options.styleSpec,
-        true,
       );
     }
   }
@@ -459,10 +466,8 @@ export default class WindParticles {
           u_drop_rate: this.options.dropRate,
           u_drop_rate_bump: this.options.dropRateBump,
           u_speed_factor: [
-            // this.options.speedFactor * 0.0001,
-            // this.options.speedFactor * 0.0001,
-            0,
-            0.0001,
+            (timeScale * this.frameTime) / this.size[0],
+            (timeScale * this.frameTime) / this.size[1],
           ],
           u_wind: this.data.texture,
           u_bbox: this.renderExtent,
@@ -738,7 +743,63 @@ export default class WindParticles {
     return [lng, lat];
   }
 
+  public destroyData() {
+    if (this.data) {
+      const {
+        texture,
+        quadBuffer,
+        buffer,
+        texCoordBuffer,
+        backgroundBuffer,
+        backgroundTexCoordBuffer,
+      } = this.data;
+      if (texture) {
+        this.gl.deleteTexture(texture);
+      }
+      if (buffer) {
+        this.gl.deleteBuffer(buffer);
+      }
+      if (quadBuffer) {
+        this.gl.deleteBuffer(quadBuffer);
+      }
+
+      if (texCoordBuffer) {
+        this.gl.deleteBuffer(texCoordBuffer);
+      }
+      if (backgroundBuffer) {
+        this.gl.deleteBuffer(backgroundBuffer);
+      }
+      if (backgroundTexCoordBuffer) {
+        this.gl.deleteBuffer(backgroundTexCoordBuffer);
+      }
+      delete this.data;
+    }
+  }
+
   public destroyed() {
-    console.log('destroyed');
+    this.stop();
+    if (this.currentParticleStateTexture) {
+      this.gl.deleteTexture(this.currentParticleStateTexture);
+      this.currentParticleStateTexture = null;
+    }
+    if (this.nextParticleStateTexture) {
+      this.gl.deleteTexture(this.nextParticleStateTexture);
+      this.nextParticleStateTexture = null;
+    }
+
+    if (this.backgroundTexture) {
+      this.gl.deleteTexture(this.backgroundTexture);
+      this.backgroundTexture = null;
+    }
+    if (this.screenTexture) {
+      this.gl.deleteTexture(this.screenTexture);
+      this.screenTexture = null;
+    }
+
+    if (this.fbo) {
+      this.gl.deleteFramebuffer(this.fbo);
+      this.fbo = null;
+    }
+    this.destroyData();
   }
 }

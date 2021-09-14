@@ -80,8 +80,52 @@ export default class Particles {
         triggerRepaint: () => {
           this.map.triggerRepaint();
         },
-        dropRate: 0.003,
-        dropRateBump: 0.002,
+        getExtent: () => {
+          const bounds = this.map.getBounds().toArray();
+          let xmin = bounds[0][0];
+          const ymin = bounds[0][1];
+          let xmax = bounds[1][0];
+          const ymax = bounds[1][1];
+
+          // 如果是多世界了，固定 x 范围到-180 到 180,但是此时采样会出问题
+          // 比如 -190 - -170范围 -1 世界和 0 世界按全球范围采样会出现错误
+          const worlds = this.getWrappedWorlds();
+          if (worlds.length > 1) {
+            xmin = -180;
+            xmax = 180;
+          } else {
+            if (xmin < -180) {
+              xmin = -180;
+            }
+
+            if (xmax > 180) {
+              xmax = 180;
+            }
+          }
+
+          const p0 = mapboxgl.MercatorCoordinate.fromLngLat(
+            new mapboxgl.LngLat(xmin, ymax),
+          );
+          const p1 = mapboxgl.MercatorCoordinate.fromLngLat(
+            new mapboxgl.LngLat(xmax, ymin),
+          );
+          return [p0.x, p0.y, p1.x, p1.y];
+        },
+        getSize: () => {
+          return [
+            this.map.transform.size.x as number,
+            this.map.transform.size.y as number,
+          ];
+        },
+        interacting: () => {
+          return (
+            !this.map.painter.options.moving &&
+            !this.map.painter.options.rotating &&
+            !this.map.painter.options.zooming
+          );
+        },
+        getWorlds: () => this.getWrappedWorlds(),
+        ...this.options,
       });
 
       this.layer.getMercatorCoordinate = getCoords;
@@ -154,7 +198,7 @@ export default class Particles {
       const w0 = Math.floor(Math.min(utl.x, utr.x, ubl.x, ubr.x));
       const w1 = Math.floor(Math.max(utl.x, utr.x, ubl.x, ubr.x));
 
-      const extraWorldCopy = 1;
+      const extraWorldCopy = 0;
 
       for (let w = w0 - extraWorldCopy; w <= w1 + extraWorldCopy; w++) {
         if (w === 0) {
@@ -166,18 +210,14 @@ export default class Particles {
     return result;
   }
 
-  public render(gl: WebGLRenderingContext, matrix: number[]) {
-    const cameraEye = getEye(matrix);
-    const cameraEye64Low = cameraEye.map((item: number) => fp64LowPart(item));
+  public prerender(gl: WebGLRenderingContext, matrix: number[]) {
     if (this.data && this.layer) {
-      const worlds = this.getWrappedWorlds();
-      // tslint:disable-next-line:prefer-for-of
-      for (let i = 0; i < worlds.length; i++) {
-        this.layer.prerender(matrix, worlds[i], {
-          cameraEye,
-          cameraEye64Low,
-        });
-      }
+      this.layer.prerender(matrix);
+    }
+  }
+
+  public render(gl: WebGLRenderingContext, matrix: number[]) {
+    if (this.data && this.layer) {
       this.layer.render(matrix);
     }
   }

@@ -17,8 +17,6 @@ varying vec2 v_tex_pos;
 
 #pragma glslify: toRGBA = require(../encode)
 #pragma glslify: fromRGBA = require(../decode)
-#pragma glslify: rand = require(../random)
-//#pragma glslify: mercatorToWGS84 = require(../mercatorToWGS84)
 
 // pseudo-random generator
 const vec3 rand_constants = vec3(12.9898, 78.233, 4375.85453);
@@ -63,7 +61,15 @@ void main() {
     vec4 color = texture2D(u_particles, v_tex_pos);
     vec2 pos = fromRGBA(color);
 
-    vec2 velocity = lookup_wind(pos);
+    vec2 global_pos = u_bbox.xy + pos * (u_bbox.zw - u_bbox.xy);
+
+    vec2 alphas = getColor(global_pos);
+
+    if (alphas.x <= u_nodata || alphas.y <= u_nodata) {
+        discard;
+    }
+
+    vec2 velocity = lookup_wind(global_pos);
 
     float speed_t = length(velocity);
     vec2 offset =  vec2(velocity.x, -velocity.y) * u_speed_factor;
