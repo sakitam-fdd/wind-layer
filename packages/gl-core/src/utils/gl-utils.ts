@@ -21,7 +21,7 @@ export function resizeCanvasSize(
     return false;
   }
   pixelRatio = pixelRatio || getDevicePixelRatio();
-  if (!(canvas instanceof OffscreenCanvas)) {
+  if (canvas instanceof HTMLCanvasElement) {
     const width = canvas.clientWidth * pixelRatio;
     const height = canvas.clientHeight * pixelRatio;
     if (width <= 0 || height <= 0) {
