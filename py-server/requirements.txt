@@ -16,7 +16,7 @@ astroid==2.2.5
 astropy==3.2.1
 atomicwrites==1.3.0
 attrs==19.1.0
-Babel==2.7.0
+Babel==2.9.1
 backcall==0.1.0
 backports.functools-lru-cache==1.5
 backports.os==0.1.1
