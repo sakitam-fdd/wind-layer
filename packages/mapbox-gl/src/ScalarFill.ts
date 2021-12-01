@@ -1,9 +1,11 @@
 import * as mapboxgl from 'mapbox-gl';
+
 import {
   fp64LowPart,
   getEye,
   IOptions,
   ScalarFill as ScalarCore,
+  // @ts-ignore
 } from 'wind-gl-core';
 
 export interface IScalarFillOptions extends IOptions {
@@ -19,11 +21,11 @@ function getCoords([lng, lat]: [number, number]): [number, number] {
 }
 
 export default class ScalarFill {
-  private gl: WebGLRenderingContext;
-  private map: mapboxgl.Map;
-  private id: string;
-  private type: string;
-  private renderingMode: '2d' | '3d';
+  public gl: WebGLRenderingContext;
+  public map: mapboxgl.Map;
+  public id: string;
+  public type: string;
+  public renderingMode: '2d' | '3d';
   private options: any;
   private data: any;
   private scalarFill: ScalarCore | null;
@@ -148,7 +150,9 @@ gl_Position.w += u_cameraEye.w;
       this.scalarFill.destroyed();
       this.scalarFill = null;
     }
+    // @ts-ignore
     delete this.gl;
+    // @ts-ignore
     delete this.map;
     map.off('zoom', this.handleZoom);
   }

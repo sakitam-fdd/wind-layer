@@ -3,13 +3,14 @@ import {
   Coordinate,
   renderer,
   // @ts-ignore
-} from 'maptalks/dist/maptalks.es.js';
+} from 'maptalks';
 import {
   clearScene,
   fp64LowPart,
   getGlContext,
   IOptions,
   ScalarFill as ScalarCore,
+  // @ts-ignore
 } from 'wind-gl-core';
 import { Extent, getWidth } from './utils';
 
@@ -242,16 +243,14 @@ gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
         ).x,
     );
     let world = 0;
-    let offsetX;
 
-    const result = [];
+    const result: number[] = [];
 
     const layer = this.layer;
     const opt = layer.getOptions();
     if (opt.wrapX) {
       while (startX < projectionExtent[0]) {
         --world;
-        offsetX = worldWidth * world;
         result.push(world * projWorldWidth);
         startX += worldWidth;
       }
@@ -259,7 +258,6 @@ gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
       startX = extent[2];
       while (startX > projectionExtent[2]) {
         ++world;
-        offsetX = worldWidth * world;
         result.push(world * projWorldWidth);
         startX -= worldWidth;
       }
@@ -301,6 +299,7 @@ gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
   // onResize() {}
 
   public remove() {
+    // @ts-ignore
     delete this._drawContext;
     super.remove();
   }
@@ -328,6 +327,7 @@ gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
 
 export class ScalarLayer extends CanvasLayer {
   private data: any;
+  // @ts-ignore
   private _map: any;
   private options: any;
 
@@ -404,11 +404,11 @@ export class ScalarLayer extends CanvasLayer {
     return this;
   }
 
-  private prepareToDraw() {
+  public prepareToDraw() {
     return [];
   }
 
-  private drawOnInteracting() {
+  public drawOnInteracting() {
     this.draw();
   }
 

@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "module": "esnext",
+    "target": "esnext",
+    "lib": [
+      "esnext",
+      "dom",
+      "webworker"
+    ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.json",
+    "package.json",
+    "rollup.config.ts",
+    "typings.d.ts"
+  ]
+}

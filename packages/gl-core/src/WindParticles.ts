@@ -772,6 +772,7 @@ export default class WindParticles {
       if (backgroundTexCoordBuffer) {
         this.gl.deleteBuffer(backgroundTexCoordBuffer);
       }
+      // @ts-ignore
       delete this.data;
     }
   }

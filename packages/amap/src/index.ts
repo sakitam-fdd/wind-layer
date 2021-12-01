@@ -1,4 +1,5 @@
-import WindCore, {
+import {
+  WindCore,
   Field,
   isArray,
   formatData,
@@ -255,6 +256,7 @@ class AMapWind {
       removeDomNode(this.canvas);
     }
     delete this.map;
+    // @ts-ignore
     delete this.canvas;
   }
 

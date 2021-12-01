@@ -4,7 +4,6 @@ import { Image as ImageLayer } from 'ol/layer'; // FIXME: should use Layer, but 
 import {
   assign,
   defaultOptions,
-  Field,
   formatData,
   IOptions,
   isArray,

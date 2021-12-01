@@ -3,7 +3,6 @@ import { FrameState } from 'ol/PluggableMap';
 import WindLayerRender from './renderer';
 
 import {
-  Field,
   isArray,
   formatData,
   warnLog,

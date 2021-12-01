@@ -1,4 +1,5 @@
-import WindCore, {
+import {
+  WindCore,
   Field,
   isArray,
   formatData,
@@ -43,7 +44,7 @@ class BMapWind extends BMap.Overlay {
   private paneName: string;
   private zIndex: number;
   private mixBlendMode: any;
-  private enableMassClear: boolean;
+  public enableMassClear: boolean;
 
   constructor (data: any, options: Partial<IWindOptions> = {}) {
     const opt = assign({}, _options, options);
@@ -90,7 +91,7 @@ class BMapWind extends BMap.Overlay {
     }
   }
 
-  private initialize (map: any) {
+  public initialize (map: any) {
     this.map = map;
     const canvas = this.canvas = document.createElement('canvas');
     canvas.style.cssText = `position:absolute; left:0; top:0; z-index: ${this.zIndex} ;user-select:none;`;
@@ -161,7 +162,7 @@ class BMapWind extends BMap.Overlay {
     }
   }
 
-  private draw () {
+  public draw () {
     this._draw();
   }
 
@@ -185,7 +186,7 @@ class BMapWind extends BMap.Overlay {
    * @param canvas
    * @returns {BMapWind}
    */
-  private render (canvas: HTMLCanvasElement) {
+  public render (canvas: HTMLCanvasElement) {
     if (!this.getData() || !this.map) return this;
     const opt = this.getWindOptions();
     if (canvas && !this.wind) {

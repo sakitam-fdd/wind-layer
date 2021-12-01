@@ -215,7 +215,7 @@ export default class Base {
       };
     }
     if ((type === gl.SAMPLER_2D || type === gl.SAMPLER_CUBE) && isArray) {
-      const units = [];
+      const units: number[] = [];
       for (let ii = 0; ii < uniformInfo.size; ++ii) {
         units.push(this.textureUnit++);
       }

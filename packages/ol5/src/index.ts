@@ -7,7 +7,8 @@ import { Pixel as IPixel } from 'ol/pixel';
 import { ProjectionLike as IProjection, transform } from 'ol/proj';
 import { Size as ISize } from 'ol/size';
 import ImageCanvas, { Options as ImageCanvasOptions } from 'ol/source/ImageCanvas';
-import WindCore, {
+import {
+  WindCore,
   assign,
   createCanvas,
   defaultOptions,
@@ -50,7 +51,6 @@ class OlWind extends ImageLayer {
   private canvas: HTMLCanvasElement;
   private wind: WindCore | null;
   private field: Field | undefined;
-  private map: any;
   private pixelRatio: number;
   private viewProjection: IProjection;
 

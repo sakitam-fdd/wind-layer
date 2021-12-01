@@ -1,4 +1,5 @@
-import WindCore, {
+import {
+  WindCore,
   Field,
   isArray,
   formatData,
@@ -24,18 +25,9 @@ export interface IWindOptions extends IOptions {
   [key: string]: any;
 }
 
-// const G = typeof window === 'undefined' ? global : window;
-
 const _options = {
   windOptions: {},
 };
-
-// @ts-ignore
-// const ol = G?.ol;
-//
-// if (!ol) {
-//   throw new Error('Before using this plugin, you must first introduce the openlayers <https://openlayers.org/>');
-// }
 
 class OlWind extends ol.layer.Image {
   private options: IWindOptions;
@@ -44,7 +36,6 @@ class OlWind extends ol.layer.Image {
   private field: Field | undefined;
   public viewProjection: ol.ProjectionLike;
   public pixelRatio: number;
-  private map: ol.Map;
   private type: string;
 
   constructor (data: any, options: Partial<IWindOptions> = {}) {

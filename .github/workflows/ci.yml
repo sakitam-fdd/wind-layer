@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [master, dev]
+  pull_request:
+    branches: [master, dev]
+
+jobs:
+  test:
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: [14.x, 16.x]
+
+    runs-on: ${{ matrix.os }}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache ~/.pnpm-store
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-pnpm-store
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ matrix.node-version }}-test-${{ env.cache-name }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.node-version }}-test-${{ env.cache-name }}-
+            ${{ runner.os }}-${{ matrix.node-version }}-test-
+            ${{ runner.os }}-
+      - name: Install pnpm
+        run: npm i -g pnpm
+
+      - name: Install deps
+        run: pnpm i
+
+      # Runs a set of commands using the runners shell
+      - name: Build and Test
+        run: pnpm test && pnpm coverage
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          # https://github.com/coverallsapp/github-action/issues/81
+          # https://docs.github.com/en/actions/security-guides/automatic-token-authentication
+          git-branch: master
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: ${{matrix.os}}-node-${{ matrix.node }}
+          parallel: true
+
+  release:
+    runs-on: ubuntu-latest
+    needs: ['test']
+    if: "!contains(github.event.head_commit.message, 'skip-release') && !contains(github.event.head_commit.message, 'skip-ci') && github.event_name != 'pull_request'"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+      - name: Cache ~/.pnpm-store
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-pnpm-store
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ matrix.node-version }}-release-${{ env.cache-name }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.node-version }}-release-${{ env.cache-name }}-
+            ${{ runner.os }}-${{ matrix.node-version }}-release-
+            ${{ runner.os }}-
+      - run: npm i -g pnpm
+      - run: pnpm i
+      - run: pnpm semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.PKG_DEPLOY_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_PKG_PUBLIC_TOKEN }}

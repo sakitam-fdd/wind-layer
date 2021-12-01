@@ -19,8 +19,8 @@ export function parseColorStyle(styleAttrField: any[]) {
   if (Array.isArray(styleAttrField) && styleAttrField.length > 3) {
     const type = styleAttrField[0]; // interpolate \ step
     const action = styleAttrField[1]; // linear
-    const expression = styleAttrField[2];
-    const interpolateColor = [];
+    // const expression = styleAttrField[2];
+    const interpolateColor: any[] = [];
     for (let i = 3; i < styleAttrField.length; i += 2) {
       const val = styleAttrField[i];
       const color = styleAttrField[i + 1];
@@ -47,8 +47,11 @@ export function parseZoomStyle(styleAttrField: any[]) {
   if (Array.isArray(styleAttrField) && styleAttrField.length > 3) {
     const type = styleAttrField[0]; // interpolate
     const action = styleAttrField[1]; // linear
-    const expression = styleAttrField[2];
-    const interpolateZoom = [];
+    // const expression = styleAttrField[2];
+    const interpolateZoom: {
+      key: string | number;
+      value: string;
+    }[] = [];
     for (let i = 3; i < styleAttrField.length; i += 2) {
       const val = styleAttrField[i];
       const color = styleAttrField[i + 1];

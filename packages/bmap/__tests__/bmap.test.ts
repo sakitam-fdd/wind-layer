@@ -1,9 +1,16 @@
-// const BMapWind = require('..');
+import { test, expect, describe, beforeAll, afterAll } from 'vitest';
+import BMapWind from '../src';
 
-describe('bmap', () => {
-  it('create', () => {
-    const layer = 'layer';
+beforeAll(async () => {
+  console.log(`[bmap-wind]: start testing...`);
+});
 
-    expect(layer).toBeDefined();
+afterAll(async () => {
+  console.log(`[bmap-wind]: test end`);
+});
+
+describe('utils', async () => {
+  test('isNumber', async () => {
+    expect(BMapWind).toBe(true);
   });
 });

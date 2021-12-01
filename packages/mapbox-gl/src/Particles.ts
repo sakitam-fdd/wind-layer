@@ -1,4 +1,5 @@
 import * as mapboxgl from 'mapbox-gl';
+// @ts-ignore
 import { IWindOptions, WindParticles } from 'wind-gl-core';
 
 export interface IParticlesOptions extends IWindOptions {
@@ -15,10 +16,10 @@ function getCoords([lng, lat]: [number, number]): [number, number] {
 
 export default class Particles {
   private gl: WebGLRenderingContext;
-  private map: any;
-  private id: string;
-  private type: string;
-  private renderingMode: '2d' | '3d';
+  public map: any;
+  public id: string;
+  public type: string;
+  public renderingMode: '2d' | '3d';
   private options: any;
   private data: any;
   private layer: any;
@@ -176,6 +177,7 @@ export default class Particles {
     map.off('movestart', this.handleMovestart);
     map.off('resize', this.resize);
     map.off('moveend', this.handleMoveend);
+    // @ts-ignore
     delete this.gl;
     delete this.map;
   }

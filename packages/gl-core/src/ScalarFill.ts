@@ -311,7 +311,7 @@ export default class ScalarFill implements IScalarFill<any> {
   public initializeVertex(coordinates: number[][]) {
     let i = 0;
     const len = coordinates.length;
-    const points = [];
+    const points: [number, number][] = [];
     for (; i < len; i++) {
       const coords = coordinates[i];
       const mc = this.getMercatorCoordinate(coords as [number, number]);

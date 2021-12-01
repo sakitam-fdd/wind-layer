@@ -1,6 +1,7 @@
 import * as mapboxgl from 'mapbox-gl';
 
-import WindCore, {
+import {
+  WindCore,
   assign,
   defaultOptions,
   Field,
@@ -28,6 +29,7 @@ const defaultConfig = {
 };
 
 class WindLayer extends Overlay {
+  // @ts-ignore
   public options: IWindOptions;
   private field: any;
   private wind: WindCore;

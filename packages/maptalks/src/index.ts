@@ -1,7 +1,8 @@
 // @ts-ignore
-import { CanvasLayer, renderer, Coordinate, Point } from 'maptalks/dist/maptalks.es.js';
+import { CanvasLayer, renderer, Coordinate, Point } from 'maptalks';
 
-import WindCore, {
+import {
+  WindCore,
   Field,
   isArray,
   formatData,
@@ -170,6 +171,7 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
     if (this.wind) {
       this.wind.stop();
     }
+    // @ts-ignore
     delete this._drawContext;
     super.remove();
   }
@@ -198,6 +200,7 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
 
 class MaptalksWind extends CanvasLayer {
   private field: any;
+  // @ts-ignore
   private _map: any;
   private options: IWindOptions;
 
@@ -295,11 +298,11 @@ class MaptalksWind extends CanvasLayer {
     return this;
   }
 
-  private prepareToDraw() {
+  public prepareToDraw() {
     return [];
   }
 
-  private drawOnInteracting() {
+  public drawOnInteracting() {
     this.draw();
   }
 

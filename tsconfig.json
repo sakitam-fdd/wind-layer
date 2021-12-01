@@ -1,44 +1,32 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "paths": {
-      "*": [
-        "node_modules",
-        "packages",
-        "typings/*",
-        "types/*"
-      ],
-      "maptalks": ["maptalks/dist/maptalks.es.js"],
-      "@mapbox/mapbox-gl-style-spec": ["@mapbox/mapbox-gl-style-spec/dist/index.es.js"]
-    },
-    "baseUrl": "./",
-    "noEmit": true,
-    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "declarationMap": true,
+    "experimentalDecorators": true,
     "strictNullChecks": true,
-    "strictPropertyInitialization": false,
-    "target": "es5",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "moduleResolution": "node",
+    "module": "esnext",
+    "target": "esnext",
+    "jsx": "preserve",
     "lib": [
-      "es5",
-      "es6",
-      "es2017",
-      "es2018",
+      "esnext",
       "dom"
     ],
-    "jsx": "react",
-    "types": ["node", "reflect-metadata", "jest"],
-    "module": "esnext",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "types": ["node", "vitest"],
+    "allowSyntheticDefaultImports": true
   },
   "include": [
-    "packages/**/src",
-    "packages/**/typings",
-    "node_modules/@types/node/globals.d.ts"
+    "packages/*/__tests__/**/*.ts"
   ],
   "exclude": [
-    "node_modules",
-    "packages/**/dist"
+    "**/node_modules/**",
+    "**/dist/**"
   ]
 }

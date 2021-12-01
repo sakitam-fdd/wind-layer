@@ -1,5 +1,6 @@
 import * as L from 'leaflet';
-import WindCore, {
+import {
+  WindCore,
   Field,
   assign,
   defaultOptions,

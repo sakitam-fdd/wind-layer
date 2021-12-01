@@ -1,17 +1,28 @@
-**/*.svg
-package.json
-/dist
-.dockerignore
+## OS
 .DS_Store
+.idea
+.npmrc
+.husky
+
+## Ignored
+.dockerignore
 .eslintignore
-*.png
-*.toml
-docker
 .editorconfig
-Dockerfile*
 .gitignore
 .prettierignore
-LICENSE
 .eslintcache
+
+## Other
+*.toml
 *.lock
+*.log
+*.md
+*.svg
+*.png
+
+LICENSE
+Dockerfile*
+
+package.json
+package-lock.json
 yarn-error.log

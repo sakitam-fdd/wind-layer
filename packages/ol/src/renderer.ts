@@ -12,10 +12,10 @@ import {
   create as createTransform,
   setFromArray as transformSetFromArray, Transform,
 } from 'ol/transform';
-import { containsExtent, intersects, getWidth, getIntersection, isEmpty, containsCoordinate } from 'ol/extent';
+import { containsExtent, intersects, getIntersection, isEmpty, containsCoordinate } from 'ol/extent';
 // import Projection from 'ol/proj/Projection';
 
-import WindCore, { Field, IOptions } from 'wind-core';
+import { WindCore, Field, IOptions } from 'wind-core';
 
 import { WindLayer } from './index';
 

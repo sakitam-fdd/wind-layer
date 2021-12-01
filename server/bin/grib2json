@@ -1,3 +1,0 @@
-#!/bin/sh
-#set -x
-java -Xmx512M -jar $(dirname "$0")/grib2json.jar $@

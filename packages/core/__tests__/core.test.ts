@@ -1,18 +1,16 @@
-const {
-  isFunction,
-} = require('..');
+import { test, expect, describe, beforeAll, afterAll } from 'vitest';
+import { isFunction } from '../src';
 
-describe('core-utils', () => {
-  it('isFunction', () => {
-      const a = 1;
-      const b = 'string';
-      const c = [1];
-      const d = function() {};
-      const e = function *() {};
-      expect(isFunction(a)).toBe(false);
-      expect(isFunction(b)).toBe(false);
-      expect(isFunction(c)).toBe(false);
-      expect(isFunction(d)).toBe(true);
-      expect(isFunction(e)).toBe(true);
-    });
+beforeAll(async () => {
+  console.log(`[wind-core]: start testing...`);
+});
+
+afterAll(async () => {
+  console.log(`[wind-core]: test end`);
+});
+
+describe('utils', async () => {
+  test('isFunction', async () => {
+    expect(isFunction(1)).toBe(false);
+  });
 });

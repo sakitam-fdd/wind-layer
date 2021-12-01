@@ -2,7 +2,14 @@
   "name": "ol-wind",
   "version": "1.1.1-alpha.2",
   "description": "ol wind",
-  "keywords": [],
+  "keywords": [
+    "openlayers",
+    "ol",
+    "webgl",
+    "map",
+    "vis",
+    "gis"
+  ],
   "author": "sakitam-fdd <smilefdd@gmail.com>",
   "license": "MIT",
   "main": "dist/ol-wind.js",
@@ -10,44 +17,58 @@
   "unpkg": "dist/ol-wind.js",
   "commonjs": "dist/ol-wind.cjs.js",
   "namespace": "OlWind",
-  "types": "types/index.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "dist",
-    "src",
-    "types",
-    "typings",
-    "package.json",
+    "LICENSE",
     "README.md",
-    "tsconfig.dev.json",
-    "tsconfig.prod.json"
+    "package.json"
   ],
-  "publishConfig": {
-    "access": "public"
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "node": {
+        "import": {
+          "production": "./dist/ol-wind.esm.js",
+          "development": "./dist/ol-wind.esm.js",
+          "default": "./dist/ol-wind.esm.js"
+        },
+        "require": {
+          "production": "./dist/ol-wind.cjs.js",
+          "development": "./dist/ol-wind.cjs.js",
+          "default": "./dist/ol-wind.cjs.js"
+        }
+      },
+      "import": "./dist/ol-wind.esm.js",
+      "require": "./dist/ol-wind.cjs.js"
+    },
+    "./dist/*": "./dist/*",
+    "./package.json": "./package.json"
   },
+  "private": false,
+  "sideEffects": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sakitam-fdd/wind-layer.git",
     "directory": "packages/ol"
   },
   "scripts": {
-    "tsc": "tsc --project tsconfig.prod.json",
     "clean": "rimraf dist",
-    "dev": "run-p dev:*",
-    "dev:rollup": "cross-env NODE_ENV=development modulePath=ol input=src/index.ts rollup -wm -c ../../rollup/dev.config.js",
-    "build": "run-p build:*",
-    "build:dev": "cross-env NODE_ENV=production modulePath=ol input=src/index.ts rollup -m -c ../../rollup/dev.config.js",
-    "build:prod": "cross-env NODE_ENV=production modulePath=ol input=src/index.ts rollup -c ../../rollup/prod.config.js",
-    "lint:ts": "run-p -c lint:ts-*",
-    "test": "jest",
-    "prepublishOnly": "run-p test",
-    "generate:docs": "typedoc --out docs --target es6 --theme minimal --mode file src"
+    "dev": "cross-env NODE_ENV=development rollup -wm -c rollup.config.ts --configPlugin esbuild",
+    "build": "rollup --c rollup.config.ts --configPlugin esbuild",
+    "build:minify": "cross-env MINIFY=true rollup --c rollup.config.ts --configPlugin esbuild",
+    "lint": "eslint src/**/* --ext .js,.ts,.tsx",
+    "prettier": "prettier --parser=typescript --write **/*.{js,ts,md}",
+    "test": "pnpm run build && pnpm run test-only",
+    "test-only": "vitest run",
+    "coverage": "vitest run --coverage"
   },
   "bugs": {
     "url": "https://github.com/sakitam-fdd/wind-layer/issues"
   },
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
   "dependencies": {
-    "wind-core": "^1.1.1-alpha.2"
+    "wind-core": "workspace:*"
   },
   "peerDependencies": {
     "ol": ">=6.0.0"
@@ -56,5 +77,7 @@
     "@types/ol": "^6.1.0",
     "ol": "^6.0.0"
   },
-  "gitHead": "8d9cae334f4f841ebf168118a0990dabe9f1e65a"
+  "publishConfig": {
+    "access": "public"
+  }
 }

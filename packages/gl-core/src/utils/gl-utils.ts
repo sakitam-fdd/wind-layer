@@ -458,11 +458,11 @@ export function getPlaneBuffer(
   const segmentWidth = width / gridX;
   const segmentHeight = height / gridY;
 
-  const indices = [];
-  const wireframeIndexes = [];
-  const vertices = [];
-  const verticesLow = [];
-  const uvs = [];
+  const indices: number[] = [];
+  const wireframeIndexes: number[] = [];
+  const vertices: number[] = [];
+  const verticesLow: number[] = [];
+  const uvs: number[] = [];
 
   for (let iy = 0; iy < gridY1; iy++) {
     const y = iy * segmentHeight;

@@ -37,7 +37,7 @@
 
 ## 开发环境搭建
 
-首先你需要 Node.js 4+ 和 NPM 3+
+首先你需要 Node.js 14+ 和 NPM 6+
 ```shell
 git clone https://github.com/sakitam-fdd/wind-layer.git
 npm install

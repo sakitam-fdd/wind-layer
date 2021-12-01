@@ -9,7 +9,7 @@ import {
   containsExtent, intersects, getIntersection, isEmpty, containsCoordinate,
 } from 'ol/extent';
 
-import WindCore, { createCanvas } from 'wind-core';
+import { WindCore, createCanvas } from 'wind-core';
 
 const ViewHint = {
   ANIMATING: 0,

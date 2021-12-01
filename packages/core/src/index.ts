@@ -1,9 +1,6 @@
 import Field from './Field';
+import Vector from './Vector';
 import { isFunction, isNumber, isString, isValide } from './utils';
-
-export { default as Field } from './Field';
-export { default as Vector } from './Vector';
-export * from './utils';
 
 export const defaultOptions = {
   globalAlpha: 0.9, // 全局透明度
@@ -20,7 +17,6 @@ export const defaultOptions = {
 };
 
 type emptyFunc = (v?: any) => number;
-type emptyGenerateParticleFunc = (v?: any) => boolean;
 
 export interface IOptions {
   globalAlpha: number; // 全局透明度
@@ -49,7 +45,7 @@ function indexFor(m: number, min: number, max: number, colorScale: string[]) {
   );
 }
 
-class BaseLayer {
+class WindCore {
   public static Field = Field;
 
   public forceStop: boolean;
@@ -406,7 +402,7 @@ class BaseLayer {
       typeof this.options.paths === 'function'
         ? this.options.paths(this)
         : this.options.paths;
-    const particles = [];
+    const particles: any[] = [];
     if (!this.field) {
       return [];
     }
@@ -434,4 +430,10 @@ class BaseLayer {
   }
 }
 
-export default BaseLayer;
+export * from './utils';
+
+export {
+  WindCore,
+  Field,
+  Vector,
+};

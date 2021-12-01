@@ -25,9 +25,9 @@ export default class Overlay {
   protected canvas: HTMLCanvasElement | null;
   private canvas2: HTMLCanvasElement | null;
   private devicePixelRatio: number;
-  private type: string;
-  private renderingMode: string;
-  private id: string | number;
+  public type: string;
+  public renderingMode: string;
+  public id: string | number;
 
   constructor(id: string | number, options = {}) {
     if (!id) {

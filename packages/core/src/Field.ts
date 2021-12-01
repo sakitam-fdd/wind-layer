@@ -86,13 +86,13 @@ export default class Field {
 
   // from https://github.com/sakitam-fdd/wind-layer/blob/95368f9433/src/windy/windy.js#L110
   public buildGrid(): (Vector | null)[][] {
-    let grid = [];
+    let grid: any[] = [];
     let p = 0;
 
     const { rows, cols, us, vs } = this;
 
     for (let j = 0; j < rows; j++) {
-      const row = [];
+      const row: any[] = [];
       for (let i = 0; i < cols; i++, p++) {
         let u = us[p];
         let v = vs[p];

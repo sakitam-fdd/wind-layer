@@ -1,0 +1,10 @@
+{
+  "name": "docs",
+  "version": "1.0.0",
+  "scripts": {
+    "api": "node scripts/generate-docs.js"
+  },
+  "dependencies": {
+    "vitepress": "^1.0.0-alpha.22"
+  }
+}
