@@ -23,7 +23,6 @@ const r = (p: string) => resolve(ROOT, '..', p);
 
 const external = [
   ...Object.keys(pkg.dependencies),
-  r('typings.d.ts'),
   'mapbox-gl',
 ];
 
@@ -34,6 +33,7 @@ const plugins = [
     ],
   }),
   replace({
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     preventAssignment: true,
   }),
   glslify(),

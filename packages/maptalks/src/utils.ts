@@ -88,7 +88,7 @@ export function boundingExtentXYs(xs: number[], ys: number[], opt_extent: Extent
 }
 
 export function applyTransform(extent: Extent, transformFn: typeof transform, opt_extent: Extent | undefined, opt_stops: number) {
-  let coordinates = [];
+  let coordinates: number[] = [];
   if (opt_stops > 1) {
     const width = extent[2] - extent[0];
     const height = extent[3] - extent[1];
@@ -117,8 +117,8 @@ export function applyTransform(extent: Extent, transformFn: typeof transform, op
     ];
   }
   transformFn(coordinates, coordinates, 2);
-  const xs = [];
-  const ys = [];
+  const xs: number[] = [];
+  const ys: number[] = [];
   for (let i = 0, l = coordinates.length; i < l; i += 2) {
     xs.push(coordinates[i]);
     ys.push(coordinates[i + 1]);

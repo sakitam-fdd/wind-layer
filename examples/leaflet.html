@@ -36,15 +36,23 @@
 
   map.addLayer(layer);
 
-  fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
+  // fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
+  fetch('./data/wind.json')
     .then(res => res.json())
     .then(res => {
+      data = res.map((item, idx) => {
+        item.header = Object.assign(item.header, {
+          parameterCategory: 1,
+          parameterNumber: idx === 0 ? 2 : 3,
+        });
+        return item;
+      });
       // const range = vectorField.range || [0.02, 28.21618329965979];
       // const scale = chroma.scale('OrRd').domain(range);
 
       const velocityScale = [0.1, 0.2, 0.3, 0.4, 0.5];
 
-      const windLayer = new leafletWind.WindLayer('wind', res, {
+      const windLayer = new leafletWind.WindLayer('wind', data, {
         windOptions: {
           // colorScale: (m) => {
           //   // console.log(m);

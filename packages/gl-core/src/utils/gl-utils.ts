@@ -14,7 +14,7 @@ export function getDevicePixelRatio() {
  * @returns {boolean}
  */
 export function resizeCanvasSize(
-  canvas: HTMLCanvasElement | OffscreenCanvas,
+  canvas: HTMLCanvasElement,
   pixelRatio?: number,
 ) {
   if (!canvas) {

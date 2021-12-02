@@ -22,8 +22,8 @@ const PROD = !DEV;
 const r = (p: string) => resolve(ROOT, '..', p);
 
 const external = [
-  ...Object.keys(pkg.dependencies),
-  r('typings.d.ts'),
+  // ...Object.keys(pkg.dependencies),
+  'leaflet',
 ];
 
 const plugins = [
@@ -33,6 +33,7 @@ const plugins = [
     ],
   }),
   replace({
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     preventAssignment: true,
   }),
   glslify(),
@@ -83,6 +84,9 @@ const umdBuild: RollupOptions = {
     name: pkg.namespace,
     sourcemap: !MINIFY,
     file: pkg.main,
+    globals: {
+      leaflet: 'L',
+    }
   },
   external,
   plugins,

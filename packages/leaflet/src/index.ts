@@ -66,8 +66,11 @@ const WindLayer = L.Layer.extend({
   },
 
   _onResize(resizeEvent: L.ResizeEvent) {
-    this.canvas.width = resizeEvent.newSize.x;
-    this.canvas.height = resizeEvent.newSize.y;
+    this.canvas.style.width = resizeEvent.newSize.x + 'px';
+    this.canvas.style.height = resizeEvent.newSize.y + 'px';
+    this._width = resizeEvent.newSize.x;
+    this._height = resizeEvent.newSize.y;
+    this._resizeCanvas(this.devicePixelRatio);
   },
 
   _zoomStart(){
@@ -89,8 +92,8 @@ const WindLayer = L.Layer.extend({
   },
 
   _resizeCanvas(scale: number) {
-    this.canvas.style.width = this._width * scale + 'px';
-    this.canvas.style.height = this._height * scale + 'px';
+    this.canvas.width = this._width * scale;
+    this.canvas.height = this._height * scale;
   },
 
   _render() {
@@ -153,6 +156,7 @@ const WindLayer = L.Layer.extend({
     const animated = this._map.options.zoomAnimation && L.Browser.any3d;
     L.DomUtil.addClass(this.canvas, 'leaflet-zoom-' + (animated ? 'animated' : 'hide'));
 
+    this._map.on(this.getEvents(), this);
     this._render();
   },
 

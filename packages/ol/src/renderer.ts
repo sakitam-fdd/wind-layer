@@ -12,7 +12,8 @@ import {
   create as createTransform,
   setFromArray as transformSetFromArray, Transform,
 } from 'ol/transform';
-import { containsExtent, intersects, getIntersection, isEmpty, containsCoordinate } from 'ol/extent';
+import {containsExtent, intersects, getIntersection, isEmpty, containsCoordinate} from 'ol/extent';
+import type { Extent } from 'ol/extent';
 // import Projection from 'ol/proj/Projection';
 
 import { WindCore, Field, IOptions } from 'wind-core';
@@ -197,7 +198,7 @@ class Render {
     const viewState = frameState.viewState;
     const point = transformProj(coordinate, 'EPSG:4326', viewState.projection);
     const viewCoordinate = fromUserCoordinate(point, viewState.projection);
-    return containsCoordinate(frameState.extent, viewCoordinate.slice(0, 2));
+    return containsCoordinate(frameState.extent as Extent, viewCoordinate.slice(0, 2));
   }
 }
 
@@ -233,12 +234,13 @@ export default class WindLayerRender extends CanvasLayerRenderer {
 
     let renderedExtent = frameState.extent;
     if (layerState.extent !== undefined) {
-      renderedExtent = getIntersection(renderedExtent, fromUserExtent(layerState.extent, viewState.projection));
+      renderedExtent = getIntersection(renderedExtent as Extent, fromUserExtent(layerState.extent, viewState.projection));
     }
 
-    if (!hints[ViewHint.ANIMATING] && !frameState.animate && !hints[ViewHint.INTERACTING] && !isEmpty(renderedExtent)) {
+    if (!hints[ViewHint.ANIMATING] && !frameState.animate && !hints[ViewHint.INTERACTING] && !isEmpty(renderedExtent as Extent)) {
       return true;
     } else {
+      // @ts-ignore
       const layer = this.getLayer() as unknown as WindLayer;
       return layer.get('forceRender');
     }
@@ -250,7 +252,6 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     const layerState = frameState.layerStatesArray[frameState.layerIndex];
     const pixelRatio = frameState.pixelRatio;
     const viewState = frameState.viewState;
-    const projection = viewState.projection;
     const size = frameState.size;
 
     let width = Math.round(size[0] * pixelRatio);
@@ -277,28 +278,30 @@ export default class WindLayerRender extends CanvasLayerRenderer {
       context.clearRect(0, 0, width, height);
     }
 
+    // @ts-ignore
     this.preRender(context, frameState);
 
     // clipped rendering if layer extent is set
     let clipped = false;
     if (layerState.extent) {
       const layerExtent = fromUserExtent(layerState.extent, viewState.projection);
-      clipped = !containsExtent(layerExtent, frameState.extent) && intersects(layerExtent, frameState.extent);
+      clipped = !containsExtent(layerExtent, frameState.extent as Extent) && intersects(layerExtent, frameState.extent as Extent);
       if (clipped) {
+        // @ts-ignore
         this.clipUnrotated(context, frameState, layerExtent);
       }
     }
 
-    const extent = frameState.extent;
     const center = viewState.center;
     const resolution = viewState.resolution;
     const rotation = viewState.rotation;
-    const projectionExtent = projection.getExtent();
 
+    // @ts-ignore
     const layer = this.getLayer() as unknown as WindLayer;
     const opt = layer.getWindOptions();
     const data = layer.getData();
 
+    // @ts-ignore
     const transformOrigin = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, 0);
 
     this.oRender.execute(this.context, 0, frameState, transformOrigin, transformOrigin, opt, data);
@@ -330,6 +333,7 @@ export default class WindLayerRender extends CanvasLayerRenderer {
       context.restore();
     }
 
+    // @ts-ignore
     this.postRender(context, frameState);
 
     const opacity = layerState.opacity;

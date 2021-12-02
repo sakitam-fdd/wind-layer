@@ -24,11 +24,7 @@ export interface IWindOptions extends IOptions {
   [key: string]: any;
 }
 
-interface Interface {
-
-}
-
-export class WindLayer extends Layer implements Interface {
+export class WindLayer extends Layer<any, any> {
   private field: any;
   public _map: any;
   private options: IWindOptions;

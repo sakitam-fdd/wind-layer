@@ -33,18 +33,9 @@ export interface IWindOptions extends IOptions {
   [key: string]: any;
 }
 
-// const G = typeof window === 'undefined' ? global : window;
-
 const _options = {
   windOptions: {},
 };
-
-// @ts-ignore
-// const ol = G?.ol;
-//
-// if (!ol) {
-//   throw new Error('Before using this plugin, you must first introduce the openlayers <https://openlayers.org/>');
-// }
 
 class OlWind extends ImageLayer {
   private options: IWindOptions;

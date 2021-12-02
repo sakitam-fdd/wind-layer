@@ -23,9 +23,9 @@
     "allowSyntheticDefaultImports": true
   },
   "include": [
-    "../packages/core/src/**/*.ts",
-    "../packages/leaflet/src/**/*.ts",
+    "../packages/*/src/**/*.ts",
     "../packages/core/typings.d.ts",
+    "typings.d.ts"
   ],
   "exclude": [
     "../packages/*/src/__tests__/**/*.ts",

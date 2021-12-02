@@ -11,6 +11,7 @@ import replace from '@rollup/plugin-replace';
 import alias from '@rollup/plugin-alias';
 import dts from 'rollup-plugin-dts';
 import { terser } from 'rollup-plugin-terser';
+import worker from 'rollup-plugin-web-worker-loader';
 
 const rq = createRequire(import.meta.url);
 const pkg = rq('./package.json');
@@ -23,7 +24,6 @@ const r = (p: string) => resolve(ROOT, '..', p);
 
 const external = [
   ...Object.keys(pkg.dependencies),
-  r('typings.d.ts'),
 ];
 
 const plugins = [
@@ -33,15 +33,21 @@ const plugins = [
     ],
   }),
   replace({
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     preventAssignment: true,
   }),
   glslify(),
-  commonjs(),
-  nodeResolve({ preferBuiltins: false }),
-  esbuild({ target: 'node14' }),
   json({
     namedExports: true,
   }),
+  worker({
+    sourcemap: true,
+    inline: true,
+    extensions: ['.js', 'ts'],
+  }),
+  commonjs(),
+  nodeResolve({ preferBuiltins: false }),
+  esbuild({ target: 'node14' }),
   ...(MINIFY ? [
     terser(),
   ] : []),

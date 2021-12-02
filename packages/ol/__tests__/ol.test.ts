@@ -1,5 +1,5 @@
 import { test, expect, describe, beforeAll, afterAll } from 'vitest';
-import OlWind from '../src';
+import { WindLayer } from '../src';
 
 beforeAll(async () => {
   console.log(`[ol-wind]: start testing...`);
@@ -11,6 +11,6 @@ afterAll(async () => {
 
 describe('utils', async () => {
   test('isFunction', async () => {
-    expect(OlWind).toBe(false);
+    expect(WindLayer).toBe(true);
   });
 });

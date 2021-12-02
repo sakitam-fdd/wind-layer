@@ -44,6 +44,7 @@ importers:
       rollup-plugin-glslify: ^1.3.1
       rollup-plugin-terser: ^7.0.2
       rollup-plugin-visualizer: ^5.8.1
+      rollup-plugin-web-worker-loader: ^1.6.1
       terser: ^5.15.1
       typedoc: ^0.23.17
       typedoc-plugin-markdown: ^3.13.6
@@ -93,6 +94,7 @@ importers:
       rollup-plugin-glslify: 1.3.1
       rollup-plugin-terser: 7.0.2_rollup@3.2.3
       rollup-plugin-visualizer: 5.8.3_rollup@3.2.3
+      rollup-plugin-web-worker-loader: 1.6.1_rollup@3.2.3
       terser: 5.15.1
       typedoc: 0.23.17_typescript@4.8.4
       typedoc-plugin-markdown: 3.13.6_typedoc@0.23.17
@@ -6857,6 +6859,14 @@ packages:
       rollup: 3.2.3
       source-map: 0.7.4
       yargs: 17.6.0
+    dev: true
+
+  /rollup-plugin-web-worker-loader/1.6.1_rollup@3.2.3:
+    resolution: {integrity: sha512-4QywQSz1NXFHKdyiou16mH3ijpcfLtLGOrAqvAqu1Gx+P8+zj+3gwC2BSL/VW1d+LW4nIHC8F7d7OXhs9UdR2A==}
+    peerDependencies:
+      rollup: ^1.9.2 || ^2.0.0
+    dependencies:
+      rollup: 3.2.3
     dev: true
 
   /rollup-pluginutils/2.8.2:
