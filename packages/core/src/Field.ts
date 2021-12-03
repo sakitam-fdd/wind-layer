@@ -352,7 +352,6 @@ export default class Field {
   }
 
   /**
-   * from: https://github.com/IHCantabria/Leaflet.CanvasLayer.Field/blob/master/src/Field.js#L252
    * 计算索引位置周围的数据
    * @private
    * @param   {Number} i - decimal index
@@ -375,7 +374,6 @@ export default class Field {
   }
 
   /**
-   * from https://github.com/IHCantabria/Leaflet.CanvasLayer.Field/blob/master/src/Field.js#L277
    * Get four surrounding values or null if not available,
    * from 4 integer indexes
    * @private
@@ -459,8 +457,9 @@ export default class Field {
    * @param width
    * @param height
    * @param unproject
+   * @return IPosition
    */
-  public randomize(o: IPosition = {}, width: number, height: number, unproject: (...args: any[]) => ([number, number] | null)) {
+  public randomize(o: IPosition = {}, width: number, height: number, unproject: (a: number[]) => ([number, number] | null)) {
     let i = (Math.random() * (width || this.cols)) | 0;
     let j = (Math.random() * (height || this.rows)) | 0;
 
@@ -477,7 +476,8 @@ export default class Field {
   }
 
   /**
-   * check is custom field
+   * 判断是否是 `Field` 的实例
+   * @return boolean
    */
   public checkFields() {
     return this.isFields;

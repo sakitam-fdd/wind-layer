@@ -1,4 +1,3 @@
-// from: https://sourcegraph.com/github.com/IHCantabria/Leaflet.CanvasLayer.Field/-/blob/src/Vector.js?utm_source=share
 export default class Vector {
   public u: number;
   public v: number;
@@ -12,19 +11,15 @@ export default class Vector {
   }
 
   /**
-   * the vector value
-   * 向量值（流体强度）
+   * 向量值（这里指风速）
    * @returns {Number}
    */
   public magnitude() {
-    // Math.pow(u, 2)
-    // Math.pow(v, 2)
-    return Math.sqrt(this.u * this.u + this.v * this.v);
+    return Math.sqrt(this.u ** 2 + this.v ** 2);
   }
 
   /**
-   * Angle in degrees (0 to 360º) --> Towards
-   * 流体方向
+   * 流体方向 （这里指风向，范围为0-360º）
    * N is 0º and E is 90º
    * @returns {Number}
    */

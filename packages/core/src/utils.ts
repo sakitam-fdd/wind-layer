@@ -110,7 +110,7 @@ export function isNumber(value: any) {
 }
 
 /**
- * check isEmpty object
+ * 判断对象是否为空
  * @param object
  * @returns {boolean}
  */
@@ -123,7 +123,7 @@ export function isEmpty(object: {}) {
 }
 
 /**
- * check is null
+ * 判断是否为 `null`
  * @param obj
  * @returns {boolean}
  */
@@ -132,7 +132,7 @@ export function isNull(obj: any) {
 }
 
 /**
- * check is array
+ * 判断是否是数组
  * @param arr
  */
 export function isArray(arr: any): boolean {
@@ -148,6 +148,10 @@ export function assign(target: object, ...sources: any[]) {
   return Object.assign(target, ...sources);
 }
 
+/**
+ * 打印⚠️信息
+ * @param msg
+ */
 export function warnLog(msg: string) {
   console.warn(`wind-layer: ${msg}`);
 }
