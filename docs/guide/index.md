@@ -1,8 +1,3 @@
----
-title: API说明
-order: 0
----
-
 # wind-layer 各包参数说明
 
 ## `WindCore` 参数说明

@@ -8,8 +8,9 @@ import {
   warnLog,
   assign,
   defaultOptions,
-  IOptions,
 } from 'wind-core';
+
+import type { IOptions } from 'wind-core';
 
 const _options = {
   forceRender: true,

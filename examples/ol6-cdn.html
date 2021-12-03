@@ -257,11 +257,13 @@
       const gui = new dat.GUI();
       gui.add(config, 'addLayer').onChange(function () {
         if (config.addLayer) {
+          windLayer.setMap(map);
           // @ts-ignore
-          window.map.addLayer(windLayer);
+          // window.map.addLayer(windLayer);
         } else {
+          windLayer.setMap(null);
           // @ts-ignore
-          window.map.removeLayer(windLayer);
+          // window.map.removeLayer(windLayer);
         }
       });
       gui.add(config, 'globalAlpha', 0.01, 1).onChange(function () {
@@ -313,14 +315,14 @@
             lineWidth: 3,
             // colorScale: scale,
           },
-          // map: map,
+          map: map,
           // projection: 'EPSG:4326'
         });
 
         console.log(map, windLayer);
 
         // @ts-ignore
-        map.addLayer(windLayer);
+        // map.addLayer(windLayer);
 
         initGui(windLayer);
       });

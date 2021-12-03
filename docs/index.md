@@ -1,28 +1,26 @@
 ---
 layout: home
 
-title: VitePress
-titleTemplate: Vite & Vue Powered Static Site Generator
+title: wind-layer
+titleTemplate: 风场插件
 
 hero:
-  name: VitePress
-  text: Vite & Vue Powered Static Site Generator
-  tagline: Simple, powerful, and performant. Meet the modern SSG framework you've always wanted.
+  name: wind-layer
+  text: Visualization library of meteorological data.
+  tagline: a maptalks / mapbox-gl / leaflet / openlayers / bmap / amap extension to show grib data.
   actions:
     - theme: brand
-      text: Get Started
+      text: Get Started / 开始
       link: /guide/getting-started
     - theme: alt
       text: View on GitHub
-      link: https://github.com/vuejs/vitepress
+      link: https://github.com/sakitam-fdd/wind-layer
 
 features:
-  - title: "Vite: The DX that can't be beat"
-    details: Feel the speed of Vite. Instant server start and lightning fast HMR that stays fast regardless of the app size.
-  - title: Designed to be simplicity first
-    details: With Markdown-centered content, it's built to help you focus on writing and deployed with minimum configuration.
-  - title: Power of Vue meets Markdown
-    details: Enhance your content with all the features of Vue in Markdown, while being able to customize your site with Vue.
-  - title: Fully static yet still dynamic
-    details: Go wild with true SSG + SPA architecture. Static on page load, but engage users with 100% interactivity from there.
+  - title: 易扩展（Easy to extend）
+    details: 抽离了核心渲染库，便于扩展到其他地图渲染库（The core rendering library is separated, which is easy to extend to other map rendering libraries.）。
+  - title: 易用（Easy to use, more user-defined parameters）
+    details: 粒子数量、线宽、颜色支持多种配置方式（The number of particles, line width and color support multiple configurations.）。
+  - title: 高性能（High performance）
+    details: 核心图层支持 webgl 渲染，已适配了 mapbox-gl、maptalks、leaflet、openlayers 地图类库（The core layer supports webgl rendering, which is currently adapted to mapbox gl, maptalks, leaflet and openlayers.）。
 ---

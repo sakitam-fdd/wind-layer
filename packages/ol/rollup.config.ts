@@ -22,7 +22,7 @@ const PROD = !DEV;
 const r = (p: string) => resolve(ROOT, '..', p);
 
 const external = [
-  ...Object.keys(pkg.dependencies),
+  // ...Object.keys(pkg.dependencies),
   'ol',
   'ol/size',
   'ol/layer',

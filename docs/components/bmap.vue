@@ -1,27 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-  <title>bmap-wind</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.css">
-  <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=bxFuXXDt1oKdlgu6mXCCnK51cDgDGBLp"></script>
-  <style type="text/css">
-    body, html,#container {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      margin:0;
-    }
-  </style>
-</head>
-<body>
-<div id="container"></div>
-<script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
-<script src="../packages/bmap/dist/bmap-wind.js"></script>
-<script type="text/javascript">
-  var map = new BMap.Map("container");
-  map.centerAndZoom(new BMap.Point(116.3964,39.9093), 2);
+<template>
+  <div class="demo-content">
+    <div class="map-warp" ref="map" id="bmap"></div>
+  </div>
+</template>
+<script setup>
+import {ref, onMounted} from 'vue'
+
+const map = ref(null)
+
+const initMap = (dom) => {
+  const map = new BMap.Map("bmap"); // eslint-disable-line
+  map.centerAndZoom(new BMap.Point(116.3964, 39.9093), 2); // eslint-disable-line
   map.enableScrollWheelZoom();
   // 地图自定义样式
   map.setMapStyle({
@@ -154,7 +143,7 @@
       "stylers": {
         "visibility": "off"
       }
-    },{
+    }, {
       "featureType": "road",
       "elementType": "labels",
       "stylers": {
@@ -163,48 +152,74 @@
     }]
   });
 
-  fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
-    .then(res => res.json())
-    .then(res => {
-      var layer = new BMapWind.WindLayer(res, {
-        windOptions: {
-          // colorScale: (m) => {
-          //   // console.log(m);
-          //   return '#fff';
-          // },
-          colorScale: [
-            "rgb(36,104, 180)",
-            "rgb(60,157, 194)",
-            "rgb(128,205,193 )",
-            "rgb(151,218,168 )",
-            "rgb(198,231,181)",
-            "rgb(238,247,217)",
-            "rgb(255,238,159)",
-            "rgb(252,217,125)",
-            "rgb(255,182,100)",
-            "rgb(252,150,75)",
-            "rgb(250,112,52)",
-            "rgb(245,64,32)",
-            "rgb(237,45,28)",
-            "rgb(220,24,32)",
-            "rgb(180,0,35)"
-          ],
-          // velocityScale: 1 / 20,
-          // paths: 5000,
-          frameRate: 16,
-          maxAge: 60,
-          globalAlpha: 0.9,
-          velocityScale: 1 / 30,
-          paths: 2000,
-          // paths: () => { // can be number or function
-          //   const zoom = map.getZoom();
-          //   return zoom * 1000;
-          // },
-        },
-      });
+  // const { WindLayer } = require('bmap-wind');
 
-      map.addOverlay(layer);
-    });
+  import('bmap-wind').then(({WindLayer}) => {
+    fetch('https://sakitam.oss-cn-beijing.aliyuncs.com/codepen/wind-layer/json/wind.json')
+      .then(res => res.json())
+      .then(res => {
+        const windLayer = new WindLayer(res, {
+          windOptions: {
+            // colorScale: scale,
+            velocityScale: 1 / 20,
+            paths: 5000,
+            // eslint-disable-next-line no-unused-vars
+            colorScale: [
+              "rgb(36,104, 180)",
+              "rgb(60,157, 194)",
+              "rgb(128,205,193 )",
+              "rgb(151,218,168 )",
+              "rgb(198,231,181)",
+              "rgb(238,247,217)",
+              "rgb(255,238,159)",
+              "rgb(252,217,125)",
+              "rgb(255,182,100)",
+              "rgb(252,150,75)",
+              "rgb(250,112,52)",
+              "rgb(245,64,32)",
+              "rgb(237,45,28)",
+              "rgb(220,24,32)",
+              "rgb(180,0,35)"
+            ],
+            lineWidth: 2,
+            // colorScale: scale,
+            generateParticleOption: false
+          },
+          zIndex: 20,
+          // map: map,
+          // projection: 'EPSG:4326'
+        });
+
+        console.log(map, windLayer);
+
+        map.addOverlay(windLayer);
+      });
+  });
+}
+
+onMounted(() => {
+  initMap(map.value);
+});
 </script>
-</body>
-</html>
+
+<style lang="less">
+.demo-content {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  background-color: #cbe0ff;
+
+  &-datgui {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1;
+    pointer-events: auto;
+  }
+
+  .map-warp {
+    width: 100%;
+    height: 100%;
+  }
+}
+</style>
