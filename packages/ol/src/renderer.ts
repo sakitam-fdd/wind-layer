@@ -1,4 +1,3 @@
-import { equals } from 'ol/array';
 import { FrameState } from 'ol/PluggableMap';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
@@ -9,14 +8,12 @@ import {
   makeScale,
   makeInverse,
   apply as applyTransform,
-  create as createTransform,
-  setFromArray as transformSetFromArray, Transform,
 } from 'ol/transform';
 import {containsExtent, intersects, getIntersection, isEmpty, containsCoordinate} from 'ol/extent';
 import type { Extent } from 'ol/extent';
-// import Projection from 'ol/proj/Projection';
 
-import { WindCore, Field, IOptions } from 'wind-core';
+import { WindCore, Field } from 'wind-core';
+import type { IOptions } from 'wind-core';
 
 import { WindLayer } from './index';
 
@@ -25,183 +22,6 @@ const ViewHint = {
   INTERACTING: 1
 };
 
-// export function getCenter(extent: number[]): [number, number] {
-//   return [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
-// }
-
-// export function wrapExtent(extent: Extent, projection: Projection) {
-//   const projectionExtent = projection.getExtent();
-//   const center = getCenter(extent);
-//   if (
-//     projection.canWrapX() &&
-//     (center[0] < projectionExtent[0] || center[0] >= projectionExtent[2])
-//   ) {
-//     const worldWidth = getWidth(projectionExtent);
-//     const worldsAway = Math.floor(
-//       (center[0] - projectionExtent[0]) / worldWidth
-//     );
-//     const offset = worldsAway * worldWidth;
-//     extent[0] -= offset;
-//     extent[2] -= offset;
-//   }
-//   return extent;
-// }
-
-// export function wrapCoordinates(coordinate: Coordinate, projection: Projection) {
-//   const projectionExtent = projection.getExtent();
-//   if (
-//     projection.canWrapX() &&
-//     (coordinate[0] < projectionExtent[0] ||
-//       coordinate[0] >= projectionExtent[2])
-//   ) {
-//     const worldWidth = getWidth(projectionExtent);
-//     const worldsAway = Math.floor(
-//       (coordinate[0] - projectionExtent[0]) / worldWidth
-//     );
-//     coordinate[0] -= worldsAway * worldWidth;
-//   }
-//   return coordinate;
-// }
-
-function transform2D(flatCoordinates: number[], offset: number, end: number, stride: number, transform: number[], opt_dest: any[]) {
-  const dest = opt_dest ? opt_dest : [];
-  let i = 0;
-  for (let j = offset; j < end; j += stride) {
-    const x = flatCoordinates[j];
-    const y = flatCoordinates[j + 1];
-    dest[i++] = transform[0] * x + transform[2] * y + transform[4];
-    dest[i++] = transform[1] * x + transform[3] * y + transform[5];
-  }
-  if (opt_dest && dest.length != i) {
-    dest.length = i;
-  }
-  return dest;
-}
-
-class Render {
-  private executors: {
-    [propName: string] : WindCore;
-  };
-  private renderedTransform_: Transform;
-  constructor() {
-    this.executors = {};
-
-    this.renderedTransform_ = createTransform();
-  }
-
-  execute(
-    context: CanvasRenderingContext2D,
-    index: number,
-    frameState: FrameState,
-    transform: number[],
-    renderedTransform: number[],
-    opt: Partial<IOptions>,
-    data: any,
-  ) {
-    if (this.executors[index]) {
-      const wind = this.executors[index];
-      wind.project = this.getPixelFromCoordinateInternal.bind(this, frameState, transform);
-      wind.unproject = this.getCoordinateFromPixel.bind(this, frameState);
-      wind.intersectsCoordinate = this.intersectsCoordinate.bind(this, frameState);
-
-      wind.prerender();
-      wind.render();
-    } else {
-      const wind = new WindCore(context, opt, data);
-
-      this.executors[index] = wind;
-
-      wind.project = this.getPixelFromCoordinateInternal.bind(this, frameState, transform);
-      wind.unproject = this.getCoordinateFromPixel.bind(this, frameState);
-      wind.intersectsCoordinate = this.intersectsCoordinate.bind(this, frameState);
-      wind.postrender = () => {};
-      wind.prerender();
-    }
-  }
-
-  public setOptions(options: Partial<IOptions>) {
-    Object.keys(this.executors).forEach((key: string) => {
-      const wind = this.executors[key];
-      if (wind) {
-        wind.setOptions(options);
-        // wind.prerender();
-      }
-    });
-  }
-
-  public setData(field: Field) {
-    Object.keys(this.executors).forEach((key: string) => {
-      const wind = this.executors[key];
-      if (wind) {
-        wind.updateData(field);
-        // wind.prerender();
-      }
-    });
-  }
-
-  // FIXME: 需要针对所有坐标进行批量计算，现在是由于单个计算时改变了缓存的矩阵造成后面坐标无法转换
-  private repeatWorld(coordinates: number[], pixelCoordinates: number[], transform: number[]) {
-    let pixel;
-    if (pixelCoordinates && equals(transform, this.renderedTransform_)) {
-      pixel = pixelCoordinates;
-    } else {
-      if (!pixelCoordinates) {
-        pixelCoordinates = [];
-      }
-      pixel = transform2D(coordinates, 0, coordinates.length, 2,
-        transform, pixelCoordinates);
-      transformSetFromArray(this.renderedTransform_, transform);
-    }
-
-    return pixel;
-  }
-
-  private getPixelFromCoordinateInternal(frameState: FrameState, transform: number[], coordinate: Coordinate): [number, number] | null {
-    const viewState = frameState.viewState;
-    const pixelRatio = frameState.pixelRatio;
-    const point = transformProj(coordinate, 'EPSG:4326', viewState.projection);
-    const viewCoordinate = fromUserCoordinate(point, viewState.projection);
-
-    if (!frameState) {
-      return null;
-    } else {
-      const pixelCoordinates = applyTransform(frameState.coordinateToPixelTransform, viewCoordinate.slice(0, 2));
-      const pixel = this.repeatWorld(viewCoordinate.slice(0, 2), pixelCoordinates, transform);
-      return [
-        pixel[0] * pixelRatio,
-        pixel[1] * pixelRatio
-      ];
-    }
-  }
-
-  private getCoordinateFromPixel(frameState: FrameState, pixel: Pixel): [number, number] | null {
-    const viewState = frameState.viewState;
-    // const pixelRatio = frameState.pixelRatio;
-    // const point = transformProj(coordinate, 'EPSG:4326', viewState.projection);
-    // const viewCoordinate = toUserCoordinate(point, viewState.projection);
-
-    if (!frameState) {
-      return null;
-    } else {
-      const viewCoordinate = applyTransform(frameState.pixelToCoordinateTransform, pixel.slice(0, 2));
-      // const pixel = this.repeatWorld(viewCoordinate.slice(0, 2), pixelCoordinates, transform);
-      const coordinate = toUserCoordinate(viewCoordinate, viewState.projection);
-      const point = transformProj(coordinate, viewState.projection, 'EPSG:4326');
-      return [
-        point[0],
-        point[1]
-      ];
-    }
-  }
-
-  private intersectsCoordinate(frameState: FrameState, coordinate: Coordinate): boolean {
-    const viewState = frameState.viewState;
-    const point = transformProj(coordinate, 'EPSG:4326', viewState.projection);
-    const viewCoordinate = fromUserCoordinate(point, viewState.projection);
-    return containsCoordinate(frameState.extent as Extent, viewCoordinate.slice(0, 2));
-  }
-}
-
 // @ts-ignore
 export default class WindLayerRender extends CanvasLayerRenderer {
   private pixelTransform: any;
@@ -209,14 +29,8 @@ export default class WindLayerRender extends CanvasLayerRenderer {
   private context: CanvasRenderingContext2D;
   private containerReused: boolean;
   private container: HTMLDivElement | HTMLCanvasElement;
-  public oRender: Render;
 
-  constructor(layer: WindLayer) {
-    // @ts-ignore
-    super(layer);
-
-    this.oRender = new Render();
-  }
+  public wind: WindCore;
 
   useContainer(target: HTMLElement | null, transform: string, opacity: number) {
     if (opacity < 1) {
@@ -304,30 +118,7 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     // @ts-ignore
     const transformOrigin = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, 0);
 
-    this.oRender.execute(this.context, 0, frameState, transformOrigin, transformOrigin, opt, data);
-
-    // if (layer.getWrapX() && projection.canWrapX() && !containsExtent(projectionExtent, extent)) {
-    //   let startX = extent[0];
-    //   const worldWidth = getWidth(projectionExtent);
-    //   let world = 0;
-    //   let offsetX;
-    //   while (startX < projectionExtent[0]) {
-    //     --world;
-    //     offsetX = worldWidth * world;
-    //     const transform = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, offsetX);
-    //     this.oRender.execute(this.context, world, frameState, transform, transformOrigin, opt, data);
-    //     startX += worldWidth;
-    //   }
-    //   world = 0;
-    //   startX = extent[2];
-    //   while (startX > projectionExtent[2]) {
-    //     ++world;
-    //     offsetX = worldWidth * world;
-    //     const transform = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, offsetX);
-    //     this.oRender.execute(this.context, world, frameState, transform, transformOrigin, opt, data);
-    //     startX -= worldWidth;
-    //   }
-    // }
+    this.execute(this.context, 0, frameState, transformOrigin, transformOrigin, opt, data);
 
     if (clipped) {
       context.restore();
@@ -343,5 +134,78 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     }
 
     return this.container;
+  }
+
+  public setOptions(options: Partial<IOptions>) {
+    if (this.wind) {
+      this.wind.setOptions(options);
+      // wind.prerender();
+    }
+  }
+
+  public setData(field: Field) {
+    if (this.wind) {
+      this.wind.updateData(field);
+      // wind.prerender();
+    }
+  }
+
+  execute(
+    context: CanvasRenderingContext2D,
+    index: number,
+    frameState: FrameState,
+    transform: number[],
+    renderedTransform: number[],
+    opt: Partial<IOptions>,
+    data: any,
+  ) {
+    if (!this.wind) {
+      this.wind = new WindCore(context, opt, data);
+
+      this.wind.project = this.getPixelFromCoordinateInternal.bind(this, frameState, transform);
+      this.wind.unproject = this.getCoordinateFromPixel.bind(this, frameState);
+      this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this, frameState);
+      this.wind.postrender = () => {};
+    }
+    this.wind.prerender();
+  }
+
+  private getPixelFromCoordinateInternal(frameState: FrameState, transform: number[], coordinate: Coordinate): [number, number] | null {
+    const viewState = frameState.viewState;
+    const pixelRatio = frameState.pixelRatio;
+    const point = transformProj(coordinate, 'EPSG:4326', viewState.projection);
+    const viewCoordinate = fromUserCoordinate(point, viewState.projection);
+
+    if (!frameState) {
+      return null;
+    } else {
+      const pixel = applyTransform(frameState.coordinateToPixelTransform, viewCoordinate.slice(0, 2));
+      return [
+        pixel[0] * pixelRatio,
+        pixel[1] * pixelRatio
+      ];
+    }
+  }
+
+  private getCoordinateFromPixel(frameState: FrameState, pixel: Pixel): [number, number] | null {
+    const viewState = frameState.viewState;
+    if (!frameState) {
+      return null;
+    } else {
+      const viewCoordinate = applyTransform(frameState.pixelToCoordinateTransform, pixel.slice(0, 2));
+      const coordinate = toUserCoordinate(viewCoordinate, viewState.projection);
+      const point = transformProj(coordinate, viewState.projection, 'EPSG:4326');
+      return [
+        point[0],
+        point[1]
+      ];
+    }
+  }
+
+  private intersectsCoordinate(frameState: FrameState, coordinate: Coordinate): boolean {
+    const viewState = frameState.viewState;
+    const point = transformProj(coordinate, 'EPSG:4326', viewState.projection);
+    const viewCoordinate = fromUserCoordinate(point, viewState.projection);
+    return containsCoordinate(frameState.extent as Extent, viewCoordinate.slice(0, 2));
   }
 }

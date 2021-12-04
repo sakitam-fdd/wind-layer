@@ -14,12 +14,11 @@ import {
   defaultOptions,
   Field,
   formatData,
-  IOptions,
   isArray,
   warnLog,
 } from 'wind-core';
 
-import { PerfWindLayer, WindLayerRender } from './layer';
+import type { IOptions, IField } from 'wind-core';
 
 export interface IWindOptions extends IOptions {
   opacity?: number;
@@ -30,6 +29,7 @@ export interface IWindOptions extends IOptions {
   maxResolution?: number;
   zIndex?: number;
   windOptions: Partial<IOptions>;
+  fieldOptions: Partial<IField>;
   [key: string]: any;
 }
 
@@ -77,7 +77,7 @@ class OlWind extends ImageLayer {
     this.setSource(new ImageCanvas(sourceOptions));
 
     if (data) {
-      this.setData(data);
+      this.setData(data, options.fieldOptions);
     }
   }
 
@@ -218,13 +218,14 @@ class OlWind extends ImageLayer {
   /**
    * set layer data
    * @param data
-   * @returns {BMapWind}
+   * @param options
+   * @returns {OlWind}
    */
-  public setData (data: any) {
+  public setData (data: any, options: Partial<IField> = {}) {
     if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
-      this.field = formatData(data);
+      this.field = formatData(data, options);
     } else {
       console.error('Illegal data');
     }
@@ -308,8 +309,6 @@ const WindLayer = OlWind;
 export {
   Field,
   WindLayer,
-  PerfWindLayer,
-  WindLayerRender,
 };
 
 export default OlWind;

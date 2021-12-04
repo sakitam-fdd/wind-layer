@@ -301,8 +301,7 @@
       .then(res => res.json())
       .then(res => {
         const windLayer = new WindLayer(res, {
-          wrapX: true,
-          forceRender: false,
+          forceRender: true,
           windOptions: {
             // colorScale: scale,
             velocityScale: 0.005,
@@ -315,14 +314,17 @@
             lineWidth: 3,
             // colorScale: scale,
           },
-          map: map,
+          fieldOptions: {
+            wrapX: true,
+          },
+          // map: map,
           // projection: 'EPSG:4326'
         });
 
         console.log(map, windLayer);
 
         // @ts-ignore
-        // map.addLayer(windLayer);
+        map.addLayer(windLayer);
 
         initGui(windLayer);
       });

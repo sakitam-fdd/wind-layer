@@ -43,14 +43,11 @@
   fetch('https://sakitam.oss-cn-beijing.aliyuncs.com/codepen/wind-layer/json/wind.json')
     .then(res => res.json())
     .then(res => {
-      // const range = vectorField.range || [0.02, 28.21618329965979];
-      // const scale = chroma.scale('OrRd').domain(range);
+
       const velocityScale = [0.1, 0.2, 0.3, 0.4, 0.5];
       const windLayer = new OlWind.WindLayer(res, {
         windOptions: {
-          velocityScale: () => {
-            return velocityScale[map.getView().getZoom() - 5] * 0.1 || 0.5;
-          },
+          velocityScale: 0.05,
           paths: 3200,
           // eslint-disable-next-line no-unused-vars
           colorScale: [
@@ -74,6 +71,9 @@
           // colorScale: scale,
           generateParticleOption: false
           // particleMultiplier: 0.3 * 10,
+        },
+        fieldOptions: {
+          wrapX: true,
         },
         map: map,
       });

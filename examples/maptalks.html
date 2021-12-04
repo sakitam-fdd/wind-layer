@@ -19,7 +19,7 @@
 <body>
 
 <div id="map" class="container"></div>
-<script src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.js"></script>
 <script src="https://cdn.jsdelivr.net/npm//axios/dist/axios.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
 <script src="//cdn.jsdelivr.net/npm/chroma-js@2.1.0/chroma.js"></script>
@@ -44,8 +44,14 @@
   fetch('./data/wind.json')
     .then(res => res.json())
     .then(res => {
-      // const range = vectorField.range || [0.02, 28.21618329965979];
-      // const scale = chroma.scale('OrRd').domain(range);
+
+      res = res.map((item, idx) => {
+        item.header = Object.assign(item.header, {
+          parameterCategory: 1,
+          parameterNumber: idx === 0 ? 2 : 3,
+        });
+        return item;
+      });
 
       const velocityScales = {
         0: 1 / 20,
@@ -117,6 +123,9 @@
           // paths: 10000,
           paths: 3782,
         },
+        fieldOptions: {
+          wrapX: true,
+        }
       });
 
       const color = {
@@ -275,8 +284,6 @@
         //   'rgba(180, 0, 35, 0.5)',
         // ],
       });
-
-      console.log(map, windLayer);
 
       function initGui(windLayer) {
         const config = {

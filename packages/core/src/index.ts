@@ -1,4 +1,5 @@
 import Field from './Field';
+import type { IField } from './Field';
 import Vector from './Vector';
 import { isFunction, isNumber, isString, isValide } from './utils';
 
@@ -436,4 +437,5 @@ export {
   WindCore,
   Field,
   Vector,
+  IField,
 };

@@ -5,10 +5,10 @@ import {
   assign,
   defaultOptions,
   formatData,
-  IOptions,
   isArray,
   createCanvas,
 } from 'wind-core';
+import type { IField, IOptions } from 'wind-core';
 
 const WindLayer = L.Layer.extend({
   options: {},
@@ -33,7 +33,7 @@ const WindLayer = L.Layer.extend({
       (window.devicePixelRatio || (window.screen.deviceXDPI / window.screen.logicalXDPI)) as number;
 
     if (data) {
-      this.setData(data);
+      this.setData(data, options.fieldOptions);
     }
   },
 
@@ -97,7 +97,6 @@ const WindLayer = L.Layer.extend({
   },
 
   _render() {
-    console.log('render');
     this._reset();
 
     const opt = this.getWindOptions();
@@ -140,7 +139,6 @@ const WindLayer = L.Layer.extend({
   intersectsCoordinate(coordinate: [number, number]): boolean {
     const bounds = this._map.getBounds();
     return bounds.contains(L.latLng(coordinate[1], coordinate[0])) as boolean;
-    // return true;
   },
 
   onAdd(map: L.Map) {
@@ -213,18 +211,21 @@ const WindLayer = L.Layer.extend({
   /**
    * set layer data
    * @param data
+   * @param options
    * @returns {WindLayer}
    */
-  setData(data: any) {
+  setData(data: any, options: Partial<IField> = {}) {
     if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
-      this.field = formatData(data);
+      this.field = formatData(data, options);
     } else {
       console.error('Illegal data');
     }
 
-    this?.wind?.updateData(this.field);
+    if (this.field) {
+      this?.wind?.updateData(this.field);
+    }
     return this;
   },
 

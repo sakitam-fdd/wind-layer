@@ -1,4 +1,5 @@
 import Field from './Field';
+import type { IField } from './Field';
 
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 const symToStringTag =
@@ -212,10 +213,11 @@ export interface IGFSItem {
 /**
  * format gfs json to vector
  * @param data
+ * @param options
  */
-export function formatData(data: IGFSItem[], options = {}) {
-  let uComp: IGFSItem;
-  let vComp: IGFSItem;
+export function formatData(data: IGFSItem[], options: Partial<IField> = {}) {
+  let uComp: IGFSItem = undefined as unknown as IGFSItem;
+  let vComp: IGFSItem = undefined as unknown as IGFSItem;
 
   if ((process.env.NODE_ENV as string) === ('development' as string)) {
     console.time('format-data');
@@ -238,9 +240,8 @@ export function formatData(data: IGFSItem[], options = {}) {
     }
   });
 
-  // @ts-ignore
   if (!vComp || !uComp) {
-    return;
+    return undefined;
   }
 
   const header = uComp.header;

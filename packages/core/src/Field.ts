@@ -256,16 +256,6 @@ export default class Field {
    * @param lat
    */
   public getDecimalIndexes(lon: number, lat: number) {
-
-    // if (lon < this.xmin) {
-    //   let n = Math.floor((this.xmin - lon) / 360) + 1;
-    //   lon = lon + 360 * n;
-    // }
-    // let offset_i = (lon - this.xmin) % 360;
-    // let i = offset_i / this.deltaX;
-    // let j = (this.ymax - lat) / this.deltaY;
-    // return [i, j];
-
     const i = floorMod(lon - this.xmin, 360) / this.deltaX; // calculate longitude index in wrapped range [0, 360)
     const j = (this.ymax - lat) / this.deltaY; // calculate latitude index in direction +90 to -90
     return [i, j];

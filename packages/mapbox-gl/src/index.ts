@@ -6,10 +6,9 @@ import {
   defaultOptions,
   Field,
   formatData,
-  IOptions,
   isArray,
-  // @ts-ignore
 } from 'wind-core';
+import type { IField, IOptions } from 'wind-core';
 
 import Overlay from './Overlay';
 
@@ -32,14 +31,11 @@ const defaultConfig = {
 class WindLayer extends Overlay {
   // @ts-ignore
   public options: IWindOptions;
-  private field: any;
+  private field: Field | undefined;
   private wind: WindCore;
 
   constructor(id: string | number, data: any, options = {} as any) {
     super(id, { ...defaultConfig, ...options });
-
-    this.field = null;
-
     this.pickWindOptions();
 
     if (data) {
@@ -171,7 +167,7 @@ class WindLayer extends Overlay {
    * @param options
    * @returns {WindLayer}
    */
-  public setData(data: any, options = {}) {
+  public setData(data: any, options: Partial<IField> = {}) {
     if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
@@ -180,7 +176,9 @@ class WindLayer extends Overlay {
       console.error('Illegal data');
     }
 
-    this?.wind?.updateData(this.field);
+    if (this.field) {
+      this?.wind?.updateData(this.field as Field);
+    }
 
     return this;
   }

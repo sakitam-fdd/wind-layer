@@ -1,4 +1,3 @@
-// @ts-ignore
 import { CanvasLayer, renderer, Coordinate, Point } from 'maptalks';
 
 import {
@@ -6,11 +5,10 @@ import {
   Field,
   isArray,
   formatData,
-  warnLog,
   assign,
   defaultOptions,
-  IOptions,
 } from 'wind-core';
+import type { IField, IOptions } from 'wind-core';
 
 import { ScalarLayer, ScalarLayerRenderer } from './ScalarLayer';
 
@@ -199,22 +197,19 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
 }
 
 class MaptalksWind extends CanvasLayer {
-  private field: any;
+  private field: Field | undefined;
   // @ts-ignore
   private _map: any;
   private options: IWindOptions;
 
-  constructor(id: string | number, data: any, options: any) {
+  constructor(id: string | number, data: any, options: any = {}) {
     super(id, assign({}, _options, options));
-
-    this.field = null;
-
     this._map = null;
 
     this.pickWindOptions();
 
     if (data) {
-      this.setData(data);
+      this.setData(data, options.fieldOptions);
     }
   }
 
@@ -244,34 +239,24 @@ class MaptalksWind extends CanvasLayer {
   /**
    * set layer data
    * @param data
+   * @param options
    * @returns {WindLayer}
    */
-  public setData (data: any) {
+  public setData (data: any, options: Partial<IField> = {}) {
     if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
-      this.field = formatData(data);
+      this.field = formatData(data, options);
     } else {
       console.error('Illegal data');
     }
 
     const renderer = this._getRenderer();
-    if (renderer && renderer.wind) {
+    if (renderer && renderer.wind && this.field) {
       renderer.wind.updateData(this.field);
     }
 
     return this;
-  }
-
-  public updateParams(options : Partial<IOptions> = {}) {
-    warnLog('will move to setWindOptions');
-    this.setWindOptions(options);
-    return this;
-  }
-
-  public getParams() {
-    warnLog('will move to getWindOptions');
-    return this.getWindOptions();
   }
 
   public setWindOptions(options: Partial<IOptions>) {

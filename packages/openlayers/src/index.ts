@@ -7,8 +7,9 @@ import {
   assign,
   defaultOptions,
   createCanvas,
-  IOptions,
 } from 'wind-core';
+
+import type { IOptions, IField } from 'wind-core';
 
 import * as ol from 'openlayers';
 import { olx } from 'openlayers';
@@ -22,6 +23,7 @@ export interface IWindOptions extends IOptions {
   maxResolution?: number;
   zIndex?: number;
   windOptions: Partial<IOptions>;
+  fieldOptions: Partial<IField>;
   [key: string]: any;
 }
 
@@ -78,7 +80,7 @@ class OlWind extends ol.layer.Image {
     this.setSource(source);
 
     if (data) {
-      this.setData(data);
+      this.setData(data, options.fieldOptions);
     }
   }
 
@@ -225,13 +227,14 @@ class OlWind extends ol.layer.Image {
   /**
    * set layer data
    * @param data
+   * @param options
    * @returns {OlWind}
    */
-  public setData (data: any) {
+  public setData (data: any, options: Partial<IField> = {}) {
     if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
-      this.field = formatData(data);
+      this.field = formatData(data, options);
     } else {
       console.error('Illegal data');
     }

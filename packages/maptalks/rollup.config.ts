@@ -92,9 +92,9 @@ const umdBuild: RollupOptions = {
       maptalks: 'maptalks',
     },
     outro: `
-      var warnings = {};
+      var __warnings = {};
 
-      function warnOnce(msg) {
+      function __warnOnce(msg) {
         if (!warnings[msg]) {
           console.warn('[maptalks-wind]: ', msg);
           warnings[msg] = true;
@@ -104,7 +104,7 @@ const umdBuild: RollupOptions = {
 
 if (G && G.mtkWind) {
   window.MaptalksWind = window.mtkWind;
-  warnOnce('MaptalksWind namespace will deprecated please use mtkWind instead！');
+  __warnOnce('MaptalksWind namespace will deprecated please use mtkWind instead！');
 }
     `
   },
