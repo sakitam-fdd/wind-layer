@@ -87,19 +87,19 @@
   };
 
   map.on('load', function () {
-    // fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
-    fetch('./data/wind.json')
+    fetch('https://sakitam.oss-cn-beijing.aliyuncs.com/codepen/wind-layer/json/wind.json')
+    // fetch('./data/wind.json')
       .then(res => res.json())
       .then(data => {
         console.log(data);
 
-        data = data.map((item, idx) => {
-          item.header = Object.assign(item.header, {
-            parameterCategory: 1,
-            parameterNumber: idx === 0 ? 2 : 3,
-          });
-          return item;
-        });
+        // data = data.map((item, idx) => {
+        //   item.header = Object.assign(item.header, {
+        //     parameterCategory: 1,
+        //     parameterNumber: idx === 0 ? 2 : 3,
+        //   });
+        //   return item;
+        // });
 
         const tempInterpolateColor = color.temp.reduce((result, item, key) => result.concat(item[0] - 273.15, 'rgba(' + item[1].join(',') + ')'), []);
 
@@ -157,7 +157,7 @@
           // mappingRange: [0, 0],
         });
 
-        map.addLayer(fillLayer);
+        // map.addLayer(fillLayer);
 
         window.windLayer = new mapboxWind.WindLayer('wind', data, {
           windOptions: {
@@ -191,6 +191,9 @@
             // paths: 10000,
             paths: 3782,
           },
+          fieldOptions: {
+            wrapX: true,
+          }
         });
 
         console.log(map, window.windLayer);
@@ -216,10 +219,10 @@
           requestAnimationFrame(draw);
         }
 
-        requestAnimationFrame(draw);
+        // requestAnimationFrame(draw);
 
         // map.addLayer(window.windLayer);
-        // window.windLayer.addTo(map);
+        window.windLayer.addTo(map);
       });
   });
 </script>

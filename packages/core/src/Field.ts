@@ -1,20 +1,26 @@
-import { floorMod } from './utils';
+import {floorMod, warnOnce} from './utils';
 import Vector from './Vector';
 
 export interface IField {
-  xmin: number; // 一般格点数据是按照矩形范围来切割，所以定义其经纬度范围
-  ymin: number;
-  xmax: number;
-  ymax: number;
+  /* 一般格点数据是按照矩形范围来切割，所以定义其经纬度范围 */
+  xmin: number; // 经度最小值
+  ymin: number; // 纬度最小值
+  xmax: number; // 经度最大值
+  ymax: number; // 纬度最大值
   deltaX: number; // x（经度）增量
-  deltaY: number; // y（维度）增量
+  deltaY: number; // y（纬度）增量 (默认我们采用的数据和格点原始数据方向保持一致，数据从左上到右下) 但是需要注意的是此时 deltaY为 -(ymin-ymax) / rows, 这是grib2json 遗留的问题。
   cols: number; // 列（可由 `(xmax - xmin) / deltaX` 得到）
   rows: number; // 行
   us: number[]; // U分量
   vs: number[]; // V分量
-  wrappedX?: boolean; // 当数据范围时按照 [0, 360] 时需要对x方向进行切割转换为 [-180, 180]
+  wrapX?: boolean; // 是否实现跨世界渲染
+  wrappedX?: boolean; // 当数据范围时按照 [0, 360] 时需要对x方向进行切割转换为 [-180, 180]，即将废弃
+  translateX?: boolean; // 当数据范围时按照 [0, 360] 时需要对x方向进行切割转换为 [-180, 180]
 }
 
+/**
+ *
+ */
 export interface IPosition {
   age?: number;
   x?: number;
@@ -36,10 +42,11 @@ export default class Field {
   private readonly isContinuous: boolean;
   private readonly deltaY: number;
   private readonly deltaX: number;
-  private readonly wrappedX: undefined | boolean;
+  private readonly translateX: undefined | boolean;
   private readonly isFields: boolean;
   public grid: (Vector | null)[][];
   public range: (number | undefined)[] | undefined;
+  private wrapX: boolean;
 
   constructor(params: IField) {
     this.grid = [];
@@ -59,13 +66,18 @@ export default class Field {
     this.deltaX = params.deltaX; // x 方向增量
     this.deltaY = params.deltaY; // y方向增量
 
+    // 当 deltaY < 0 时，但是数据组织是由左上到右下此时说明数据 Y 轴是反的
     if (this.deltaY < 0 && this.ymin < this.ymax) {
       console.warn('[wind-core]: The data is flipY');
     } else {
+      // 由于数据组织方式和deltaY的默认处理，那么在正常情况下我们需要交换 ymin 和 ymax 得到数据真实的 bbox（todo：我们需要按照真实数据来组织吗？）
       this.ymin = Math.min(params.ymax, params.ymin);
       this.ymax = Math.max(params.ymax, params.ymin);
     }
 
+    /**
+     *
+     */
     this.isFields = true;
 
     const cols = Math.ceil((this.xmax - this.xmin) / params.deltaX); // 列
@@ -75,10 +87,14 @@ export default class Field {
       console.warn('[wind-core]: The data grid not equal');
     }
 
-    // Math.floor(ni * Δλ) >= 360;
-    // lon lat 经度 纬度
+    // 部分数据可能并不是连续的，其经度范围可能是 -180 - 179.5（比如 GFS 0.5 分辨率的）我们需要补齐最后一位
     this.isContinuous = Math.floor(this.cols * params.deltaX) >= 360;
-    this.wrappedX = 'wrappedX' in params ? params.wrappedX : this.xmax > 180; // [0, 360] --> [-180, 180];
+    this.translateX = 'translateX' in params ? params.translateX : this.xmax > 180; // [0, 360] --> [-180, 180];
+    if ('wrappedX' in params) {
+      warnOnce('[wind-core]: ', '`wrappedX` namespace will deprecated please use `translateX` instead！')
+    }
+
+    this.wrapX = Boolean(params.wrapX);
 
     this.grid = this.buildGrid();
     this.range = this.calculateRange();
@@ -209,7 +225,7 @@ export default class Field {
     let xmin = this.xmin;
     let xmax = this.xmax;
 
-    if (this.wrappedX) {
+    if (this.translateX) {
       if (this.isContinuous) {
         xmin = -180;
         xmax = 180;
@@ -217,10 +233,6 @@ export default class Field {
         // not sure about this (just one particular case, but others...?)
         xmax = this.xmax - 360;
         xmin = this.xmin - 360;
-        /* eslint-disable no-console */
-        // console.warn(`are these xmin: ${xmin} & xmax: ${xmax} OK?`);
-        // TODO: Better throw an exception on no-controlled situations.
-        /* eslint-enable no-console */
       }
     }
     return [xmin, xmax];
@@ -244,6 +256,16 @@ export default class Field {
    * @param lat
    */
   public getDecimalIndexes(lon: number, lat: number) {
+
+    // if (lon < this.xmin) {
+    //   let n = Math.floor((this.xmin - lon) / 360) + 1;
+    //   lon = lon + 360 * n;
+    // }
+    // let offset_i = (lon - this.xmin) % 360;
+    // let i = offset_i / this.deltaX;
+    // let j = (this.ymax - lat) / this.deltaY;
+    // return [i, j];
+
     const i = floorMod(lon - this.xmin, 360) / this.deltaX; // calculate longitude index in wrapped range [0, 360)
     const j = (this.ymax - lat) / this.deltaY; // calculate latitude index in direction +90 to -90
     return [i, j];
@@ -256,8 +278,15 @@ export default class Field {
    * @param lat
    */
   public valueAt(lon: number, lat: number) {
+    let flag = false;
 
-    if (!this.contains(lon, lat)) return null;
+    if (this.wrapX) {
+      flag = true;
+    } else if (this.contains(lon, lat)) {
+      flag = true;
+    }
+
+    if (!flag) return null;
 
     const indexes = this.getDecimalIndexes(lon, lat);
     let ii = Math.floor(indexes[0]);
@@ -276,7 +305,15 @@ export default class Field {
    * @param lat
    */
   public interpolatedValueAt(lon: number, lat: number) {
-    if (!this.contains(lon, lat)) return null;
+    let flag = false;
+
+    if (this.wrapX) {
+      flag = true;
+    } else if (this.contains(lon, lat)) {
+      flag = true;
+    }
+
+    if (!flag) return null;
 
     let [i, j] = this.getDecimalIndexes(lon, lat);
     return this.interpolatePoint(i, j);
@@ -435,7 +472,7 @@ export default class Field {
   private longitudeAtX(i: number) {
     let halfXPixel = this.deltaX / 2.0;
     let lon = this.xmin + halfXPixel + i * this.deltaX;
-    if (this.wrappedX) {
+    if (this.translateX) {
       lon = lon > 180 ? lon - 360 : lon;
     }
     return lon;

@@ -20,6 +20,7 @@ export { default as Particles } from './Particles';
 
 export interface IWindOptions extends IOptions {
   windOptions: Partial<IOptions>;
+  fieldOptions: any;
   [key: string]: any;
 }
 
@@ -34,7 +35,7 @@ class WindLayer extends Overlay {
   private field: any;
   private wind: WindCore;
 
-  constructor(id: string | number, data: any, options = {}) {
+  constructor(id: string | number, data: any, options = {} as any) {
     super(id, { ...defaultConfig, ...options });
 
     this.field = null;
@@ -42,7 +43,7 @@ class WindLayer extends Overlay {
     this.pickWindOptions();
 
     if (data) {
-      this.setData(data);
+      this.setData(data, options.fieldOptions);
     }
 
     this.stop = this.stop.bind(this);
@@ -167,13 +168,14 @@ class WindLayer extends Overlay {
   /**
    * set layer data
    * @param data
+   * @param options
    * @returns {WindLayer}
    */
-  public setData(data: any) {
+  public setData(data: any, options = {}) {
     if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
-      this.field = formatData(data);
+      this.field = formatData(data, options);
     } else {
       console.error('Illegal data');
     }

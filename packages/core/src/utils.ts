@@ -151,9 +151,24 @@ export function assign(target: object, ...sources: any[]) {
 /**
  * 打印⚠️信息
  * @param msg
+ * @param n
  */
-export function warnLog(msg: string) {
-  console.warn(`wind-layer: ${msg}`);
+export function warnLog(msg: string, n?: string) {
+  console.warn(`${n || 'wind-layer'}: ${msg}`);
+}
+
+const warnings = {};
+
+/**
+ * 在程序运行时只打印同类型警告一次
+ * @param namespaces
+ * @param msg
+ */
+export function warnOnce(namespaces: string, msg: string) {
+  if (!warnings[msg]) {
+    warnLog(msg, namespaces);
+    warnings[msg] = true;
+  }
 }
 
 /**
@@ -198,7 +213,7 @@ export interface IGFSItem {
  * format gfs json to vector
  * @param data
  */
-export function formatData(data: IGFSItem[]) {
+export function formatData(data: IGFSItem[], options = {}) {
   let uComp: IGFSItem;
   let vComp: IGFSItem;
 
@@ -240,7 +255,7 @@ export function formatData(data: IGFSItem[]) {
     rows: header.ny, // 行
     us: uComp.data, // U分量
     vs: vComp.data, // V分量
-    // wrappedX: false,
+    ...options,
   });
 
   if ((process.env.NODE_ENV as string) === ('development' as string)) {

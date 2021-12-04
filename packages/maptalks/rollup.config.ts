@@ -21,9 +21,13 @@ const PROD = !DEV;
 
 const r = (p: string) => resolve(ROOT, '..', p);
 
+const umdExternal = [
+  'maptalks',
+];
+
 const external = [
+  ...umdExternal,
   ...Object.keys(pkg.dependencies),
-  'maptalks'
 ];
 
 const plugins = [
@@ -86,9 +90,25 @@ const umdBuild: RollupOptions = {
     file: pkg.main,
     globals: {
       maptalks: 'maptalks',
-    }
+    },
+    outro: `
+      var warnings = {};
+
+      function warnOnce(msg) {
+        if (!warnings[msg]) {
+          console.warn('[maptalks-wind]: ', msg);
+          warnings[msg] = true;
+        }
+      }
+      var G = typeof window === "undefined" ? global : window;
+
+if (G && G.mtkWind) {
+  window.MaptalksWind = window.mtkWind;
+  warnOnce('MaptalksWind namespace will deprecated please use mtkWind instead！');
+}
+    `
   },
-  external,
+  external: umdExternal,
   plugins,
   onwarn(warning, warn) {
     if (warning.code !== 'EVAL') warn(warning);

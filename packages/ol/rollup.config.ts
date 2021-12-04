@@ -21,8 +21,7 @@ const PROD = !DEV;
 
 const r = (p: string) => resolve(ROOT, '..', p);
 
-const external = [
-  // ...Object.keys(pkg.dependencies),
+const umdExternal = [
   'ol',
   'ol/size',
   'ol/layer',
@@ -35,6 +34,11 @@ const external = [
   'ol/source/ImageCanvas',
   'ol/renderer/Map',
   'ol/renderer/canvas/ImageLayer'
+];
+
+const external = [
+  ...umdExternal,
+  ...Object.keys(pkg.dependencies),
 ];
 
 const plugins = [
@@ -110,7 +114,7 @@ const umdBuild: RollupOptions = {
       'ol/renderer/canvas/ImageLayer': 'ol.renderer.canvas.ImageLayer',
     },
   },
-  external,
+  external: umdExternal,
   plugins,
   onwarn(warning, warn) {
     if (warning.code !== 'EVAL') warn(warning);

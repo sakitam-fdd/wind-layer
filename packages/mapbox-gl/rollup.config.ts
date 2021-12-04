@@ -21,9 +21,13 @@ const PROD = !DEV;
 
 const r = (p: string) => resolve(ROOT, '..', p);
 
-const external = [
-  ...Object.keys(pkg.dependencies),
+const umdExternal = [
   'mapbox-gl',
+];
+
+const external = [
+  ...umdExternal,
+  ...Object.keys(pkg.dependencies),
 ];
 
 const plugins = [
@@ -88,7 +92,7 @@ const umdBuild: RollupOptions = {
       'mapbox-gl': 'mapboxgl',
     }
   },
-  external,
+  external: umdExternal,
   plugins,
   onwarn(warning, warn) {
     if (warning.code !== 'EVAL') warn(warning);

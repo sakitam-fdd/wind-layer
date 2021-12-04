@@ -40,8 +40,8 @@
 
   window.map = map;
 
-  fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
-  // fetch('./data/wind.json')
+  // fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
+  fetch('./data/wind.json')
     .then(res => res.json())
     .then(res => {
       // const range = vectorField.range || [0.02, 28.21618329965979];
@@ -81,7 +81,7 @@
       //   return item;
       // });
 
-      const windLayer = new MaptalksWind.WindLayer('wind', res, {
+      const windLayer = new mtkWind.WindLayer('wind', res, {
         windOptions: {
           // colorScale: (m) => {
           //   // console.log(m);
@@ -160,7 +160,7 @@
       const windInterpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
       const tempInterpolateColor = color.temp.reduce((result, item, key) => result.concat(item[0] - 273.15, 'rgba(' + item[1].join(',') + ')'), []);
 
-      const scalarLayer = new MaptalksWind.ScalarLayer('scalar', {
+      const scalarLayer = new mtkWind.ScalarLayer('scalar', {
         // "type": "jsonArray",
         // "data": res,
         "type": "image",
@@ -223,7 +223,7 @@
         // ],
       });
 
-      const tempLayer = new MaptalksWind.ScalarLayer('temp', {
+      const tempLayer = new mtkWind.ScalarLayer('temp', {
         // "type": "jsonArray",
         // "data": res,
         "type": "image",

@@ -84,7 +84,7 @@ const umdBuild: RollupOptions = {
     sourcemap: !MINIFY,
     file: pkg.main,
   },
-  external,
+  // external,
   plugins,
   onwarn(warning, warn) {
     if (warning.code !== 'EVAL') warn(warning);
