@@ -4,12 +4,12 @@
   </div>
 </template>
 <script>
-  import '@sakitam-gis/ol5/ol.css';
-  // import Map from 'ol/Map';
-  // import View from 'ol/View';
-  // import TileLayer from 'ol/layer/Tile';
-  // import { fromLonLat } from 'ol/proj';
-  // import OSM from 'ol/source/OSM';
+  import '@sakitam-gis/ol5/src.css';
+  // import Map from 'src/Map';
+  // import View from 'src/View';
+  // import TileLayer from 'src/layer/Tile';
+  // import { fromLonLat } from 'src/proj';
+  // import OSM from 'src/source/OSM';
   // import { WindLayer } from 'ol5-wind';
 
   export default {

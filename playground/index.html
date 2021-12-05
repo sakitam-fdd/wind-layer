@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title><%- title %></title>
+  <style>
+    html, body, .container {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%
+    }
+
+    .container {
+      display: flex;
+      justify-content: center; /* 水平居中 */
+      align-items: center;
+    }
+
+    #map {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div id="map"></div>
+</div>
+<script type="module" src="/src/index.ts"></script>
+</body>
+</html>

@@ -5,16 +5,16 @@
 </template>
 <script>
   import 'ol/ol.css';
-  // import Map from 'ol/Map';
-  // import View from 'ol/View';
-  // import TileLayer from 'ol/layer/Tile';
-  // import Projection from 'ol/proj/Projection'
-  // import OSM from 'ol/source/OSM';
-  // import { register } from 'ol/proj/proj4';
-  // import GeoJSON from 'ol/format/GeoJSON';
-  // import VectorLayer from 'ol/layer/Vector';
-  // import VectorSource from 'ol/source/Vector';
-  // import { WindLayer } from 'ol-wind';
+  // import Map from 'src/Map';
+  // import View from 'src/View';
+  // import TileLayer from 'src/layer/Tile';
+  // import Projection from 'src/proj/Projection'
+  // import OSM from 'src/source/OSM';
+  // import { register } from 'src/proj/proj4';
+  // import GeoJSON from 'src/format/GeoJSON';
+  // import VectorLayer from 'src/layer/Vector';
+  // import VectorSource from 'src/source/Vector';
+  // import { WindLayer } from 'src-wind';
 
   export default {
     name: 'ol-wind-moll',
@@ -29,12 +29,12 @@
         const TileLayer = await import('ol/layer/Tile').then(res => res.default);
         const Projection = await import('ol/proj/Projection').then(res => res.default);
         const OSM = await import('ol/source/OSM').then(res => res.default);
-        // const { get: getProjection } = await import('ol/proj');
+        // const { get: getProjection } = await import('src/proj');
         const { register } = await import('ol/proj/proj4');
         const GeoJSON = await import('ol/format/GeoJSON').then(res => res.default);
         const VectorLayer = await import('ol/layer/Vector').then(res => res.default);
         const VectorSource = await import('ol/source/Vector').then(res => res.default);
-        const { WindLayer } = await import('ol-wind');
+        const { WindLayer } = await import('src-wind');
 
         proj4.defs('ESRI:53009', '+proj=moll +lon_0=0 +x_0=0 +y_0=0 +a=6371000 ' +
           '+b=6371000 +units=m +no_defs');

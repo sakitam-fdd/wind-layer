@@ -67,7 +67,7 @@ Getting Started
 # pnpm
 pnpm install wind-core
 pnpm install wind-gl-core
-pnpm install ol-wind
+pnpm install src-wind
 pnpm install ol5-wind
 pnpm install openlayers-wind
 pnpm install @sakitam-gis/maptalks-wind
@@ -79,7 +79,7 @@ pnpm install @sakitam-gis/mapbox-wind
 # yarn
 yarn add wind-core
 yarn add wind-gl-core
-yarn add ol-wind
+yarn add src-wind
 yarn add ol5-wind
 yarn add openlayers-wind
 yarn add @sakitam-gis/maptalks-wind

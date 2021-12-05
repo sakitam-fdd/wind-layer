@@ -9,7 +9,7 @@ import {
   makeInverse,
   apply as applyTransform,
 } from 'ol/transform';
-import {containsExtent, intersects, getIntersection, isEmpty, containsCoordinate} from 'ol/extent';
+import {containsExtent, intersects, containsCoordinate, getIntersection, isEmpty} from 'ol/extent';
 import type { Extent } from 'ol/extent';
 
 import { WindCore, Field } from 'wind-core';
@@ -33,10 +33,7 @@ export default class WindLayerRender extends CanvasLayerRenderer {
   public wind: WindCore;
 
   useContainer(target: HTMLElement | null, transform: string, opacity: number) {
-    if (opacity < 1) {
-      target = null;
-    }
-    // @ts-ignore
+    // 此处强制新建 canvas
     super.useContainer(null, transform, opacity);
   }
 
@@ -58,8 +55,6 @@ export default class WindLayerRender extends CanvasLayerRenderer {
       const layer = this.getLayer() as unknown as WindLayer;
       return layer.get('forceRender');
     }
-
-    // return !!this.wind;
   }
 
   renderFrame(frameState: FrameState, target: HTMLDivElement) {
@@ -85,11 +80,8 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     if (canvas.width != width || canvas.height != height) {
       canvas.width = width;
       canvas.height = height;
-      if (canvas.style.transform !== canvasTransform) {
-        canvas.style.transform = canvasTransform;
-      }
     } else if (!this.containerReused) {
-      context.clearRect(0, 0, width, height);
+      context.globalCompositeOperation = 'source-over';
     }
 
     // @ts-ignore
@@ -97,9 +89,11 @@ export default class WindLayerRender extends CanvasLayerRenderer {
 
     // clipped rendering if layer extent is set
     let clipped = false;
+    let render = true;
     if (layerState.extent) {
       const layerExtent = fromUserExtent(layerState.extent, viewState.projection);
-      clipped = !containsExtent(layerExtent, frameState.extent as Extent) && intersects(layerExtent, frameState.extent as Extent);
+      render = intersects(layerExtent, frameState.extent as Extent);
+      clipped = render && !containsExtent(layerExtent, frameState.extent as Extent);
       if (clipped) {
         // @ts-ignore
         this.clipUnrotated(context, frameState, layerExtent);
@@ -118,19 +112,17 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     // @ts-ignore
     const transformOrigin = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, 0);
 
-    this.execute(this.context, 0, frameState, transformOrigin, transformOrigin, opt, data);
+    this.execute(this.context, frameState, transformOrigin, transformOrigin, opt, data);
+
+    // @ts-ignore
+    this.postRender(context, frameState);
 
     if (clipped) {
       context.restore();
     }
 
-    // @ts-ignore
-    this.postRender(context, frameState);
-
-    const opacity = layerState.opacity;
-    const container = this.container;
-    if (container !== null && opacity !== parseFloat(<string>container.style.opacity)) {
-      container.style.opacity = (opacity === 1 ? '' : opacity) as string;
+    if (canvasTransform !== canvas.style.transform) {
+      canvas.style.transform = canvasTransform;
     }
 
     return this.container;
@@ -152,7 +144,6 @@ export default class WindLayerRender extends CanvasLayerRenderer {
 
   execute(
     context: CanvasRenderingContext2D,
-    index: number,
     frameState: FrameState,
     transform: number[],
     renderedTransform: number[],
@@ -162,15 +153,17 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     if (!this.wind) {
       this.wind = new WindCore(context, opt, data);
 
-      this.wind.project = this.getPixelFromCoordinateInternal.bind(this, frameState, transform);
-      this.wind.unproject = this.getCoordinateFromPixel.bind(this, frameState);
-      this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this, frameState);
+      this.wind.project = this.getPixelFromCoordinateInternal.bind(this);
+      this.wind.unproject = this.getCoordinateFromPixel.bind(this);
+      this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
       this.wind.postrender = () => {};
+      this.wind.prerender();
     }
-    this.wind.prerender();
   }
 
-  private getPixelFromCoordinateInternal(frameState: FrameState, transform: number[], coordinate: Coordinate): [number, number] | null {
+  private getPixelFromCoordinateInternal(coordinate: Coordinate): [number, number] | null {
+    // @ts-ignore
+    const frameState = this.frameState;
     const viewState = frameState.viewState;
     const pixelRatio = frameState.pixelRatio;
     const point = transformProj(coordinate, 'EPSG:4326', viewState.projection);
@@ -187,7 +180,9 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     }
   }
 
-  private getCoordinateFromPixel(frameState: FrameState, pixel: Pixel): [number, number] | null {
+  private getCoordinateFromPixel(pixel: Pixel): [number, number] | null {
+    // @ts-ignore
+    const frameState = this.frameState;
     const viewState = frameState.viewState;
     if (!frameState) {
       return null;
@@ -202,10 +197,13 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     }
   }
 
-  private intersectsCoordinate(frameState: FrameState, coordinate: Coordinate): boolean {
+  private intersectsCoordinate(coordinate: Coordinate): boolean {
+    // @ts-ignore
+    const frameState = this.frameState;
     const viewState = frameState.viewState;
     const point = transformProj(coordinate, 'EPSG:4326', viewState.projection);
     const viewCoordinate = fromUserCoordinate(point, viewState.projection);
+    // const extent = getForViewAndSize(viewState.center, viewState.resolution, viewState.rotation, frameState.size.map((item) => item * frameState.pixelRatio));
     return containsCoordinate(frameState.extent as Extent, viewCoordinate.slice(0, 2));
   }
 }

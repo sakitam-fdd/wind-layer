@@ -1,3 +1,4 @@
+import 'ol/ol.css';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
@@ -5,11 +6,11 @@ import { fromLonLat } from 'ol/proj';
 import Feature from 'ol/Feature';
 import GeoJSON from 'ol/format/GeoJSON';
 import Circle from 'ol/geom/Circle';
-import { Vector as VectorLayer } from 'ol/layer';
-import { OSM, Vector as VectorSource } from 'ol/source';
+import { Vector as VectorLayer, Image as ImageLayer } from 'ol/layer';
+import { OSM, Vector as VectorSource, ImageStatic } from 'ol/source';
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 
-import { WindLayer } from 'src-wind';
+import { WindLayer } from 'ol-wind';
 
 const image = new CircleStyle({
   radius: 5,
@@ -82,8 +83,7 @@ const styles = {
   })
 };
 
-const styleFunction = function(feature: Feature) {
-  // @ts-ignore
+const styleFunction = function(feature) {
   return styles[feature.getGeometry().getType()];
 };
 
@@ -170,12 +170,19 @@ function initMap() {
 
   vectorSource.addFeature(new Feature(new Circle([5e6, 7e6], 1e6)));
 
-  // @ts-ignore
   const vectorLayer = new VectorLayer({
     source: vectorSource,
     // @ts-ignore
     style: styleFunction
   });
+
+  const image = new ImageLayer({
+    source: new ImageStatic({
+      url: 'https://imgs.xkcd.com/comics/online_communities.png',
+      projection: 'EPSG:4326',
+      imageExtent: [-180, -90, 180, 90],
+    }),
+  })
 
   const map = new Map({
     layers: [layer, vectorLayer],
@@ -192,13 +199,13 @@ function initMap() {
   // @ts-ignore
   window.map = map;
 
-  function initGui(windLayer: WindLayer) {
+  function initGui(windLayer) {
     const config = {
       addLayer: true,
-      paths: 1000,
+      paths: 3000,
       lineWidth: 3,
       velocityScale: 0.005,
-      globalAlpha: 0.8,
+      globalAlpha: 0.9,
       maxAge: 90,
     };
 
@@ -206,9 +213,11 @@ function initMap() {
     const gui = new dat.GUI();
     gui.add(config, 'addLayer').onChange(function () {
       if (config.addLayer) {
+        // windLayer.setMap(map);
         // @ts-ignore
         window.map.addLayer(windLayer);
       } else {
+        // windLayer.setMap(null);
         // @ts-ignore
         window.map.removeLayer(windLayer);
       }
@@ -248,19 +257,53 @@ function initMap() {
     .then(res => res.json())
     .then(res => {
       const windLayer = new WindLayer(res, {
-        wrapX: true,
         forceRender: false,
         windOptions: {
           // colorScale: scale,
-          velocityScale: 0.005,
-          paths: 2000,
+          velocityScale: 0.05,
+          paths: 3200,
           // eslint-disable-next-line no-unused-vars
-          colorScale: () => {
-            // console.log(m);
-            return '#ff473c';
-          },
+          colorScale: [
+            "rgb(36,104, 180)",
+            "rgb(60,157, 194)",
+            "rgb(128,205,193 )",
+            "rgb(151,218,168 )",
+            "rgb(198,231,181)",
+            "rgb(238,247,217)",
+            "rgb(255,238,159)",
+            "rgb(252,217,125)",
+            "rgb(255,182,100)",
+            "rgb(252,150,75)",
+            "rgb(250,112,52)",
+            "rgb(245,64,32)",
+            "rgb(237,45,28)",
+            "rgb(220,24,32)",
+            "rgb(180,0,35)"
+          ],
           lineWidth: 3,
           // colorScale: scale,
+        },
+        fieldOptions: {
+          wrapX: true,
+        },
+        // map: map,
+        // projection: 'EPSG:4326'
+      });
+
+      const windLayer1 = new WindLayer(res, {
+        className: 'ol-wind',
+        forceRender: false,
+        windOptions: {
+          // colorScale: scale,
+          velocityScale: 0.1,
+          paths: 3200,
+          // eslint-disable-next-line no-unused-vars
+          colorScale: '#fff',
+          lineWidth: 3,
+          // colorScale: scale,
+        },
+        fieldOptions: {
+          wrapX: true,
         },
         // map: map,
         // projection: 'EPSG:4326'
@@ -270,6 +313,13 @@ function initMap() {
 
       // @ts-ignore
       map.addLayer(windLayer);
+      map.addLayer(windLayer1);
+
+      setTimeout(() => {
+        map.removeLayer(windLayer1);
+      }, 5 * 1000);
+
+      map.addLayer(image);
 
       initGui(windLayer);
     });

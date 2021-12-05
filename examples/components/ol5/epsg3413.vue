@@ -4,7 +4,7 @@
   </div>
 </template>
 <script>
-  import '@sakitam-gis/ol5/ol.css';
+  import '@sakitam-gis/ol5/src.css';
   // import Map from '@sakitam-gis/ol5/Map';
   // import View from '@sakitam-gis/ol5/View';
   // import TileLayer from '@sakitam-gis/ol5/layer/Tile';

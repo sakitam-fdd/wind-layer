@@ -39,7 +39,7 @@ function sidebarGuide() {
         { text: 'maptalks', link: '/guide/maptalks' },
         { text: 'mapbox-gl', link: '/guide/mapbox-gl' },
         { text: 'leaflet', link: '/guide/leaflet' },
-        { text: 'ol', link: '/guide/ol' },
+        { text: 'ol', link: '/guide/src' },
         { text: 'ol5', link: '/guide/ol5' },
         { text: 'ol3-4', link: '/guide/openlayers' },
         { text: 'amap', link: '/guide/amap' },

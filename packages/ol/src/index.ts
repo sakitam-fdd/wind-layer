@@ -1,11 +1,9 @@
 import { Layer } from 'ol/layer';
-import { FrameState } from 'ol/PluggableMap';
 import WindLayerRender from './renderer';
 
 import {
   isArray,
   formatData,
-  warnLog,
   assign,
   defaultOptions,
   Field,
@@ -31,9 +29,6 @@ export class WindLayer extends Layer<any, any> {
   private field: Field | undefined;
   public _map: any;
   private options: IWindOptions;
-  private renderer_: WindLayerRender;
-
-  // protected createRenderer(): LayerRenderer<Layer<Source>>;
 
   constructor(data: any, options: any) {
     const opt = assign({}, _options, options);
@@ -41,6 +36,11 @@ export class WindLayer extends Layer<any, any> {
     super(opt);
 
     this.options = opt;
+
+    // @tip overwrite for layer className and disable containerReused
+    // @ts-ignore
+    this.className_ =
+      options.className !== undefined ? options.className : 'wind-layer';
 
     this.pickWindOptions();
 
@@ -51,24 +51,12 @@ export class WindLayer extends Layer<any, any> {
     }
   }
 
-  // @ts-ignore
-  public render(frameState: FrameState, target: HTMLDivElement) {
-    const layerRenderer = this.getRenderer();
-
-    if (layerRenderer.prepareFrame(frameState)) {
-      return layerRenderer.renderFrame(frameState, target);
+  public unrender() {
+    super.unrender();
+    const renderer = this.getRenderer();
+    if (renderer) {
+      renderer.wind.stop();
     }
-  }
-
-  public getRenderer() {
-    if (!this.renderer_) {
-      this.renderer_ = this.createRenderer();
-    }
-    return this.renderer_;
-  }
-
-  public hasRenderer() {
-    return !!this.renderer_;
   }
 
   protected createRenderer() {
@@ -117,17 +105,6 @@ export class WindLayer extends Layer<any, any> {
     }
 
     return this;
-  }
-
-  public updateParams(options : Partial<IOptions> = {}) {
-    warnLog('will move to setWindOptions');
-    this.setWindOptions(options);
-    return this;
-  }
-
-  public getParams() {
-    warnLog('will move to getWindOptions');
-    return this.getWindOptions();
   }
 
   public setWindOptions(options: Partial<IOptions>) {

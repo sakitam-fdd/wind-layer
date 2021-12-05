@@ -5,13 +5,13 @@
 </template>
 <script>
   import 'ol/ol.css';
-  // import Map from 'ol/Map';
-  // import View from 'ol/View';
-  // import TileLayer from 'ol/layer/Tile';
-  // import { get as getProjection } from 'ol/proj';
-  // import OSM from 'ol/source/OSM';
-  // import { register } from 'ol/proj/proj4';
-  // import { WindLayer } from 'ol-wind';
+  // import Map from 'src/Map';
+  // import View from 'src/View';
+  // import TileLayer from 'src/layer/Tile';
+  // import { get as getProjection } from 'src/proj';
+  // import OSM from 'src/source/OSM';
+  // import { register } from 'src/proj/proj4';
+  // import { WindLayer } from 'src-wind';
 
   export default {
     name: 'ol-wind-epsg3413',
@@ -28,7 +28,7 @@
         const OSM = await import('ol/source/OSM').then(res => res.default);
         const { get: getProjection } = await import('ol/proj');
         const { register } = await import('ol/proj/proj4');
-        const { WindLayer } = await import('ol-wind');
+        const { WindLayer } = await import('src-wind');
 
         proj4.defs("EPSG:3413","+proj=stere +lat_0=90 +lat_ts=70 +lon_0=-45 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs");
 

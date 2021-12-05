@@ -68,7 +68,7 @@ extension to show wind field。
 # npm
 npm install wind-core
 npm install wind-gl-core
-npm install ol-wind
+npm install src-wind
 npm install ol5-wind
 npm install openlayers-wind
 npm install @sakitam-gis/maptalks-wind
@@ -80,7 +80,7 @@ npm install @sakitam-gis/mapbox-wind
 # yarn
 yarn add wind-core
 yarn add wind-gl-core
-yarn add ol-wind
+yarn add src-wind
 yarn add ol5-wind
 yarn add openlayers-wind
 yarn add @sakitam-gis/maptalks-wind

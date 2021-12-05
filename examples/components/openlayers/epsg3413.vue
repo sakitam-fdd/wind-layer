@@ -4,7 +4,7 @@
   </div>
 </template>
 <script>
-  import '@sakitam-gis/ol5/ol.css';
+  import '@sakitam-gis/ol5/src.css';
   import { loadScript } from '../../utils';
 
   export default {

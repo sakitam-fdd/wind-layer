@@ -16,12 +16,12 @@
 </template>
 <script>
   import 'ol/ol.css';
-  // import Map from 'ol/Map';
-  // import View from 'ol/View';
-  // import TileLayer from 'ol/layer/Tile';
-  // import { fromLonLat } from 'ol/proj';
-  // import OSM from 'ol/source/OSM';
-  // import { WindLayer } from 'ol-wind';
+  // import Map from 'src/Map';
+  // import View from 'src/View';
+  // import TileLayer from 'src/layer/Tile';
+  // import { fromLonLat } from 'src/proj';
+  // import OSM from 'src/source/OSM';
+  // import { WindLayer } from 'src-wind';
 
   export default {
     name: 'ol-wind-base',
@@ -40,7 +40,7 @@
         const TileLayer = await import('ol/layer/Tile').then(res => res.default);
         const { fromLonLat } = await import('ol/proj');
         const OSM = await import('ol/source/OSM').then(res => res.default);
-        const { WindLayer } = await import('ol-wind');
+        const { WindLayer } = await import('src-wind');
 
         const layer = new TileLayer({
           source: new OSM({
