@@ -84,7 +84,7 @@ jobs:
         uses: changesets/action@v1
         with:
           # This expects you to have a script called release which does a build for your packages and calls changeset publish
-          publish: pnpm release
+          publish: pnpm version && pnpm release
         env:
           GITHUB_TOKEN: ${{ secrets.PKG_DEPLOY_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_PKG_PUBLIC_TOKEN }}
@@ -111,6 +111,7 @@ jobs:
             ${{ runner.os }}-
       - run: npm i -g pnpm
       - run: pnpm i
+      - run: pnpm build
       - run: pnpm docs:api
       - run: pnpm docs:build
 

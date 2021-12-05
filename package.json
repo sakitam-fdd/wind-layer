@@ -13,6 +13,7 @@
     "docs:api": "pnpm run -r api --filter docs",
     "docs:build": "vitepress build docs",
     "docs:serve": "vitepress serve docs",
+    "version": "pnpm changeset version",
     "changeset": "changeset",
     "clear": "pnpm run -r clear",
     "release": "pnpm build && pnpm build:minify && pnpm test-only && pnpm release:only",
