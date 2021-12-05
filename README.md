@@ -1,4 +1,4 @@
-# 快速使用
+# wind-layer
 
 a [maptalks](https://maptalks.org/) | [mapbox-gl](https://github.com/mapbox/mapbox-gl-js) | [openlayers](http://openlayers.org) | [leaflet](https://leafletjs.com/) | [bmap](https://map.baidu.com/) | [amap](https://ditu.amap.com/)
 extension to show wind field。
@@ -24,13 +24,9 @@ extension to show wind field。
 并且色斑图目前只针对 `mapbox` 和 `maptalks` 做了相关适配, 相关示例请查看[mapbox](https://github.com/sakitam-fdd/wind-layer/examples/mapbox.html)和[maptalks](https://github.com/sakitam-fdd/wind-layer/examples/maptalks.html)。
 其所使用的数据为单通道或者双通道图片，需要对原始grib做预处理。
 
-粒子图层暂时只适配了 `mapbox-gl`，示例请查看
+粒子图层暂时只适配了 `mapbox-gl`，示例请查看 [mapbox-particles](https://codepen.io/sakitam-fdd/pen/vYjdQbr)。
 
-<iframe height="300" style="width: 100%;" scrolling="no" title="sakitam-gis-gl-wind" src="https://codepen.io/sakitam-fdd/embed/preview/vYjdQbr?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
-  See the Pen <a href="https://codepen.io/sakitam-fdd/pen/vYjdQbr">
-  sakitam-gis-gl-wind</a> by FDD (<a href="https://codepen.io/sakitam-fdd">@sakitam-fdd</a>)
-  on <a href="https://codepen.io">CodePen</a>.
-</iframe>
+对于 webgl 图层，目前处于积极开发状态，会有较大的 api 变动。
 
 ## 示例图片
 
