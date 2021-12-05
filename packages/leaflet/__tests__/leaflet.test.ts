@@ -1,5 +1,10 @@
 import { test, expect, describe, beforeAll, afterAll } from 'vitest';
-import { WindLayer } from '../src';
+
+// vi.stubGlobal('L', vi.mocked({
+//   Layer: class {
+//     static extend = vi.fn();
+//   }
+// }));
 
 beforeAll(async () => {
   console.log(`[leaflet-wind]: start testing...`);
@@ -9,8 +14,41 @@ afterAll(async () => {
   console.log(`[leaflet-wind]: test end`);
 });
 
-describe('utils', async () => {
-  test('isFunction', async () => {
-    expect(WindLayer).toBe(true);
+describe('leaflet', async () => {
+  test('instance', async () => {
+    const { WindLayer } = await import('../src');
+    // @ts-ignore
+    const layer = new WindLayer('wind', [], {
+      windOptions: {
+        colorScale: [
+          "rgb(36,104, 180)",
+          "rgb(60,157, 194)",
+          "rgb(128,205,193 )",
+          "rgb(151,218,168 )",
+          "rgb(198,231,181)",
+          "rgb(238,247,217)",
+          "rgb(255,238,159)",
+          "rgb(252,217,125)",
+          "rgb(255,182,100)",
+          "rgb(252,150,75)",
+          "rgb(250,112,52)",
+          "rgb(245,64,32)",
+          "rgb(237,45,28)",
+          "rgb(220,24,32)",
+          "rgb(180,0,35)"
+        ],
+        frameRate: 16,
+        maxAge: 60,
+        globalAlpha: 0.9,
+        velocityScale: 0.01,
+        // paths: 10000,
+        paths: 1000,
+      },
+      fieldOptions: {
+        wrapX: true,
+      }
+    });
+    expect(layer).toBeInstanceOf(WindLayer);
   });
 });
+

@@ -11,7 +11,7 @@ order: 3
 ### 基础地图展示
 
 ::: tip
-基础使用，不旋转不倾斜。
+基础使用。
 :::
 
 <<<@/components/maptalks.vue

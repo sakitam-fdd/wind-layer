@@ -1,5 +1,5 @@
 import { test, expect, describe, beforeAll, afterAll } from 'vitest';
-import { isNumber } from '../src';
+import { isNumber } from '../';
 
 beforeAll(async () => {
   console.log(`[wind-gl-core]: start testing...`);

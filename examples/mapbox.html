@@ -93,13 +93,13 @@
       .then(data => {
         console.log(data);
 
-        // data = data.map((item, idx) => {
-        //   item.header = Object.assign(item.header, {
-        //     parameterCategory: 1,
-        //     parameterNumber: idx === 0 ? 2 : 3,
-        //   });
-        //   return item;
-        // });
+        data = data.map((item, idx) => {
+          item.header = Object.assign(item.header, {
+            parameterCategory: 1,
+            parameterNumber: idx === 0 ? 2 : 3,
+          });
+          return item;
+        });
 
         const tempInterpolateColor = color.temp.reduce((result, item, key) => result.concat(item[0] - 273.15, 'rgba(' + item[1].join(',') + ')'), []);
 

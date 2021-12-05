@@ -1,35 +1,38 @@
-## wind-layer
+# 快速使用
 
-a [openlayers](http://openlayers.org) | [bmap](https://map.baidu.com/) | [amap](https://ditu.amap.com/) | [maptalks](https://maptalks.org/) | [mapbox-gl](https://github.com/mapbox/mapbox-gl-js) | [leaflet](https://leafletjs.com/)
+a [maptalks](https://maptalks.org/) | [mapbox-gl](https://github.com/mapbox/mapbox-gl-js) | [openlayers](http://openlayers.org) | [leaflet](https://leafletjs.com/) | [bmap](https://map.baidu.com/) | [amap](https://ditu.amap.com/)
 extension to show wind field。
-  
-### 介绍
 
-  [wind-layer](./) 设计之初是来源于 [earth](http://earth.nullschool.net) [cambecc](https://github.com/cambecc/earth) 的一个气象数据的展示，他使用了流体场的方式去展示了全球的风速和风向富有很强的
-表现力, 这个插件的很多核心代码也是来源于此。
+## 介绍
 
-  目前最新版本为`v1.0.0`体验版，在`1.0`版本之前，在设计之初考虑的只有 [`openlayers`](http://openlayers.org)
-一个地图引擎的支持，所以统一使用的是一个`package` 进行管理；这在后续去添加其他地图扩展库存在很多不便，所以在 `1.0`
-版本之后对仓库进行了拆分，抽离了核心支持库和其他扩展库。
+[wind-layer](./) 是一个专注于气象格点数据可视的插件，设计之处是参考了 [earth](http://earth.nullschool.net) [cambecc](https://github.com/cambecc/earth) 的一个气象数据的展示，他使用了流体场的方式去展示了全球的风速和风向，富有很强的
+表现力, 这个插件的早期的很多核心代码也是来源于此。当然现在塔不仅仅是做风场的展示，常规的气象数据都可以依赖此插件进行可视化。
 
-### 特性 (相对于原始 [windy.js](https://github.com/Esri/wind-js))
+## 特性 (相对于原始 [windy.js](https://github.com/Esri/wind-js))
 
-* 抽离了粒子`Field`和向量 `Vector` 计算代码，便于进行扩展计算, 例如使用 webworker 或者 gpu.js 加速。
 * 易于配置粒子数量，原始 windy.js 只能给定一个系数，会根据地图元素的大小进行计算粒子数量；现在可以支持系数方式和固定粒子数量以及回调函数的的三种方式。
 * 颜色配置支持三种方式：
-    String：固定颜色值
-    Function: 通过回调函数的风速值设定颜色（但是会有一定的性能损失）
-    String[]: 按照风速值范围等间隔渲染，无法做到精确匹配对应值的颜色。
+  String：固定颜色值
+  Function: 通过回调函数的风速值设定颜色（但是会有一定的性能损失）
+  String[]: 按照风速值范围等间隔渲染，无法做到精确匹配对应值的颜色。
 * 线条宽度支持动态设置。
 * 抽离了核心渲染库，便于扩展到其他地图渲染库。
 
-### 关于webgl<并未包含粒子图层>
+## 关于webgl
 
-  其中的大部分代码来自于 [webgl-wind](https://github.com/mapbox/webgl-wind) 和 [windgl](https://github.com/astrosat/windgl),
-并且目前只针对 `mapbox` 和 `maptalks` 做了相关适配, 相关示例请查看[mapbox](https://github.com/sakitam-fdd/wind-layer/examples/mapbox.html)和[maptalks](https://github.com/sakitam-fdd/wind-layer/examples/maptalks.html)。
-  其所使用的数据为单通道或者双通道图片，需要对原始grib做预处理。
+其中的大部分代码来自于 [webgl-wind](https://github.com/mapbox/webgl-wind) 和 [windgl](https://github.com/astrosat/windgl),
+并且色斑图目前只针对 `mapbox` 和 `maptalks` 做了相关适配, 相关示例请查看[mapbox](https://github.com/sakitam-fdd/wind-layer/examples/mapbox.html)和[maptalks](https://github.com/sakitam-fdd/wind-layer/examples/maptalks.html)。
+其所使用的数据为单通道或者双通道图片，需要对原始grib做预处理。
 
-### 示例图片
+粒子图层暂时只适配了 `mapbox-gl`，示例请查看
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="sakitam-gis-gl-wind" src="https://codepen.io/sakitam-fdd/embed/preview/vYjdQbr?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/sakitam-fdd/pen/vYjdQbr">
+  sakitam-gis-gl-wind</a> by FDD (<a href="https://codepen.io/sakitam-fdd">@sakitam-fdd</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+## 示例图片
 
 ![mapbox](https://sakitam-fdd.github.io/wind-layer/mapbox.gif)
 
@@ -37,7 +40,7 @@ extension to show wind field。
 
 ![wind](https://sakitam-fdd.github.io/wind-layer/wind.png)
 
-### 扩展包
+## 扩展
 
 | Project | Version | Npm | CDN | Description |
 |---------|---------|-----|------|-------------|
@@ -52,30 +55,28 @@ extension to show wind field。
 | [mapbox-wind](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/mapbox-gl) | [![Npm package](https://img.shields.io/npm/v/@sakitam-gis/mapbox-wind.svg)](https://www.npmjs.org/package/@sakitam-gis/mapbox-wind) | [![NPM downloads](https://img.shields.io/npm/dm/@sakitam-gis/mapbox-wind.svg)](https://npmjs.org/package/@sakitam-gis/mapbox-wind) | [![](https://data.jsdelivr.com/v1/package/npm/@sakitam-gis/mapbox-wind/badge)](https://www.jsdelivr.com/package/npm/@sakitam-gis/mapbox-wind) | mapbox-gl 风场扩展插件 |
 | [leaflet-wind](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/leaflet) | [![Npm package](https://img.shields.io/npm/v/leaflet-wind.svg)](https://www.npmjs.org/package/leaflet-wind) | [![NPM downloads](https://img.shields.io/npm/dm/leaflet-wind.svg)](https://npmjs.org/package/leaflet-wind) | [![](https://data.jsdelivr.com/v1/package/npm/leaflet-wind/badge)](https://www.jsdelivr.com/package/npm/leaflet-wind) | Leaflet风场扩展插件 |
 
-### 安装
+## 安装
 
-#### 使用 npm 或 yarn 安装
+### 使用 pnpm 或 yarn 安装
 
-::: tip
-**我们推荐使用 npm 或 yarn 的方式进行开发**，
+**我们推荐使用 pnpm 或 yarn 的方式进行开发**，
 不仅可在开发环境轻松调试，也可放心地在生产环境打包部署使用，
 享受整个生态圈和工具链带来的诸多好处。
-:::
 
 相关插件：
 
 ```bash
-# npm
-npm install wind-core
-npm install wind-gl-core
-npm install src-wind
-npm install ol5-wind
-npm install openlayers-wind
-npm install @sakitam-gis/maptalks-wind
-npm install amap-wind
-npm install bmap-wind
-npm install leaflet-wind
-npm install @sakitam-gis/mapbox-wind
+# pnpm
+pnpm install wind-core
+pnpm install wind-gl-core
+pnpm install src-wind
+pnpm install ol5-wind
+pnpm install openlayers-wind
+pnpm install @sakitam-gis/maptalks-wind
+pnpm install amap-wind
+pnpm install bmap-wind
+pnpm install leaflet-wind
+pnpm install @sakitam-gis/mapbox-wind
 
 # yarn
 yarn add wind-core
@@ -90,7 +91,7 @@ yarn add leaflet-wind
 yarn add @sakitam-gis/mapbox-wind
 ```
 
-#### 部分插件亦可以通过浏览器引入
+### 部分插件亦可以通过浏览器引入
 
 在浏览器中使用 `script` 标签直接引入文件，并使用全局变量。
 
@@ -109,123 +110,58 @@ yarn add @sakitam-gis/mapbox-wind
 | [leaflet-wind](https://cdn.jsdelivr.net/npm/leaflet-wind/dist/) | https://unpkg.com/leaflet-wind/dist/leaflet-wind.js | https://cdn.jsdelivr.net/npm/leaflet-wind/dist/leaflet-wind.js |
 | [@sakitam-gis/mapbox-wind](https://cdn.jsdelivr.net/npm/@sakitam-gis/mapbox-wind/dist/) | https://unpkg.com/@sakitam-gis/mapbox-wind/dist/mapbox-wind.js | https://cdn.jsdelivr.net/npm/@sakitam-gis/mapbox-wind/dist/mapbox-wind.js |
 
-### 示例
+## 基础
 
-``` html
-<div id="map" class="container"></div>
-<script src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js"></script>
-<script>
-  const map = new maptalks.Map('map', {
-    center: [113.53450137499999, 34.44104525],
-    zoom: 5,
-    baseLayer: new maptalks.TileLayer('base', {
-      // urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-      urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-      subdomains: ['a', 'b', 'c', 'd'],
-    })
-  });
+基础使用可以分为三步：
 
-  fetch('./out.json')
-    .then(res => res.json())
-    .then(res => {
-      // const range = vectorField.range || [0.02, 28.21618329965979];
-      // const scale = chroma.scale('OrRd').domain(range);
+1. 引入相应的 `WebGIS` 地图类库，引入对应的可视化图层扩展插件。
+2. 正常初始化一个地图。
+3. 创建一个 `WindLayer`，设置风场格点的 `U V` 数据和图层参数 并添加到地图上。
 
-      const windLayer = new MaptalksWind.WindLayer('wind', res, {
-        windOptions: {
-          // colorScale: (m) => {
-          //   // console.log(m);
-          //   return '#fff';
-          // },
-          colorScale: [
-            "rgb(36,104, 180)",
-            "rgb(60,157, 194)",
-            "rgb(128,205,193 )",
-            "rgb(151,218,168 )",
-            "rgb(198,231,181)",
-            "rgb(238,247,217)",
-            "rgb(255,238,159)",
-            "rgb(252,217,125)",
-            "rgb(255,182,100)",
-            "rgb(252,150,75)",
-            "rgb(250,112,52)",
-            "rgb(245,64,32)",
-            "rgb(237,45,28)",
-            "rgb(220,24,32)",
-            "rgb(180,0,35)"
-          ],
-          // velocityScale: 1 / 20,
-          // paths: 5000,
-          frameRate: 16,
-          maxAge: 60,
-          globalAlpha: 0.9,
-          velocityScale: 1 / 30,
-          // paths: 10000,
-          generateParticleOption: true,
-          paths: () => { // can be number or function
-            const zoom = map.getZoom();
-            return zoom * 1000;
-          },
-        },
-      });
+## 示例
 
-      console.log(map, windLayer);
+以下以 maptalks 为例：
 
-      map.addLayer(windLayer);
-    });
-</script>
-```
+### npm + es6
 
 ``` html
 <template>
   <div class="demo-content">
+    <div class="demo-content-datgui"></div>
     <div class="map-warp" ref="map"></div>
   </div>
 </template>
 <script>
-  import 'ol/ol.css';
-  import Map from 'ol/Map';
-  import View from 'ol/View';
-  import TileLayer from 'ol/layer/Tile';
-  import { fromLonLat } from 'ol/proj';
-  import OSM from 'ol/source/OSM';
-  import { WindLayer } from 'ol-wind';
+  import 'maptalks/dist/maptalks.css';
+  import {
+    Map,
+    TileLayer,
+  } from 'maptalks';
+
+  import { WindLayer } from 'maptalks-wind';
 
   export default {
-    name: 'ol-wind-base',
+    name: 'maptalks-wind-base',
     data() {
-      return {
-        url: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
-        zoom: 3,
-      };
+      return {};
     },
     watch: {},
     methods: {
       initMap() {
-        const layer = new TileLayer({
-          source: new OSM({
-            // projection: 'EPSG:3857',
-            url: '//{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-          }),
-        });
-
-        const map = new Map({
-          layers: [layer],
-          target: this.$refs.map,
-          view: new View({
-            // projection: 'EPSG:4326',
-            center: fromLonLat([113.53450137499999, 34.44104525]),
-            // center: [113.53450137499999, 34.44104525],
-            zoom: 2,
-          }),
-          // pixelRatio: 2,
+        const map = new Map(this.$refs.map, {
+          center: [113.53450137499999, 34.44104525],
+          zoom: 3,
+          baseLayer: new TileLayer('base', {
+            urlTemplate: '//{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            // urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+            subdomains: ['a', 'b', 'c', 'd'],
+          })
         });
 
         fetch('/data/wind.json')
           .then(res => res.json())
           .then(res => {
-            const windLayer = new WindLayer(res, {
+            const windLayer = new WindLayer('wind', res, {
               windOptions: {
                 // colorScale: scale,
                 velocityScale: 1 / 20,
@@ -248,9 +184,7 @@ yarn add @sakitam-gis/mapbox-wind
                   "rgb(220,24,32)",
                   "rgb(180,0,35)"
                 ],
-                width: 3,
                 // colorScale: scale,
-                generateParticleOption: false
               },
               // map: map,
               // projection: 'EPSG:4326'
@@ -290,7 +224,96 @@ yarn add @sakitam-gis/mapbox-wind
 </style>
 ```
 
-#### [文档请移步](//sakitam-fdd.github.io/wind-layer/) 正在完善中......
+### cdn
+
+``` html
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map - Display a map</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.css">
+<style type="text/css">
+  html, body {
+    margin: 0;
+    height: 100%;
+    width: 100%
+  }
+  .container {
+    width: 100%;
+    height: 100%
+  }
+</style>
+<body>
+
+<div id="map" class="container"></div>
+<script src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js"></script>
+<script>
+  const map = new maptalks.Map('map', {
+    center: [113.53450137499999, 34.44104525],
+    zoom: 5,
+    baseLayer: new maptalks.TileLayer('base', {
+      // urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+      urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+      subdomains: ['a', 'b', 'c', 'd'],
+    })
+  });
+
+  fetch('data.json')
+    .then(res => res.json())
+    .then(res => {
+      // const range = vectorField.range || [0.02, 28.21618329965979];
+      // const scale = chroma.scale('OrRd').domain(range);
+
+      const windLayer = new MaptalksWind.WindLayer('wind', res, {
+        windOptions: {
+          // colorScale: (m) => {
+          //   // console.log(m);
+          //   return '#fff';
+          // },
+          colorScale: [
+            "rgb(36,104, 180)",
+            "rgb(60,157, 194)",
+            "rgb(128,205,193 )",
+            "rgb(151,218,168 )",
+            "rgb(198,231,181)",
+            "rgb(238,247,217)",
+            "rgb(255,238,159)",
+            "rgb(252,217,125)",
+            "rgb(255,182,100)",
+            "rgb(252,150,75)",
+            "rgb(250,112,52)",
+            "rgb(245,64,32)",
+            "rgb(237,45,28)",
+            "rgb(220,24,32)",
+            "rgb(180,0,35)"
+          ],
+          // velocityScale: 1 / 20,
+          // paths: 5000,
+          frameRate: 16,
+          maxAge: 60,
+          globalAlpha: 0.9,
+          velocityScale: 1 / 30,
+          // paths: 10000,
+          paths: () => { // can be number or function
+            const zoom = map.getZoom();
+            return zoom * 1000;
+          },
+        },
+      });
+
+      console.log(map, windLayer);
+
+      map.addLayer(windLayer);
+    });
+</script>
+</body>
+</html>
+
+```
+
+## [文档请移步](//sakitam-fdd.github.io/wind-layer/) 正在完善中......
 
 ## 如何获取数据
 
@@ -311,7 +334,7 @@ cp current-wind-surface-level-gfs-1.0.json <earth-git-repository>/public/data/we
 ## 使用node服务获取数据
 
 > 默认运行在3000端口, 使用koa2构建。
-  目前仅抓取少量数据, 全部数据数据量过大会造成抓取时间过长和转换失败。
+目前仅抓取少量数据, 全部数据数据量过大会造成抓取时间过长和转换失败。
 
 ```bash
 npm run start // 调试环境启动服务

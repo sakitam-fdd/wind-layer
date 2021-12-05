@@ -8,11 +8,12 @@ export interface IField {
   xmax: number; // 经度最大值
   ymax: number; // 纬度最大值
   deltaX: number; // x（经度）增量
-  deltaY: number; // y（纬度）增量 (默认我们采用的数据和格点原始数据方向保持一致，数据从左上到右下) 但是需要注意的是此时 deltaY为 -(ymin-ymax) / rows, 这是grib2json 遗留的问题。
+  deltaY: number; // y（纬度）增量 (默认我们采用的数据和格点原始数据方向保持一致，数据从左上到右下) 但是需要注意的是此时 deltaY为 -(ymax-ymin) / rows
   cols: number; // 列（可由 `(xmax - xmin) / deltaX` 得到）
   rows: number; // 行
   us: number[]; // U分量
   vs: number[]; // V分量
+  flipY?: boolean; // 因为grib2json的问题，我们需要翻转 Y 轴数据
   wrapX?: boolean; // 是否实现跨世界渲染
   wrappedX?: boolean; // 当数据范围时按照 [0, 360] 时需要对x方向进行切割转换为 [-180, 180]，即将废弃
   translateX?: boolean; // 当数据范围时按照 [0, 360] 时需要对x方向进行切割转换为 [-180, 180]
@@ -44,6 +45,7 @@ export default class Field {
   private readonly deltaX: number;
   private readonly translateX: undefined | boolean;
   private readonly isFields: boolean;
+  private readonly flipY: boolean;
   public grid: (Vector | null)[][];
   public range: (number | undefined)[] | undefined;
   private wrapX: boolean;
@@ -65,14 +67,18 @@ export default class Field {
 
     this.deltaX = params.deltaX; // x 方向增量
     this.deltaY = params.deltaY; // y方向增量
+    this.flipY = Boolean(params.flipY);
+
+    // 由于数据组织方式和deltaY的默认处理，那么在正常情况下我们需要交换 ymin 和 ymax 得到数据真实的 bbox（todo：我们需要按照真实数据来组织吗？）
+    this.ymin = Math.min(params.ymax, params.ymin);
+    this.ymax = Math.max(params.ymax, params.ymin);
 
     // 当 deltaY < 0 时，但是数据组织是由左上到右下此时说明数据 Y 轴是反的
-    if (this.deltaY < 0 && this.ymin < this.ymax) {
+    if (!(this.deltaY < 0 && this.ymin < this.ymax)) {
+      if (params.flipY === undefined) {
+        this.flipY = true;
+      }
       console.warn('[wind-core]: The data is flipY');
-    } else {
-      // 由于数据组织方式和deltaY的默认处理，那么在正常情况下我们需要交换 ymin 和 ymax 得到数据真实的 bbox（todo：我们需要按照真实数据来组织吗？）
-      this.ymin = Math.min(params.ymax, params.ymin);
-      this.ymax = Math.max(params.ymax, params.ymin);
     }
 
     /**
@@ -257,8 +263,13 @@ export default class Field {
    */
   public getDecimalIndexes(lon: number, lat: number) {
     const i = floorMod(lon - this.xmin, 360) / this.deltaX; // calculate longitude index in wrapped range [0, 360)
-    const j = (this.ymax - lat) / this.deltaY; // calculate latitude index in direction +90 to -90
-    return [i, j];
+    if (this.flipY) {
+      const j = (this.ymax - lat) / this.deltaY; // calculate latitude index in direction +90 to -90
+      return [i, j];
+    } else {
+      const j = (this.ymin + lat) / this.deltaY; // calculate latitude index in direction +90 to -90
+      return [i, j];
+    }
   }
 
   /**

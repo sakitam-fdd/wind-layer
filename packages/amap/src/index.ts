@@ -8,8 +8,8 @@ import {
   createCanvas,
   removeDomNode,
   defaultOptions,
-  IOptions,
 } from 'wind-core';
+import type { IField, IOptions } from 'wind-core';
 
 export interface IWindOptions extends IOptions {
   opacity: number;
@@ -36,6 +36,7 @@ const _options = {
   zIndex: 12,
   zooms: [0, 22],
   windOptions: {},
+  fieldOptions: {},
 };
 
 class AMapWind {
@@ -72,7 +73,7 @@ class AMapWind {
     this.pickWindOptions();
 
     if (data) {
-      this.setData(data);
+      this.setData(data, this.options.fieldOptions);
     }
   }
 
@@ -322,13 +323,14 @@ class AMapWind {
   /**
    * set layer data
    * @param data
+   * @param options
    * @returns {WindLayer}
    */
-  public setData (data: any) {
+  public setData (data: any, options: Partial<IField> = {}) {
     if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
-      this.field = formatData(data);
+      this.field = formatData(data, options);
     } else {
       console.error('Illegal data');
     }

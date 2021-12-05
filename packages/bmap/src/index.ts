@@ -6,8 +6,8 @@ import {
   warnLog,
   assign,
   defaultOptions,
-  IOptions,
 } from 'wind-core';
+import type { IField, IOptions } from 'wind-core';
 
 export interface IWindOptions extends IOptions {
   opacity: number;
@@ -25,6 +25,7 @@ const _options = {
   opacity: 1,
   zIndex: 1,
   windOptions: {},
+  fieldOptions: {},
 };
 
 // @ts-ignore
@@ -75,7 +76,7 @@ class BMapWind extends BMap.Overlay {
     this.pickWindOptions();
 
     if (data) {
-      this.setData(data);
+      this.setData(data, options.fieldOptions);
     }
   }
 
@@ -340,13 +341,14 @@ class BMapWind extends BMap.Overlay {
   /**
    * set layer data
    * @param data
+   * @param options
    * @returns {BMapWind}
    */
-  public setData (data: any) {
+  public setData (data: any, options: Partial<IField> = {}) {
     if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
-      this.field = formatData(data);
+      this.field = formatData(data, options);
     } else {
       console.error('Illegal data');
     }

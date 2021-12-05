@@ -22,11 +22,19 @@ Getting Started
 * 线条宽度支持动态设置。
 * 抽离了核心渲染库，便于扩展到其他地图渲染库。
 
-## 关于webgl<并未包含粒子图层>
+## 关于webgl
 
 其中的大部分代码来自于 [webgl-wind](https://github.com/mapbox/webgl-wind) 和 [windgl](https://github.com/astrosat/windgl),
-并且目前只针对 `mapbox` 和 `maptalks` 做了相关适配, 相关示例请查看[mapbox](https://github.com/sakitam-fdd/wind-layer/examples/mapbox.html)和[maptalks](https://github.com/sakitam-fdd/wind-layer/examples/maptalks.html)。
+并且色斑图目前只针对 `mapbox` 和 `maptalks` 做了相关适配, 相关示例请查看[mapbox](https://github.com/sakitam-fdd/wind-layer/examples/mapbox.html)和[maptalks](https://github.com/sakitam-fdd/wind-layer/examples/maptalks.html)。
 其所使用的数据为单通道或者双通道图片，需要对原始grib做预处理。
+
+粒子图层暂时只适配了 `mapbox-gl`，示例请查看
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="sakitam-gis-gl-wind" src="https://codepen.io/sakitam-fdd/embed/preview/vYjdQbr?default-tab=result" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href="https://codepen.io/sakitam-fdd/pen/vYjdQbr">
+  sakitam-gis-gl-wind</a> by FDD (<a href="https://codepen.io/sakitam-fdd">@sakitam-fdd</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
 
 ## 示例图片
 

@@ -144,7 +144,7 @@ class WindLayer extends Overlay {
 
   public pickWindOptions() {
     Object.keys(defaultOptions).forEach((key: string) => {
-      if (key in this.options) {
+      if (this.options && key in this.options) {
         if (this.options.windOptions === undefined) {
           this.options.windOptions = {};
         }

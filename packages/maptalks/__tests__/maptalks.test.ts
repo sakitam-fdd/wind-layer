@@ -1,5 +1,5 @@
 import { test, expect, describe, beforeAll, afterAll } from 'vitest';
-import OlWind from '../src';
+import { WindLayer } from '../src';
 
 beforeAll(async () => {
   console.log(`[maptalks-wind]: start testing...`);
@@ -9,8 +9,14 @@ afterAll(async () => {
   console.log(`[maptalks-wind]: test end`);
 });
 
-describe('utils', async () => {
-  test('isFunction', async () => {
-    expect(OlWind).toBe(false);
+describe('maptalks', async () => {
+  test('instance', async () => {
+    const layer = new WindLayer('wind-layer', [], {
+      zIndex: 20,
+      colorScale: "rgb(255, 255, 255)",
+      velocityScale: 1 / 30,
+      paths: 1000,
+    });
+    expect(layer).toBeInstanceOf(WindLayer);
   });
 });

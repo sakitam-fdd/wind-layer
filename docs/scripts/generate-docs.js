@@ -5,7 +5,7 @@ createTypeDocApp({
   name: 'Class Docs',
   tsconfig: path.resolve(__dirname, '../tsconfig.docs.json'),
   githubPages: true,
-  disableSources: true,
+  disableSources: false,
   entryPoints: [
     path.resolve(__dirname, '../../packages/core/src/index.ts'),
     path.resolve(__dirname, '../../packages/gl-core/src/index.ts'),

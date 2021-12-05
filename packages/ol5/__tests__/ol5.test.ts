@@ -9,8 +9,14 @@ afterAll(async () => {
   console.log(`[ol5-wind]: test end`);
 });
 
-describe('utils', async () => {
-  test('isFunction', async () => {
-    expect(OlWind).toBe(false);
+describe('ol5', async () => {
+  test('instance', async () => {
+    const layer = new OlWind([], {
+      zIndex: 20,
+      colorScale: "rgb(255, 255, 255)",
+      velocityScale: 1 / 30,
+      paths: 1000,
+    });
+    expect(layer).toBeInstanceOf(OlWind);
   });
 });

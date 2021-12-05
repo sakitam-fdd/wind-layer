@@ -29,8 +29,15 @@ lo1: xmin
 lo2: xmax
 la1: ymin
 la2: ymax
-# U/V主要由以下参数区分
+# u/v 主要由以下参数区分
 parameterCategory: data type
 parameterNumber: data type
 ```
+
+一般情况下由 `grib2json` 转出的数据`parameterCategory`参数为`1`，当`parameterNumber` 为 `2` 时为`u` 分量，
+当`parameterNumber` 为 `3` 时为`v` 分量。
+
+并且还需要注意的是 `dy`（纬度）增量 (默认我们采用的数据和格点原始数据方向保持一致，数据从左上到右下) 但是需要注意的是此时 `dy` 为 -(ymax - ymin) / ny
+有些情况下我们格点数据组织形式可能 Y 轴是上下翻转的，此时我们可以配置 `options.fieldOptions.flipY = true`，来主动翻转数据（默认情况下我们检测到数据配置中的
+`deltaY > 0` 时并且未配置`flipY`参数项默认去翻转数据）。
 

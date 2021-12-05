@@ -17,17 +17,16 @@ const map = ref(null)
 const gui = ref(null)
 
 const initMap = async (dom, gui) => {
-  const Map = await import('ol/Map').then(res => res.default);
-
-  const View = await import('ol/View').then(res => res.default);
-  const TileLayer = await import('ol/layer/Tile').then(res => res.default);
-  const { fromLonLat } = await import('ol/proj');
-  const OSM = await import('ol/source/OSM').then(res => res.default);
-  const { WindLayer } = await import('ol-wind');
+  const Map = await import('@sakitam-gis/ol5/Map').then(res => res.default);
+  const View = await import('@sakitam-gis/ol5/View').then(res => res.default);
+  const TileLayer = await import('@sakitam-gis/ol5/layer/Tile').then(res => res.default);
+  const { fromLonLat } = await import('@sakitam-gis/ol5/proj');
+  const OSM = await import('@sakitam-gis/ol5/source/OSM').then(res => res.default);
+  const { WindLayer } = await import('ol5-wind');
 
   const layer = new TileLayer({
     source: new OSM({
-      projection: 'EPSG:3857',
+      // projection: 'EPSG:3857',
       // url: '//{a-d}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
       url: '//{a-d}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
     }),
@@ -37,10 +36,10 @@ const initMap = async (dom, gui) => {
     layers: [layer],
     target: dom,
     view: new View({
-      projection: 'EPSG:4326',
-      center: [113.53450137499999, 34.44104525],
+      center: fromLonLat([113.53450137499999, 34.44104525]),
       zoom: 2,
     }),
+    // pixelRatio: 2,
   });
 
   fetch('https://sakitam.oss-cn-beijing.aliyuncs.com/codepen/wind-layer/json/wind.json')
@@ -77,9 +76,8 @@ const initMap = async (dom, gui) => {
             wrapX: true,
             // flipY: true,
           },
+          map: map,
         });
-
-        map.addLayer(windLayer);
       });
 }
 

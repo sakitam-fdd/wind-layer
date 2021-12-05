@@ -180,7 +180,7 @@ function initMap() {
     source: new ImageStatic({
       url: 'https://imgs.xkcd.com/comics/online_communities.png',
       projection: 'EPSG:4326',
-      imageExtent: [-180, -90, 180, 90],
+      imageExtent: [-180, -90, 180, 90].map(i => i / 4),
     }),
   })
 
@@ -253,7 +253,7 @@ function initMap() {
   }
 
   // fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
-  fetch('https://sakitam-1255686840.cos.ap-beijing.myqcloud.com/public/codepen/json/out.json')
+  fetch('https://sakitam.oss-cn-beijing.aliyuncs.com/codepen/wind-layer/json/wind.json')
     .then(res => res.json())
     .then(res => {
       const windLayer = new WindLayer(res, {
@@ -285,6 +285,7 @@ function initMap() {
         },
         fieldOptions: {
           wrapX: true,
+          // flipY: true,
         },
         // map: map,
         // projection: 'EPSG:4326'
