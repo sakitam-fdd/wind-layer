@@ -29,7 +29,7 @@ COPY package.json *.lock ./
 
 # 只安装dependencies依赖
 # node镜像自带yarn
-RUN yarn --only=prod --registry=https://registry.npm.taobao.org
+RUN yarn --only=prod --registry=https://registry.npmmirror.com
 
 # 把其他源文件复制到工作目录
 COPY . .
