@@ -111,7 +111,7 @@ libarchive-c==2.8
 lief==0.9.0
 llvmlite==0.29.0
 locket==0.2.0
-lxml==4.3.4
+lxml==4.9.1
 MarkupSafe==1.1.1
 marshmallow==3.5.1
 marshmallow-sqlalchemy==0.22.3
