@@ -119,7 +119,7 @@ matplotlib==3.1.0
 mccabe==0.6.1
 memory-profiler==0.57.0
 MetPy==0.12.0
-mistune==0.8.4
+mistune==2.0.3
 mkl-fft==1.0.12
 mkl-random==1.0.2
 mkl-service==2.0.2
