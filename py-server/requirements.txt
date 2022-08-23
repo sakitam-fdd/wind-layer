@@ -130,7 +130,7 @@ msgpack==0.6.1
 multipledispatch==0.6.0
 munch==2.5.0
 navigator-updater==0.2.1
-nbconvert==5.5.0
+nbconvert==6.5.1
 nbformat==4.4.0
 networkx==2.3
 nltk==3.4.4
