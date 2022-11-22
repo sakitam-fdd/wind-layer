@@ -38,11 +38,11 @@ Getting Started
 
 ## 示例图片
 
-![mapbox](https://sakitam-fdd.github.io/wind-layer/mapbox.gif)
+![mapbox](/mapbox.gif)
 
-![maptalks](https://sakitam-fdd.github.io/wind-layer/maptalks.gif)
+![maptalks](/maptalks.gif)
 
-![wind](https://sakitam-fdd.github.io/wind-layer/wind.png)
+![wind](/wind.png)
 
 ## 扩展
 
