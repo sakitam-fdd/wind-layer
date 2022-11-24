@@ -36,7 +36,7 @@ CanvasLayer.constructor
 
 #### Defined in
 
-packages/maptalks/src/index.ts:205
+[packages/maptalks/src/index.ts:205](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/index.ts#L205)
 
 ## Properties
 
@@ -46,7 +46,7 @@ packages/maptalks/src/index.ts:205
 
 #### Defined in
 
-packages/maptalks/src/index.ts:202
+[packages/maptalks/src/index.ts:202](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/index.ts#L202)
 
 ___
 
@@ -56,7 +56,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/index.ts:200
+[packages/maptalks/src/index.ts:200](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/index.ts#L200)
 
 ___
 
@@ -66,7 +66,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/index.ts:203
+[packages/maptalks/src/index.ts:203](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/index.ts#L203)
 
 ## Methods
 
@@ -80,7 +80,7 @@ packages/maptalks/src/index.ts:203
 
 #### Defined in
 
-packages/maptalks/src/index.ts:294
+[packages/maptalks/src/index.ts:294](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/index.ts#L294)
 
 ___
 
@@ -94,7 +94,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/index.ts:279
+[packages/maptalks/src/index.ts:279](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/index.ts#L279)
 
 ___
 
@@ -108,7 +108,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/index.ts:290
+[packages/maptalks/src/index.ts:290](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/index.ts#L290)
 
 ___
 
@@ -124,7 +124,7 @@ get wind layer data
 
 #### Defined in
 
-packages/maptalks/src/index.ts:235
+[packages/maptalks/src/index.ts:235](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/index.ts#L235)
 
 ___
 
@@ -138,7 +138,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/index.ts:275
+[packages/maptalks/src/index.ts:275](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/index.ts#L275)
 
 ___
 
@@ -152,7 +152,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/index.ts:220
+[packages/maptalks/src/index.ts:220](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/index.ts#L220)
 
 ___
 
@@ -166,7 +166,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/index.ts:286
+[packages/maptalks/src/index.ts:286](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/index.ts#L286)
 
 ___
 
@@ -189,7 +189,7 @@ set layer data
 
 #### Defined in
 
-packages/maptalks/src/index.ts:245
+[packages/maptalks/src/index.ts:245](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/index.ts#L245)
 
 ___
 
@@ -209,4 +209,4 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/index.ts:262
+[packages/maptalks/src/index.ts:262](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/index.ts#L262)

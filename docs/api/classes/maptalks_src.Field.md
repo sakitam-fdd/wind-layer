@@ -24,7 +24,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-packages/core/dist/index.d.ts:68
+packages/core/dist/index.d.ts:70
 
 ## Properties
 
@@ -50,7 +50,7 @@ https://en.wikipedia.org/wiki/Bilinear_interpolation
 
 #### Defined in
 
-packages/core/dist/index.d.ts:88
+packages/core/dist/index.d.ts:93
 
 ___
 
@@ -67,7 +67,7 @@ index
 
 #### Defined in
 
-packages/core/dist/index.d.ts:135
+packages/core/dist/index.d.ts:140
 
 ___
 
@@ -84,7 +84,7 @@ index
 
 #### Defined in
 
-packages/core/dist/index.d.ts:143
+packages/core/dist/index.d.ts:148
 
 ___
 
@@ -94,7 +94,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:56
+packages/core/dist/index.d.ts:57
 
 ___
 
@@ -104,7 +104,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:62
+packages/core/dist/index.d.ts:63
 
 ___
 
@@ -114,7 +114,17 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:61
+packages/core/dist/index.d.ts:62
+
+___
+
+### flipY
+
+• `Private` `Readonly` **flipY**: `any`
+
+#### Defined in
+
+packages/core/dist/index.d.ts:66
 
 ___
 
@@ -134,7 +144,7 @@ decimal index
 
 #### Defined in
 
-packages/core/dist/index.d.ts:151
+packages/core/dist/index.d.ts:156
 
 ___
 
@@ -155,7 +165,7 @@ from 4 integer indexes
 
 #### Defined in
 
-packages/core/dist/index.d.ts:162
+packages/core/dist/index.d.ts:167
 
 ___
 
@@ -165,7 +175,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:99
+packages/core/dist/index.d.ts:104
 
 ___
 
@@ -175,7 +185,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:65
+packages/core/dist/index.d.ts:67
 
 ___
 
@@ -191,7 +201,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:127
+packages/core/dist/index.d.ts:132
 
 ___
 
@@ -201,7 +211,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:60
+packages/core/dist/index.d.ts:61
 
 ___
 
@@ -211,7 +221,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:64
+packages/core/dist/index.d.ts:65
 
 ___
 
@@ -227,7 +237,7 @@ row index (integer)
 
 #### Defined in
 
-packages/core/dist/index.d.ts:188
+packages/core/dist/index.d.ts:193
 
 ___
 
@@ -243,7 +253,7 @@ column index (integer)
 
 #### Defined in
 
-packages/core/dist/index.d.ts:182
+packages/core/dist/index.d.ts:187
 
 ___
 
@@ -253,7 +263,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:66
+packages/core/dist/index.d.ts:68
 
 ___
 
@@ -263,7 +273,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:57
+packages/core/dist/index.d.ts:58
 
 ___
 
@@ -273,7 +283,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:63
+packages/core/dist/index.d.ts:64
 
 ___
 
@@ -283,7 +293,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:58
+packages/core/dist/index.d.ts:59
 
 ___
 
@@ -293,7 +303,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:59
+packages/core/dist/index.d.ts:60
 
 ___
 
@@ -303,7 +313,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:67
+packages/core/dist/index.d.ts:69
 
 ___
 
@@ -313,7 +323,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:53
+packages/core/dist/index.d.ts:54
 
 ___
 
@@ -323,7 +333,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:52
+packages/core/dist/index.d.ts:53
 
 ___
 
@@ -333,7 +343,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:55
+packages/core/dist/index.d.ts:56
 
 ___
 
@@ -343,7 +353,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:54
+packages/core/dist/index.d.ts:55
 
 ## Methods
 
@@ -357,7 +367,7 @@ packages/core/dist/index.d.ts:54
 
 #### Defined in
 
-packages/core/dist/index.d.ts:69
+packages/core/dist/index.d.ts:71
 
 ___
 
@@ -373,7 +383,7 @@ calculate vector value range
 
 #### Defined in
 
-packages/core/dist/index.d.ts:92
+packages/core/dist/index.d.ts:97
 
 ___
 
@@ -391,7 +401,7 @@ boolean
 
 #### Defined in
 
-packages/core/dist/index.d.ts:202
+packages/core/dist/index.d.ts:207
 
 ___
 
@@ -412,7 +422,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:100
+packages/core/dist/index.d.ts:105
 
 ___
 
@@ -429,7 +439,7 @@ grib data extent
 
 #### Defined in
 
-packages/core/dist/index.d.ts:75
+packages/core/dist/index.d.ts:80
 
 ___
 
@@ -452,7 +462,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:106
+packages/core/dist/index.d.ts:111
 
 ___
 
@@ -473,7 +483,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:121
+packages/core/dist/index.d.ts:126
 
 ___
 
@@ -497,7 +507,7 @@ Get interpolated grid value lon-lat coordinates
 
 #### Defined in
 
-packages/core/dist/index.d.ts:120
+packages/core/dist/index.d.ts:125
 
 ___
 
@@ -519,7 +529,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:98
+packages/core/dist/index.d.ts:103
 
 ___
 
@@ -544,7 +554,7 @@ Lon-Lat for grid indexes
 
 #### Defined in
 
-packages/core/dist/index.d.ts:176
+packages/core/dist/index.d.ts:181
 
 ___
 
@@ -571,7 +581,7 @@ IPosition
 
 #### Defined in
 
-packages/core/dist/index.d.ts:197
+packages/core/dist/index.d.ts:202
 
 ___
 
@@ -579,27 +589,7 @@ ___
 
 ▸ **release**(): `void`
 
-#### Returns
-
-`void`
-
-#### Defined in
-
-packages/core/dist/index.d.ts:70
-
-___
-
-### startBatchInterpolate
-
-▸ **startBatchInterpolate**(`width`, `height`, `unproject`): `void`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `width` | `number` |
-| `height` | `number` |
-| `unproject` | (...`args`: `any`[]) => ``null`` \| [`number`, `number`] |
+release data
 
 #### Returns
 
@@ -607,7 +597,7 @@ ___
 
 #### Defined in
 
-packages/core/dist/index.d.ts:203
+packages/core/dist/index.d.ts:75
 
 ___
 
@@ -631,7 +621,7 @@ Nearest value at lon-lat coordinates
 
 #### Defined in
 
-packages/core/dist/index.d.ts:113
+packages/core/dist/index.d.ts:118
 
 ___
 
@@ -654,4 +644,4 @@ Value for grid indexes
 
 #### Defined in
 
-packages/core/dist/index.d.ts:169
+packages/core/dist/index.d.ts:174

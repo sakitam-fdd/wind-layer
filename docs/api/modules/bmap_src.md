@@ -30,4 +30,4 @@ Re-exports [Field](../classes/maptalks_src.Field.md)
 
 #### Defined in
 
-packages/bmap/src/index.ts:415
+[packages/bmap/src/index.ts:417](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L417)

@@ -1,8 +1,16 @@
 # `ol-wind`
 
-> openlayers wind field
+> [openlayers](https://openlayers.org/) wind layer adapter
 
 ## Usage
+
+### Install
+
+```bash
+pnpm i ol-wind -S
+```
+
+### Example
 
 ```js
 import { WindLayer } from 'ol-wind';

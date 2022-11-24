@@ -32,7 +32,7 @@ IOptions.colorScale
 
 #### Defined in
 
-packages/core/dist/index.d.ts:347
+packages/core/dist/index.d.ts:351
 
 ___
 
@@ -42,7 +42,7 @@ ___
 
 #### Defined in
 
-packages/bmap/src/index.ts:15
+[packages/bmap/src/index.ts:15](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L15)
 
 ___
 
@@ -56,7 +56,7 @@ IOptions.frameRate
 
 #### Defined in
 
-packages/core/dist/index.d.ts:353
+packages/core/dist/index.d.ts:357
 
 ___
 
@@ -70,7 +70,7 @@ IOptions.globalAlpha
 
 #### Defined in
 
-packages/core/dist/index.d.ts:345
+packages/core/dist/index.d.ts:349
 
 ___
 
@@ -84,7 +84,7 @@ IOptions.gpet
 
 #### Defined in
 
-packages/core/dist/index.d.ts:357
+packages/core/dist/index.d.ts:361
 
 ___
 
@@ -98,7 +98,7 @@ IOptions.lineWidth
 
 #### Defined in
 
-packages/core/dist/index.d.ts:346
+packages/core/dist/index.d.ts:350
 
 ___
 
@@ -112,7 +112,7 @@ IOptions.maxAge
 
 #### Defined in
 
-packages/core/dist/index.d.ts:350
+packages/core/dist/index.d.ts:354
 
 ___
 
@@ -126,7 +126,7 @@ IOptions.maxVelocity
 
 #### Defined in
 
-packages/core/dist/index.d.ts:355
+packages/core/dist/index.d.ts:359
 
 ___
 
@@ -140,7 +140,7 @@ IOptions.minVelocity
 
 #### Defined in
 
-packages/core/dist/index.d.ts:354
+packages/core/dist/index.d.ts:358
 
 ___
 
@@ -150,7 +150,7 @@ ___
 
 #### Defined in
 
-packages/bmap/src/index.ts:13
+[packages/bmap/src/index.ts:13](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L13)
 
 ___
 
@@ -164,7 +164,7 @@ IOptions.particleAge
 
 #### Defined in
 
-packages/core/dist/index.d.ts:349
+packages/core/dist/index.d.ts:353
 
 ___
 
@@ -178,7 +178,7 @@ IOptions.particleMultiplier
 
 #### Defined in
 
-packages/core/dist/index.d.ts:351
+packages/core/dist/index.d.ts:355
 
 ___
 
@@ -192,7 +192,7 @@ IOptions.paths
 
 #### Defined in
 
-packages/core/dist/index.d.ts:352
+packages/core/dist/index.d.ts:356
 
 ___
 
@@ -206,7 +206,7 @@ IOptions.useCoordsDraw
 
 #### Defined in
 
-packages/core/dist/index.d.ts:356
+packages/core/dist/index.d.ts:360
 
 ___
 
@@ -220,7 +220,7 @@ IOptions.velocityScale
 
 #### Defined in
 
-packages/core/dist/index.d.ts:348
+packages/core/dist/index.d.ts:352
 
 ___
 
@@ -230,7 +230,7 @@ ___
 
 #### Defined in
 
-packages/bmap/src/index.ts:16
+[packages/bmap/src/index.ts:16](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L16)
 
 ___
 
@@ -240,4 +240,4 @@ ___
 
 #### Defined in
 
-packages/bmap/src/index.ts:14
+[packages/bmap/src/index.ts:14](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L14)

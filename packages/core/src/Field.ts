@@ -131,6 +131,9 @@ export default class Field {
     return grid;
   }
 
+  /**
+   * release data
+   */
   public release() {
     this.grid = [];
   }
@@ -520,6 +523,4 @@ export default class Field {
   public checkFields() {
     return this.isFields;
   }
-
-  public startBatchInterpolate(width: number, height: number, unproject: (...args: any[]) => ([number, number] | null)) {}
 }

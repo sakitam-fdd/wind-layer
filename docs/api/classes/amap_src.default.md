@@ -25,7 +25,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-packages/amap/src/index.ts:49
+[packages/amap/src/index.ts:50](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L50)
 
 ## Properties
 
@@ -35,7 +35,7 @@ packages/amap/src/index.ts:49
 
 #### Defined in
 
-packages/amap/src/index.ts:43
+[packages/amap/src/index.ts:44](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L44)
 
 ___
 
@@ -45,7 +45,7 @@ ___
 
 #### Defined in
 
-packages/amap/src/index.ts:45
+[packages/amap/src/index.ts:46](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L46)
 
 ___
 
@@ -55,7 +55,7 @@ ___
 
 #### Defined in
 
-packages/amap/src/index.ts:46
+[packages/amap/src/index.ts:47](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L47)
 
 ___
 
@@ -65,7 +65,7 @@ ___
 
 #### Defined in
 
-packages/amap/src/index.ts:47
+[packages/amap/src/index.ts:48](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L48)
 
 ___
 
@@ -75,7 +75,7 @@ ___
 
 #### Defined in
 
-packages/amap/src/index.ts:42
+[packages/amap/src/index.ts:43](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L43)
 
 ___
 
@@ -85,7 +85,7 @@ ___
 
 #### Defined in
 
-packages/amap/src/index.ts:44
+[packages/amap/src/index.ts:45](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L45)
 
 ## Methods
 
@@ -101,7 +101,7 @@ fixed viewMode
 
 #### Defined in
 
-packages/amap/src/index.ts:225
+[packages/amap/src/index.ts:226](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L226)
 
 ___
 
@@ -123,7 +123,7 @@ append layer to map
 
 #### Defined in
 
-packages/amap/src/index.ts:83
+[packages/amap/src/index.ts:84](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L84)
 
 ___
 
@@ -139,7 +139,7 @@ canvas constructor
 
 #### Defined in
 
-packages/amap/src/index.ts:196
+[packages/amap/src/index.ts:197](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L197)
 
 ___
 
@@ -155,7 +155,7 @@ get canvas layer
 
 #### Defined in
 
-packages/amap/src/index.ts:148
+[packages/amap/src/index.ts:149](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L149)
 
 ___
 
@@ -171,7 +171,7 @@ get canvas context
 
 #### Defined in
 
-packages/amap/src/index.ts:298
+[packages/amap/src/index.ts:299](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L299)
 
 ___
 
@@ -187,7 +187,7 @@ get wind layer data
 
 #### Defined in
 
-packages/amap/src/index.ts:318
+[packages/amap/src/index.ts:319](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L319)
 
 ___
 
@@ -201,7 +201,7 @@ ___
 
 #### Defined in
 
-packages/amap/src/index.ts:350
+[packages/amap/src/index.ts:352](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L352)
 
 ___
 
@@ -215,7 +215,7 @@ ___
 
 #### Defined in
 
-packages/amap/src/index.ts:367
+[packages/amap/src/index.ts:369](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L369)
 
 ___
 
@@ -229,7 +229,7 @@ ___
 
 #### Defined in
 
-packages/amap/src/index.ts:106
+[packages/amap/src/index.ts:107](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L107)
 
 ___
 
@@ -251,7 +251,7 @@ init windy layer
 
 #### Defined in
 
-packages/amap/src/index.ts:95
+[packages/amap/src/index.ts:96](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L96)
 
 ___
 
@@ -271,7 +271,7 @@ ___
 
 #### Defined in
 
-packages/amap/src/index.ts:288
+[packages/amap/src/index.ts:289](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L289)
 
 ___
 
@@ -285,7 +285,7 @@ ___
 
 #### Defined in
 
-packages/amap/src/index.ts:303
+[packages/amap/src/index.ts:304](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L304)
 
 ___
 
@@ -305,7 +305,7 @@ ___
 
 #### Defined in
 
-packages/amap/src/index.ts:267
+[packages/amap/src/index.ts:268](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L268)
 
 ___
 
@@ -319,7 +319,7 @@ ___
 
 #### Defined in
 
-packages/amap/src/index.ts:263
+[packages/amap/src/index.ts:264](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L264)
 
 ___
 
@@ -335,7 +335,7 @@ remove layer
 
 #### Defined in
 
-packages/amap/src/index.ts:247
+[packages/amap/src/index.ts:248](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L248)
 
 ___
 
@@ -357,13 +357,13 @@ render layer
 
 #### Defined in
 
-packages/amap/src/index.ts:117
+[packages/amap/src/index.ts:118](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L118)
 
 ___
 
 ### setData
 
-▸ **setData**(`data`): [`default`](amap_src.default.md)
+▸ **setData**(`data`, `options?`): [`default`](amap_src.default.md)
 
 set layer data
 
@@ -372,6 +372,7 @@ set layer data
 | Name | Type |
 | :------ | :------ |
 | `data` | `any` |
+| `options` | `Partial`<`IField`\> |
 
 #### Returns
 
@@ -379,7 +380,7 @@ set layer data
 
 #### Defined in
 
-packages/amap/src/index.ts:327
+[packages/amap/src/index.ts:329](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L329)
 
 ___
 
@@ -399,7 +400,7 @@ ___
 
 #### Defined in
 
-packages/amap/src/index.ts:355
+[packages/amap/src/index.ts:357](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L357)
 
 ___
 
@@ -419,7 +420,7 @@ ___
 
 #### Defined in
 
-packages/amap/src/index.ts:276
+[packages/amap/src/index.ts:277](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L277)
 
 ___
 
@@ -439,4 +440,4 @@ ___
 
 #### Defined in
 
-packages/amap/src/index.ts:344
+[packages/amap/src/index.ts:346](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L346)

@@ -25,7 +25,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:421
+[packages/gl-core/src/utils/gl-utils.ts:421](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L421)
 
 ___
 
@@ -42,7 +42,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:429
+[packages/gl-core/src/utils/gl-utils.ts:429](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L429)
 
 ___
 
@@ -59,7 +59,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:433
+[packages/gl-core/src/utils/gl-utils.ts:433](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L433)
 
 ___
 
@@ -76,7 +76,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:417
+[packages/gl-core/src/utils/gl-utils.ts:417](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L417)
 
 ___
 
@@ -93,4 +93,4 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:425
+[packages/gl-core/src/utils/gl-utils.ts:425](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L425)

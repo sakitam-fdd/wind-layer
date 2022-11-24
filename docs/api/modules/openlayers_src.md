@@ -30,4 +30,4 @@ Re-exports [Field](../classes/maptalks_src.Field.md)
 
 #### Defined in
 
-packages/openlayers/src/index.ts:316
+[packages/openlayers/src/index.ts:316](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L316)

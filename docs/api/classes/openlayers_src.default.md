@@ -35,7 +35,7 @@ ol.layer.Image.constructor
 
 #### Defined in
 
-packages/openlayers/src/index.ts:43
+[packages/openlayers/src/index.ts:43](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L43)
 
 ## Properties
 
@@ -45,7 +45,7 @@ packages/openlayers/src/index.ts:43
 
 #### Defined in
 
-packages/openlayers/src/index.ts:36
+[packages/openlayers/src/index.ts:36](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L36)
 
 ___
 
@@ -55,7 +55,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:38
+[packages/openlayers/src/index.ts:38](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L38)
 
 ___
 
@@ -65,7 +65,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:35
+[packages/openlayers/src/index.ts:35](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L35)
 
 ___
 
@@ -75,7 +75,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:40
+[packages/openlayers/src/index.ts:40](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L40)
 
 ___
 
@@ -85,7 +85,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:41
+[packages/openlayers/src/index.ts:41](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L41)
 
 ___
 
@@ -95,7 +95,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:39
+[packages/openlayers/src/index.ts:39](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L39)
 
 ___
 
@@ -105,7 +105,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:37
+[packages/openlayers/src/index.ts:37](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L37)
 
 ## Methods
 
@@ -127,7 +127,7 @@ append layer to map
 
 #### Defined in
 
-packages/openlayers/src/index.ts:91
+[packages/openlayers/src/index.ts:91](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L91)
 
 ___
 
@@ -151,7 +151,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:111
+[packages/openlayers/src/index.ts:111](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L111)
 
 ___
 
@@ -249,7 +249,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:133
+[packages/openlayers/src/index.ts:133](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L133)
 
 ___
 
@@ -265,7 +265,7 @@ get wind layer data
 
 #### Defined in
 
-packages/openlayers/src/index.ts:223
+[packages/openlayers/src/index.ts:223](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L223)
 
 ___
 
@@ -336,7 +336,7 @@ get map
 
 #### Defined in
 
-packages/openlayers/src/index.ts:307
+[packages/openlayers/src/index.ts:307](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L307)
 
 ___
 
@@ -434,7 +434,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:258
+[packages/openlayers/src/index.ts:258](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L258)
 
 ___
 
@@ -448,7 +448,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:279
+[packages/openlayers/src/index.ts:279](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L279)
 
 ___
 
@@ -541,7 +541,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:311
+[packages/openlayers/src/index.ts:311](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L311)
 
 ___
 
@@ -583,7 +583,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:275
+[packages/openlayers/src/index.ts:275](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L275)
 
 ___
 
@@ -632,7 +632,7 @@ TODO: 空间判断出错，需要修复
 
 #### Defined in
 
-packages/openlayers/src/index.ts:193
+[packages/openlayers/src/index.ts:193](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L193)
 
 ___
 
@@ -718,7 +718,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:208
+[packages/openlayers/src/index.ts:208](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L208)
 
 ___
 
@@ -738,7 +738,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:174
+[packages/openlayers/src/index.ts:174](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L174)
 
 ___
 
@@ -760,7 +760,7 @@ render windy layer
 
 #### Defined in
 
-packages/openlayers/src/index.ts:143
+[packages/openlayers/src/index.ts:143](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L143)
 
 ___
 
@@ -815,7 +815,7 @@ set layer data
 
 #### Defined in
 
-packages/openlayers/src/index.ts:233
+[packages/openlayers/src/index.ts:233](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L233)
 
 ___
 
@@ -874,7 +874,7 @@ ol.layer.Image.setMap
 
 #### Defined in
 
-packages/openlayers/src/index.ts:295
+[packages/openlayers/src/index.ts:295](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L295)
 
 ___
 
@@ -1086,7 +1086,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:263
+[packages/openlayers/src/index.ts:263](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L263)
 
 ___
 
@@ -1131,7 +1131,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:99
+[packages/openlayers/src/index.ts:99](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L99)
 
 ___
 
@@ -1145,7 +1145,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:105
+[packages/openlayers/src/index.ts:105](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L105)
 
 ___
 
@@ -1197,7 +1197,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:183
+[packages/openlayers/src/index.ts:183](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L183)
 
 ___
 
@@ -1248,7 +1248,7 @@ ___
 
 #### Defined in
 
-packages/openlayers/src/index.ts:252
+[packages/openlayers/src/index.ts:252](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L252)
 
 ___
 
