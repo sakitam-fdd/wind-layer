@@ -28,4 +28,4 @@ Renames and re-exports [WindLayer](leaflet_src.md#windlayer)
 
 #### Defined in
 
-packages/leaflet/src/index.ts:13
+[packages/leaflet/src/index.ts:13](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/leaflet/src/index.ts#L13)

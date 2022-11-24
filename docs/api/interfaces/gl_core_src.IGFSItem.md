@@ -18,7 +18,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-packages/gl-core/src/ScalarFill.ts:29
+[packages/gl-core/src/ScalarFill.ts:29](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/ScalarFill.ts#L29)
 
 ___
 
@@ -47,4 +47,4 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/ScalarFill.ts:16
+[packages/gl-core/src/ScalarFill.ts:16](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/ScalarFill.ts#L16)

@@ -34,7 +34,7 @@ renderer.CanvasLayerRenderer.constructor
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:60
+[packages/maptalks/src/ScalarLayer.ts:60](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L60)
 
 ___
 
@@ -44,7 +44,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:58
+[packages/maptalks/src/ScalarLayer.ts:58](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L58)
 
 ___
 
@@ -54,7 +54,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:61
+[packages/maptalks/src/ScalarLayer.ts:61](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L61)
 
 ___
 
@@ -64,7 +64,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:59
+[packages/maptalks/src/ScalarLayer.ts:59](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L59)
 
 ___
 
@@ -74,7 +74,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:57
+[packages/maptalks/src/ScalarLayer.ts:57](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L57)
 
 ## Methods
 
@@ -88,7 +88,7 @@ packages/maptalks/src/ScalarLayer.ts:57
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:81
+[packages/maptalks/src/ScalarLayer.ts:81](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L81)
 
 ___
 
@@ -102,7 +102,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:63
+[packages/maptalks/src/ScalarLayer.ts:63](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L63)
 
 ___
 
@@ -116,7 +116,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:86
+[packages/maptalks/src/ScalarLayer.ts:86](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L86)
 
 ___
 
@@ -130,7 +130,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:311
+[packages/maptalks/src/ScalarLayer.ts:311](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L311)
 
 ___
 
@@ -144,7 +144,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:92
+[packages/maptalks/src/ScalarLayer.ts:92](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L92)
 
 ___
 
@@ -158,7 +158,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:75
+[packages/maptalks/src/ScalarLayer.ts:75](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L75)
 
 ___
 
@@ -172,7 +172,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:271
+[packages/maptalks/src/ScalarLayer.ts:271](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L271)
 
 ___
 
@@ -186,7 +186,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:130
+[packages/maptalks/src/ScalarLayer.ts:130](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L130)
 
 ___
 
@@ -200,7 +200,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:67
+[packages/maptalks/src/ScalarLayer.ts:67](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L67)
 
 ___
 
@@ -214,7 +214,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:307
+[packages/maptalks/src/ScalarLayer.ts:307](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L307)
 
 ___
 
@@ -228,7 +228,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:114
+[packages/maptalks/src/ScalarLayer.ts:114](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L114)
 
 ___
 
@@ -242,7 +242,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:207
+[packages/maptalks/src/ScalarLayer.ts:207](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L207)
 
 ___
 
@@ -256,7 +256,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:124
+[packages/maptalks/src/ScalarLayer.ts:124](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L124)
 
 ___
 
@@ -270,7 +270,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:71
+[packages/maptalks/src/ScalarLayer.ts:71](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L71)
 
 ___
 
@@ -290,7 +290,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:287
+[packages/maptalks/src/ScalarLayer.ts:287](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L287)
 
 ___
 
@@ -310,7 +310,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:283
+[packages/maptalks/src/ScalarLayer.ts:283](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L283)
 
 ___
 
@@ -330,7 +330,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:295
+[packages/maptalks/src/ScalarLayer.ts:295](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L295)
 
 ___
 
@@ -350,7 +350,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:291
+[packages/maptalks/src/ScalarLayer.ts:291](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L291)
 
 ___
 
@@ -370,7 +370,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:279
+[packages/maptalks/src/ScalarLayer.ts:279](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L279)
 
 ___
 
@@ -390,7 +390,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:275
+[packages/maptalks/src/ScalarLayer.ts:275](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L275)
 
 ___
 
@@ -404,7 +404,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:315
+[packages/maptalks/src/ScalarLayer.ts:315](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L315)
 
 ___
 
@@ -418,7 +418,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:319
+[packages/maptalks/src/ScalarLayer.ts:319](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L319)
 
 ___
 
@@ -432,7 +432,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:323
+[packages/maptalks/src/ScalarLayer.ts:323](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L323)
 
 ___
 
@@ -446,7 +446,7 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:301
+[packages/maptalks/src/ScalarLayer.ts:301](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L301)
 
 ___
 
@@ -466,4 +466,4 @@ ___
 
 #### Defined in
 
-packages/maptalks/src/ScalarLayer.ts:101
+[packages/maptalks/src/ScalarLayer.ts:101](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/ScalarLayer.ts#L101)

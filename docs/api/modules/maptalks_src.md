@@ -29,4 +29,4 @@ sidebarDepth: 4
 
 #### Defined in
 
-packages/maptalks/src/index.ts:302
+[packages/maptalks/src/index.ts:302](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/index.ts#L302)

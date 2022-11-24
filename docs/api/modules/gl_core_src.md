@@ -29,7 +29,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-packages/gl-core/src/ScalarFill.ts:91
+[packages/gl-core/src/ScalarFill.ts:91](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/ScalarFill.ts#L91)
 
 ## Functions
 
@@ -54,7 +54,7 @@ bind attribute
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:300
+[packages/gl-core/src/utils/gl-utils.ts:300](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L300)
 
 ___
 
@@ -78,7 +78,7 @@ bind framebuffer
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:317
+[packages/gl-core/src/utils/gl-utils.ts:317](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L317)
 
 ___
 
@@ -102,7 +102,7 @@ bind texture
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:243
+[packages/gl-core/src/utils/gl-utils.ts:243](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L243)
 
 ___
 
@@ -122,7 +122,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/common.ts:1
+[packages/gl-core/src/utils/common.ts:1](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/common.ts#L1)
 
 ___
 
@@ -148,7 +148,7 @@ clear scene
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:362
+[packages/gl-core/src/utils/gl-utils.ts:362](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L362)
 
 ___
 
@@ -171,7 +171,7 @@ create data buffer
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:270
+[packages/gl-core/src/utils/gl-utils.ts:270](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L270)
 
 ___
 
@@ -195,7 +195,7 @@ create program from vertex and frag
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:137
+[packages/gl-core/src/utils/gl-utils.ts:137](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L137)
 
 ___
 
@@ -219,7 +219,7 @@ create shader and compile shader
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:114
+[packages/gl-core/src/utils/gl-utils.ts:114](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L114)
 
 ___
 
@@ -245,7 +245,7 @@ create 2d texture
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:174
+[packages/gl-core/src/utils/gl-utils.ts:174](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L174)
 
 ___
 
@@ -268,7 +268,7 @@ defines
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:87
+[packages/gl-core/src/utils/gl-utils.ts:87](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L87)
 
 ___
 
@@ -291,7 +291,7 @@ delete texture
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:257
+[packages/gl-core/src/utils/gl-utils.ts:257](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L257)
 
 ___
 
@@ -312,7 +312,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/common.ts:34
+[packages/gl-core/src/utils/common.ts:34](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/common.ts#L34)
 
 ___
 
@@ -332,7 +332,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/common.ts:64
+[packages/gl-core/src/utils/common.ts:64](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/common.ts#L64)
 
 ___
 
@@ -346,7 +346,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:4
+[packages/gl-core/src/utils/gl-utils.ts:4](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L4)
 
 ___
 
@@ -366,7 +366,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/common.ts:140
+[packages/gl-core/src/utils/common.ts:140](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/common.ts#L140)
 
 ___
 
@@ -389,7 +389,7 @@ get gl context
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:45
+[packages/gl-core/src/utils/gl-utils.ts:45](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L45)
 
 ___
 
@@ -414,7 +414,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:439
+[packages/gl-core/src/utils/gl-utils.ts:439](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L439)
 
 ___
 
@@ -437,7 +437,7 @@ inject shader module
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:98
+[packages/gl-core/src/utils/gl-utils.ts:98](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L98)
 
 ___
 
@@ -457,7 +457,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/common.ts:26
+[packages/gl-core/src/utils/common.ts:26](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/common.ts#L26)
 
 ___
 
@@ -477,7 +477,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/common.ts:30
+[packages/gl-core/src/utils/common.ts:30](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/common.ts#L30)
 
 ___
 
@@ -499,7 +499,7 @@ load image by url
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:396
+[packages/gl-core/src/utils/gl-utils.ts:396](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L396)
 
 ___
 
@@ -520,7 +520,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/common.ts:68
+[packages/gl-core/src/utils/common.ts:68](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/common.ts#L68)
 
 ___
 
@@ -551,7 +551,7 @@ https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-anti-patterns.html
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:16
+[packages/gl-core/src/utils/gl-utils.ts:16](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L16)
 
 ___
 
@@ -575,7 +575,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:336
+[packages/gl-core/src/utils/gl-utils.ts:336](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L336)
 
 ___
 
@@ -599,7 +599,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:211
+[packages/gl-core/src/utils/gl-utils.ts:211](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L211)
 
 ___
 
@@ -621,7 +621,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/common.ts:128
+[packages/gl-core/src/utils/common.ts:128](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/common.ts#L128)
 
 ___
 
@@ -643,4 +643,4 @@ ___
 
 #### Defined in
 
-packages/gl-core/src/utils/gl-utils.ts:281
+[packages/gl-core/src/utils/gl-utils.ts:281](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L281)

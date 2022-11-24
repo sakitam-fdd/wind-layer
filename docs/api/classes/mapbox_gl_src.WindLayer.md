@@ -36,7 +36,7 @@ Overlay.constructor
 
 #### Defined in
 
-packages/mapbox-gl/src/index.ts:37
+[packages/mapbox-gl/src/index.ts:37](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/index.ts#L37)
 
 ## Properties
 
@@ -50,7 +50,7 @@ Overlay.canvas
 
 #### Defined in
 
-packages/mapbox-gl/src/Overlay.ts:25
+[packages/mapbox-gl/src/Overlay.ts:25](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/Overlay.ts#L25)
 
 ___
 
@@ -60,7 +60,7 @@ ___
 
 #### Defined in
 
-packages/mapbox-gl/src/index.ts:34
+[packages/mapbox-gl/src/index.ts:34](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/index.ts#L34)
 
 ___
 
@@ -74,7 +74,7 @@ Overlay.id
 
 #### Defined in
 
-packages/mapbox-gl/src/Overlay.ts:30
+[packages/mapbox-gl/src/Overlay.ts:30](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/Overlay.ts#L30)
 
 ___
 
@@ -88,7 +88,7 @@ Overlay.map
 
 #### Defined in
 
-packages/mapbox-gl/src/Overlay.ts:23
+[packages/mapbox-gl/src/Overlay.ts:23](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/Overlay.ts#L23)
 
 ___
 
@@ -102,7 +102,7 @@ Overlay.options
 
 #### Defined in
 
-packages/mapbox-gl/src/index.ts:33
+[packages/mapbox-gl/src/index.ts:33](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/index.ts#L33)
 
 ___
 
@@ -116,7 +116,7 @@ Overlay.renderingMode
 
 #### Defined in
 
-packages/mapbox-gl/src/Overlay.ts:29
+[packages/mapbox-gl/src/Overlay.ts:29](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/Overlay.ts#L29)
 
 ___
 
@@ -130,7 +130,7 @@ Overlay.type
 
 #### Defined in
 
-packages/mapbox-gl/src/Overlay.ts:28
+[packages/mapbox-gl/src/Overlay.ts:28](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/Overlay.ts#L28)
 
 ___
 
@@ -140,7 +140,7 @@ ___
 
 #### Defined in
 
-packages/mapbox-gl/src/index.ts:35
+[packages/mapbox-gl/src/index.ts:35](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/index.ts#L35)
 
 ## Methods
 
@@ -164,7 +164,7 @@ Overlay.addTo
 
 #### Defined in
 
-packages/mapbox-gl/src/Overlay.ts:151
+[packages/mapbox-gl/src/Overlay.ts:151](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/Overlay.ts#L151)
 
 ___
 
@@ -182,7 +182,7 @@ Overlay.clear
 
 #### Defined in
 
-packages/mapbox-gl/src/Overlay.ts:130
+[packages/mapbox-gl/src/Overlay.ts:130](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/Overlay.ts#L130)
 
 ___
 
@@ -198,7 +198,7 @@ get wind layer data
 
 #### Defined in
 
-packages/mapbox-gl/src/index.ts:160
+[packages/mapbox-gl/src/index.ts:160](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/index.ts#L160)
 
 ___
 
@@ -216,7 +216,7 @@ Overlay.getMap
 
 #### Defined in
 
-packages/mapbox-gl/src/Overlay.ts:147
+[packages/mapbox-gl/src/Overlay.ts:147](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/Overlay.ts#L147)
 
 ___
 
@@ -230,7 +230,7 @@ ___
 
 #### Defined in
 
-packages/mapbox-gl/src/index.ts:199
+[packages/mapbox-gl/src/index.ts:199](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/index.ts#L199)
 
 ___
 
@@ -244,7 +244,7 @@ ___
 
 #### Defined in
 
-packages/mapbox-gl/src/index.ts:66
+[packages/mapbox-gl/src/index.ts:66](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/index.ts#L66)
 
 ___
 
@@ -262,7 +262,7 @@ Overlay.initialize
 
 #### Defined in
 
-packages/mapbox-gl/src/Overlay.ts:74
+[packages/mapbox-gl/src/Overlay.ts:74](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/Overlay.ts#L74)
 
 ___
 
@@ -286,7 +286,7 @@ Overlay.intersectsCoordinate
 
 #### Defined in
 
-packages/mapbox-gl/src/Overlay.ts:119
+[packages/mapbox-gl/src/Overlay.ts:119](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/Overlay.ts#L119)
 
 ___
 
@@ -310,7 +310,7 @@ Overlay.onAdd
 
 #### Defined in
 
-packages/mapbox-gl/src/index.ts:50
+[packages/mapbox-gl/src/index.ts:50](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/index.ts#L50)
 
 ___
 
@@ -324,7 +324,7 @@ ___
 
 #### Defined in
 
-packages/mapbox-gl/src/index.ts:145
+[packages/mapbox-gl/src/index.ts:145](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/index.ts#L145)
 
 ___
 
@@ -348,7 +348,7 @@ Overlay.project
 
 #### Defined in
 
-packages/mapbox-gl/src/Overlay.ts:98
+[packages/mapbox-gl/src/Overlay.ts:98](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/Overlay.ts#L98)
 
 ___
 
@@ -362,7 +362,7 @@ ___
 
 #### Defined in
 
-packages/mapbox-gl/src/index.ts:73
+[packages/mapbox-gl/src/index.ts:73](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/index.ts#L73)
 
 ___
 
@@ -380,7 +380,7 @@ Overlay.remove
 
 #### Defined in
 
-packages/mapbox-gl/src/index.ts:135
+[packages/mapbox-gl/src/index.ts:135](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/index.ts#L135)
 
 ___
 
@@ -398,7 +398,7 @@ Overlay.render
 
 #### Defined in
 
-packages/mapbox-gl/src/index.ts:103
+[packages/mapbox-gl/src/index.ts:103](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/index.ts#L103)
 
 ___
 
@@ -422,7 +422,7 @@ Overlay.resizeCanvas
 
 #### Defined in
 
-packages/mapbox-gl/src/Overlay.ts:60
+[packages/mapbox-gl/src/Overlay.ts:60](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/Overlay.ts#L60)
 
 ___
 
@@ -445,7 +445,7 @@ set layer data
 
 #### Defined in
 
-packages/mapbox-gl/src/index.ts:170
+[packages/mapbox-gl/src/index.ts:170](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/index.ts#L170)
 
 ___
 
@@ -469,7 +469,7 @@ Overlay.setMap
 
 #### Defined in
 
-packages/mapbox-gl/src/Overlay.ts:142
+[packages/mapbox-gl/src/Overlay.ts:142](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/Overlay.ts#L142)
 
 ___
 
@@ -489,7 +489,7 @@ ___
 
 #### Defined in
 
-packages/mapbox-gl/src/index.ts:186
+[packages/mapbox-gl/src/index.ts:186](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/index.ts#L186)
 
 ___
 
@@ -503,7 +503,7 @@ ___
 
 #### Defined in
 
-packages/mapbox-gl/src/index.ts:97
+[packages/mapbox-gl/src/index.ts:97](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/index.ts#L97)
 
 ___
 
@@ -527,7 +527,7 @@ Overlay.unproject
 
 #### Defined in
 
-packages/mapbox-gl/src/Overlay.ts:111
+[packages/mapbox-gl/src/Overlay.ts:111](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/Overlay.ts#L111)
 
 ___
 
@@ -541,4 +541,4 @@ ___
 
 #### Defined in
 
-packages/mapbox-gl/src/index.ts:85
+[packages/mapbox-gl/src/index.ts:85](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/mapbox-gl/src/index.ts#L85)

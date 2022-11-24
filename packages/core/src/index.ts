@@ -8,7 +8,7 @@ export const defaultOptions = {
   lineWidth: 1, // 线条宽度
   colorScale: '#fff',
   velocityScale: 1 / 25,
-  // particleAge: 90, // 粒子在重新生成之前绘制的最大帧数
+  // particleAge: 90,
   maxAge: 90, // alias for particleAge
   // particleMultiplier: 1 / 300, // TODO: PATHS = Math.round(width * height * particleMultiplier);
   paths: 800,
@@ -79,6 +79,10 @@ class WindCore {
     }
   }
 
+  /**
+   * 设置配置项
+   * @param options
+   */
   public setOptions(options: Partial<IOptions>) {
     this.options = { ...defaultOptions, ...options };
 
@@ -106,10 +110,17 @@ class WindCore {
     this.prerender();
   }
 
+  /**
+   * 获取配置项
+   */
   public getOptions() {
     return this.options;
   }
 
+  /**
+   * 更新数据
+   * @param field
+   */
   public updateData(field: Field) {
     this.field = field;
     if (!this.generated) {
@@ -128,16 +139,26 @@ class WindCore {
     throw new Error('unproject must be overriden');
   }
 
+  /**
+   * 判断位置是否在当前视窗内
+   * @param coordinates
+   */
   public intersectsCoordinate(coordinates: [number, number]): boolean {
     throw new Error('must be overriden');
   }
 
+  /**
+   * 清空当前画布
+   */
   public clearCanvas() {
     this.stop();
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     this.forceStop = false;
   }
 
+  /**
+   * 启动粒子动画
+   */
   public start() {
     this.starting = true;
     this.forceStop = false;
@@ -145,6 +166,9 @@ class WindCore {
     this.animate();
   }
 
+  /**
+   * 停止粒子动画
+   */
   public stop() {
     cancelAnimationFrame(this.animationLoop);
     this.starting = false;
@@ -407,9 +431,6 @@ class WindCore {
     if (!this.field) {
       return [];
     }
-    if ('startBatchInterpolate' in this.field) {
-      this.field.startBatchInterpolate(width, height, this.unproject);
-    }
     let i = 0;
     for (; i < particleCount; i++) {
       particles.push(
@@ -427,7 +448,7 @@ class WindCore {
   }
 
   private randomize() {
-    return Math.floor(Math.random() * this.options.maxAge); // 例如最大生成90帧插值粒子路径
+    return Math.floor(Math.random() * this.options.maxAge);
   }
 }
 
