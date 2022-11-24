@@ -47,9 +47,6 @@ const plugins = [
   json({
     namedExports: true,
   }),
-  ...(MINIFY ? [
-    terser(),
-  ] : []),
 ];
 
 const esmBuild: RollupOptions = {
@@ -87,13 +84,18 @@ const umdBuild: RollupOptions = {
     dir: undefined,
     name: pkg.namespace,
     sourcemap: !MINIFY,
-    file: pkg.main,
+    file: MINIFY ? pkg.main.split('.').splice(pkg.main.split('.').length - 1, 0, 'min').join('.') : pkg.main,
     globals: {
       leaflet: 'L',
     }
   },
   external: umdExternal,
-  plugins,
+  plugins: [
+    ...plugins,
+    ...(MINIFY ? [
+      terser(),
+    ] : []),
+  ],
   onwarn(warning, warn) {
     if (warning.code !== 'EVAL') warn(warning);
   },
