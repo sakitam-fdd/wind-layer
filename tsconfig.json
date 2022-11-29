@@ -23,6 +23,8 @@
     "allowSyntheticDefaultImports": true
   },
   "include": [
+    "packages/*/src/**/*.ts",
+    "packages/*/typings.d.ts",
     "packages/*/__tests__/**/*.ts"
   ],
   "exclude": [

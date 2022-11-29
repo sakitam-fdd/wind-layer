@@ -135,9 +135,9 @@ importers:
 
   packages/gl-core:
     specifiers:
-      wind-core: workspace:*
+      '@sakitam-gis/vis-engine': ^1.0.0
     dependencies:
-      wind-core: link:../core
+      '@sakitam-gis/vis-engine': 1.0.4
 
   packages/leaflet:
     specifiers:
@@ -2177,6 +2177,14 @@ packages:
       rollup: 3.2.3
     dev: true
 
+  /@sakitam-gis/vis-engine/1.0.4:
+    resolution: {integrity: sha512-mPEpRP/rTrd1PKauKjSkSspSzw0CtXN7l/glAAMoktP3guEcwxkRYrAXdTuvjWkdM59dhFFXUvH1oKwTd0318w==}
+    engines: {node: '>= 14.18.1', npm: '>= 6.14.15'}
+    dependencies:
+      colord: 2.9.3
+      gl-matrix: 3.4.3
+    dev: false
+
   /@tootallnate/once/2.0.0:
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}
     engines: {node: '>= 10'}
@@ -3373,6 +3381,10 @@ packages:
     resolution: {integrity: sha512-qiBjkpbMLO/HL68y+lh4q0/O1MZFj2RX6X/KmMa3+gJD3z+WwI1ZzDHysvqHGS3mP6mznPckpXmw1nI9cJjyRg==}
     hasBin: true
     dev: true
+
+  /colord/2.9.3:
+    resolution: {integrity: sha512-jeC1axXpnb0/2nn/Y1LPuLdgXBLH7aDcHu4KEKfqw3CUhX7ZpfBSlPKyqXE6btIgEzfWtrX3/tyBCaCvXvMkOw==}
+    dev: false
 
   /colorette/2.0.19:
     resolution: {integrity: sha512-3tlv/dIP7FWvj3BsbHrGLJ6l/oKh1O3TcgBqMn+yyCagOxc23fyzDS6HypQbgxWbkpDnf52p1LuR4eWDQ/K9WQ==}
@@ -4882,7 +4894,6 @@ packages:
 
   /gl-matrix/3.4.3:
     resolution: {integrity: sha512-wcCp8vu8FT22BnvKVPjXa/ICBWRq/zjFfdofZy1WSpQZpphblv12/bOQLBC1rMM7SGOFS9ltVmKOHil5+Ml7gA==}
-    dev: true
 
   /glob-parent/5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}

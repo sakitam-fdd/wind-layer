@@ -15,5 +15,3 @@ vec2 mercatorToWGS84(vec2 xy) {
   // pass lng through, as it doesn't change
   return vec2(xy.x, y);
 }
-
-#pragma glslify: export(mercatorToWGS84)

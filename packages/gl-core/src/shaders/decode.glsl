@@ -8,5 +8,3 @@ vec2 fromRGBA(const vec4 color) {
     float y = dot(rounded_color.ba, bitDec);
     return vec2(x, y);
 }
-
-#pragma glslify: export(fromRGBA)

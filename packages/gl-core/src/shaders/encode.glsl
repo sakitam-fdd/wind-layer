@@ -12,5 +12,3 @@ vec4 toRGBA (const vec2 pos) {
 
     return vec4(rg, ba);
 }
-
-#pragma glslify: export(toRGBA)

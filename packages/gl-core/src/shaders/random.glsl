@@ -4,5 +4,3 @@ float rand(const vec2 co) {
   float t = dot(rand_constants.xy, co);
   return fract(sin(t) * (rand_constants.z + t));
 }
-
-#pragma glslify: export(rand)

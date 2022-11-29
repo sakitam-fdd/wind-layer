@@ -8,5 +8,3 @@ vec2 wgs84ToMercator(vec2 xy) {
   // pass x through, as it doesn't change
   return vec2(xy.x, y);
 }
-
-#pragma glslify: export(wgs84ToMercator)

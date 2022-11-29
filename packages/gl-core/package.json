@@ -69,7 +69,7 @@
   },
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
   "dependencies": {
-    "wind-core": "workspace:*"
+    "@sakitam-gis/vis-engine": "^1.0.0"
   },
   "publishConfig": {
     "access": "public"

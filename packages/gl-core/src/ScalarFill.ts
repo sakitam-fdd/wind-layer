@@ -1,16 +1,20 @@
+import {
+  utils,
+  Texture,
+  Renderer,
+  Scene,
+  Program,
+  PerspectiveCamera,
+  Geometry,
+  Mesh,
+} from '@sakitam-gis/vis-engine';
 // @ts-ignore
 import DataProcess from 'web-worker:./workers/DataProcesse';
-import { Fill } from './Fill';
-import { isNumber } from './utils/common';
-import {
-  createBuffer,
-  createTexture,
-  getPlaneBuffer,
-  IPlaneBuffer,
-  loadImage,
-} from './utils/gl-utils';
+import { IPlaneBuffer, loadImage } from './utils/gl-utils';
 import { createLinearGradient, createZoom } from './utils/style-parser';
-import { WindFill } from './WindFill';
+import fillVert from './shaders/fill.vert.glsl';
+import fillFrag from './shaders/fill.frag.glsl';
+import * as shaderLib from './shaders/shaderLib';
 
 export interface IGFSItem {
   header: {
@@ -62,12 +66,7 @@ export interface IData {
   vMax?: number;
   min?: number;
   max?: number;
-  texCoordBuffer: WebGLBuffer | null;
-  quadBuffer: WebGLBuffer | null;
-  quad64LowBuffer: WebGLBuffer | null;
-  texture?: WebGLTexture | null;
-  indexes?: number[] | number[][];
-  wireframeIndexes?: number[] | number[][];
+  texture?: Texture;
 }
 
 export interface IJsonArrayData {
@@ -119,27 +118,6 @@ export const defaultOptions: IOptions = {
   widthSegments: 1,
   heightSegments: 1,
   wireframe: false,
-  createPlaneBuffer: (
-    points: number[][],
-    widthSegments: number,
-    heightSegments: number,
-  ) => {
-    const [startX, endX, startY, endY] = [
-      points[0][0],
-      points[2][0],
-      points[0][1],
-      points[1][1],
-    ];
-
-    return getPlaneBuffer(
-      startX,
-      endX,
-      startY,
-      endY,
-      widthSegments,
-      heightSegments,
-    );
-  },
   injectShaderModules: {
     '#modules-transformZ': `
 float transformZ(float value, vec3 pos) {
@@ -154,31 +132,24 @@ gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
 
 export function checkUVData(data: IData) {
   return (
-    isNumber(data.uMin) &&
-    isNumber(data.uMax) &&
-    isNumber(data.vMin) &&
-    isNumber(data.vMax)
+    utils.isNumber(data.uMin) &&
+    utils.isNumber(data.uMax) &&
+    utils.isNumber(data.vMin) &&
+    utils.isNumber(data.vMax)
   );
 }
 
 export function checkData(data: IData) {
-  return isNumber(data.min) && isNumber(data.max);
+  return utils.isNumber(data.min) && utils.isNumber(data.max);
 }
 
-interface IScalarFill<T> {
-  [key: string]: T;
-}
-
-let uid = 0;
-
-export default class ScalarFill implements IScalarFill<any> {
+export default class ScalarFill {
   [index: string]: any;
 
-  public readonly gl: WebGLRenderingContext;
+  public readonly renderer: Renderer;
   public data: IData;
-  public colorRampTexture: WebGLTexture | null;
+  public colorRampTexture: Texture;
 
-  private uid: string;
   private options: IOptions;
 
   private opacity: number;
@@ -187,19 +158,25 @@ export default class ScalarFill implements IScalarFill<any> {
 
   private worker: Worker;
 
-  private drawCommand: WindFill | Fill;
+  private program: Program;
 
-  constructor(gl: WebGLRenderingContext, options?: Partial<IOptions>) {
-    this.gl = gl;
-    this.uid = `ScalarFill_${uid}`;
-    uid++;
+  private geometry: Geometry;
 
-    if (!this.gl) {
+  private mesh: Mesh;
+
+  private scene: Scene;
+
+  constructor(rs: { renderer: Renderer; scene: Scene }, options?: Partial<IOptions>) {
+    this.renderer = rs.renderer;
+    this.scene = rs.scene;
+
+    if (!this.renderer) {
       throw new Error('initialize error');
     }
 
     if (!options) {
-      options = {};
+      // eslint-disable-next-line no-param-reassign
+      options = {} as IOptions;
     }
 
     this.options = {
@@ -220,13 +197,7 @@ export default class ScalarFill implements IScalarFill<any> {
 
     if (typeof this.options.getZoom === 'function') {
       this.setOpacity(
-        createZoom(
-          this.uid,
-          this.options.getZoom(),
-          'opacity',
-          this.options.styleSpec,
-          true,
-        ),
+        createZoom(this.uid, this.options.getZoom(), 'opacity', this.options.styleSpec, true),
       );
     }
   }
@@ -263,52 +234,52 @@ export default class ScalarFill implements IScalarFill<any> {
     }
 
     if (data) {
-      this.colorRampTexture = createTexture(
-        this.gl,
-        this.gl.NEAREST,
-        data,
-        16,
-        16,
-      );
+      this.colorRampTexture = new Texture(this.renderer, {
+        magFilter: this.renderer.gl.NEAREST,
+        minFilter: this.renderer.gl.NEAREST,
+        width: 255,
+        height: 1,
+      });
     }
   }
 
-  public initialize(gl: WebGLRenderingContext) {
-    if (!this.drawCommand) {
-      if (this.options.renderForm === 'rg') {
-        this.drawCommand = new WindFill(
-          gl,
-          undefined,
-          undefined,
-          this.options.injectShaderModules,
-        );
-      } else if (this.options.renderForm === 'r') {
-        this.drawCommand = new Fill(
-          gl,
-          undefined,
-          undefined,
-          this.options.injectShaderModules,
-        );
-      } else {
-        console.warn('This type is not supported temporarily');
-      }
+  public initialize() {
+    if (!this.program) {
+      this.program = new Program(this.renderer, {
+        vertexShader: fillVert,
+        fragmentShader: fillFrag,
+        uniforms: {
+          texture: {
+            value: undefined,
+          },
+        },
+        defines: ['RENDER_TYPE'],
+        includes: shaderLib,
+      });
     }
+
+    if (this.mesh) {
+      this.mesh.destroy();
+      this.scene.remove(this.mesh);
+    }
+
+    this.mesh = new Mesh(this.renderer, {
+      geometry: this.geometry,
+      program: this.program,
+      wireframe: this.options.wireframe,
+    });
+    this.scene.add(this.mesh);
 
     this.buildColorRamp();
 
     if (typeof this.options.getZoom === 'function') {
       this.setOpacity(
-        createZoom(
-          this.uid,
-          this.options.getZoom(),
-          'opacity',
-          this.options.styleSpec,
-        ),
+        createZoom(this.uid, this.options.getZoom(), 'opacity', this.options.styleSpec),
       );
     }
   }
 
-  public initializeVertex(coordinates: number[][]) {
+  public initializeGeometry(coordinates: number[][]) {
     let i = 0;
     const len = coordinates.length;
     const points: [number, number][] = [];
@@ -318,28 +289,23 @@ export default class ScalarFill implements IScalarFill<any> {
       points.push([mc[0], mc[1]]);
     }
 
-    // @ts-ignore
-    const buffers = (
-      this.options.createPlaneBuffer || defaultOptions.createPlaneBuffer
-    )(
-      points,
-      (this.options.widthSegments as number) || 1,
-      (this.options.heightSegments as number) || 1,
-    );
+    if (this.geometry) {
+      this.geometry.destroy();
+    }
 
-    return {
-      indexes: buffers.elements.data,
-      wireframeIndexes: buffers.wireframeElements.data,
-      quadBuffer: createBuffer(
-        this.gl,
-        new Float32Array(buffers.position.data),
-      ),
-      quad64LowBuffer: createBuffer(
-        this.gl,
-        new Float32Array(buffers.positionLow.data),
-      ),
-      texCoordBuffer: createBuffer(this.gl, new Float32Array(buffers.uvs.data)),
-    };
+    this.geometry = new Geometry(this.renderer, {
+      position: {
+        size: 3,
+        data: new Float32Array(points.flat()),
+      },
+      uv: {
+        size: 2,
+        data: new Float32Array([0, 1, 1, 1, 0, 0, 1, 0]),
+      },
+      index: {
+        data: new Uint16Array([0, 1, 2, 1, 3, 2]),
+      },
+    });
   }
 
   public getTextureData(data: IJsonArrayData | IImageData): Promise<IData> {
@@ -347,19 +313,17 @@ export default class ScalarFill implements IScalarFill<any> {
       if (data.type === 'image' && data.url) {
         loadImage(data.url)
           .then((image) => {
-            // this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
             const processedData: IData = {
               width: image.width,
               height: image.height,
-              texture: createTexture(
-                this.gl,
-                this.gl.LINEAR,
+              texture: new Texture(this.renderer, {
+                width: image.width,
+                height: image.height,
                 image,
-                image.width,
-                image.height,
-              ),
-              ...this.initializeVertex(data.extent),
+              }),
             };
+
+            this.initializeGeometry(data.extent);
 
             if (this.options.renderForm === 'rg') {
               processedData.uMin = data.uMin;
@@ -394,8 +358,9 @@ export default class ScalarFill implements IScalarFill<any> {
         const processedData: IData = {
           width: gfsData[0].header.nx,
           height: gfsData[0].header.ny,
-          ...this.initializeVertex(pos),
         };
+
+        this.initializeGeometry(pos);
 
         if (!this.worker) {
           this.worker = new DataProcess();
@@ -405,23 +370,19 @@ export default class ScalarFill implements IScalarFill<any> {
               processedData.uMax = payload[2];
               processedData.vMin = payload[3];
               processedData.vMax = payload[4];
-              processedData.texture = createTexture(
-                this.gl,
-                this.gl.LINEAR,
-                new Uint8Array(payload[0]),
-                processedData.width,
-                processedData.height,
-              );
+              processedData.texture = new Texture(this.renderer, {
+                width: processedData.width,
+                height: processedData.height,
+                image: new Uint8Array(payload[0]),
+              });
             } else if (this.options.renderForm === 'r') {
               processedData.min = payload[1];
               processedData.max = payload[2];
-              processedData.texture = createTexture(
-                this.gl,
-                this.gl.LINEAR,
-                new Uint8Array(payload[0]),
-                processedData.width,
-                processedData.height,
-              );
+              processedData.texture = new Texture(this.renderer, {
+                width: processedData.width,
+                height: processedData.height,
+                image: new Uint8Array(payload[0]),
+              });
             } else {
               console.warn('This type is not supported temporarily');
             }
@@ -439,11 +400,7 @@ export default class ScalarFill implements IScalarFill<any> {
           // }
 
           gfsData.forEach((record: IGFSItem) => {
-            switch (
-              record.header.parameterCategory +
-              ',' +
-              record.header.parameterNumber
-            ) {
+            switch (record.header.parameterCategory + ',' + record.header.parameterNumber) {
               case '1,2':
               case '2,2':
                 uComp = record;
@@ -472,11 +429,8 @@ export default class ScalarFill implements IScalarFill<any> {
     });
   }
 
-  public setData(
-    data: IJsonArrayData | IImageData,
-    cb?: (args?: boolean) => void,
-  ) {
-    if (this.gl && data) {
+  public setData(data: IJsonArrayData | IImageData, cb?: (args?: boolean) => void) {
+    if (data) {
       // Error Prevention
       this.getTextureData(data)
         .then((d) => {
@@ -485,7 +439,7 @@ export default class ScalarFill implements IScalarFill<any> {
           cb && cb(true);
 
           if (this.data) {
-            this.initialize(this.gl);
+            this.initialize();
           }
 
           if (this.options.triggerRepaint) {
@@ -508,38 +462,23 @@ export default class ScalarFill implements IScalarFill<any> {
     return [lng, lat];
   }
 
-  public prerender() {}
+  public prerender() {
+    throw new Error('ScalarFill subclass must define virtual methods');
+  }
 
-  public render(
-    matrix: number[],
-    offsetX?: number,
-    cameraParams?: {
-      cameraEye: number[];
-      cameraEye64Low: number[];
-    },
-  ) {
-    if (
-      this.data &&
-      this.drawCommand &&
-      this.data.texture &&
-      this.colorRampTexture
-    ) {
+  public render(matrix: number[], camera: PerspectiveCamera, offsetX?: number) {
+    if (this.data && this.program && this.data.texture && this.colorRampTexture) {
       const opacity = this.opacity;
 
       const uniforms: any = {
-        u_opacity: isNumber(opacity) ? opacity : 1,
+        u_opacity: utils.isNumber(opacity) ? opacity : 1,
         u_image_res: [this.data.width, this.data.height],
         u_matrix: matrix,
-        u_offset: isNumber(offsetX) ? offsetX : 0,
+        u_offset: utils.isNumber(offsetX) ? offsetX : 0,
         u_color_ramp: this.colorRampTexture,
         u_color_range: this.colorRange,
         u_mapping_range: this.options.mappingRange || [0, 0], // 映射高度
       };
-
-      if (cameraParams) {
-        uniforms.u_cameraEye = cameraParams.cameraEye;
-        uniforms.u_cameraEye64Low = cameraParams.cameraEye64Low;
-      }
 
       if (this.options.renderForm === 'rg') {
         uniforms.u_wind_min = [this.data.uMin, this.data.vMin];
@@ -578,77 +517,30 @@ export default class ScalarFill implements IScalarFill<any> {
         console.warn('This type is not supported temporarily');
       }
 
-      const depthEnabled = this.gl.isEnabled(this.gl.DEPTH_TEST);
-      this.gl.enable(this.gl.DEPTH_TEST);
-      this.gl.depthMask(true);
-      this.gl.depthFunc(this.gl.LEQUAL);
+      Object.keys(uniforms).forEach((k) => {
+        this.program.setUniform(k, uniforms[k]);
+      });
 
-      const data = this.options.wireframe
-        ? this.data.wireframeIndexes
-        : this.data.indexes;
-
-      this.drawCommand
-        .active()
-        // .resize()
-        .setUniforms(uniforms)
-        .setAttributes({
-          instancePositions: {
-            buffer: this.data.quadBuffer,
-            numComponents: 3,
-          },
-          instancePositions64Low: {
-            buffer: this.data.quad64LowBuffer,
-            numComponents: 3,
-          },
-          a_texCoord: {
-            buffer: this.data.texCoordBuffer,
-            numComponents: 2,
-          },
-        })
-        .elements({
-          data: new Uint32Array(data as number[]),
-          primitive: this.options.wireframe ? this.gl.LINES : this.gl.TRIANGLES,
-          count: data?.length,
-          usage: this.gl.STATIC_DRAW,
-        })
-        .draw();
-
-      if (!depthEnabled) {
-        this.gl.disable(this.gl.DEPTH_TEST);
-      }
+      this.renderer.render({
+        scene: this.scene,
+        camera,
+      });
     }
   }
 
-  public postrender() {}
-
-  public destroyData() {
-    if (this.data) {
-      // const {
-      //   texture,
-      //   quadBuffer,
-      //   quad64LowBuffer,
-      //   texCoordBuffer,
-      // } = this.data;
-      // if (texture) {
-      //   this.gl.deleteTexture(texture);
-      // }
-      // if (quadBuffer) {
-      //   this.gl.deleteBuffer(quadBuffer);
-      // }
-      //
-      // if (quad64LowBuffer) {
-      //   this.gl.deleteBuffer(quad64LowBuffer);
-      // }
-      //
-      // if (texCoordBuffer) {
-      //   this.gl.deleteBuffer(texCoordBuffer);
-      // }
-      // delete this.data;
-    }
+  public postrender() {
+    throw new Error('ScalarFill subclass must define virtual methods');
   }
 
-  public destroyed() {
-    this.destroyData();
+  public destroy() {
+    if (this.mesh) {
+      this.mesh.destroy();
+    }
+
+    if (this.program) {
+      this.program.destroy();
+    }
+
     if (this.worker) {
       this.worker.terminate();
     }
