@@ -1,3 +1,7 @@
+float calcTexture(const vec2 puv) {
+    return texture2D(u_image, puv).r;
+}
+
 float bilinear(const vec2 uv) {
     vec2 px = 1.0 / u_image_res;
     vec2 vc = (floor(uv * u_image_res)) * px;

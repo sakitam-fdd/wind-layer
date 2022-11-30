@@ -5,8 +5,9 @@ import {
   Scene,
   Program,
   PerspectiveCamera,
-  Geometry,
+  Plane,
   Mesh,
+  DataTexture,
 } from '@sakitam-gis/vis-engine';
 // @ts-ignore
 import DataProcess from 'web-worker:./workers/DataProcesse';
@@ -47,9 +48,6 @@ export interface IOptions {
     widthSegments: number,
     heightSegments: number,
   ) => IPlaneBuffer;
-  injectShaderModules: {
-    [key: string]: string;
-  };
   displayRange?: [number, number];
   mappingRange?: [number, number];
   widthSegments?: number;
@@ -118,16 +116,6 @@ export const defaultOptions: IOptions = {
   widthSegments: 1,
   heightSegments: 1,
   wireframe: false,
-  injectShaderModules: {
-    '#modules-transformZ': `
-float transformZ(float value, vec3 pos) {
-  return 0.0;
-}
-    `,
-    '#modules-project': `
-gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, 1.0);
-    `,
-  },
 };
 
 export function checkUVData(data: IData) {
@@ -144,11 +132,10 @@ export function checkData(data: IData) {
 }
 
 export default class ScalarFill {
-  [index: string]: any;
-
   public readonly renderer: Renderer;
   public data: IData;
-  public colorRampTexture: Texture;
+  public colorRampTexture: DataTexture;
+  public uid: string;
 
   private options: IOptions;
 
@@ -160,7 +147,7 @@ export default class ScalarFill {
 
   private program: Program;
 
-  private geometry: Geometry;
+  private geometry: Plane;
 
   private mesh: Mesh;
 
@@ -213,12 +200,7 @@ export default class ScalarFill {
   public handleZoom() {
     if (typeof this.options.getZoom === 'function') {
       this.setOpacity(
-        createZoom(
-          this.uid,
-          this.options.getZoom(),
-          'opacity',
-          this.options.styleSpec,
-        ),
+        createZoom(this.uid, this.options.getZoom(), 'opacity', this.options.styleSpec),
       );
     }
   }
@@ -234,7 +216,8 @@ export default class ScalarFill {
     }
 
     if (data) {
-      this.colorRampTexture = new Texture(this.renderer, {
+      this.colorRampTexture = new DataTexture(this.renderer, {
+        data,
         magFilter: this.renderer.gl.NEAREST,
         minFilter: this.renderer.gl.NEAREST,
         width: 255,
@@ -268,6 +251,9 @@ export default class ScalarFill {
       program: this.program,
       wireframe: this.options.wireframe,
     });
+
+    this.mesh.position.fromArray([0.5, 0.5, 0]);
+
     this.scene.add(this.mesh);
 
     this.buildColorRamp();
@@ -279,32 +265,30 @@ export default class ScalarFill {
     }
   }
 
+  /**
+   * 注意这里我们一般初始化的 Plane Geometry，我们为了提高精度
+   * 会采用相对坐标，集合体的所有顶点坐标转换为相对于几何体的相对坐标
+   * @param coordinates
+   */
   public initializeGeometry(coordinates: number[][]) {
     let i = 0;
     const len = coordinates.length;
-    const points: [number, number][] = [];
+    const points: [number, number, number][] = [];
     for (; i < len; i++) {
       const coords = coordinates[i];
       const mc = this.getMercatorCoordinate(coords as [number, number]);
-      points.push([mc[0], mc[1]]);
+      points.push([mc[0], mc[1], 0]);
     }
 
     if (this.geometry) {
       this.geometry.destroy();
     }
 
-    this.geometry = new Geometry(this.renderer, {
-      position: {
-        size: 3,
-        data: new Float32Array(points.flat()),
-      },
-      uv: {
-        size: 2,
-        data: new Float32Array([0, 1, 1, 1, 0, 0, 1, 0]),
-      },
-      index: {
-        data: new Uint16Array([0, 1, 2, 1, 3, 2]),
-      },
+    this.geometry = new Plane(this.renderer, {
+      width: 1,
+      height: 1,
+      widthSegments: this.options.widthSegments,
+      heightSegments: this.options.heightSegments,
     });
   }
 
@@ -466,14 +450,13 @@ export default class ScalarFill {
     throw new Error('ScalarFill subclass must define virtual methods');
   }
 
-  public render(matrix: number[], camera: PerspectiveCamera, offsetX?: number) {
+  public render(camera: PerspectiveCamera, offsetX = 0) {
     if (this.data && this.program && this.data.texture && this.colorRampTexture) {
       const opacity = this.opacity;
 
       const uniforms: any = {
         u_opacity: utils.isNumber(opacity) ? opacity : 1,
         u_image_res: [this.data.width, this.data.height],
-        u_matrix: matrix,
         u_offset: utils.isNumber(offsetX) ? offsetX : 0,
         u_color_ramp: this.colorRampTexture,
         u_color_range: this.colorRange,

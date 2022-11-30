@@ -13,16 +13,12 @@ uniform float u_opacity;
 
 varying vec2 vUv;
 
-#include <bilinear>;
-#include <mercatorToWGS84>;
-
-float calcTexture(const vec2 puv) {
-    return texture2D(u_image, puv).r;
-}
+#include <bilinear>
+#include <mercatorToWGS84>
 
 float getValue(const vec2 uv) {
-    float min = u_mapping_range.x;
-    float max = u_mapping_range.y;
+    float min = u_range.x;
+    float max = u_range.y;
     float r = bilinear(uv);
     return r * (max - min) + min;
 }

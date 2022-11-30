@@ -1,12 +1,11 @@
 import * as mapboxgl from 'mapbox-gl';
 
-import {
-  fp64LowPart,
-  getEye,
-  IOptions,
-  ScalarFill as ScalarCore,
-  // @ts-ignore
-} from 'wind-gl-core';
+import { Renderer, Scene } from '@sakitam-gis/vis-engine';
+
+import { IOptions, ScalarFill as ScalarCore } from 'wind-gl-core';
+
+import CameraSync from './utils/CameraSync';
+import { fromLngLat } from './utils/mercatorCoordinate';
 
 export interface IScalarFillOptions extends IOptions {
   wrapX: boolean;
@@ -21,11 +20,14 @@ function getCoords([lng, lat]: [number, number]): [number, number] {
 }
 
 export default class ScalarFill {
-  public gl: WebGLRenderingContext;
-  public map: mapboxgl.Map;
+  public gl: WebGLRenderingContext | WebGL2RenderingContext | null;
+  public map: mapboxgl.Map | null;
   public id: string;
   public type: string;
   public renderingMode: '2d' | '3d';
+  public sync: CameraSync;
+  public scene: Scene;
+  public renderer: Renderer;
   private options: any;
   private data: any;
   private scalarFill: ScalarCore | null;
@@ -40,7 +42,28 @@ export default class ScalarFill {
 
     this.data = data;
 
+    this.updateCamera = this.updateCamera.bind(this);
     this.handleZoom = this.handleZoom.bind(this);
+  }
+
+  get camera() {
+    return this.sync.camera;
+  }
+
+  updateCamera() {
+    this.sync.update();
+  }
+
+  projectToWorld(coord) {
+    const mc = fromLngLat(
+      {
+        lng: coord[0],
+        lat: coord[1],
+      },
+      coord[2],
+    );
+
+    return [mc.x, mc.y, mc.z];
   }
 
   public handleZoom() {
@@ -50,58 +73,42 @@ export default class ScalarFill {
   }
 
   public initialize() {
-    if (!this.scalarFill && this.gl) {
-      this.scalarFill = new ScalarCore(this.gl, {
-        opacity: this.options.opacity,
-        renderForm: this.options.renderForm,
-        styleSpec: this.options.styleSpec,
-        displayRange: this.options.displayRange,
-        mappingRange: this.options.mappingRange,
-        widthSegments: this.options.widthSegments,
-        heightSegments: this.options.heightSegments,
-        wireframe: this.options.wireframe,
-        createPlaneBuffer: this.options.createPlaneBuffer,
-        getZoom: () => this.map.getZoom(),
-        triggerRepaint: () => {
-          this.map.triggerRepaint();
-        },
-        injectShaderModules: {
-          '#modules-transformZ': `
-const float MATH_PI = 3.141592653589793;
-const float earthRadius = 6371008.8;
-const float earthCircumfrence = 2.0 * MATH_PI * earthRadius;
-
-            float latFromMercatorY(float y) {
-  float y2 = 180.0 - y * 360.0;
-  return 360.0 / MATH_PI * atan(exp(y2 * MATH_PI / 180.0)) - 90.0;
-}
-
-float circumferenceAtLatitude(float latitude) {
-  return earthCircumfrence * cos(latitude * MATH_PI / 180.0);
-}
-
-float mercatorScale(float lat) {
-  return 1.0 / cos(lat * MATH_PI / 180.0);
-}
-
-float transformZ(float value, vec3 pos) {
-  float mercatorY = pos.y;
-  //  float scale = circumferenceAtLatitude(latFromMercatorY(mercatorY));
-  float scale = earthCircumfrence * mercatorScale(latFromMercatorY(mercatorY));
-
-  return value / scale;
-}
-          `,
-          '#modules-project': `
-gl_Position = u_matrix * vec4(pos.xy + vec2(u_offset, 0.0), pos.z + z, pos.w);
-gl_Position.w += u_cameraEye.w;
-    `,
-        },
+    if (!this.scalarFill && this.gl && this.map) {
+      this.renderer = new Renderer(this.gl, {
+        autoClear: false,
       });
+      this.scene = new Scene();
+      this.sync = new CameraSync(this.map, 'perspective', this.scene);
+
+      this.scalarFill = new ScalarCore(
+        {
+          // @ts-ignore
+          renderer: this.renderer,
+          // @ts-ignore
+          scene: this.scene,
+        },
+        {
+          opacity: this.options.opacity,
+          renderForm: this.options.renderForm,
+          styleSpec: this.options.styleSpec,
+          displayRange: this.options.displayRange,
+          mappingRange: this.options.mappingRange,
+          widthSegments: this.options.widthSegments,
+          heightSegments: this.options.heightSegments,
+          wireframe: this.options.wireframe,
+          createPlaneBuffer: this.options.createPlaneBuffer,
+          getZoom: () => this.map?.getZoom() as number,
+          triggerRepaint: () => {
+            this.map?.triggerRepaint();
+          },
+        },
+      );
 
       this.scalarFill.getMercatorCoordinate = getCoords;
 
       this.map.on('zoom', this.handleZoom);
+      this.map.on('move', this.updateCamera);
+      this.map.on('resize', this.updateCamera);
     }
     if (this.data) {
       this.setData(this.data);
@@ -144,17 +151,15 @@ gl_Position.w += u_cameraEye.w;
     });
   }
 
-  // This is called when the map is destroyed or the gl context lost.
-  public onRemove(map: mapboxgl.Map) {
+  public onRemove() {
     if (this.scalarFill) {
-      this.scalarFill.destroyed();
       this.scalarFill = null;
     }
-    // @ts-ignore
-    delete this.gl;
-    // @ts-ignore
-    delete this.map;
-    map.off('zoom', this.handleZoom);
+    this.map?.off('zoom', this.handleZoom);
+    this.map?.off('move', this.updateCamera);
+    this.map?.off('resize', this.updateCamera);
+    this.map = null;
+    this.gl = null;
   }
 
   public getWrappedWorlds() {
@@ -166,17 +171,11 @@ gl_Position.w += u_cameraEye.w;
       // @ts-ignore
       const utl = this.map.transform.pointCoordinate(new mapboxgl.Point(0, 0));
       // @ts-ignore
-      const utr = this.map.transform.pointCoordinate(
-        new mapboxgl.Point(width, 0),
-      );
+      const utr = this.map.transform.pointCoordinate(new mapboxgl.Point(width, 0));
       // @ts-ignore
-      const ubl = this.map.transform.pointCoordinate(
-        new mapboxgl.Point(width, height),
-      );
+      const ubl = this.map.transform.pointCoordinate(new mapboxgl.Point(width, height));
       // @ts-ignore
-      const ubr = this.map.transform.pointCoordinate(
-        new mapboxgl.Point(0, height),
-      );
+      const ubr = this.map.transform.pointCoordinate(new mapboxgl.Point(0, height));
       const w0 = Math.floor(Math.min(utl.x, utr.x, ubl.x, ubr.x));
       const w1 = Math.floor(Math.max(utl.x, utr.x, ubl.x, ubr.x));
 
@@ -192,18 +191,13 @@ gl_Position.w += u_cameraEye.w;
     return result;
   }
 
-  public render(gl: WebGLRenderingContext, matrix: number[]) {
-    const cameraEye = getEye(matrix);
-    const cameraEye64Low = cameraEye.map((item: number) => fp64LowPart(item));
-    if (this.data && this.scalarFill) {
-      const worlds = this.getWrappedWorlds();
-      // tslint:disable-next-line:prefer-for-of
-      for (let i = 0; i < worlds.length; i++) {
-        this.scalarFill.render(matrix, worlds[i], {
-          cameraEye,
-          cameraEye64Low,
-        });
-      }
+  public render() {
+    this.scene.worldMatrixNeedsUpdate = true;
+    const worlds = this.getWrappedWorlds();
+    // tslint:disable-next-line:prefer-for-of
+    for (let i = 0; i < worlds.length; i++) {
+      this.scalarFill?.render(this.camera, worlds[i]);
     }
+    this.renderer.resetState();
   }
 }

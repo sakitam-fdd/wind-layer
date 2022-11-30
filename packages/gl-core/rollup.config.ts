@@ -23,7 +23,7 @@ const PROD = !DEV;
 const r = (p: string) => resolve(ROOT, '..', p);
 
 const external = [
-  // ...Object.keys(pkg.dependencies),
+  ...Object.keys(pkg.dependencies),
 ];
 
 const plugins = [
@@ -85,6 +85,9 @@ const umdBuild: RollupOptions = {
     dir: undefined,
     name: pkg.namespace,
     sourcemap: !MINIFY,
+    globals: {
+      '@sakitam-gis/vis-engine': 've',
+    },
     file: MINIFY ? pkg.main.split('.').splice(pkg.main.split('.').length - 1, 0, 'min').join('.') : pkg.main,
   },
   external,
