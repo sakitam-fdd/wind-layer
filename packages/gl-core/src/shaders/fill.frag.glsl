@@ -24,8 +24,11 @@ float getValue(const vec2 uv) {
 }
 
 void main () {
-    vec2 globalWGS84 = mercatorToWGS84(vUv);
-    float value = getValue(globalWGS84);
+    vec2 uv = vUv;
+    #ifdef USE_WGS84
+    uv = mercatorToWGS84(vUv);
+    #endif
+    float value = getValue(uv);
     float value_t = (value - u_color_range.x) / (u_color_range.y - u_color_range.x);
     vec2 ramp_pos = vec2(value_t, 0.5);
 

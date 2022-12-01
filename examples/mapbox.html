@@ -67,7 +67,8 @@
       ],
     },
     center: [113.53450137499999, 34.44104525],
-    zoom: 0
+    zoom: 0,
+    antialias: true
   });
 
   const color = {
@@ -102,10 +103,10 @@
       // ],
       // top left, top right, bottom right, bottom left
       "extent": [
-        [-180, 85.051129],
-        [180, 85.051129],
-        [180, -85.051129],
-        [-180, -85.051129],
+        [-180 / 2, 85.051129 / 2, 1000],
+        [180 / 2, 85.051129 / 2, 1000],
+        [180 / 2, -85.051129 / 2, 1000],
+        [-180 / 2, -85.051129 / 2, 1000],
       ],
       "width": 1440,
       "height": 720,
@@ -141,8 +142,6 @@
       // widthSegments: 1,
       // heightSegments: 1,
       // displayRange: [0, 80],
-      mappingRange: [0, 5000000],
-      // mappingRange: [0, 0],
     });
 
     map.addLayer(fillLayer);

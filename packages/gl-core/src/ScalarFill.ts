@@ -49,7 +49,6 @@ export interface IOptions {
     heightSegments: number,
   ) => IPlaneBuffer;
   displayRange?: [number, number];
-  mappingRange?: [number, number];
   widthSegments?: number;
   heightSegments?: number;
   wireframe?: boolean;
@@ -112,7 +111,6 @@ export const defaultOptions: IOptions = {
     opacity: 1,
   },
   displayRange: [Infinity, Infinity],
-  mappingRange: [0, 0],
   widthSegments: 1,
   heightSegments: 1,
   wireframe: false,
@@ -136,6 +134,8 @@ export default class ScalarFill {
   public data: IData;
   public colorRampTexture: DataTexture;
   public uid: string;
+
+  public meshWorldPosition: number[];
 
   private options: IOptions;
 
@@ -236,7 +236,7 @@ export default class ScalarFill {
             value: undefined,
           },
         },
-        defines: ['RENDER_TYPE'],
+        defines: ['RENDER_TYPE 1.0', 'USE_WGS84'],
         includes: shaderLib,
       });
     }
@@ -252,7 +252,7 @@ export default class ScalarFill {
       wireframe: this.options.wireframe,
     });
 
-    this.mesh.position.fromArray([0.5, 0.5, 0]);
+    this.mesh.position.fromArray(this.meshWorldPosition);
 
     this.scene.add(this.mesh);
 
@@ -273,20 +273,39 @@ export default class ScalarFill {
   public initializeGeometry(coordinates: number[][]) {
     let i = 0;
     const len = coordinates.length;
-    const points: [number, number, number][] = [];
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    let minZ = Infinity;
+    let maxZ = Infinity;
     for (; i < len; i++) {
       const coords = coordinates[i];
-      const mc = this.getMercatorCoordinate(coords as [number, number]);
-      points.push([mc[0], mc[1], 0]);
+      const [x, y, z] = this.getWorldCoordinate(coords as [number, number]);
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      minZ = Math.min(minZ, z);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+      maxZ = Math.max(maxZ, z);
     }
+
+    if (maxZ === Infinity && minZ !== Infinity) {
+      maxZ = minZ;
+    }
+    if (minZ === Infinity && maxZ !== Infinity) {
+      minZ = maxZ;
+    }
+
+    this.meshWorldPosition = [(minX + maxX) / 2, (minY + maxY) / 2, (minZ + maxZ) / 2];
 
     if (this.geometry) {
       this.geometry.destroy();
     }
 
     this.geometry = new Plane(this.renderer, {
-      width: 1,
-      height: 1,
+      width: maxX - minX,
+      height: maxY - minY,
       widthSegments: this.options.widthSegments,
       heightSegments: this.options.heightSegments,
     });
@@ -442,8 +461,8 @@ export default class ScalarFill {
     return this.data;
   }
 
-  public getMercatorCoordinate([lng, lat]: [number, number]): [number, number] {
-    return [lng, lat];
+  public getWorldCoordinate(coords: number[]): number[] {
+    return coords;
   }
 
   public prerender() {
@@ -460,7 +479,6 @@ export default class ScalarFill {
         u_offset: utils.isNumber(offsetX) ? offsetX : 0,
         u_color_ramp: this.colorRampTexture,
         u_color_range: this.colorRange,
-        u_mapping_range: this.options.mappingRange || [0, 0], // 映射高度
       };
 
       if (this.options.renderForm === 'rg') {

@@ -16,7 +16,7 @@ this.scalarRender = new ScalarCore(this.gl, {
   }
 });
 
-this.scalarRender.getMercatorCoordinate = ([lng, lat]: [number, number]) => {
+this.scalarRender.getWorldCoordinate = ([lng, lat]: [number, number]) => {
   const coords = map.coordToPoint(new Coordinate(lng, lat), map.getGLZoom());
   return [
     coords.x,

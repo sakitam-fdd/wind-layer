@@ -658,7 +658,7 @@ export default class WindParticles {
     const instancePositions = new Float32Array(len * 2);
     for (; i < len; i++) {
       const coords = coordinates[i];
-      const mc = this.getMercatorCoordinate(coords as [number, number]);
+      const mc = this.getWorldCoordinate(coords as [number, number]);
       instancePositions[i * 2] = mc[0];
       instancePositions[i * 2 + 1] = mc[1];
     }
@@ -739,7 +739,7 @@ export default class WindParticles {
     return this.data;
   }
 
-  public getMercatorCoordinate([lng, lat]: [number, number]): [number, number] {
+  public getWorldCoordinate([lng, lat]: [number, number]): [number, number] {
     return [lng, lat];
   }
 
