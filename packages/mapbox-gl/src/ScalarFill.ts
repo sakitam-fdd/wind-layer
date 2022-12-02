@@ -1,22 +1,27 @@
 import * as mapboxgl from 'mapbox-gl';
 
-import { Renderer, Scene } from '@sakitam-gis/vis-engine';
+import { Renderer, Scene, highPrecision } from '@sakitam-gis/vis-engine';
 
 import { IOptions, ScalarFill as ScalarCore } from 'wind-gl-core';
 
 import CameraSync from './utils/CameraSync';
 import { fromLngLat } from './utils/mercatorCoordinate';
 
+highPrecision(true);
+
 export interface IScalarFillOptions extends IOptions {
   wrapX: boolean;
 }
 
-function getCoords([lng, lat]: [number, number]): [number, number] {
-  const mercatorCoordinate = mapboxgl.MercatorCoordinate.fromLngLat({
-    lng,
-    lat,
-  });
-  return [mercatorCoordinate.x, mercatorCoordinate.y];
+function getCoords(coords: number[]): number[] {
+  const mercatorCoordinate = mapboxgl.MercatorCoordinate.fromLngLat(
+    {
+      lng: coords[0],
+      lat: coords[1],
+    },
+    coords[2],
+  );
+  return [mercatorCoordinate.x, mercatorCoordinate.y, mercatorCoordinate.z as number];
 }
 
 export default class ScalarFill {
@@ -92,7 +97,6 @@ export default class ScalarFill {
           renderForm: this.options.renderForm,
           styleSpec: this.options.styleSpec,
           displayRange: this.options.displayRange,
-          mappingRange: this.options.mappingRange,
           widthSegments: this.options.widthSegments,
           heightSegments: this.options.heightSegments,
           wireframe: this.options.wireframe,
@@ -104,7 +108,7 @@ export default class ScalarFill {
         },
       );
 
-      this.scalarFill.getMercatorCoordinate = getCoords;
+      this.scalarFill.getWorldCoordinate = getCoords;
 
       this.map.on('zoom', this.handleZoom);
       this.map.on('move', this.updateCamera);

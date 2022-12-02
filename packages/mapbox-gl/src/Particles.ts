@@ -129,7 +129,7 @@ export default class Particles {
         ...this.options,
       });
 
-      this.layer.getMercatorCoordinate = getCoords;
+      this.layer.getWorldCoordinate = getCoords;
 
       this.map.on('zoom', this.handleZoom);
       this.map.on('movestart', this.handleMovestart);
