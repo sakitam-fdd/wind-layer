@@ -1,2 +1,2 @@
 declare module '*.json';
-interface Window {}
+declare module 'maptalks';
