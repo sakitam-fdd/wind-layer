@@ -1,4 +1,0 @@
-class Manager {
-  constructor() {
-  }
-}
