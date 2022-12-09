@@ -29,7 +29,7 @@ const defaultOptions = {
   throttleRequests: true, // 指定是否手动限制请求，如设置为 false 则使用浏览器的请求队列限制
   maxRequests: 6,
   maxRequestsPerServer: 6,
-  requestsByServer: {}
+  requestsByServer: {},
 };
 
 function sortRequests(a: IRequest, b: IRequest) {
