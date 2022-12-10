@@ -29,6 +29,10 @@ export default class TileManager {
     return this;
   }
 
+  getTile(key) {
+    return this.tiles.get(key);
+  }
+
   addTile(tile: Tile) {
     if (!this.hasTile(tile)) {
       this.tiles.set(tile.id, tile);
