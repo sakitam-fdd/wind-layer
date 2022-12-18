@@ -123,6 +123,10 @@ export default class ScalarFill {
     }
   }
 
+  /**
+   * 构建渲染所需色带
+   * TODO: 这里我们需要支持渐变色和非渐变色
+   */
   buildColorRamp() {
     const { data, colorRange } = createLinearGradient(
       [],
