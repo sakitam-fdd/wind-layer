@@ -1,14 +1,24 @@
-import { DataTexture, Renderer, Scene, utils } from '@sakitam-gis/vis-engine';
-import TileManager from '../tile/TileManager';
+import { DataTexture, Renderer, Scene, utils, Vector2 } from '@sakitam-gis/vis-engine';
+import TileManager from '../layer/tile/TileManager';
+import Pipelines from './Pipelines';
+import ComposePass from './pass/compose';
+import ColorizePass from './pass/colorize';
+import { isFunction } from '../utils/common';
 import { createLinearGradient, createZoom } from '../utils/style-parser';
 
 enum RenderFrom {
+  // 标量值
   r = 'r',
+  // 矢量值
   rg = 'rg',
+  // 一般用于浮点值（精度最高）
   rgba = 'rgba',
 }
 
 export interface ScalarFillOptions {
+  /**
+   * 获取当前视野内的瓦片
+   */
   getViewTiles: () => any[];
   /**
    * 指定渲染通道
@@ -20,6 +30,10 @@ export interface ScalarFillOptions {
   };
   getZoom?: () => number;
   opacity?: number;
+  /**
+   * 是否等待当前视野瓦片加载完成后再执行渲染
+   */
+  waitTilesLoaded?: boolean;
   triggerRepaint?: () => void;
   displayRange?: [number, number];
   widthSegments?: number;
@@ -28,6 +42,7 @@ export interface ScalarFillOptions {
 }
 
 export const defaultOptions: ScalarFillOptions = {
+  getViewTiles: () => [],
   renderFrom: RenderFrom.r,
   styleSpec: {
     'fill-color': [
@@ -57,15 +72,20 @@ export const defaultOptions: ScalarFillOptions = {
   widthSegments: 1,
   heightSegments: 1,
   wireframe: false,
+  waitTilesLoaded: false,
 };
 
 export default class ScalarFill {
   private options: ScalarFillOptions;
-  private opacity: number;
   private uid: string;
+  private renderPipeline: WithNull<Pipelines>;
   private readonly scene: Scene;
   private readonly renderer: Renderer;
   private readonly tileManager: TileManager;
+
+  #opacity: number;
+  #colorRange: Vector2;
+  #colorRampTexture: DataTexture;
 
   constructor(rs: { renderer: Renderer; scene: Scene }, options?: Partial<ScalarFillOptions>) {
     this.renderer = rs.renderer;
@@ -87,9 +107,24 @@ export default class ScalarFill {
       ...options,
     };
 
-    this.opacity = this.options.opacity || 1;
+    this.#opacity = this.options.opacity || 1;
 
     this.tileManager = new TileManager(this.renderer, this.scene, {});
+  }
+
+  initialize() {
+    this.renderPipeline = new Pipelines(this.renderer);
+
+    const composePass = new ComposePass('compose', this.renderer, {
+      project: this.getWorldCoordinate.bind(this),
+      tileManager: this.tileManager,
+    });
+    const colorizePass = new ColorizePass('colorize', this.renderer, {});
+
+    // 先执行瓦片合并，绘制在 fbo 中
+    this.renderPipeline.addPass(composePass);
+    // 再执行着色
+    this.renderPipeline.addPass(colorizePass);
   }
 
   updateOptions(options: Partial<ScalarFillOptions>) {
@@ -100,7 +135,7 @@ export default class ScalarFill {
 
     this.buildColorRamp();
 
-    if (typeof this.options.getZoom === 'function') {
+    if (isFunction(this.options.getZoom)) {
       this.setOpacity(
         createZoom(this.uid, this.options.getZoom(), 'opacity', this.options.styleSpec, true),
       );
@@ -112,11 +147,14 @@ export default class ScalarFill {
   }
 
   setOpacity(opacity: number) {
-    this.opacity = opacity;
+    this.#opacity = opacity;
   }
 
+  /**
+   * 处理地图缩放事件
+   */
   handleZoom() {
-    if (typeof this.options.getZoom === 'function') {
+    if (isFunction(this.options.getZoom)) {
       this.setOpacity(
         createZoom(this.uid, this.options.getZoom(), 'opacity', this.options.styleSpec),
       );
@@ -134,11 +172,11 @@ export default class ScalarFill {
     );
 
     if (colorRange) {
-      this.colorRange = colorRange;
+      this.#colorRange = new Vector2(...colorRange);
     }
 
     if (data) {
-      this.colorRampTexture = new DataTexture(this.renderer, {
+      this.#colorRampTexture = new DataTexture(this.renderer, {
         data,
         magFilter: this.renderer.gl.NEAREST,
         minFilter: this.renderer.gl.NEAREST,
@@ -152,25 +190,71 @@ export default class ScalarFill {
     return coords;
   }
 
-  setData() {}
+  /**
+   * 设置数据
+   * 目前设计的支持的数据类型：
+   * 1. 瓦片链接，内部进行处理 xyz
+   * 2. 单张数据图片
+   * 3. jsonArray
+   * @param data
+   */
+  setData(data) {
+    if (this.tileManager) {
+      return this.tileManager.setData(data);
+    }
+    return Promise.reject(new Error('数据未更新成功！'));
+  }
 
-  getData() {}
+  /**
+   * 获取数据
+   */
+  getData() {
+    return this.tileManager?.getData();
+  }
 
-  render() {
+  prerender(camera) {
     const tiles = this.options.getViewTiles();
-    if (tiles) {
-      let i = 0;
-      const len = tiles.length;
-      for (; i < len; i++) {
-        const tile = this.tileManager.getTile(tiles[i].key);
-        if (tile) {
-          this.tileManager.update();
-        } else {
-          this.tileManager.addTile();
-        }
-      }
+    if (tiles && this.renderPipeline) {
+      this.renderPipeline.prerender(
+        {
+          scene: this.scene,
+          camera,
+        },
+        {
+          tiles,
+          opacity: this.#opacity,
+          colorRange: this.#colorRange,
+          colorRampTexture: this.#colorRampTexture,
+        },
+      );
     }
   }
 
-  destroy() {}
+  render(camera) {
+    const tiles = this.options.getViewTiles();
+    if (tiles && this.renderPipeline) {
+      this.renderPipeline.render(
+        {
+          scene: this.scene,
+          camera,
+        },
+        {
+          tiles,
+          opacity: this.#opacity,
+          colorRange: this.#colorRange,
+          colorRampTexture: this.#colorRampTexture,
+        },
+      );
+    }
+  }
+
+  /**
+   * 销毁此 Renderer
+   */
+  destroy() {
+    if (this.renderPipeline) {
+      this.renderPipeline.destroy();
+      this.renderPipeline = null;
+    }
+  }
 }

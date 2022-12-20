@@ -13,7 +13,8 @@
  * ]
  * ```
  */
-import { findStopLessThanOrEqualTo, isNumber } from './common';
+import { utils } from '@sakitam-gis/vis-engine';
+import { findStopLessThanOrEqualTo } from './common';
 
 export function parseColorStyle(styleAttrField: any[]) {
   if (Array.isArray(styleAttrField) && styleAttrField.length > 3) {
@@ -179,7 +180,7 @@ export function createZoom(
   const ukey = `${uid}_${key}`;
   const styleAttrField = styles[key] as any[] | number;
 
-  if (isNumber(styleAttrField)) {
+  if (utils.isNumber(styleAttrField)) {
     if (cachedStyle[ukey]) {
       delete cachedStyle[ukey];
     }

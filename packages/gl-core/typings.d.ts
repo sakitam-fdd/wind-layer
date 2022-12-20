@@ -4,4 +4,5 @@ declare module 'web-worker:*' {
   const WokerFactory: new () => Worker;
   export default WokerFactory;
 }
-interface Window {}
+
+type WithNull<T> = T | null;

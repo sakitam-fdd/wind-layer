@@ -23,6 +23,14 @@ export default class TileManager {
     this.reset();
   }
 
+  setData(data) {
+    console.log(data);
+  }
+
+  getData() {
+
+  }
+
   reset() {
     this.tiles.clear();
     this.renderableTiles.clear();
