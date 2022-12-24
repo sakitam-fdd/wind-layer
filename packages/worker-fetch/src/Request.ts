@@ -1,11 +1,19 @@
 import RequestScheduler from './RequestScheduler';
 import { arrayBufferToImage, arrayBufferToImageBitmap, getReferrer } from './util';
+import { decode, toRGBA8 } from './UPNG';
 
 export class RequestAdapter {
   public requestScheduler: RequestScheduler;
 
   constructor(options) {
     this.requestScheduler = new RequestScheduler(options);
+  }
+
+  arrayBuffer2unit8(data: ArrayBuffer, callback: any) {
+    const pngImage = decode(data);
+
+    const pixels = toRGBA8(pngImage);
+    callback(null, new Uint8Array(pixels[0]));
   }
 
   arrayBuffer2Image(data: ArrayBuffer, callback: any) {
