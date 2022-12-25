@@ -5,11 +5,13 @@ import fillFrag from '../../shaders/fill.frag.glsl';
 import * as shaderLib from '../../shaders/shaderLib';
 
 /**
- * 在这里我们实现将所有瓦片绘制在 fbo 上以提升多世界渲染的边界接边问题
+ * 在这里我们实现将所有瓦片绘制在 fbo 上以提升多世界渲染的边界接边效果
  * 在下一步再进行完整的着色
  */
 export default class ComposePass extends Pass {
   readonly #program: Program;
+
+  readonly prerender = true;
 
   #current: RenderTarget;
   #next: RenderTarget;
@@ -40,21 +42,27 @@ export default class ComposePass extends Pass {
     this.#next = new RenderTarget(renderer, opt);
   }
 
+  /**
+   * 此处绘制主要是合并瓦片
+   * @param rendererParams
+   * @param rendererState
+   */
   render(rendererParams, rendererState) {
     if (rendererParams.target) {
       rendererParams.target.bind();
       this.renderer.setViewport(rendererParams.target.width, rendererParams.target.height);
     }
 
-    const { tiles } = rendererState;
+    const { tileManager } = this.options;
 
-    this.options.tileManager.update(tiles);
-
-    const len = tiles.length;
-    let i = 0;
-    for (; i < len; i++) {
-      const tile = this.options.tileManager.getTile(tiles[i].key);
-
+    if (tileManager) {
+      const tiles = tileManager.getTiles();
+      const len = tiles.length;
+      let i = 0;
+      for (; i < len; i++) {
+        const tile = this.options.tileManager.getTileMesh(tiles[i].key);
+        tile.draw();
+      }
     }
 
     if (rendererParams.target) {

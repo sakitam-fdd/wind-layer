@@ -69,7 +69,8 @@
   },
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
   "dependencies": {
-    "@sakitam-gis/vis-engine": "^1.0.0"
+    "@sakitam-gis/vis-engine": "^1.0.0",
+    "wind-gl-worker": "workspace:*"
   },
   "publishConfig": {
     "access": "public"

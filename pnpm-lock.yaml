@@ -138,8 +138,10 @@ importers:
   packages/gl-core:
     specifiers:
       '@sakitam-gis/vis-engine': ^1.0.0
+      wind-gl-worker: workspace:*
     dependencies:
       '@sakitam-gis/vis-engine': 1.4.0
+      wind-gl-worker: link:../worker-fetch
 
   packages/leaflet:
     specifiers:

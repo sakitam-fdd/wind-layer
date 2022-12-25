@@ -2,6 +2,7 @@ import Tile from './Tile';
 
 export interface TileManagerOptions {
   maxSize: number;
+  dispatcher: any;
 }
 
 export default class TileManager {

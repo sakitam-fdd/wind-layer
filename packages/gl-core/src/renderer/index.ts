@@ -1,4 +1,5 @@
 import { DataTexture, Renderer, Scene, utils, Vector2 } from '@sakitam-gis/vis-engine';
+import * as wf from 'wind-gl-worker';
 import TileManager from '../layer/tile/TileManager';
 import Pipelines from './Pipelines';
 import ComposePass from './pass/compose';
@@ -82,6 +83,7 @@ export default class ScalarFill {
   private readonly scene: Scene;
   private readonly renderer: Renderer;
   private readonly tileManager: TileManager;
+  private readonly dispatcher: any;
 
   #opacity: number;
   #colorRange: Vector2;
@@ -109,7 +111,13 @@ export default class ScalarFill {
 
     this.#opacity = this.options.opacity || 1;
 
-    this.tileManager = new TileManager(this.renderer, this.scene, {});
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    this.dispatcher = new wf.Dispatcher(wf.getGlobalWorkerPool(), this, this.uid);
+
+    this.tileManager = new TileManager(this.renderer, this.scene, {
+      dispatcher: this.dispatcher,
+    });
   }
 
   initialize() {
@@ -213,15 +221,13 @@ export default class ScalarFill {
   }
 
   prerender(camera) {
-    const tiles = this.options.getViewTiles();
-    if (tiles && this.renderPipeline) {
+    if (this.renderPipeline) {
       this.renderPipeline.prerender(
         {
           scene: this.scene,
           camera,
         },
         {
-          tiles,
           opacity: this.#opacity,
           colorRange: this.#colorRange,
           colorRampTexture: this.#colorRampTexture,
@@ -231,15 +237,13 @@ export default class ScalarFill {
   }
 
   render(camera) {
-    const tiles = this.options.getViewTiles();
-    if (tiles && this.renderPipeline) {
+    if (this.renderPipeline) {
       this.renderPipeline.render(
         {
           scene: this.scene,
           camera,
         },
         {
-          tiles,
           opacity: this.#opacity,
           colorRange: this.#colorRange,
           colorRampTexture: this.#colorRampTexture,
