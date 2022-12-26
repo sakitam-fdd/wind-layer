@@ -6,10 +6,13 @@ import {
   PerspectiveCamera,
   Scene,
   utils,
+  highPrecision,
 } from '@sakitam-gis/vis-engine';
 import { mercatorZfromAltitude } from './mercatorCoordinate';
 
 const { degToRad, radToDeg, clamp } = utils;
+
+highPrecision(true);
 
 export function compareVersion(v1, v2) {
   // eslint-disable-next-line no-param-reassign

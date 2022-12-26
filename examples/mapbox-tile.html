@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'/>
+  <title>mapbox wind</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+  <meta name="renderer" content="webkit"/>
+  <meta name="force-rendering" content="webkit"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <script src="https://unpkg.com/mapbox-gl@1.13.3/dist/mapbox-gl.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/mapbox-gl@1.13.3/dist/mapbox-gl.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+      background: #202020;
+    }
+  </style>
+</head>
+<body>
+<div id='map'></div>
+<!--<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/mapbox-wind@1.0.0-alpha.10/dist/mapbox-wind.js"></script>-->
+<script src="../packages/mapbox-gl/dist/mapbox-wind.js"></script>
+<script src="https://unpkg.com/dat.gui@0.7.9/build/dat.gui.min.js"></script>
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoidTEwaW50IiwiYSI6InQtMnZvTkEifQ.c8mhXquPE7_xoB3P4Ag8cA';
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/satellite-streets-v12',
+    center: { lng: 105.70150033978689, lat: 22.76021405309811 }, // starting position [lng, lat]
+    zoom: 1.5, // starting zoom
+    antialias: true,
+  });
+
+  const color = {
+    temp: [[203,[115,70,105,255]],
+      [218,[202,172,195,255]],
+      [233,[162,70,145,255]],
+      [248,[143,89,169,255]],
+      [258,[157,219,217,255]],
+      [265,[106,191,181,255]],
+      [269,[100,166,189,255]],
+      [273.15,[93,133,198,255]],
+      [274,[68,125,99,255]],
+      [283,[128,147,24,255]],
+      [294,[243,183,4,255]],
+      [303,[232,83,25,255]],
+      [320,[71,14,0,255]]],
+  };
+
+  map.on('load', function () {
+    const tempInterpolateColor = color.temp.reduce((result, item, key) => result.concat(item[0] - 273.15, 'rgba(' + item[1].join(',') + ')'), []);
+
+    const fillLayer = new mapboxWind.ScalarFill('temp', {
+      // "type": "jsonArray",
+      // "data": data,
+      type: "image",
+      tileSize: 256,
+      url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+      subdomains: ['a', 'b', 'c', 'd']
+    }, {
+      wrapX: true,
+      wireframe: true,
+      styleSpec: {
+        'fill-color': [
+          'interpolate',
+          ['linear'],
+          ['get', 'value'],
+          ...tempInterpolateColor
+        ],
+        'opacity': [
+          'interpolate',
+          ['exponential', 0.5],
+          ['zoom'],
+          1,
+          1,
+          2,
+          1
+        ],
+      },
+      renderForm: 'r',
+      widthSegments: 1,
+      heightSegments: 1,
+      // displayRange: [0, 80],
+    });
+
+    map.addLayer(fillLayer);
+  });
+</script>
+</body>
+</html>

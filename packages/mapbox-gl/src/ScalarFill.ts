@@ -1,27 +1,50 @@
 import * as mapboxgl from 'mapbox-gl';
 
-import { Renderer, Scene, highPrecision } from '@sakitam-gis/vis-engine';
+import { Renderer, Scene } from '@sakitam-gis/vis-engine';
 
-import { IOptions, ScalarFill as ScalarCore } from 'wind-gl-core';
+import { ScalarFill as ScalarCore } from 'wind-gl-core';
+import type { ScalarFillOptions } from 'wind-gl-core';
 
 import CameraSync from './utils/CameraSync';
-import { fromLngLat } from './utils/mercatorCoordinate';
 
-highPrecision(true);
+const C = Math.PI * 6378137;
 
-export interface IScalarFillOptions extends IOptions {
-  wrapX: boolean;
+function toLngLat(x, y) {
+  const lng = (x / C) * 180;
+  let lat = (y / C) * 180;
+  lat = (180 / Math.PI) * (2 * Math.atan(Math.exp((lat * Math.PI) / 180)) - Math.PI / 2);
+  return [lng, lat];
 }
 
-function getCoords(coords: number[]): number[] {
-  const mercatorCoordinate = mapboxgl.MercatorCoordinate.fromLngLat(
-    {
-      lng: coords[0],
-      lat: coords[1],
-    },
-    coords[2],
-  );
-  return [mercatorCoordinate.x, mercatorCoordinate.y, mercatorCoordinate.z as number];
+function getMercCoords(x, y, z) {
+  const resolution = (2 * C) / 256 / 2 ** z;
+  const mercX = x * resolution - (2 * C) / 2.0;
+  const mercY = y * resolution - (2 * C) / 2.0;
+
+  return toLngLat(mercX, mercY);
+}
+
+function getTileBBox(x, y, z) {
+  // for Google/OSM tile scheme we need to alter the y
+  // eslint-disable-next-line no-param-reassign
+  y = 2 ** z - y - 1;
+
+  const min = getMercCoords(x * 256, y * 256, z);
+  const max = getMercCoords((x + 1) * 256, (y + 1) * 256, z);
+
+  const p1 = mapboxgl.MercatorCoordinate.fromLngLat([min[0], max[1]]);
+  const p2 = mapboxgl.MercatorCoordinate.fromLngLat([max[0], min[1]]);
+
+  return {
+    left: p1.x,
+    top: p1.y,
+    right: p2.x,
+    bottom: p2.y,
+  };
+}
+
+export interface IScalarFillOptions extends ScalarFillOptions {
+  wrapX: boolean;
 }
 
 export default class ScalarFill {
@@ -47,7 +70,7 @@ export default class ScalarFill {
 
     this.data = data;
 
-    this.updateCamera = this.updateCamera.bind(this);
+    this.update = this.update.bind(this);
     this.handleZoom = this.handleZoom.bind(this);
   }
 
@@ -55,67 +78,16 @@ export default class ScalarFill {
     return this.sync.camera;
   }
 
-  updateCamera() {
+  update() {
     this.sync.update();
-  }
-
-  projectToWorld(coord) {
-    const mc = fromLngLat(
-      {
-        lng: coord[0],
-        lat: coord[1],
-      },
-      coord[2],
-    );
-
-    return [mc.x, mc.y, mc.z];
+    if (this.scalarFill) {
+      this.scalarFill.updateTiles();
+    }
   }
 
   public handleZoom() {
     if (this.scalarFill) {
       this.scalarFill.handleZoom();
-    }
-  }
-
-  public initialize() {
-    if (!this.scalarFill && this.gl && this.map) {
-      this.renderer = new Renderer(this.gl, {
-        autoClear: false,
-      });
-      this.scene = new Scene();
-      this.sync = new CameraSync(this.map, 'perspective', this.scene);
-
-      this.scalarFill = new ScalarCore(
-        {
-          // @ts-ignore
-          renderer: this.renderer,
-          // @ts-ignore
-          scene: this.scene,
-        },
-        {
-          opacity: this.options.opacity,
-          renderForm: this.options.renderForm,
-          styleSpec: this.options.styleSpec,
-          displayRange: this.options.displayRange,
-          widthSegments: this.options.widthSegments,
-          heightSegments: this.options.heightSegments,
-          wireframe: this.options.wireframe,
-          createPlaneBuffer: this.options.createPlaneBuffer,
-          getZoom: () => this.map?.getZoom() as number,
-          triggerRepaint: () => {
-            this.map?.triggerRepaint();
-          },
-        },
-      );
-
-      this.scalarFill.getWorldCoordinate = getCoords;
-
-      this.map.on('zoom', this.handleZoom);
-      this.map.on('move', this.updateCamera);
-      this.map.on('resize', this.updateCamera);
-    }
-    if (this.data) {
-      this.setData(this.data);
     }
   }
 
@@ -125,6 +97,7 @@ export default class ScalarFill {
       ...(options || {}),
     };
     if (this.scalarFill) {
+      // @ts-ignore
       this.scalarFill.updateOptions(options);
     }
   }
@@ -133,22 +106,70 @@ export default class ScalarFill {
     this.gl = gl;
     this.map = map;
 
-    if (this.map) {
-      this.initialize();
+    this.renderer = new Renderer(gl, {
+      autoClear: false,
+    });
+    this.scene = new Scene();
+    this.sync = new CameraSync(map, 'perspective', this.scene);
+    this.scalarFill = new ScalarCore(
+      {
+        renderer: this.renderer,
+        scene: this.scene,
+      },
+      {
+        opacity: this.options.opacity,
+        renderFrom: this.options.renderFrom,
+        styleSpec: this.options.styleSpec,
+        displayRange: this.options.displayRange,
+        widthSegments: this.options.widthSegments,
+        heightSegments: this.options.heightSegments,
+        wireframe: this.options.wireframe,
+        getZoom: () => this.map?.getZoom() as number,
+        triggerRepaint: () => {
+          this.map?.triggerRepaint();
+        },
+        getViewTiles: () => {
+          // @ts-ignore
+          const { transform } = this.map;
+          const tiles = transform.coveringTiles({
+            tileSize: this.data.tileSize,
+            minzoom: this.data.minzoom,
+            maxzoom: this.data.maxzoom,
+            roundZoom: this.data.roundZoom,
+          });
+
+          const wrapTiles: any[] = [];
+
+          for (let i = 0; i < tiles.length; i++) {
+            const tile = tiles[i].toUnwrapped();
+            const { x, y, z } = tile.canonical;
+            wrapTiles.push({
+              x,
+              y,
+              z,
+              wrap: tile.wrap,
+              bounds: getTileBBox(x, y, z),
+              tileKey: tile.key,
+              size: this.data.tileSize,
+            });
+          }
+
+          return wrapTiles;
+        },
+      },
+    );
+    if (this.data) {
+      this.setData(this.data);
     }
+    map.on('move', this.update);
+    map.on('resize', this.update);
   }
 
   public setData(data: any) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.data = data;
       if (this.data && this.scalarFill) {
-        this.scalarFill.setData(this.data, (status) => {
-          if (status) {
-            resolve(true);
-          } else {
-            reject(false);
-          }
-        });
+        this.scalarFill.setData(this.data);
       } else {
         resolve(false);
       }
@@ -160,48 +181,19 @@ export default class ScalarFill {
       this.scalarFill = null;
     }
     this.map?.off('zoom', this.handleZoom);
-    this.map?.off('move', this.updateCamera);
-    this.map?.off('resize', this.updateCamera);
+    this.map?.off('move', this.update);
+    this.map?.off('resize', this.update);
     this.map = null;
     this.gl = null;
   }
 
-  public getWrappedWorlds() {
-    const result = [0];
-
-    if (this.options.wrapX) {
-      // @ts-ignore
-      const { width, height } = this.map.transform;
-      // @ts-ignore
-      const utl = this.map.transform.pointCoordinate(new mapboxgl.Point(0, 0));
-      // @ts-ignore
-      const utr = this.map.transform.pointCoordinate(new mapboxgl.Point(width, 0));
-      // @ts-ignore
-      const ubl = this.map.transform.pointCoordinate(new mapboxgl.Point(width, height));
-      // @ts-ignore
-      const ubr = this.map.transform.pointCoordinate(new mapboxgl.Point(0, height));
-      const w0 = Math.floor(Math.min(utl.x, utr.x, ubl.x, ubr.x));
-      const w1 = Math.floor(Math.max(utl.x, utr.x, ubl.x, ubr.x));
-
-      const extraWorldCopy = 1;
-
-      for (let w = w0 - extraWorldCopy; w <= w1 + extraWorldCopy; w++) {
-        if (w === 0) {
-          continue;
-        }
-        result.push(w);
-      }
-    }
-    return result;
+  prerender() {
+    this.scalarFill?.prerender(this.camera);
+    this.renderer.resetState();
   }
 
-  public render() {
-    this.scene.worldMatrixNeedsUpdate = true;
-    const worlds = this.getWrappedWorlds();
-    // tslint:disable-next-line:prefer-for-of
-    for (let i = 0; i < worlds.length; i++) {
-      this.scalarFill?.render(this.camera, worlds[i]);
-    }
+  render() {
+    this.scalarFill?.render(this.camera);
     this.renderer.resetState();
   }
 }
