@@ -6,3 +6,4 @@ declare module 'web-worker:*' {
 }
 
 type WithNull<T> = T | null;
+type WithUndef<T> = T | undefined;

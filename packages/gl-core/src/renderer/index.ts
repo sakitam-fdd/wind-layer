@@ -1,5 +1,5 @@
 import { DataTexture, Renderer, Scene, utils, Vector2 } from '@sakitam-gis/vis-engine';
-import * as wf from 'wind-gl-worker';
+import wf from 'wind-gl-worker';
 import TileManager from '../layer/tile/TileManager';
 import Pipelines from './Pipelines';
 import ComposePass from './pass/compose';
@@ -124,7 +124,6 @@ export default class ScalarFill {
     this.renderPipeline = new Pipelines(this.renderer);
 
     const composePass = new ComposePass('compose', this.renderer, {
-      project: this.getWorldCoordinate.bind(this),
       tileManager: this.tileManager,
     });
     const colorizePass = new ColorizePass('colorize', this.renderer, {});
@@ -194,10 +193,6 @@ export default class ScalarFill {
     }
   }
 
-  getWorldCoordinate(coords: number[]): number[] {
-    return coords;
-  }
-
   /**
    * 设置数据
    * 目前设计的支持的数据类型：
@@ -218,6 +213,14 @@ export default class ScalarFill {
    */
   getData() {
     return this.tileManager?.getData();
+  }
+
+  /**
+   * 更新视野内的瓦片
+   */
+  updateTiles() {
+    const tiles = this.options.getViewTiles();
+    this.tileManager.update(tiles);
   }
 
   prerender(camera) {

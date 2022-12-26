@@ -15,4 +15,12 @@ export default class TileMesh {
       geometry,
     });
   }
+
+  setCenter(center: number[]) {
+    this.mesh.position.set(center[0], center[1], center[2] || 0);
+  }
+
+  getMesh() {
+    return this.mesh;
+  }
 }

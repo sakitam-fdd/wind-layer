@@ -1,7 +1,7 @@
 import { Program, Renderer, RenderTarget } from '@sakitam-gis/vis-engine';
 import Pass from './base';
-import fillVert from '../../shaders/fill.vert.glsl';
-import fillFrag from '../../shaders/fill.frag.glsl';
+import vert from '../../shaders/compose.vert.glsl';
+import frag from '../../shaders/compose.frag.glsl';
 import * as shaderLib from '../../shaders/shaderLib';
 
 /**
@@ -20,8 +20,8 @@ export default class ComposePass extends Pass {
     super(id, renderer, options);
 
     this.#program = new Program(renderer, {
-      vertexShader: fillVert,
-      fragmentShader: fillFrag,
+      vertexShader: vert,
+      fragmentShader: frag,
       uniforms: {
         texture: {
           value: undefined,

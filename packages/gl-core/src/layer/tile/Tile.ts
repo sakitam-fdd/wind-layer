@@ -1,4 +1,4 @@
-import { Program, Renderer, Plane, utils } from '@sakitam-gis/vis-engine';
+import { Program, Renderer, Geometry, Plane, Texture } from '@sakitam-gis/vis-engine';
 import TileMesh from './TileMesh';
 
 export enum TileState {
@@ -36,9 +36,14 @@ export interface TileOptions {
    * 针对单个瓦片可能存在多个数据
    */
   url: string | string[];
+  actor: any;
+  program?: Program;
   tileBounds: TileBounds;
   tileSize: TileSize;
-  tileZoom: number;
+  onLoad: (ctx: Tile) => void;
+  wrap?: number;
+  tileZoom?: number;
+  tileKey?: string;
 }
 
 /**
@@ -64,9 +69,10 @@ export default class Tile {
   public z: number;
 
   /**
-   * 瓦片 id
+   * 哪个世界
    */
-  public id: string;
+  public wrap: number;
+
   public tileKey: string;
 
   /**
@@ -80,49 +86,279 @@ export default class Tile {
   public tileSize: TileSize;
 
   /**
+   * 瓦片路径
+   */
+  public url: string | string[];
+
+  /**
    * 瓦片的世界范围
    */
   public tileBounds: TileBounds;
 
-  public mesh: TileMesh;
+  public actor: any;
+
+  public tileCenter: [number, number, number];
+
+  public renderer: Renderer;
+
+  public tileMesh: TileMesh;
 
   public geometry: Plane;
 
+  public program: Program;
+
+  #onLoad: any;
+
+  #request: Map<string, any>;
+
+  #textures: Map<number, Texture> = new Map();
+
   /**
+   * @param renderer
    * @param x 默认为 0
    * @param y 默认为 0
    * @param z 默认为 0
    * @param options
    */
-  constructor(x = 0, y = 0, z = 0, options: TileOptions) {
+  constructor(renderer: Renderer, x = 0, y = 0, z = 0, options: TileOptions = {} as TileOptions) {
+    this.renderer = renderer;
     this.x = x;
     this.y = y;
     this.z = z;
+    this.wrap = options.wrap || 0;
+    this.actor = options.actor;
 
-    this.tileKey = `${x}_${y}_${z}`;
+    this.tileKey = options.tileKey || `${x}_${y}_${z}_${this.wrap}`;
 
-    this.id = utils.uid(`${this.tileKey}_tile`);
-
+    this.url = options.url;
     this.tileSize = options.tileSize;
     this.tileBounds = options.tileBounds;
+    this.program =
+      options.program ||
+      new Program(this.renderer, {
+        vertexShader: `
+      attribute vec2 uv;
+      attribute vec3 position;
+      uniform vec3 cameraPosition;
+      uniform mat4 viewMatrix;
+      uniform mat4 modelMatrix;
+      uniform mat4 modelViewMatrix;
+      uniform mat4 projectionMatrix;
+
+      varying vec2 vUv;
+
+      void main() {
+          vUv = uv;
+
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+      `,
+        fragmentShader: `
+      precision mediump float;
+    varying vec2 vUv;
+    uniform sampler2D u_image;
+    void main() {
+        vec4 color = texture2D(u_image, vUv);
+        gl_FragColor = color * 1.0;
+    }
+      `,
+        uniforms: {
+          u_image: { value: null },
+        },
+      });
+    this.tileCenter = this.getCenter();
+
+    this.#onLoad = options.onLoad;
+    this.#request = new Map();
 
     this.state = TileState.loading;
+    this.updateGeometry(true);
+    this.createMesh(true);
+  }
+
+  hasData() {
+    return this.state === TileState.loaded;
   }
 
   isLoaded() {
     return this.state === TileState.loaded || this.state === TileState.errored;
   }
 
-  textures() {
-
+  getMesh() {
+    return this.tileMesh.getMesh();
   }
 
-  load() {
+  get textures() {
+    return this.#textures;
+  }
+
+  #loadData(url) {
+    return new Promise((resolve, reject) => {
+      this.actor.send(
+        'loadData',
+        {
+          url,
+          cancelId: url,
+        },
+        (e, data) => {
+          if (e) {
+            return reject(e);
+          }
+          resolve(data);
+        },
+      );
+      this.#request.set(url, url);
+    });
+  }
+
+  #removeRequest() {
+    if (Array.isArray(this.url)) {
+      for (let i = 0; i < this.url.length; i++) {
+        this.#request.delete(this.url[i]);
+      }
+    } else {
+      this.#request.delete(this.url);
+    }
+  }
+
+  /**
+   * 更新瓦片顶点信息
+   * @param force
+   */
+  updateGeometry(force?: boolean) {
+    if (!this.geometry || force) {
+      const position = [
+        this.tileBounds.left,
+        this.tileBounds.top,
+        0,
+        this.tileBounds.right,
+        this.tileBounds.top,
+        0,
+        this.tileBounds.left,
+        this.tileBounds.bottom,
+        0,
+        this.tileBounds.right,
+        this.tileBounds.bottom,
+        0,
+      ];
+      let i = 0;
+      const len = position.length;
+      for (; i < len; i += 3) {
+        // eslint-disable-next-line operator-assignment
+        position[i] = position[i] - this.tileCenter[0];
+        position[i + 1] = position[i + 1] - this.tileCenter[1];
+        position[i + 2] = position[i + 2] - this.tileCenter[2];
+      }
+      this.geometry = new Geometry(this.renderer, {
+        position: {
+          size: 3,
+          data: new Float32Array(position),
+        },
+        normal: {
+          size: 3,
+          data: new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]),
+        },
+        uv: {
+          size: 2,
+          data: new Float32Array([0, 1, 1, 1, 0, 0, 1, 0]),
+        },
+        index: {
+          data: new Uint16Array([0, 2, 1, 2, 3, 1]),
+        },
+      });
+    }
+  }
+
+  /**
+   * 创建 `TileMesh`
+   * @param force
+   */
+  createMesh(force?: boolean) {
+    if (!this.tileMesh || force) {
+      this.tileMesh = new TileMesh(this.tileKey, this.renderer, this.program, this.geometry);
+      this.tileMesh.setCenter(this.tileCenter);
+    }
+
+    return this.tileMesh;
+  }
+
+  createTextures(index: number, image) {
+    const texture = this.#textures.get(index);
+    if (texture) {
+      texture.setData(image);
+    } else {
+      this.#textures.set(
+        index,
+        new Texture(this.renderer, {
+          image,
+          width: image.width,
+          height: image.height,
+          minFilter: this.renderer.gl.LINEAR,
+          magFilter: this.renderer.gl.LINEAR,
+          wrapS: this.renderer.gl.CLAMP_TO_EDGE,
+          wrapT: this.renderer.gl.CLAMP_TO_EDGE,
+          flipY: true, // 注意，对 ImageBitmap 无效
+        }),
+      );
+    }
+
+    this.program.setUniform('u_image', this.#textures.get(0));
+  }
+
+  /**
+   * 执行数据加载
+   */
+  async load() {
     // 在这里我们需要实现 webworker 加载
+    try {
+      this.state = TileState.loading;
+      if (Array.isArray(this.url)) {
+        const p: Promise<any>[] = [];
+        for (let i = 0; i < this.url.length; i++) {
+          p.push(this.#loadData(this.url[i]));
+        }
+        const data = await Promise.all(p);
+        data.forEach((d, index) => {
+          this.createTextures(index, data);
+        });
+      } else {
+        const data = await this.#loadData(this.url);
+        this.createTextures(0, data);
+      }
+
+      this.#removeRequest();
+
+      this.state = TileState.loaded;
+
+      if (this.#onLoad) {
+        this.#onLoad(this);
+      }
+    } catch (e) {
+      this.state = TileState.errored;
+      this.#removeRequest();
+    }
+
+    return this;
   }
 
-  abort() {
+  /**
+   * 如果存在进行中的请求，那么执行 cancel
+   * 如果已经加载完成，执行资源释放
+   */
+  unload() {
     // 支持取消
+    if (this.#request.size > 0 && this.state === TileState.loading) {
+      const iterator = this.#request.entries();
+      for (let i = 0; i < this.#request.size; i++) {
+        const [url] = iterator.next().value;
+        if (url) {
+          this.actor.send('cancel', {
+            url,
+            cancelId: url,
+          });
+        }
+      }
+    }
   }
 
   // eslint-disable-next-line
@@ -145,34 +381,24 @@ export default class Tile {
   /**
    * 获取瓦片世界坐标系下的中心点
    */
-  getCenter() {
+  getCenter(): [number, number, number] {
     return [
       (this.tileBounds.left + this.tileBounds.right) / 2,
       (this.tileBounds.top + this.tileBounds.bottom) / 2,
+      0,
     ];
   }
 
-  /**
-   * 更新瓦片顶点信息
-   * @param renderer
-   */
-  updateGeometry(renderer: Renderer) {
-    if (!this.geometry) {
-      this.geometry = new Plane(renderer);
+  destroy() {
+    this.unload();
+    for (const [, value] of this.#textures) {
+      if (value) {
+        value?.destroy();
+      }
     }
-  }
-
-  /**
-   * 创建 `TileMesh`
-   * @param renderer
-   * @param program
-   * @param force
-   */
-  createMesh(renderer: Renderer, program: Program, force?: boolean) {
-    if (!this.mesh || force) {
-      this.mesh = new TileMesh(this.id, renderer, program, this.geometry);
+    this.#textures.clear();
+    if (this.geometry) {
+      this.geometry.destroy();
     }
-
-    return this.mesh;
   }
 }

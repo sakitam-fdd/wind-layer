@@ -1,7 +1,6 @@
-import ScalarFill, { defaultOptions } from './ScalarFill';
-
-import type { IOptions } from './ScalarFill';
+import ScalarFill, { defaultOptions } from './renderer';
+import type { ScalarFillOptions } from './renderer';
 
 export * from './utils/common';
 
-export { ScalarFill, defaultOptions, IOptions };
+export { ScalarFill, ScalarFillOptions, defaultOptions };
