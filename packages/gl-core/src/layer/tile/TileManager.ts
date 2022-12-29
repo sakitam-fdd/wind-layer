@@ -84,7 +84,6 @@ export default class TileManager {
 
   removeTile(tile: Tile) {
     if (this.hasTile(tile)) {
-      this.scene.remove(tile.getMesh());
       this.#tiles.delete(tile.tileKey);
     }
   }
@@ -132,7 +131,6 @@ export default class TileManager {
         tile?.unload();
         // 此处删除后不一定需要资源释放，因为在缓存中可能还存在，只有缓存失效的需要释放资源
         this.#tiles.delete(key);
-        this.scene.remove(tile.getMesh());
       }
     }
     for (let i = 0; i < tiles.length; i++) {
@@ -150,7 +148,6 @@ export default class TileManager {
             tileKey: t.tileKey,
             tileBounds: t.bounds,
             onLoad: (ctx) => {
-              this.scene.add(ctx.getMesh());
               this.#cache.add(ctx.tileKey, ctx);
             },
           });

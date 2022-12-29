@@ -118,6 +118,8 @@ export default class ScalarFill {
     this.tileManager = new TileManager(this.renderer, this.scene, {
       dispatcher: this.dispatcher,
     });
+
+    this.initialize();
   }
 
   initialize() {

@@ -1,16 +1,26 @@
 import { Renderer } from '@sakitam-gis/vis-engine';
 
-export default class Pass {
+export default class Pass<T> {
   public id: string;
 
   public readonly renderer: Renderer;
 
-  public options: any;
+  public options: T;
 
-  constructor(id: string, renderer: Renderer, options = {}) {
+  #enabled = true;
+
+  constructor(id: string, renderer: Renderer, options: T = {} as T) {
     this.id = id;
     this.renderer = renderer;
     this.options = options;
+  }
+
+  get enabled() {
+    return this.#enabled;
+  }
+
+  set enabled(state) {
+    this.#enabled = state;
   }
 
   render(rendererParams, rendererState) {

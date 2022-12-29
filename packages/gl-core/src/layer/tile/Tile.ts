@@ -37,7 +37,6 @@ export interface TileOptions {
    */
   url: string | string[];
   actor: any;
-  program?: Program;
   tileBounds: TileBounds;
   tileSize: TileSize;
   onLoad: (ctx: Tile) => void;
@@ -105,8 +104,6 @@ export default class Tile {
 
   public geometry: Plane;
 
-  public program: Program;
-
   #onLoad: any;
 
   #request: Map<string, any>;
@@ -133,39 +130,6 @@ export default class Tile {
     this.url = options.url;
     this.tileSize = options.tileSize;
     this.tileBounds = options.tileBounds;
-    this.program =
-      options.program ||
-      new Program(this.renderer, {
-        vertexShader: `
-      attribute vec2 uv;
-      attribute vec3 position;
-      uniform vec3 cameraPosition;
-      uniform mat4 viewMatrix;
-      uniform mat4 modelMatrix;
-      uniform mat4 modelViewMatrix;
-      uniform mat4 projectionMatrix;
-
-      varying vec2 vUv;
-
-      void main() {
-          vUv = uv;
-
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-      `,
-        fragmentShader: `
-      precision mediump float;
-    varying vec2 vUv;
-    uniform sampler2D u_image;
-    void main() {
-        vec4 color = texture2D(u_image, vUv);
-        gl_FragColor = color * 1.0;
-    }
-      `,
-        uniforms: {
-          u_image: { value: null },
-        },
-      });
     this.tileCenter = this.getCenter();
 
     this.#onLoad = options.onLoad;
@@ -173,7 +137,6 @@ export default class Tile {
 
     this.state = TileState.loading;
     this.updateGeometry(true);
-    this.createMesh(true);
   }
 
   hasData() {
@@ -199,6 +162,7 @@ export default class Tile {
         {
           url,
           cancelId: url,
+          type: 'arrayBuffer',
         },
         (e, data) => {
           if (e) {
@@ -271,11 +235,12 @@ export default class Tile {
 
   /**
    * 创建 `TileMesh`
+   * @param program
    * @param force
    */
-  createMesh(force?: boolean) {
+  createMesh(program: Program, force?: boolean) {
     if (!this.tileMesh || force) {
-      this.tileMesh = new TileMesh(this.tileKey, this.renderer, this.program, this.geometry);
+      this.tileMesh = new TileMesh(this.tileKey, this.renderer, program, this.geometry);
       this.tileMesh.setCenter(this.tileCenter);
     }
 
@@ -301,8 +266,6 @@ export default class Tile {
         }),
       );
     }
-
-    this.program.setUniform('u_image', this.#textures.get(0));
   }
 
   /**
@@ -336,6 +299,7 @@ export default class Tile {
     } catch (e) {
       this.state = TileState.errored;
       this.#removeRequest();
+      console.error(e);
     }
 
     return this;

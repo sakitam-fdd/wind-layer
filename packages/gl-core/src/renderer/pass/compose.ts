@@ -1,14 +1,20 @@
-import { Program, Renderer, RenderTarget } from '@sakitam-gis/vis-engine';
+import { utils, Program, Renderer, RenderTarget } from '@sakitam-gis/vis-engine';
 import Pass from './base';
 import vert from '../../shaders/compose.vert.glsl';
 import frag from '../../shaders/compose.frag.glsl';
 import * as shaderLib from '../../shaders/shaderLib';
+import TileManager from '../../layer/tile/TileManager';
+import { TileState } from '../../layer/tile/Tile';
+
+export interface ComposePassOptions {
+  tileManager: TileManager;
+}
 
 /**
  * 在这里我们实现将所有瓦片绘制在 fbo 上以提升多世界渲染的边界接边效果
  * 在下一步再进行完整的着色
  */
-export default class ComposePass extends Pass {
+export default class ComposePass extends Pass<ComposePassOptions> {
   readonly #program: Program;
 
   readonly prerender = true;
@@ -16,7 +22,11 @@ export default class ComposePass extends Pass {
   #current: RenderTarget;
   #next: RenderTarget;
 
-  constructor(id: string, renderer: Renderer, options = {}) {
+  constructor(
+    id: string,
+    renderer: Renderer,
+    options: ComposePassOptions = {} as ComposePassOptions,
+  ) {
     super(id, renderer, options);
 
     this.#program = new Program(renderer, {
@@ -32,8 +42,8 @@ export default class ComposePass extends Pass {
     });
 
     const opt = {
-      width: 256,
-      height: 256,
+      width: this.renderer.width,
+      height: this.renderer.height,
       minFilter: renderer.gl.NEAREST,
       magFilter: renderer.gl.NEAREST,
     };
@@ -48,25 +58,32 @@ export default class ComposePass extends Pass {
    * @param rendererState
    */
   render(rendererParams, rendererState) {
-    if (rendererParams.target) {
-      rendererParams.target.bind();
-      this.renderer.setViewport(rendererParams.target.width, rendererParams.target.height);
+    if (this.#current) {
+      // this.#current.bind();
+      this.renderer.setViewport(this.#current.width, this.#current.height);
     }
 
     const { tileManager } = this.options;
 
     if (tileManager) {
-      const tiles = tileManager.getTiles();
-      const len = tiles.length;
-      let i = 0;
-      for (; i < len; i++) {
-        const tile = this.options.tileManager.getTileMesh(tiles[i].key);
-        tile.draw();
+      const tiles = tileManager.tiles;
+      const entries = tiles.entries();
+
+      for (let i = 0; i < tiles.size; i++) {
+        const [, tile] = entries.next().value;
+        if (tile && tile.state === TileState.loaded) {
+          const tileMesh = tile.createMesh(this.#program);
+          const mesh = tileMesh.getMesh();
+          this.#program.setUniform('u_image', tile.textures.get(0));
+          mesh.updateMatrix();
+          mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, mesh.localMatrix);
+          mesh.draw(utils.omit(rendererParams, ['target']));
+        }
       }
     }
 
-    if (rendererParams.target) {
-      rendererParams.target.unbind();
+    if (this.#current) {
+      // this.#current.unbind();
     }
   }
 }
