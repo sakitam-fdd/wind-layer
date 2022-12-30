@@ -1,11 +1,12 @@
 import * as mapboxgl from 'mapbox-gl';
 
-import { Renderer, Scene } from '@sakitam-gis/vis-engine';
+import { Renderer, Scene, OrthographicCamera } from '@sakitam-gis/vis-engine';
 
-import { ScalarFill as ScalarCore } from 'wind-gl-core';
-import type { ScalarFillOptions } from 'wind-gl-core';
+import type { LayerData, ScalarFillOptions } from 'wind-gl-core';
+import { LayerDataType, ScalarFill as ScalarCore } from 'wind-gl-core';
 
 import CameraSync from './utils/CameraSync';
+import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
 
 const C = Math.PI * 6378137;
 
@@ -24,7 +25,7 @@ function getMercCoords(x, y, z) {
   return toLngLat(mercX, mercY);
 }
 
-function getTileBBox(x, y, z) {
+function getTileBBox(x, y, z, wrap = 0) {
   // for Google/OSM tile scheme we need to alter the y
   // eslint-disable-next-line no-param-reassign
   y = 2 ** z - y - 1;
@@ -36,9 +37,9 @@ function getTileBBox(x, y, z) {
   const p2 = mapboxgl.MercatorCoordinate.fromLngLat([max[0], min[1]]);
 
   return {
-    left: p1.x,
+    left: p1.x + wrap,
     top: p1.y,
-    right: p2.x,
+    right: p2.x + wrap,
     bottom: p2.y,
   };
 }
@@ -55,6 +56,7 @@ export default class ScalarFill {
   public renderingMode: '2d' | '3d';
   public sync: CameraSync;
   public scene: Scene;
+  public orthoCamera: OrthographicCamera;
   public renderer: Renderer;
   private options: any;
   private data: any;
@@ -80,6 +82,10 @@ export default class ScalarFill {
 
   update() {
     this.sync.update();
+    if (this.orthoCamera) {
+      const { width, height } = (this.map as any).painter as any;
+      this.orthoCamera.orthographic(0, width, height, 0, 0, 1);
+    }
     if (this.scalarFill) {
       this.scalarFill.updateTiles();
     }
@@ -111,6 +117,8 @@ export default class ScalarFill {
     });
     this.scene = new Scene();
     this.sync = new CameraSync(map, 'perspective', this.scene);
+    const { width, height } = (this.map as any).painter as any;
+    this.orthoCamera = new OrthographicCamera(0, width, height, 0, 0, 1);
     this.scalarFill = new ScalarCore(
       {
         renderer: this.renderer,
@@ -128,32 +136,79 @@ export default class ScalarFill {
         triggerRepaint: () => {
           this.map?.triggerRepaint();
         },
-        getViewTiles: () => {
-          // @ts-ignore
-          const { transform } = this.map;
-          const tiles = transform.coveringTiles({
-            tileSize: this.data.tileSize,
-            minzoom: this.data.minzoom,
-            maxzoom: this.data.maxzoom,
-            roundZoom: this.data.roundZoom,
-          });
-
+        getViewTiles: (data: LayerData) => {
+          const { transform } = this.map as any;
           const wrapTiles: any[] = [];
-
-          for (let i = 0; i < tiles.length; i++) {
-            const tile = tiles[i].toUnwrapped();
-            const { x, y, z } = tile.canonical;
-            wrapTiles.push({
-              x,
-              y,
-              z,
-              wrap: tile.wrap,
-              bounds: getTileBBox(x, y, z),
-              tileKey: tile.key,
-              size: this.data.tileSize,
+          if (data.type === LayerDataType.image) {
+            const cornerCoords = data.extent.map((c: any) =>
+              mapboxgl.MercatorCoordinate.fromLngLat(c),
+            );
+            const tileID = getCoordinatesCenterTileID(cornerCoords);
+            if (this.options.wrapX) {
+              transform.getVisibleUnwrappedCoordinates(tileID).forEach((unwrapped) => {
+                const x = unwrapped.canonical.x;
+                const y = unwrapped.canonical.y;
+                const z = unwrapped.canonical.z;
+                const wrap = unwrapped.wrap;
+                wrapTiles.push({
+                  x,
+                  y,
+                  z,
+                  wrap,
+                  bounds: getTileBBox(x, y, z, wrap),
+                  tileKey: `${z}_${x}_${y}_${wrap}`,
+                  size: this.data.tileSize,
+                });
+              });
+            } else {
+              const x = tileID.x;
+              const y = tileID.y;
+              const z = tileID.z;
+              const wrap = 0;
+              wrapTiles.push({
+                x,
+                y,
+                z,
+                wrap,
+                bounds: getTileBBox(x, y, z, wrap),
+                tileKey: `${z}_${x}_${y}_${wrap}`,
+                size: this.data.tileSize,
+              });
+            }
+          } else if (data.type === LayerDataType.tile) {
+            const tiles = transform.coveringTiles({
+              tileSize: this.data.tileSize,
+              minzoom: this.data.minzoom,
+              maxzoom: this.data.maxzoom,
+              roundZoom: this.data.roundZoom,
             });
-          }
 
+            for (let i = 0; i < tiles.length; i++) {
+              const tile = tiles[i].toUnwrapped();
+              const { x, y, z } = tile.canonical;
+              if (this.options.wrapX) {
+                wrapTiles.push({
+                  x,
+                  y,
+                  z,
+                  wrap: tile.wrap,
+                  bounds: getTileBBox(x, y, z, tile.wrap),
+                  tileKey: tile.key,
+                  size: this.data.tileSize,
+                });
+              } else if (tile.wrap === 0) {
+                wrapTiles.push({
+                  x,
+                  y,
+                  z,
+                  wrap: tile.wrap,
+                  bounds: getTileBBox(x, y, z, tile.wrap),
+                  tileKey: tile.key,
+                  size: this.data.tileSize,
+                });
+              }
+            }
+          }
           return wrapTiles;
         },
       },
@@ -163,6 +218,7 @@ export default class ScalarFill {
     }
     map.on('move', this.update);
     map.on('resize', this.update);
+    this.update();
   }
 
   public setData(data: any) {
@@ -188,12 +244,18 @@ export default class ScalarFill {
   }
 
   prerender() {
+    this.scene.worldMatrixNeedsUpdate = true;
+    this.scene.updateMatrixWorld();
+    this.camera.updateMatrixWorld();
     this.scalarFill?.prerender(this.camera);
     this.renderer.resetState();
   }
 
   render() {
-    this.scalarFill?.render(this.camera);
+    this.scene.worldMatrixNeedsUpdate = true;
+    this.scene.updateMatrixWorld();
+    this.camera.updateMatrixWorld();
+    this.scalarFill?.render(this.orthoCamera);
     this.renderer.resetState();
   }
 }

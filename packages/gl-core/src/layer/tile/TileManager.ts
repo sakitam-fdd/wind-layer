@@ -1,17 +1,13 @@
 import { Renderer, Scene, Program } from '@sakitam-gis/vis-engine';
 import Tile from './Tile';
 import LRUCache from './LRUCache';
-
-export interface TileData {
-  url: string | string[];
-  subdomains: (string | number)[];
-}
+import { LayerData, LayerDataType } from '../../type';
 
 export interface TileManagerOptions {
   maxSize: number;
   dispatcher: any;
   program: Program;
-  data: TileData;
+  data: LayerData;
 }
 
 const URL_PATTERN = /\{ *([\w_]+) *\}/g;
@@ -37,7 +33,7 @@ export default class TileManager {
 
   #tiles: Map<string, Tile>;
   #cache: LRUCache<Tile>;
-  #data: TileData;
+  #data: LayerData;
 
   constructor(renderer: Renderer, scene, options: Partial<TileManagerOptions>) {
     this.renderer = renderer;
@@ -88,34 +84,41 @@ export default class TileManager {
     }
   }
 
-  getUrl(x, y, z, url: string | string[], subdomains) {
-    let domain = '';
-    if (subdomains) {
-      if (Array.isArray(subdomains) && subdomains.length > 0) {
-        const { length } = subdomains;
-        let s = (x + y) % length;
-        if (s < 0) {
-          s = 0;
+  getUrl(x, y, z, d: LayerData) {
+    if (d.type === LayerDataType.image) {
+      return d.url;
+    } else if (d.type === LayerDataType.tile) {
+      const { url, subdomains } = d;
+      let domain: string | number = '';
+      if (subdomains) {
+        if (Array.isArray(subdomains) && subdomains.length > 0) {
+          const { length } = subdomains;
+          let s = (x + y) % length;
+          if (s < 0) {
+            s = 0;
+          }
+          domain = subdomains[s];
         }
-        domain = subdomains[s];
       }
+
+      const data = {
+        x,
+        y,
+        z,
+        s: domain,
+      };
+
+      if (Array.isArray(url)) {
+        return url.map((u) => formatUrl(u, data));
+      }
+
+      return formatUrl(url, data);
+    } else {
+      return '';
     }
-
-    const data = {
-      x,
-      y,
-      z,
-      s: domain,
-    };
-
-    if (Array.isArray(url)) {
-      return url.map((u) => formatUrl(u, data));
-    }
-
-    return formatUrl(url, data);
   }
 
-  setData(data: TileData) {
+  setData(data: LayerData) {
     this.#data = data;
   }
 
@@ -142,7 +145,7 @@ export default class TileManager {
           const actor = this.options.dispatcher.getActor();
           tile = new Tile(this.renderer, t.x, t.y, t.z, {
             actor,
-            url: this.getUrl(t.x, t.y, t.z, this.#data.url, this.#data.subdomains),
+            url: this.getUrl(t.x, t.y, t.z, this.#data),
             wrap: t.wrap,
             tileSize: t.size,
             tileKey: t.tileKey,

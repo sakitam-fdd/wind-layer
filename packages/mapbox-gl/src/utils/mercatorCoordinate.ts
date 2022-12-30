@@ -94,3 +94,29 @@ export function getTileCenter(x, y, z) {
     y: -((y * earthCircumference) / numTiles - halfEarthCircumference),
   };
 }
+
+export function getCoordinatesCenterTileID(coords: Array<any>) {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  for (const coord of coords) {
+    minX = Math.min(minX, coord.x);
+    minY = Math.min(minY, coord.y);
+    maxX = Math.max(maxX, coord.x);
+    maxY = Math.max(maxY, coord.y);
+  }
+
+  const dx = maxX - minX;
+  const dy = maxY - minY;
+  const dMax = Math.max(dx, dy);
+  const zoom = Math.max(0, Math.floor(-Math.log(dMax) / Math.LN2));
+  const tilesAtZoom = Math.pow(2, zoom);
+
+  return {
+    z: zoom,
+    x: Math.floor((minX + maxX) / 2 * tilesAtZoom),
+    y: Math.floor((minY + maxY) / 2 * tilesAtZoom)
+  };
+}

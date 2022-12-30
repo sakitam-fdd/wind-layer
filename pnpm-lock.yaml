@@ -137,10 +137,10 @@ importers:
 
   packages/gl-core:
     specifiers:
-      '@sakitam-gis/vis-engine': ^1.0.0
+      '@sakitam-gis/vis-engine': ^1.4.1
       wind-gl-worker: workspace:*
     dependencies:
-      '@sakitam-gis/vis-engine': 1.4.0
+      '@sakitam-gis/vis-engine': 1.4.1
       wind-gl-worker: link:../worker-fetch
 
   packages/leaflet:
@@ -158,13 +158,13 @@ importers:
 
   packages/mapbox-gl:
     specifiers:
-      '@sakitam-gis/vis-engine': ^1.0.0
+      '@sakitam-gis/vis-engine': ^1.4.1
       '@types/mapbox-gl': ^1.9.1
       mapbox-gl: ^1.8.0
       wind-core: workspace:*
       wind-gl-core: workspace:*
     dependencies:
-      '@sakitam-gis/vis-engine': 1.4.0
+      '@sakitam-gis/vis-engine': 1.4.1
       wind-core: link:../core
       wind-gl-core: link:../gl-core
     devDependencies:
@@ -173,12 +173,12 @@ importers:
 
   packages/maptalks:
     specifiers:
-      '@sakitam-gis/vis-engine': ^1.0.0
+      '@sakitam-gis/vis-engine': ^1.4.1
       maptalks: ^1.0.0-rc.10
       wind-core: workspace:*
       wind-gl-core: workspace:*
     dependencies:
-      '@sakitam-gis/vis-engine': 1.4.0
+      '@sakitam-gis/vis-engine': 1.4.1
       wind-core: link:../core
       wind-gl-core: link:../gl-core
     devDependencies:
@@ -2200,8 +2200,8 @@ packages:
       rollup: 3.2.3
     dev: true
 
-  /@sakitam-gis/vis-engine/1.4.0:
-    resolution: {integrity: sha512-35bhcoeNf4hAYqzjHEmXH45Fr+5eocL0szTxPASljQvE/yUMFaPICWeKe1KF9PIWAbCkXq7YcBYuYTQUbLZ+8A==}
+  /@sakitam-gis/vis-engine/1.4.1:
+    resolution: {integrity: sha512-48VBNBiDMl3EZZtgAdX6ZC9nPInyCWxKCPotQQrXFAawKMmnBu2tUyr9uZK/YGQO08tGrX5WDwWiGN89qib3qg==}
     engines: {node: '>= 14.18.1', npm: '>= 6.14.15'}
     dependencies:
       colord: 2.9.3
