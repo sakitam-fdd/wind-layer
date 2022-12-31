@@ -52,6 +52,13 @@ export default class ComposePass extends Pass<ComposePassOptions> {
     this.#next = new RenderTarget(renderer, opt);
   }
 
+  get textures() {
+    return {
+      current: this.#current.texture,
+      next: this.#next.texture,
+    };
+  }
+
   /**
    * 此处绘制主要是合并瓦片
    * @param rendererParams
@@ -59,7 +66,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
    */
   render(rendererParams, rendererState) {
     if (this.#current) {
-      // this.#current.bind();
+      this.#current.bind();
       this.renderer.setViewport(this.#current.width, this.#current.height);
     }
 
@@ -74,8 +81,10 @@ export default class ComposePass extends Pass<ComposePassOptions> {
         if (tile && tile.state === TileState.loaded) {
           const tileMesh = tile.createMesh(this.#program);
           const mesh = tileMesh.getMesh();
-          this.#program.setUniform('u_image', tile.textures.get(0));
+          mesh.program.setUniform('u_image', tile.textures.get(0));
+
           mesh.updateMatrix();
+          mesh.worldMatrixNeedsUpdate = false;
           mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, mesh.localMatrix);
           mesh.draw(utils.omit(rendererParams, ['target']));
         }
@@ -83,7 +92,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
     }
 
     if (this.#current) {
-      // this.#current.unbind();
+      this.#current.unbind();
     }
   }
 }

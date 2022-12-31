@@ -1,26 +1,18 @@
 import { DataTexture, Renderer, Scene, utils, Vector2 } from '@sakitam-gis/vis-engine';
-import wf from 'wind-gl-worker';
+import wgw from 'wind-gl-worker';
 import TileManager from '../layer/tile/TileManager';
 import Pipelines from './Pipelines';
 import ComposePass from './pass/compose';
 import ColorizePass from './pass/colorize';
 import { isFunction } from '../utils/common';
 import { createLinearGradient, createZoom } from '../utils/style-parser';
-
-enum RenderFrom {
-  // 标量值
-  r = 'r',
-  // 矢量值
-  rg = 'rg',
-  // 一般用于浮点值（精度最高）
-  rgba = 'rgba',
-}
+import { RenderFrom, LayerData } from '../type';
 
 export interface ScalarFillOptions {
   /**
    * 获取当前视野内的瓦片
    */
-  getViewTiles: () => any[];
+  getViewTiles: (data: any) => any[];
   /**
    * 指定渲染通道
    */
@@ -113,7 +105,7 @@ export default class ScalarFill {
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    this.dispatcher = new wf.Dispatcher(wf.getGlobalWorkerPool(), this, this.uid);
+    this.dispatcher = new wgw.Dispatcher(wgw.getGlobalWorkerPool(), this, this.uid);
 
     this.tileManager = new TileManager(this.renderer, this.scene, {
       dispatcher: this.dispatcher,
@@ -123,12 +115,19 @@ export default class ScalarFill {
   }
 
   initialize() {
+    this.updateOptions({});
     this.renderPipeline = new Pipelines(this.renderer);
 
     const composePass = new ComposePass('compose', this.renderer, {
       tileManager: this.tileManager,
     });
-    const colorizePass = new ColorizePass('colorize', this.renderer, {});
+
+    const textures = composePass.textures;
+
+    const colorizePass = new ColorizePass('colorize', this.renderer, {
+      texture: textures.current,
+      textureNext: textures.next,
+    });
 
     // 先执行瓦片合并，绘制在 fbo 中
     this.renderPipeline.addPass(composePass);
@@ -203,7 +202,7 @@ export default class ScalarFill {
    * 3. jsonArray
    * @param data
    */
-  setData(data) {
+  setData(data: LayerData) {
     if (this.tileManager) {
       return this.tileManager.setData(data);
     }
@@ -213,7 +212,7 @@ export default class ScalarFill {
   /**
    * 获取数据
    */
-  getData() {
+  getData(): LayerData {
     return this.tileManager?.getData();
   }
 
@@ -221,7 +220,7 @@ export default class ScalarFill {
    * 更新视野内的瓦片
    */
   updateTiles() {
-    const tiles = this.options.getViewTiles();
+    const tiles = this.options.getViewTiles(this.getData());
     this.tileManager.update(tiles);
   }
 
@@ -252,6 +251,8 @@ export default class ScalarFill {
           opacity: this.#opacity,
           colorRange: this.#colorRange,
           colorRampTexture: this.#colorRampTexture,
+          displayRange: this.options.displayRange,
+          useDisplayRange: Boolean(this.options.displayRange),
         },
       );
     }
