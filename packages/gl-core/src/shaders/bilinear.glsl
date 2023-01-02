@@ -1,5 +1,5 @@
 float calcTexture(const vec2 puv) {
-    return texture2D(u_image, puv).r;
+    return texture2D(u_texture, puv).r;
 }
 
 float bilinear(const vec2 uv) {

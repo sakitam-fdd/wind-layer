@@ -1,20 +1,28 @@
-import { Program, Renderer, Mesh, Geometry } from '@sakitam-gis/vis-engine';
+import {Program, Renderer, Mesh, Geometry, Texture, utils, Vector2} from '@sakitam-gis/vis-engine';
 import Pass from './base';
 import fillVert from '../../shaders/fill.vert.glsl';
 import fillFrag from '../../shaders/fill.frag.glsl';
 import * as shaderLib from '../../shaders/shaderLib';
-import { pick } from '../../utils/common';
+
+export interface ColorizePassOptions {
+  texture: Texture;
+  textureNext: Texture;
+}
 
 /**
  * 着色
  */
-export default class ColorizePass extends Pass {
+export default class ColorizePass extends Pass<ColorizePassOptions> {
   readonly #program: Program;
   readonly #mesh: Mesh;
   readonly #geometry: Geometry;
   readonly prerender = false;
 
-  constructor(id: string, renderer: Renderer, options = {}) {
+  constructor(
+    id: string,
+    renderer: Renderer,
+    options: ColorizePassOptions = {} as ColorizePassOptions,
+  ) {
     super(id, renderer, options);
 
     this.#program = new Program(renderer, {
@@ -24,23 +32,20 @@ export default class ColorizePass extends Pass {
         opacity: {
           value: 1,
         },
-        texture0: {
+        displayRange: {
           value: null,
         },
-        texture0Next: {
-          value: null,
+        u_texture: {
+          value: this.options.texture,
         },
-        texture1: {
-          value: null,
-        },
-        texture1Next: {
-          value: null,
+        u_textureNext: {
+          value: this.options.textureNext,
         },
         colorRampTexture: {
           value: null,
         },
       },
-      defines: ['RENDER_TYPE 1.0', 'USE_WGS84'],
+      defines: ['RENDER_TYPE 1.0'],
       includes: shaderLib,
     });
 
@@ -67,16 +72,28 @@ export default class ColorizePass extends Pass {
    * @param rendererState
    */
   render(rendererParams, rendererState) {
-    if (rendererParams.scene && !rendererParams.scene.contains(this.#mesh)) {
-      rendererParams.scene.add(this.#mesh);
-    }
-
     if (rendererState) {
-      const uniforms = pick(['opacity', 'colorRange', 'colorRampTexture']);
+      const uniforms = utils.pick(rendererState, [
+        'opacity',
+        'colorRange',
+        'colorRampTexture',
+        'useDisplayRange',
+        'displayRange',
+      ]);
 
       Object.keys(uniforms).forEach((key) => {
-        this.#program.setUniform(key, uniforms[key]);
+        if (uniforms[key] !== undefined) {
+          this.#mesh.program.setUniform(key, uniforms[key]);
+        }
       });
+
+      this.#mesh.program.setUniform('u_range', new Vector2(-50.84996643066404, 42.25002441406252));
+      this.#mesh.program.setUniform('u_image_res', new Vector2(this.options.texture.width, this.options.texture.height));
+
+      this.#mesh.updateMatrix();
+      this.#mesh.worldMatrixNeedsUpdate = false;
+      // this.#mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, this.#mesh.localMatrix);
+      this.#mesh.draw(rendererParams);
     }
   }
 }
