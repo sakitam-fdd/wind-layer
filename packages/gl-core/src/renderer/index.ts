@@ -150,6 +150,13 @@ export default class ScalarFill {
     }
   }
 
+  resize() {
+    if (this.renderPipeline) {
+      const attr = this.renderer.attributes;
+      this.renderPipeline.resize(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
+    }
+  }
+
   setFillColor() {
     this.buildColorRamp();
   }

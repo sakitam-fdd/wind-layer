@@ -33,21 +33,21 @@
   mapboxgl.accessToken = 'pk.eyJ1IjoidTEwaW50IiwiYSI6InQtMnZvTkEifQ.c8mhXquPE7_xoB3P4Ag8cA';
   const map = new mapboxgl.Map({
     container: 'map',
-    // style: 'mapbox://styles/mapbox/satellite-streets-v12',
-    style: {
-      version: 8,
-      sources: {
-      },
-      layers: [
-        {
-          id: 'background',
-          type: 'background',
-          layout: {
-            visibility: 'none',
-          },
-        },
-      ],
-    },
+    style: 'mapbox://styles/mapbox/satellite-streets-v12',
+    // style: {
+    //   version: 8,
+    //   sources: {
+    //   },
+    //   layers: [
+    //     {
+    //       id: 'background',
+    //       type: 'background',
+    //       layout: {
+    //         visibility: 'none',
+    //       },
+    //     },
+    //   ],
+    // },
     center: { lng: 105.70150033978689, lat: 22.76021405309811 }, // starting position [lng, lat]
     zoom: 1.5, // starting zoom
     antialias: true,
@@ -90,7 +90,7 @@
       width: 1440,
       height: 720,
     }, {
-      wrapX: false,
+      wrapX: true,
       wireframe: true,
       styleSpec: {
         'fill-color': [
@@ -106,13 +106,13 @@
           1,
           1,
           2,
-          1
+          0
         ],
       },
       renderForm: 'r',
       widthSegments: 1,
       heightSegments: 1,
-      displayRange: [0, 80],
+      displayRange: [-80, 80],
     });
 
     map.addLayer(fillLayer);

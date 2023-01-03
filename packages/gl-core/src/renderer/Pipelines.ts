@@ -19,6 +19,14 @@ export default class Pipelines {
     return this.passes.length;
   }
 
+  resize(width: number, height: number) {
+    const len = this.#passes.length;
+    for (let i = 0; i < len; i++) {
+      const pass = this.#passes[i];
+      pass.resize?.(width, height);
+    }
+  }
+
   addPass(pass) {
     this.#passes.push(pass);
   }

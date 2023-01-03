@@ -1,4 +1,12 @@
-import {Program, Renderer, Mesh, Geometry, Texture, utils, Vector2} from '@sakitam-gis/vis-engine';
+import {
+  Program,
+  Renderer,
+  Mesh,
+  Geometry,
+  Texture,
+  utils,
+  Vector2,
+} from '@sakitam-gis/vis-engine';
 import Pass from './base';
 import fillVert from '../../shaders/fill.vert.glsl';
 import fillFrag from '../../shaders/fill.frag.glsl';
@@ -52,11 +60,15 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
     this.#geometry = new Geometry(renderer, {
       position: {
         size: 2,
-        data: new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]),
+        data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
       },
       uv: {
         size: 2,
-        data: new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]),
+        data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
+      },
+      index: {
+        size: 1,
+        data: new Uint16Array([0, 1, 2, 2, 1, 3]),
       },
     });
 
@@ -72,6 +84,8 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
    * @param rendererState
    */
   render(rendererParams, rendererState) {
+    const attr = this.renderer.attributes;
+    this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
     if (rendererState) {
       const uniforms = utils.pick(rendererState, [
         'opacity',
@@ -88,11 +102,13 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
       });
 
       this.#mesh.program.setUniform('u_range', new Vector2(-50.84996643066404, 42.25002441406252));
-      this.#mesh.program.setUniform('u_image_res', new Vector2(this.options.texture.width, this.options.texture.height));
+      this.#mesh.program.setUniform(
+        'u_image_res',
+        new Vector2(this.options.texture.width, this.options.texture.height),
+      );
 
       this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;
-      // this.#mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, this.#mesh.localMatrix);
       this.#mesh.draw(rendererParams);
     }
   }

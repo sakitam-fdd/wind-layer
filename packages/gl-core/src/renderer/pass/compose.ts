@@ -52,6 +52,11 @@ export default class ComposePass extends Pass<ComposePassOptions> {
     this.#next = new RenderTarget(renderer, opt);
   }
 
+  resize(width: number, height: number) {
+    this.#current.resize(width, height);
+    this.#next.resize(width, height);
+  }
+
   get textures() {
     return {
       current: this.#current.texture,
@@ -67,6 +72,12 @@ export default class ComposePass extends Pass<ComposePassOptions> {
   render(rendererParams, rendererState) {
     if (this.#current) {
       this.#current.bind();
+      const attr = this.renderer.attributes;
+      if (attr.depth && this.#current.depth) {
+        this.renderer.state.enable(this.renderer.gl.DEPTH_TEST);
+        this.renderer.state.setDepthMask(true);
+      }
+      this.renderer.clear();
       this.renderer.setViewport(this.#current.width, this.#current.height);
     }
 

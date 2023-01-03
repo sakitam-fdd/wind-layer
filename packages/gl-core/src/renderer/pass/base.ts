@@ -1,5 +1,7 @@
 import { Renderer } from '@sakitam-gis/vis-engine';
 
+const ERR_PASS_METHOD_UNDEFINED = 'Pass subclass must define virtual methods';
+
 export default class Pass<T> {
   public id: string;
 
@@ -24,10 +26,10 @@ export default class Pass<T> {
   }
 
   render(rendererParams, rendererState) {
-    throw new Error('');
+    throw new Error(ERR_PASS_METHOD_UNDEFINED);
   }
 
   destroy() {
-    throw new Error('');
+    throw new Error(ERR_PASS_METHOD_UNDEFINED);
   }
 }

@@ -74,6 +74,7 @@ export default class ScalarFill {
 
     this.update = this.update.bind(this);
     this.handleZoom = this.handleZoom.bind(this);
+    this.handleResize = this.handleResize.bind(this);
   }
 
   get camera() {
@@ -91,13 +92,19 @@ export default class ScalarFill {
     }
   }
 
-  public handleZoom() {
+  handleResize() {
+    if (this.scalarFill) {
+      this.scalarFill.resize();
+    }
+  }
+
+  handleZoom() {
     if (this.scalarFill) {
       this.scalarFill.handleZoom();
     }
   }
 
-  public updateOptions(options: Partial<IScalarFillOptions>) {
+  updateOptions(options: Partial<IScalarFillOptions>) {
     this.options = {
       ...this.options,
       ...(options || {}),
@@ -108,7 +115,7 @@ export default class ScalarFill {
     }
   }
 
-  public onAdd(map: mapboxgl.Map, gl: WebGLRenderingContext) {
+  onAdd(map: mapboxgl.Map, gl: WebGLRenderingContext) {
     this.gl = gl;
     this.map = map;
 
@@ -217,11 +224,12 @@ export default class ScalarFill {
       this.setData(this.data);
     }
     map.on('move', this.update);
-    map.on('resize', this.update);
+    map.on('zoom', this.handleZoom);
+    map.on('resize', this.handleResize);
     this.update();
   }
 
-  public setData(data: any) {
+  setData(data: any) {
     return new Promise((resolve) => {
       this.data = data;
       if (this.data && this.scalarFill) {
@@ -232,13 +240,13 @@ export default class ScalarFill {
     });
   }
 
-  public onRemove() {
+  onRemove() {
     if (this.scalarFill) {
       this.scalarFill = null;
     }
     this.map?.off('zoom', this.handleZoom);
     this.map?.off('move', this.update);
-    this.map?.off('resize', this.update);
+    this.map?.off('resize', this.handleResize);
     this.map = null;
     this.gl = null;
   }
@@ -248,7 +256,6 @@ export default class ScalarFill {
     this.scene.updateMatrixWorld();
     this.camera.updateMatrixWorld();
     this.scalarFill?.prerender(this.camera);
-    this.renderer.resetState();
   }
 
   render() {
@@ -256,6 +263,5 @@ export default class ScalarFill {
     this.scene.updateMatrixWorld();
     this.camera.updateMatrixWorld();
     this.scalarFill?.render(this.orthoCamera);
-    this.renderer.resetState();
   }
 }
