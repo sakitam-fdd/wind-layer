@@ -29,6 +29,9 @@ void main () {
     #ifdef USE_WGS84
     uv = mercatorToWGS84(vUv);
     #endif
+    if(texture2D(u_texture, uv).a == 0.0) {
+        discard;
+    }
     float value = getValue(uv);
     float value_t = (value - colorRange.x) / (colorRange.y - colorRange.x);
     vec2 ramp_pos = vec2(value_t, 0.5);

@@ -93,9 +93,13 @@ export default class ScalarFill {
   }
 
   handleResize() {
+    if (this.renderer && this.gl) {
+      this.renderer.setSize(this.gl?.canvas?.width, this.gl?.canvas?.height);
+    }
     if (this.scalarFill) {
       this.scalarFill.resize();
     }
+    this.update();
   }
 
   handleZoom() {

@@ -55,6 +55,7 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
       },
       defines: ['RENDER_TYPE 1.0'],
       includes: shaderLib,
+      transparent: true,
     });
 
     this.#geometry = new Geometry(renderer, {
@@ -107,7 +108,6 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
         new Vector2(this.options.texture.width, this.options.texture.height),
       );
 
-      this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;
       this.#mesh.draw(rendererParams);
     }
