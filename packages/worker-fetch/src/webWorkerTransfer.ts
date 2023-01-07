@@ -1,4 +1,5 @@
 import { isImageBitmap, isArrayBuffer } from './util';
+import { AJAXError } from './Request';
 
 type SerializedObject<S extends Serialized = any> = {
   [_: string]: S;
@@ -73,6 +74,7 @@ export function register<T>(
 
 register('Object', Object);
 register('Error', Error);
+register('AJAXError', AJAXError);
 
 /**
  * Serialize the given object for transfer to or from a web worker.
