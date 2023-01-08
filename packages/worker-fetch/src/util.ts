@@ -151,6 +151,7 @@ export function arrayBufferToImageBitmap(
   const blob: Blob = new Blob([new Uint8Array(data)], { type: 'image/png' });
   createImageBitmap(blob, {
     imageOrientation: 'flipY',
+    premultiplyAlpha: 'none',
   })
     .then((imgBitmap) => {
       callback(null, imgBitmap);
@@ -196,4 +197,32 @@ export function arrayBufferToImage(
     );
   const blob: Blob = new Blob([new Uint8Array(data)], { type: 'image/png' });
   img.src = data.byteLength ? URL.createObjectURL(blob) : transparentPngUrl;
+}
+
+/*
+Takes in a flattened one dimensional array
+representing two-dimensional pixel values
+and returns an array of arrays.
+*/
+export function unflatten(valuesInOneDimension, size) {
+  const { height, width } = size;
+  const valuesInTwoDimensions: any[] = [];
+  for (let y = 0; y < height; y++) {
+    const start = y * width;
+    const end = start + width;
+    valuesInTwoDimensions.push(valuesInOneDimension.slice(start, end));
+  }
+  return valuesInTwoDimensions;
+}
+
+export function parseMetedata(str: string) {
+  const array = str.split(',');
+  const res = array.map((item) => {
+    const kv = item.split(':');
+    return {
+      [kv[0]]: isNaN(parseFloat(kv[1])) ? kv[1] : parseFloat(kv[1]),
+    };
+  });
+
+  return res.reduce((pre, cur) => Object.assign({}, pre, cur), {});
 }

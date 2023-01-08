@@ -29,25 +29,26 @@
 <!--<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/mapbox-wind@1.0.0-alpha.10/dist/mapbox-wind.js"></script>-->
 <script src="../packages/mapbox-gl/dist/mapbox-wind.js"></script>
 <script src="https://unpkg.com/dat.gui@0.7.9/build/dat.gui.min.js"></script>
+<script src="https://unpkg.com/twgl.js@5.3.0/dist/5.x/twgl.js"></script>
 <script>
   mapboxgl.accessToken = 'pk.eyJ1IjoidTEwaW50IiwiYSI6InQtMnZvTkEifQ.c8mhXquPE7_xoB3P4Ag8cA';
   const map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/mapbox/satellite-streets-v12',
-    // style: {
-    //   version: 8,
-    //   sources: {
-    //   },
-    //   layers: [
-    //     {
-    //       id: 'background',
-    //       type: 'background',
-    //       layout: {
-    //         visibility: 'none',
-    //       },
-    //     },
-    //   ],
-    // },
+    // style: 'mapbox://styles/mapbox/satellite-streets-v12',
+    style: {
+      version: 8,
+      sources: {
+      },
+      layers: [
+        {
+          id: 'background',
+          type: 'background',
+          layout: {
+            visibility: 'none',
+          },
+        },
+      ],
+    },
     center: { lng: 105.70150033978689, lat: 22.76021405309811 }, // starting position [lng, lat]
     zoom: 1.5, // starting zoom
     antialias: true,
@@ -80,15 +81,15 @@
 
       type: "image",
       // url: "https://a.basemaps.cartocdn.com/dark_all/0/0/0.png",
-      url: "http://localhost:63342/wind-layer/examples/data/var_tmp.png",
+      url: "./data/1.png",
       extent: [
         [-180, 85.051129],
         [180, 85.051129],
         [180, -85.051129],
         [-180, -85.051129],
       ],
-      width: 1440,
-      height: 720,
+      width: 512,
+      height: 512,
     }, {
       wrapX: true,
       wireframe: true,
@@ -106,7 +107,7 @@
           1,
           1,
           2,
-          1
+          0.5
         ],
       },
       renderForm: 'r',
@@ -117,6 +118,102 @@
 
     map.addLayer(fillLayer);
   });
+
+  async function main() {
+    const gl = document.createElement('canvas').getContext('webgl');
+    gl.canvas.width = 1;
+    gl.canvas.height = 1;
+    gl.viewport(0, 0, 1, 1);
+
+    const req = await fetch('https://cdn.jsdelivr.net/npm/glsl-read-float@1.1.0/index.glsl')
+    const glslFn = await req.text();
+
+    const vs = `
+    attribute vec4 position;
+    void main() {
+     gl_PointSize = 1.0;
+     // gl_Position = vec4(vec3(0), 1);
+     gl_Position = position;
+  }
+  `;
+
+    const fs = `
+    precision highp float;
+    uniform sampler2D tex;
+
+   ${glslFn}
+
+   // note: the 0.1s here an there are voodoo related to precision
+   float decode_float(vec4 v) {
+     vec4 bits = v * 255.0;
+     float sign = mix(-1.0, 1.0, step(bits[3], 128.0));
+     float expo = floor(mod(bits[3] + 0.1, 128.0)) * 2.0 +
+                  floor((bits[2] + 0.1) / 128.0) - 127.0;
+     float sig = bits[0] +
+                 bits[1] * 256.0 +
+                 floor(mod(bits[2] + 0.1, 128.0)) * 256.0 * 256.0;
+     return sign * (1.0 + sig / 8388607.0) * pow(2.0, expo);
+   }
+
+   void main() {
+     float value = decode_float(texture2D(tex, vec2(0)));
+     gl_FragColor = encode_float(value).abgr;
+   }
+`;
+
+    const prg = twgl.createProgram(gl, [vs, fs]);
+    const vLoc = gl.getUniformLocation(prg, 'value');
+    gl.useProgram(prg);
+
+    // if safari
+    {
+      // Safari fails if you don't have at least one attribute.
+      // meaning it fails the WebGL Conformance Tests and has for > 4 years
+      // in one of many ways.
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, 1, gl.STATIC_DRAW);
+      const pLoc = gl.getAttribLocation(prg, "position");
+      gl.enableVertexAttribArray(pLoc);
+      gl.vertexAttribPointer(pLoc, 1, gl.UNSIGNED_BYTE, false, 0, 0);
+    }
+
+    gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+
+    function test(v) {
+      const float = new Float32Array([v]);
+      const data = new Uint8Array(float.buffer);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+      gl.drawArrays(gl.POINTS, 0, 1);
+      const f = new Float32Array(1);
+      const u = new Uint8Array(f.buffer);
+      gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, u);
+
+      log(`in: ${(new Float32Array([v]))[0]}, out: ${f[0]}`);
+    }
+
+    test(123.456);
+    test(0.00913);
+    test(1000000.1);
+    test(0.0000001);
+    test(-123.456);
+    test(-0.00913);
+    test(-1000000.1);
+    test(-0.0000001);
+    test(0.0);
+    test(1/0);
+    test(-1/0);
+    test(1.175494351E-38),
+      test(3.402823465E37),
+      test(1+'foo');  // NaN
+  }
+
+  function log(...args) {
+    const elem = document.createElement('pre');
+    elem.textContent = args.join(' ');
+    document.body.appendChild(elem);
+  }
+
+  main();
 </script>
 </body>
 </html>

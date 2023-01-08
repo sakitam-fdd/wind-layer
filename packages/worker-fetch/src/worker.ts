@@ -31,7 +31,7 @@ export default class Worker {
       if (err) {
         callback(err);
       } else {
-        this.request.arrayBuffer2Image(data, callback);
+        this.request.arrayBuffer2unit8(data, callback);
       }
     });
     this.cancelMap.set(cancelId, cancel);

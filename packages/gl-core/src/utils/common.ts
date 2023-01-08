@@ -59,3 +59,33 @@ export function findStopLessThanOrEqualTo(stops: number[], input: number) {
 
   return 0;
 }
+
+let linkEl;
+
+/**
+ * 使用相对地址时使用 `a.href` 和 `image.src` 可以获取完整的 url
+ * 但是不同的是 `image.src` 会直接请求资源。
+ * @param path
+ */
+export function resolveURL(path: string): string {
+  if (!linkEl) linkEl = document.createElement('a');
+  linkEl.href = path;
+  return linkEl.href;
+}
+
+/**
+ * 判断大小端
+ */
+export const littleEndian = (function machineIsLittleEndian() {
+  const uint8Array = new Uint8Array([0xAA, 0xBB]);
+  const uint16array = new Uint16Array(uint8Array.buffer);
+  return uint16array[0] === 0xBBAA;
+})();
+
+/**
+ * 判断数据是否是 `ImageBitmap`
+ * @param image
+ */
+export function isImageBitmap(image: any): image is ImageBitmap {
+  return typeof ImageBitmap !== 'undefined' && image instanceof ImageBitmap;
+}

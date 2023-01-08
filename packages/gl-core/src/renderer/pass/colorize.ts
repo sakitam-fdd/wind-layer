@@ -8,6 +8,7 @@ import {
   Vector2,
 } from '@sakitam-gis/vis-engine';
 import Pass from './base';
+import { littleEndian } from '../../utils/common';
 import fillVert from '../../shaders/fill.vert.glsl';
 import fillFrag from '../../shaders/fill.frag.glsl';
 import * as shaderLib from '../../shaders/shaderLib';
@@ -41,7 +42,7 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
           value: 1,
         },
         displayRange: {
-          value: null,
+          value: new Vector2(-Infinity, Infinity),
         },
         u_texture: {
           value: this.options.texture,
@@ -53,7 +54,7 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
           value: null,
         },
       },
-      defines: ['RENDER_TYPE 1.0'],
+      defines: ['RENDER_TYPE 1.0', `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
       transparent: true,
     });

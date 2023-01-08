@@ -1,5 +1,6 @@
 import { Program, Renderer, Geometry, Plane, Texture } from '@sakitam-gis/vis-engine';
 import TileMesh from './TileMesh';
+import { resolveURL, isImageBitmap } from '../../utils/common';
 
 export enum TileState {
   loading = '0',
@@ -160,7 +161,7 @@ export default class Tile {
       this.actor.send(
         'loadData',
         {
-          url,
+          url: resolveURL(url),
           cancelId: url,
           type: 'arrayBuffer',
         },
@@ -249,13 +250,14 @@ export default class Tile {
 
   createTextures(index: number, image) {
     const texture = this.#textures.get(index);
+    const iib = isImageBitmap(image) || image instanceof Image;
     if (texture) {
-      texture.setData(image);
+      texture.setData(iib ? image : image.data);
     } else {
       this.#textures.set(
         index,
         new Texture(this.renderer, {
-          image,
+          image: iib ? image : image.data,
           width: image.width,
           height: image.height,
           minFilter: this.renderer.gl.LINEAR,
@@ -263,6 +265,7 @@ export default class Tile {
           wrapS: this.renderer.gl.CLAMP_TO_EDGE,
           wrapT: this.renderer.gl.CLAMP_TO_EDGE,
           flipY: true, // 注意，对 ImageBitmap 无效
+          premultiplyAlpha: false, // 禁用 `Alpha` 预乘
         }),
       );
     }

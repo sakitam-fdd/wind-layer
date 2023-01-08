@@ -1,5 +1,13 @@
+import { fromArrayBuffer, Pool } from 'geotiff';
 import RequestScheduler from './RequestScheduler';
-import { arrayBufferToImage, arrayBufferToImageBitmap, getReferrer, isWorker, warnOnce } from './util';
+import {
+  arrayBufferToImageBitmap,
+  getReferrer,
+  isWorker,
+  warnOnce,
+  unflatten,
+  parseMetedata,
+} from './util';
 import { decode, toRGBA8 } from './UPNG';
 
 export type RequestParameters = {
@@ -250,6 +258,16 @@ export const makeRequest = function (
   return makeXMLHttpRequest(requestParameters, callback);
 };
 
+let pool: Pool;
+
+export function getPool() {
+  if (!pool) {
+    pool = new Pool();
+  }
+
+  return pool;
+}
+
 export class RequestAdapter {
   public requestScheduler: RequestScheduler;
 
@@ -265,20 +283,99 @@ export class RequestAdapter {
     return makeRequest(params, callback);
   }
 
+  /**
+   * arrayBuffer 转 Unit8
+   * @param data
+   * @param callback
+   */
   arrayBuffer2unit8(data: ArrayBuffer, callback: any) {
     const pngImage = decode(data);
 
     const pixels = toRGBA8(pngImage);
-    callback(null, new Uint8Array(pixels[0]));
+    callback(null, {
+      data: new Uint8Array(pixels[0]),
+      width: pngImage.width,
+      height: pngImage.height,
+    });
   }
 
+  /**
+   * arrayBuffer 转图像
+   * 1. 如果支持 ImageBitmap 则生成 `ImageBitmap` 除了极少数浏览器不支持外兼容性尚可
+   * 2. 在 safari 和移动浏览器下配合 rgba2float 有精度问题，不建议使用
+   * @param data
+   * @param callback
+   */
   arrayBuffer2Image(data: ArrayBuffer, callback: any) {
     const imageBitmapSupported = typeof createImageBitmap === 'function';
     if (imageBitmapSupported) {
       arrayBufferToImageBitmap(data, callback);
     } else {
-      arrayBufferToImage(data, callback);
+      this.arrayBuffer2unit8(data, callback);
     }
+  }
+
+  arrayBuffer2tiff(data: ArrayBuffer, callback: any) {
+    fromArrayBuffer(data)
+      .then((geotiff) => {
+        geotiff
+          .getImage()
+          .then((image) => {
+            const result: any = {};
+            const fileDirectory = image.fileDirectory;
+
+            const { GeographicTypeGeoKey, ProjectedCSTypeGeoKey } = image.getGeoKeys();
+
+            result.projection = ProjectedCSTypeGeoKey || GeographicTypeGeoKey;
+
+            const height = image.getHeight();
+            result.height = height;
+            const width = image.getWidth();
+            result.width = width;
+
+            const [resolutionX, resolutionY] = image.getResolution();
+            result.pixelHeight = Math.abs(resolutionY);
+            result.pixelWidth = Math.abs(resolutionX);
+
+            const [originX, originY] = image.getOrigin();
+            result.xmin = originX;
+            result.xmax = result.xmin + width * result.pixelWidth;
+            result.ymax = originY;
+            result.ymin = result.ymax - height * result.pixelHeight;
+
+            result.noDataValue = fileDirectory.GDAL_NODATA
+              ? parseFloat(fileDirectory.GDAL_NODATA)
+              : null;
+
+            result.numberOfRasters = fileDirectory.SamplesPerPixel;
+
+            image
+              .readRasters({
+                pool: getPool(),
+              })
+              .then((rasters) => {
+                result.values = rasters.map(
+                  (valuesInOneDimension) =>
+                    unflatten(valuesInOneDimension, { height, width }) as any,
+                );
+                result.rasters = rasters;
+                result.metadata = image.getGDALMetadata();
+                const metadata = parseMetedata(fileDirectory.ImageDescription || '');
+                result.min = metadata.min;
+                result.max = metadata.max;
+                callback(null, result);
+              })
+              .catch((err) => {
+                callback(err);
+              });
+          })
+          .catch((err) => {
+            callback(err);
+          });
+      })
+      .catch((err) => {
+        callback(err);
+      });
   }
 
   fetch(params, callback) {
