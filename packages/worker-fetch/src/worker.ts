@@ -24,6 +24,12 @@ export default class Worker {
     this.referrer = referrer;
   }
 
+  configDeps(dispatcherId: string, deps: string[]) {
+    if (deps && Array.isArray(deps) && deps.length > 0) {
+      self.importScripts(...deps);
+    }
+  }
+
   loadData(dispatcherId: string, params: any, callback: any) {
     const cancelId = params?.cancelId;
     const { cancel } = this.request.fetch(params, (err, data) => {
@@ -31,7 +37,7 @@ export default class Worker {
       if (err) {
         callback(err);
       } else {
-        this.request.arrayBuffer2unit8(data, callback);
+        this.request.arrayBuffer2tiff(data, callback);
       }
     });
     this.cancelMap.set(cancelId, cancel);

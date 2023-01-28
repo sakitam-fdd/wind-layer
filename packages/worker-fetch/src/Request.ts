@@ -1,4 +1,4 @@
-import { fromArrayBuffer, Pool } from 'geotiff';
+// import * as GeoTIFF from 'geotiff/dist-module/geotiff';
 import RequestScheduler from './RequestScheduler';
 import {
   arrayBufferToImageBitmap,
@@ -258,11 +258,13 @@ export const makeRequest = function (
   return makeXMLHttpRequest(requestParameters, callback);
 };
 
-let pool: Pool;
+let pool;
 
 export function getPool() {
   if (!pool) {
-    pool = new Pool();
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    pool = new self.GeoTIFF.Pool();
   }
 
   return pool;
@@ -316,7 +318,16 @@ export class RequestAdapter {
   }
 
   arrayBuffer2tiff(data: ArrayBuffer, callback: any) {
-    fromArrayBuffer(data)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    if (!self.GeoTIFF) {
+      throw new Error(
+        'Must config [geotiff](https://github.com/geotiffjs/geotiff.js) dep use `configDeps`',
+      );
+    }
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    self.GeoTIFF.fromArrayBuffer(data)
       .then((geotiff) => {
         geotiff
           .getImage()
@@ -350,9 +361,7 @@ export class RequestAdapter {
             result.numberOfRasters = fileDirectory.SamplesPerPixel;
 
             image
-              .readRasters({
-                pool: getPool(),
-              })
+              .readRasters()
               .then((rasters) => {
                 result.values = rasters.map(
                   (valuesInOneDimension) =>
@@ -363,6 +372,7 @@ export class RequestAdapter {
                 const metadata = parseMetedata(fileDirectory.ImageDescription || '');
                 result.min = metadata.min;
                 result.max = metadata.max;
+                result.isTiff = true;
                 callback(null, result);
               })
               .catch((err) => {

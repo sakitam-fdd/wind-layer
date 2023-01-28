@@ -68,6 +68,11 @@ export const defaultOptions: ScalarFillOptions = {
   waitTilesLoaded: false,
 };
 
+/**
+ * 因为使用的是共享 worker 所以外部依赖仅需要注册一次
+ */
+let registerDeps = false;
+
 export default class ScalarFill {
   private options: ScalarFillOptions;
   private uid: string;
@@ -106,6 +111,12 @@ export default class ScalarFill {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.dispatcher = new wgw.Dispatcher(wgw.getGlobalWorkerPool(), this, this.uid);
+
+    if (!registerDeps) {
+      const deps = wgw.getConfigDeps();
+      this.dispatcher.broadcast('configDeps', deps);
+      registerDeps = true;
+    }
 
     this.tileManager = new TileManager(this.renderer, this.scene, {
       dispatcher: this.dispatcher,

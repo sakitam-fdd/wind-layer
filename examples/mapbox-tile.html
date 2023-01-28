@@ -32,6 +32,21 @@
 <script src="https://unpkg.com/twgl.js@5.3.0/dist/5.x/twgl.js"></script>
 <script>
   mapboxgl.accessToken = 'pk.eyJ1IjoidTEwaW50IiwiYSI6InQtMnZvTkEifQ.c8mhXquPE7_xoB3P4Ag8cA';
+
+  // if (mapboxgl.Map.prototype._setupPainter.toString().indexOf('webgl2') === -1) {
+  //   const setupPainterPrev = mapboxgl.Map.prototype._setupPainter;
+  //   mapboxgl.Map.prototype._setupPainter = function () {
+  //     const getContextPrev = this._canvas.getContext;
+  //     this._canvas.getContext = function (name, attrib) {
+  //       return getContextPrev.apply(this, ['webgl2', attrib]) ||
+  //         getContextPrev.apply(this, ['webgl', attrib]) ||
+  //         getContextPrev.apply(this, ['experimental-webgl', attrib]);
+  //     };
+  //     setupPainterPrev.apply(this);
+  //     this._canvas.getContext = getContextPrev;
+  //   };
+  // }
+
   const map = new mapboxgl.Map({
     container: 'map',
     // style: 'mapbox://styles/mapbox/satellite-streets-v12',
@@ -73,6 +88,8 @@
   map.on('load', function () {
     const tempInterpolateColor = color.temp.reduce((result, item, key) => result.concat(item[0] - 273.15, 'rgba(' + item[1].join(',') + ')'), []);
 
+    mapboxWind.configDeps(['https://unpkg.com/geotiff@2.0.7/dist-browser/geotiff.js']);
+
     const fillLayer = new mapboxWind.ScalarFill('temp', {
       // type: "tile",
       // tileSize: 256,
@@ -81,7 +98,50 @@
 
       type: "image",
       // url: "https://a.basemaps.cartocdn.com/dark_all/0/0/0.png",
-      url: "./data/1.png",
+      url: "./data/temp.tiff",
+      extent: [
+        [-180, 85.051129],
+        [180, 85.051129],
+        [180, -85.051129],
+        [-180, -85.051129],
+      ],
+      width: 512,
+      height: 512,
+    }, {
+      wrapX: true,
+      wireframe: true,
+      styleSpec: {
+        'fill-color': [
+          'interpolate',
+          ['linear'],
+          ['get', 'value'],
+          ...tempInterpolateColor
+        ],
+        'opacity': [
+          'interpolate',
+          ['exponential', 0.5],
+          ['zoom'],
+          1,
+          1,
+          2,
+          0.5
+        ],
+      },
+      renderForm: 'r',
+      widthSegments: 1,
+      heightSegments: 1,
+      displayRange: [-80, 80],
+    });
+
+    const fillLayer1 = new mapboxWind.ScalarFill('temp1', {
+      // type: "tile",
+      // tileSize: 256,
+      // url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+      // subdomains: ['a', 'b', 'c', 'd'],
+
+      type: "image",
+      // url: "https://a.basemaps.cartocdn.com/dark_all/0/0/0.png",
+      url: "./data/temp.tiff",
       extent: [
         [-180, 85.051129],
         [180, 85.051129],
@@ -117,6 +177,7 @@
     });
 
     map.addLayer(fillLayer);
+    map.addLayer(fillLayer1);
   });
 
   async function main() {

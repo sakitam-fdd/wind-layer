@@ -46,6 +46,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
       height: this.renderer.height,
       minFilter: renderer.gl.NEAREST,
       magFilter: renderer.gl.NEAREST,
+      type: this.renderer.gl.FLOAT,
     };
 
     this.#current = new RenderTarget(renderer, opt);

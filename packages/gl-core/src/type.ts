@@ -1,10 +1,12 @@
 export enum RenderFrom {
   // 标量值
   r = 'r',
-  // 矢量值
+  // 矢量值 (暂不可用)
   rg = 'rg',
-  // 一般用于浮点值（精度最高）
+  // 一般用于浮点值（需要在 glsl 中做 rgba2float 转换）
   rgba = 'rgba',
+  // 浮点值（精度最高）
+  float = 'float',
 }
 
 export enum LayerDataType {

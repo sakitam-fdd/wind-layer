@@ -5,7 +5,7 @@ import request from './Request';
 import RequestScheduler from './RequestScheduler';
 import ThrottledInvoker from './ThrottledInvoker';
 import { getReferrer } from './util';
-import { setWorkerUrl } from './config';
+import { setWorkerUrl, configDeps, getConfigDeps } from './config';
 import { register } from './webWorkerTransfer';
 import * as utils from './util';
 
@@ -27,6 +27,8 @@ const exported = {
   utils,
   request,
   register,
+  configDeps,
+  getConfigDeps,
   prewarm,
   getReferrer,
   setWorkerUrl,

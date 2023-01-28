@@ -54,7 +54,7 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
           value: null,
         },
       },
-      defines: ['RENDER_TYPE 1.0', `LITTLE_ENDIAN ${littleEndian}`],
+      defines: ['RENDER_TYPE 2.0', `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
       transparent: true,
     });

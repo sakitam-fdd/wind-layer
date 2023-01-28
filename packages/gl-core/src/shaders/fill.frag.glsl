@@ -22,7 +22,11 @@ vec4 calcTexture(const vec2 puv) {
 }
 
 float decodeValue(const vec2 vc) {
-    return decode_float(calcTexture(vc), LITTLE_ENDIAN);
+    if(RENDER_TYPE == 2.0) {
+        return calcTexture(vc).r;
+    } else {
+        return decode_float(calcTexture(vc), LITTLE_ENDIAN);
+    }
 }
 
 float getValue(const vec2 uv) {

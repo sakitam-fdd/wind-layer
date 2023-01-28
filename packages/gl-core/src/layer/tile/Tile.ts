@@ -252,12 +252,12 @@ export default class Tile {
     const texture = this.#textures.get(index);
     const iib = isImageBitmap(image) || image instanceof Image;
     if (texture) {
-      texture.setData(iib ? image : image.data);
+      texture.setData(iib ? image : image?.isTiff ? image.rasters[0] : image.data);
     } else {
       this.#textures.set(
         index,
         new Texture(this.renderer, {
-          image: iib ? image : image.data,
+          image: iib ? image : image?.isTiff ? image.rasters[0] : image.data,
           width: image.width,
           height: image.height,
           minFilter: this.renderer.gl.LINEAR,
@@ -266,6 +266,8 @@ export default class Tile {
           wrapT: this.renderer.gl.CLAMP_TO_EDGE,
           flipY: true, // 注意，对 ImageBitmap 无效
           premultiplyAlpha: false, // 禁用 `Alpha` 预乘
+          type: image?.isTiff ? this.renderer.gl.FLOAT : this.renderer.gl.UNSIGNED_BYTE,
+          format: image?.isTiff ? this.renderer.gl.LUMINANCE : this.renderer.gl.RGBA,
         }),
       );
     }
