@@ -1,36 +1,7 @@
-import { Program, Renderer, Geometry, Plane, Texture } from '@sakitam-gis/vis-engine';
+import { Geometry, Plane, Program, Renderer, Texture } from '@sakitam-gis/vis-engine';
 import TileMesh from './TileMesh';
-import { resolveURL, isImageBitmap } from '../../utils/common';
-
-export enum TileState {
-  loading = '0',
-  loaded = '1',
-  errored = '2',
-}
-
-/**
- * 瓦片尺寸
- */
-export interface TileSize {
-  /**
-   * 瓦片宽度
-   */
-  width: number;
-  /**
-   * 瓦片高度
-   */
-  height: number;
-}
-
-/**
- * 瓦片范围
- */
-export interface TileBounds {
-  left: number;
-  top: number;
-  right: number;
-  bottom: number;
-}
+import { DecodeType, TileState, TileSize, TileBounds, LayerData } from '../../type';
+import { isImageBitmap, resolveURL } from '../../utils/common';
 
 export interface TileOptions {
   /**
@@ -38,12 +9,14 @@ export interface TileOptions {
    */
   url: string | string[];
   actor: any;
+  userData: LayerData;
   tileBounds: TileBounds;
   tileSize: TileSize;
   onLoad: (ctx: Tile) => void;
   wrap?: number;
   tileZoom?: number;
   tileKey?: string;
+  decodeType?: DecodeType;
 }
 
 /**
@@ -95,6 +68,13 @@ export default class Tile {
    */
   public tileBounds: TileBounds;
 
+  /**
+   * 数据解析类型
+   */
+  public decodeType: DecodeType;
+
+  public userData: LayerData;
+
   public actor: any;
 
   public tileCenter: [number, number, number];
@@ -132,6 +112,8 @@ export default class Tile {
     this.tileSize = options.tileSize;
     this.tileBounds = options.tileBounds;
     this.tileCenter = this.getCenter();
+    this.decodeType = options.decodeType ?? DecodeType.image;
+    this.userData = options.userData;
 
     this.#onLoad = options.onLoad;
     this.#request = new Map();
@@ -164,6 +146,7 @@ export default class Tile {
           url: resolveURL(url),
           cancelId: url,
           type: 'arrayBuffer',
+          decodeType: this.decodeType,
         },
         (e, data) => {
           if (e) {

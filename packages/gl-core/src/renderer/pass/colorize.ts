@@ -12,10 +12,12 @@ import { littleEndian } from '../../utils/common';
 import fillVert from '../../shaders/fill.vert.glsl';
 import fillFrag from '../../shaders/fill.frag.glsl';
 import * as shaderLib from '../../shaders/shaderLib';
+import { RenderType } from '../../type';
 
 export interface ColorizePassOptions {
   texture: Texture;
   textureNext: Texture;
+  renderType: RenderType;
 }
 
 /**
@@ -54,7 +56,7 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
           value: null,
         },
       },
-      defines: ['RENDER_TYPE 2.0', `LITTLE_ENDIAN ${littleEndian}`],
+      defines: [`RENDER_TYPE ${this.options.renderType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
       transparent: true,
     });
@@ -92,6 +94,7 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
       const uniforms = utils.pick(rendererState, [
         'opacity',
         'colorRange',
+        'dataRange',
         'colorRampTexture',
         'useDisplayRange',
         'displayRange',
@@ -103,7 +106,6 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
         }
       });
 
-      this.#mesh.program.setUniform('u_range', new Vector2(-50.84996643066404, 42.25002441406252));
       this.#mesh.program.setUniform(
         'u_image_res',
         new Vector2(this.options.texture.width, this.options.texture.height),

@@ -1,13 +1,14 @@
 import { Renderer, Scene, Program } from '@sakitam-gis/vis-engine';
 import Tile from './Tile';
 import LRUCache from './LRUCache';
-import { LayerData, LayerDataType } from '../../type';
+import { DecodeType, LayerData, LayerDataType, TileLike } from '../../type';
 
 export interface TileManagerOptions {
   maxSize: number;
   dispatcher: any;
   program: Program;
   data: LayerData;
+  decodeType?: DecodeType;
 }
 
 const URL_PATTERN = /\{ *([\w_]+) *\}/g;
@@ -126,7 +127,7 @@ export default class TileManager {
     return this.#data;
   }
 
-  update(tiles: any[]) {
+  update(tiles: TileLike[]) {
     const iterator = this.#tiles.entries();
     for (let i = 0; i < this.#tiles.size; i++) {
       const [key, tile] = iterator.next().value;
@@ -146,10 +147,12 @@ export default class TileManager {
           tile = new Tile(this.renderer, t.x, t.y, t.z, {
             actor,
             url: this.getUrl(t.x, t.y, t.z, this.#data),
+            userData: this.#data,
             wrap: t.wrap,
             tileSize: t.size,
             tileKey: t.tileKey,
             tileBounds: t.bounds,
+            decodeType: this.options.decodeType,
             onLoad: (ctx) => {
               this.#cache.add(ctx.tileKey, ctx);
             },

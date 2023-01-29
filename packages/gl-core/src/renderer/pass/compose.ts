@@ -4,10 +4,11 @@ import vert from '../../shaders/compose.vert.glsl';
 import frag from '../../shaders/compose.frag.glsl';
 import * as shaderLib from '../../shaders/shaderLib';
 import TileManager from '../../layer/tile/TileManager';
-import { TileState } from '../../layer/tile/Tile';
+import { TileState, RenderType } from '../../type';
 
 export interface ComposePassOptions {
   tileManager: TileManager;
+  renderType: RenderType;
 }
 
 /**
@@ -37,7 +38,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
           value: undefined,
         },
       },
-      defines: ['RENDER_TYPE 1.0', 'USE_WGS84'],
+      defines: [`RENDER_TYPE ${this.options.renderType}`, 'USE_WGS84'],
       includes: shaderLib,
     });
 

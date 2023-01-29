@@ -6,7 +6,11 @@ uniform sampler2D u_texture;
 uniform sampler2D colorRampTexture;
 
 uniform vec2 u_image_res;
-uniform vec2 u_range;
+#if RENDER_TYPE == 1
+uniform vec4 dataRange;
+#else
+uniform vec2 dataRange;
+#endif
 uniform vec2 colorRange;
 uniform bool useDisplayRange;
 uniform vec2 displayRange;
@@ -21,15 +25,41 @@ vec4 calcTexture(const vec2 puv) {
     return texture2D(u_texture, puv);
 }
 
+#if RENDER_TYPE == 3
+// float
 float decodeValue(const vec2 vc) {
-    if(RENDER_TYPE == 2.0) {
-        return calcTexture(vc).r;
-    } else {
-        return decode_float(calcTexture(vc), LITTLE_ENDIAN);
-    }
+    return calcTexture(vc).r;
 }
+#elif RENDER_TYPE == 2
+// rgba decode float
+float decodeValue(const vec2 vc) {
+    return decode_float(calcTexture(vc), LITTLE_ENDIAN);
+}
+#elif RENDER_TYPE == 1
+// rg
+vec2 decodeValue(const vec2 vc) {
+    vec4 rgba = calcTexture(vc);
+    return rgba.rg;
+}
+#else
+float decodeValue(const vec2 vc) {
+    return calcTexture(vc).r;
+}
+#endif
 
-float getValue(const vec2 uv) {
+#if RENDER_TYPE == 1
+vec2 bilinear(const vec2 uv) {
+    vec2 px = 1.0 / u_image_res;
+    vec2 vc = (floor(uv * u_image_res)) * px;
+    vec2 f = fract(uv * u_image_res);
+    vec2 tl = decodeValue(vc);
+    vec2 tr = decodeValue(vc + vec2(px.x, 0));
+    vec2 bl = decodeValue(vc + vec2(0, px.y));
+    vec2 br = decodeValue(vc + px);
+    return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
+}
+#else
+float bilinear(const vec2 uv) {
     vec2 px = 1.0 / u_image_res;
     vec2 vc = (floor(uv * u_image_res)) * px;
     vec2 f = fract(uv * u_image_res);
@@ -39,6 +69,30 @@ float getValue(const vec2 uv) {
     float br = decodeValue(vc + px);
     return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
 }
+#endif
+
+#if RENDER_TYPE == 1
+float getValue(const vec2 uv) {
+    float rmin = dataRange.x;
+    float rmax = dataRange.y;
+    float gmin = dataRange.z;
+    float gmax = dataRange.w;
+    vec2 rg = bilinear(uv);
+    return length(rg * (vec2(rmax, gmax) - vec2(rmin, gmin)) + vec2(rmin, gmin));
+}
+#elif RENDER_TYPE == 0
+float getValue(const vec2 uv) {
+    float min = dataRange.x;
+    float max = dataRange.y;
+    float r = bilinear(uv);
+    return r * (max - min) + min;
+}
+#else
+// float
+float getValue(const vec2 uv) {
+    return bilinear(uv);
+}
+#endif
 
 void main () {
     vec2 uv = vUv;

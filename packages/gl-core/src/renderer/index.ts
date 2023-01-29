@@ -1,12 +1,12 @@
-import { DataTexture, Renderer, Scene, utils, Vector2 } from '@sakitam-gis/vis-engine';
+import {DataTexture, Renderer, Scene, utils, Vector2} from '@sakitam-gis/vis-engine';
 import wgw from 'wind-gl-worker';
 import TileManager from '../layer/tile/TileManager';
 import Pipelines from './Pipelines';
 import ComposePass from './pass/compose';
 import ColorizePass from './pass/colorize';
-import { isFunction } from '../utils/common';
-import { createLinearGradient, createZoom } from '../utils/style-parser';
-import { RenderFrom, LayerData } from '../type';
+import {isFunction} from '../utils/common';
+import {createLinearGradient, createZoom} from '../utils/style-parser';
+import {DecodeType, getRenderType, LayerData, LayerDataType, RenderFrom} from '../type';
 
 export interface ScalarFillOptions {
   /**
@@ -17,6 +17,7 @@ export interface ScalarFillOptions {
    * 指定渲染通道
    */
   renderFrom?: RenderFrom;
+  decodeType?: DecodeType;
   styleSpec?: {
     'fill-color': any[];
     opacity: number | any[];
@@ -120,6 +121,7 @@ export default class ScalarFill {
 
     this.tileManager = new TileManager(this.renderer, this.scene, {
       dispatcher: this.dispatcher,
+      decodeType: this.options.decodeType,
     });
 
     this.initialize();
@@ -128,9 +130,10 @@ export default class ScalarFill {
   initialize() {
     this.updateOptions({});
     this.renderPipeline = new Pipelines(this.renderer);
-
+    const renderType = getRenderType(this.options.renderFrom ?? RenderFrom.r);
     const composePass = new ComposePass('compose', this.renderer, {
       tileManager: this.tileManager,
+      renderType,
     });
 
     const textures = composePass.textures;
@@ -138,6 +141,7 @@ export default class ScalarFill {
     const colorizePass = new ColorizePass('colorize', this.renderer, {
       texture: textures.current,
       textureNext: textures.next,
+      renderType,
     });
 
     // 先执行瓦片合并，绘制在 fbo 中
@@ -260,18 +264,26 @@ export default class ScalarFill {
 
   render(camera) {
     if (this.renderPipeline) {
+      const state: any = {
+        opacity: this.#opacity,
+        colorRange: this.#colorRange,
+        colorRampTexture: this.#colorRampTexture,
+        displayRange: this.options.displayRange,
+        useDisplayRange: Boolean(this.options.displayRange),
+      };
+
+      const data = this.getData();
+
+      if (data.type === LayerDataType.image) {
+        state.dataRange = data.dataRange;
+      }
+
       this.renderPipeline.render(
         {
           scene: this.scene,
           camera,
         },
-        {
-          opacity: this.#opacity,
-          colorRange: this.#colorRange,
-          colorRampTexture: this.#colorRampTexture,
-          displayRange: this.options.displayRange,
-          useDisplayRange: Boolean(this.options.displayRange),
-        },
+        state,
       );
     }
   }
