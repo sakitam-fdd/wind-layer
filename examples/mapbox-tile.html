@@ -99,14 +99,16 @@
       type: "image",
       // url: "https://a.basemaps.cartocdn.com/dark_all/0/0/0.png",
       // url: "./data/temp.tiff",
-      url: "./data/2.png",
+      // url: "./data/2.png",
+      url: "./data/10.jpeg",
       extent: [
         [-180, 85.051129],
         [180, 85.051129],
         [180, -85.051129],
         [-180, -85.051129],
       ],
-      tileSize: [512, 512],
+      // tileSize: [512, 512],
+      tileSize: [257, 257],
       dataRange: [-50.84996643066404, 42.25002441406252], // 如果是多通道的话，以以下方式组织 [[-50.84996643066404, 42.25002441406252], [-50.84996643066404, 42.25002441406252]]
     }, {
       wrapX: true,
@@ -128,7 +130,7 @@
           0.5
         ],
       },
-      decodeType: 0,
+      decodeType: 3,
       renderFrom: 'r',
       widthSegments: 1,
       heightSegments: 1,

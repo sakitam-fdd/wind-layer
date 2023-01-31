@@ -1,4 +1,4 @@
-import { utils } from '@sakitam-gis/vis-engine';
+import {utils} from '@sakitam-gis/vis-engine';
 
 export function calcMinMax(array: number[]): [number, number] {
   let min = Infinity;
@@ -88,4 +88,14 @@ export const littleEndian = (function machineIsLittleEndian() {
  */
 export function isImageBitmap(image: any): image is ImageBitmap {
   return typeof ImageBitmap !== 'undefined' && image instanceof ImageBitmap;
+}
+
+export function parseRange(exif) {
+  const string = exif?.ImageDescription || '';
+  const group = string.split(';');
+  const gs = group.filter((item) => item !== '');
+  return gs.reduce(
+    (prev, current) => prev.concat(current.split(',').map((item) => parseFloat(item))),
+    [],
+  );
 }

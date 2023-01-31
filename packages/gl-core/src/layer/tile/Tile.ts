@@ -1,7 +1,7 @@
 import { Geometry, Plane, Program, Renderer, Texture } from '@sakitam-gis/vis-engine';
 import TileMesh from './TileMesh';
-import { DecodeType, TileState, TileSize, TileBounds, LayerData } from '../../type';
-import { isImageBitmap, resolveURL } from '../../utils/common';
+import { DecodeType, TileState, TileSize, TileBounds, LayerData, DataRange } from '../../type';
+import { isImageBitmap, resolveURL, parseRange } from '../../utils/common';
 
 export interface TileOptions {
   /**
@@ -87,6 +87,8 @@ export default class Tile {
 
   #onLoad: any;
 
+  #dataRange: DataRange | DataRange[];
+
   #request: Map<string, any>;
 
   #textures: Map<number, Texture> = new Map();
@@ -117,6 +119,7 @@ export default class Tile {
 
     this.#onLoad = options.onLoad;
     this.#request = new Map();
+    this.#dataRange = [];
 
     this.state = TileState.loading;
     this.updateGeometry(true);
@@ -136,6 +139,14 @@ export default class Tile {
 
   get textures() {
     return this.#textures;
+  }
+
+  /**
+   * 针对需要从元数据解析的数据范围从此处获取
+   * 一般我们会从 Exif 信息中读取
+   */
+  getDataRange() {
+    return this.#dataRange;
   }
 
   #loadData(url) {
@@ -270,10 +281,16 @@ export default class Tile {
         }
         const data = await Promise.all(p);
         data.forEach((d, index) => {
+          if (d.withExif) {
+            this.#dataRange.push(parseRange(d.exif as string));
+          }
           this.createTextures(index, data);
         });
       } else {
-        const data = await this.#loadData(this.url);
+        const data: any = await this.#loadData(this.url);
+        if (data.withExif) {
+          this.#dataRange = parseRange(data.exif as string);
+        }
         this.createTextures(0, data);
       }
 
