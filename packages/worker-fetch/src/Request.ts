@@ -1,4 +1,4 @@
-// import * as GeoTIFF from 'geotiff/dist-module/geotiff';
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import RequestScheduler from './RequestScheduler';
 import {
   arrayBufferToImageBitmap,
@@ -7,6 +7,7 @@ import {
   warnOnce,
   unflatten,
   parseMetedata,
+  isImageBitmap,
 } from './util';
 import { decode, toRGBA8 } from './UPNG';
 
@@ -318,14 +319,12 @@ export class RequestAdapter {
   }
 
   arrayBuffer2tiff(data: ArrayBuffer, callback: any) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     if (!self.GeoTIFF) {
       throw new Error(
         'Must config [geotiff](https://github.com/geotiffjs/geotiff.js) dep use `configDeps`',
       );
     }
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     self.GeoTIFF.fromArrayBuffer(data)
       .then((geotiff) => {
@@ -388,25 +387,64 @@ export class RequestAdapter {
       });
   }
 
+  parseExif(data: ArrayBuffer, callback: any) {
+    // @ts-ignore
+    if (!self.exifr) {
+      throw new Error(
+        'Must config [exifr](https://github.com/MikeKovarik/exifr) dep use `configDeps`',
+      );
+    }
+    // @ts-ignore
+    self.exifr
+      .parse(data)
+      .then((res) => {
+        this.arrayBuffer2Image(data, (error, image) => {
+          if (error) {
+            callback(error);
+          } else {
+            callback(null, {
+              data: isImageBitmap(image) ? image : image.data,
+              width: image.width,
+              height: image.height,
+              exit: res,
+              withExif: true,
+            });
+          }
+        });
+      })
+      .catch((err) => {
+        callback(err);
+      });
+  }
+
   fetch(params, callback) {
     let aborted = false;
 
-    const request = makeRequest(params, callback);
+    const promise = this.requestScheduler.scheduleRequest(params);
 
-    this.requestScheduler.scheduleRequest(params).then((requestToken) => {
-      if (!requestToken) {
-        aborted = true;
-        return;
-      }
+    const cb = (...args) => {
+      promise.then((requestToken) => {
+        if (!requestToken) {
+          aborted = true;
+          return;
+        }
 
-      if (aborted) {
+        if (aborted) {
+          requestToken.done();
+          return;
+        }
+
+        callback(...args);
+
         requestToken.done();
-        return;
-      }
-    });
+      });
+    };
+
+    const request = makeRequest(params, cb);
 
     return {
       cancel: () => {
+        aborted = true;
         request.cancel();
       },
     };

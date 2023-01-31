@@ -114,7 +114,6 @@ export default class ScalarFill {
       ...(options || {}),
     };
     if (this.scalarFill) {
-      // @ts-ignore
       this.scalarFill.updateOptions(options);
     }
   }
@@ -127,12 +126,12 @@ export default class ScalarFill {
       autoClear: false,
     });
 
-    // const ext = gl.getExtension('OES_texture_float');
-    //
-    // if (ext) {
-    //   gl.getExtension('OES_texture_float_linear');
-    //   gl.getExtension('EXT_color_buffer_float');
-    // }
+    const ext = gl.getExtension('OES_texture_float');
+
+    if (ext) {
+      gl.getExtension('OES_texture_float_linear');
+      gl.getExtension('EXT_color_buffer_float');
+    }
 
     this.scene = new Scene();
     this.sync = new CameraSync(map, 'perspective', this.scene);
@@ -146,6 +145,7 @@ export default class ScalarFill {
       {
         opacity: this.options.opacity,
         renderFrom: this.options.renderFrom,
+        decodeType: this.options.decodeType,
         styleSpec: this.options.styleSpec,
         displayRange: this.options.displayRange,
         widthSegments: this.options.widthSegments,
@@ -196,7 +196,7 @@ export default class ScalarFill {
             }
           } else if (data.type === LayerDataType.tile) {
             const tiles = transform.coveringTiles({
-              tileSize: this.data.tileSize,
+              tileSize: this.data.tileSize?.[0] || 512,
               minzoom: this.data.minzoom,
               maxzoom: this.data.maxzoom,
               roundZoom: this.data.roundZoom,

@@ -37,7 +37,15 @@ export default class Worker {
       if (err) {
         callback(err);
       } else {
-        this.request.arrayBuffer2tiff(data, callback);
+        if (params?.decodeType === 0) {
+          this.request.arrayBuffer2Image(data, callback);
+        } else if (params?.decodeType === 1) {
+          this.request.arrayBuffer2unit8(data, callback);
+        } else if (params?.decodeType === 2) {
+          this.request.arrayBuffer2tiff(data, callback);
+        } else if (params?.decodeType === 3) {
+          this.request.parseExif(data, callback);
+        }
       }
     });
     this.cancelMap.set(cancelId, cancel);
