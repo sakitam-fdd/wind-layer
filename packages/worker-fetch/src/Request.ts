@@ -406,7 +406,7 @@ export class RequestAdapter {
               data: isImageBitmap(image) ? image : image.data,
               width: image.width,
               height: image.height,
-              exit: res,
+              exif: res,
               withExif: true,
             });
           }
