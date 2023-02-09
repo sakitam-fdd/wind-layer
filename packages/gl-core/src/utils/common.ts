@@ -90,12 +90,13 @@ export function isImageBitmap(image: any): image is ImageBitmap {
   return typeof ImageBitmap !== 'undefined' && image instanceof ImageBitmap;
 }
 
+/**
+ * 从 exif 解析数据范围
+ * @param exif
+ */
 export function parseRange(exif) {
   const string = exif?.ImageDescription || '';
   const group = string.split(';');
   const gs = group.filter((item) => item !== '');
-  return gs.reduce(
-    (prev, current) => prev.concat(current.split(',').map((item) => parseFloat(item))),
-    [],
-  );
+  return gs.map((item) => item.split(',').map((v) => parseFloat(v)));
 }

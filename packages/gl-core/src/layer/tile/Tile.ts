@@ -1,7 +1,7 @@
 import { Geometry, Plane, Program, Renderer, Texture } from '@sakitam-gis/vis-engine';
 import TileMesh from './TileMesh';
-import { DecodeType, TileState, TileSize, TileBounds, LayerData, DataRange } from '../../type';
-import { isImageBitmap, resolveURL, parseRange } from '../../utils/common';
+import { DecodeType, LayerData, RenderFrom, TileBounds, TileSize, TileState } from '../../type';
+import { isImageBitmap, parseRange, resolveURL } from '../../utils/common';
 
 export interface TileOptions {
   /**
@@ -17,6 +17,7 @@ export interface TileOptions {
   tileZoom?: number;
   tileKey?: string;
   decodeType?: DecodeType;
+  renderFrom?: RenderFrom;
 }
 
 /**
@@ -75,6 +76,8 @@ export default class Tile {
 
   public userData: LayerData;
 
+  public renderFrom: RenderFrom;
+
   public actor: any;
 
   public tileCenter: [number, number, number];
@@ -86,8 +89,6 @@ export default class Tile {
   public geometry: Plane;
 
   #onLoad: any;
-
-  #dataRange: DataRange | DataRange[];
 
   #request: Map<string, any>;
 
@@ -115,11 +116,11 @@ export default class Tile {
     this.tileBounds = options.tileBounds;
     this.tileCenter = this.getCenter();
     this.decodeType = options.decodeType ?? DecodeType.image;
+    this.renderFrom = options.renderFrom ?? RenderFrom.r;
     this.userData = options.userData;
 
     this.#onLoad = options.onLoad;
     this.#request = new Map();
-    this.#dataRange = [];
 
     this.state = TileState.loading;
     this.updateGeometry(true);
@@ -139,14 +140,6 @@ export default class Tile {
 
   get textures() {
     return this.#textures;
-  }
-
-  /**
-   * 针对需要从元数据解析的数据范围从此处获取
-   * 一般我们会从 Exif 信息中读取
-   */
-  getDataRange() {
-    return this.#dataRange;
   }
 
   #loadData(url) {
@@ -245,13 +238,28 @@ export default class Tile {
   createTextures(index: number, image) {
     const texture = this.#textures.get(index);
     const iib = isImageBitmap(image) || image instanceof Image;
+
+    let dataRange;
+
+    if (image.withExif) {
+      dataRange = parseRange(image.exif as string);
+    }
+
     if (texture) {
-      texture.setData(iib ? image : image?.isTiff ? image.rasters[0] : image.data);
+      if (texture.userData) {
+        texture.userData.dataRange = dataRange;
+      }
+      texture.setData(iib ? image : image.data);
     } else {
       this.#textures.set(
         index,
         new Texture(this.renderer, {
-          image: iib ? image : image?.isTiff ? image.rasters[0] : image.data,
+          userData: dataRange
+            ? {
+                dataRange,
+              }
+            : undefined,
+          image: iib ? image : image.data,
           width: image.width,
           height: image.height,
           minFilter: this.renderer.gl.LINEAR,
@@ -260,8 +268,23 @@ export default class Tile {
           wrapT: this.renderer.gl.CLAMP_TO_EDGE,
           flipY: true, // 注意，对 ImageBitmap 无效
           premultiplyAlpha: false, // 禁用 `Alpha` 预乘
-          type: image?.isTiff ? this.renderer.gl.FLOAT : this.renderer.gl.UNSIGNED_BYTE,
-          format: image?.isTiff ? this.renderer.gl.LUMINANCE : this.renderer.gl.RGBA,
+          // generateMipmaps: false,
+          type:
+            this.renderFrom === RenderFrom.float
+              ? this.renderer.gl.FLOAT
+              : this.renderer.gl.UNSIGNED_BYTE,
+          format:
+            this.renderFrom === RenderFrom.float
+              ? this.renderer.isWebGL2
+                ? (this.renderer.gl as WebGL2RenderingContext).RED
+                : this.renderer.gl.LUMINANCE
+              : this.renderer.gl.RGBA,
+          internalFormat:
+            this.renderFrom === RenderFrom.float
+              ? this.renderer.isWebGL2
+                ? (this.renderer.gl as WebGL2RenderingContext).R32F
+                : this.renderer.gl.LUMINANCE
+              : this.renderer.gl.RGBA,
         }),
       );
     }
@@ -281,16 +304,10 @@ export default class Tile {
         }
         const data = await Promise.all(p);
         data.forEach((d, index) => {
-          if (d.withExif) {
-            this.#dataRange.push(parseRange(d.exif as string));
-          }
-          this.createTextures(index, data);
+          this.createTextures(index, d);
         });
       } else {
         const data: any = await this.#loadData(this.url);
-        if (data.withExif) {
-          this.#dataRange = parseRange(data.exif as string);
-        }
         this.createTextures(0, data);
       }
 

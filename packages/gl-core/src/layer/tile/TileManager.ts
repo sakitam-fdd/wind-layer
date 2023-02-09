@@ -1,7 +1,7 @@
 import { Renderer, Scene, Program } from '@sakitam-gis/vis-engine';
 import Tile from './Tile';
 import LRUCache from './LRUCache';
-import { DecodeType, LayerData, LayerDataType, TileLike } from '../../type';
+import { DecodeType, LayerData, LayerDataType, RenderFrom, TileLike } from '../../type';
 
 export interface TileManagerOptions {
   maxSize: number;
@@ -9,6 +9,7 @@ export interface TileManagerOptions {
   program: Program;
   data: LayerData;
   decodeType?: DecodeType;
+  renderFrom?: RenderFrom;
 }
 
 const URL_PATTERN = /\{ *([\w_]+) *\}/g;
@@ -110,7 +111,12 @@ export default class TileManager {
       };
 
       if (Array.isArray(url)) {
-        return url.map((u) => formatUrl(u, data));
+        if (url.length > 2) {
+          console.warn(
+            `[TileManager]: Only supports up to two urls, Now there are more than two urls-${url.toString()}, and only the first two are selected by default`,
+          );
+        }
+        return url.filter((item, index) => index < 2).map((u) => formatUrl(u, data));
       }
 
       return formatUrl(url, data);
@@ -152,6 +158,7 @@ export default class TileManager {
             tileSize: t.size,
             tileKey: t.tileKey,
             tileBounds: t.bounds,
+            renderFrom: this.options.renderFrom,
             decodeType: this.options.decodeType,
             onLoad: (ctx) => {
               this.#cache.add(ctx.tileKey, ctx);

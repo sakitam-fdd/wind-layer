@@ -124,14 +124,13 @@ export default class ScalarFill {
 
     this.renderer = new Renderer(gl, {
       autoClear: false,
+      extensions: [
+        'OES_texture_float',
+        'OES_texture_float_linear',
+        'WEBGL_color_buffer_float',
+        'EXT_color_buffer_float',
+      ],
     });
-
-    const ext = gl.getExtension('OES_texture_float');
-
-    if (ext) {
-      gl.getExtension('OES_texture_float_linear');
-      gl.getExtension('EXT_color_buffer_float');
-    }
 
     this.scene = new Scene();
     this.sync = new CameraSync(map, 'perspective', this.scene);

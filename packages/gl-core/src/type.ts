@@ -77,11 +77,11 @@ export type TileSize = [number, number];
 /**
  * 数据范围
  */
-export type DataRange = [number, number] | [number, number, number, number];
+export type DataRange = [number, number];
 
 interface ImageData {
   type: LayerDataType.image;
-  url: string | string[];
+  url: string | [string, string];
   /**
    * top left, top right, bottom right, bottom left
    */
@@ -111,7 +111,7 @@ interface JsonArrayData {
 interface TileData {
   type: LayerDataType.tile;
   tileSize: TileSize;
-  url: string | string[];
+  url: string | [string, string];
   subdomains?: (number | string)[];
 }
 

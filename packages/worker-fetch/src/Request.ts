@@ -5,7 +5,6 @@ import {
   getReferrer,
   isWorker,
   warnOnce,
-  unflatten,
   parseMetedata,
   isImageBitmap,
 } from './util';
@@ -362,11 +361,23 @@ export class RequestAdapter {
             image
               .readRasters()
               .then((rasters) => {
-                result.values = rasters.map(
-                  (valuesInOneDimension) =>
-                    unflatten(valuesInOneDimension, { height, width }) as any,
-                );
+                // result.values = rasters.map(
+                //   (valuesInOneDimension) =>
+                //     unflatten(valuesInOneDimension, { height, width }) as any,
+                // );
                 result.rasters = rasters;
+                const r = rasters[0];
+                if (r) {
+                  let i = 0;
+                  const bands = rasters.length;
+                  const d = new r.constructor(r.length * bands);
+                  for (; i < r.length; i++) {
+                    for (let j = 0; j < bands; j++) {
+                      d[i + j] = rasters[j][i];
+                    }
+                  }
+                  result.data = d;
+                }
                 result.metadata = image.getGDALMetadata();
                 const metadata = parseMetedata(fileDirectory.ImageDescription || '');
                 result.min = metadata.min;

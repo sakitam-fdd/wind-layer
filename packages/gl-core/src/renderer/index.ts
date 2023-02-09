@@ -1,12 +1,12 @@
-import {DataTexture, Renderer, Scene, utils, Vector2} from '@sakitam-gis/vis-engine';
+import { DataTexture, Renderer, Scene, utils, Vector2 } from '@sakitam-gis/vis-engine';
 import wgw from 'wind-gl-worker';
 import TileManager from '../layer/tile/TileManager';
 import Pipelines from './Pipelines';
 import ComposePass from './pass/compose';
 import ColorizePass from './pass/colorize';
-import {isFunction} from '../utils/common';
-import {createLinearGradient, createZoom} from '../utils/style-parser';
-import {DecodeType, getRenderType, LayerData, LayerDataType, RenderFrom} from '../type';
+import { isFunction, resolveURL } from '../utils/common';
+import { createLinearGradient, createZoom } from '../utils/style-parser';
+import { DecodeType, getRenderType, LayerData, LayerDataType, RenderFrom } from '../type';
 
 export interface ScalarFillOptions {
   /**
@@ -33,6 +33,7 @@ export interface ScalarFillOptions {
   widthSegments?: number;
   heightSegments?: number;
   wireframe?: boolean;
+  onInit?: (error, data) => void;
 }
 
 export const defaultOptions: ScalarFillOptions = {
@@ -67,6 +68,7 @@ export const defaultOptions: ScalarFillOptions = {
   heightSegments: 1,
   wireframe: false,
   waitTilesLoaded: false,
+  onInit: () => undefined,
 };
 
 /**
@@ -115,13 +117,20 @@ export default class ScalarFill {
 
     if (!registerDeps) {
       const deps = wgw.getConfigDeps();
-      this.dispatcher.broadcast('configDeps', deps);
+      this.dispatcher.broadcast(
+        'configDeps',
+        deps.map((d) => resolveURL(d)),
+        (err, data) => {
+          this.options.onInit?.(err, data);
+        },
+      );
       registerDeps = true;
     }
 
     this.tileManager = new TileManager(this.renderer, this.scene, {
       dispatcher: this.dispatcher,
       decodeType: this.options.decodeType,
+      renderFrom: this.options.renderFrom,
     });
 
     this.initialize();
@@ -134,6 +143,7 @@ export default class ScalarFill {
     const composePass = new ComposePass('compose', this.renderer, {
       tileManager: this.tileManager,
       renderType,
+      renderFrom: this.options.renderFrom ?? RenderFrom.r,
     });
 
     const textures = composePass.textures;
@@ -208,6 +218,7 @@ export default class ScalarFill {
     if (data) {
       this.#colorRampTexture = new DataTexture(this.renderer, {
         data,
+        name: 'colorRampTexture',
         magFilter: this.renderer.gl.NEAREST,
         minFilter: this.renderer.gl.NEAREST,
         width: 255,

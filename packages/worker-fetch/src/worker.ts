@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-import { isWorker } from './util';
+import {asyncAll, isWorker} from './util';
 import Actor from './Actor';
 import getRequest, { RequestAdapter } from './Request';
 
@@ -24,9 +24,42 @@ export default class Worker {
     this.referrer = referrer;
   }
 
-  configDeps(dispatcherId: string, deps: string[]) {
+  configDeps(dispatcherId: string, deps: string[], callback: any) {
     if (deps && Array.isArray(deps) && deps.length > 0) {
-      self.importScripts(...deps);
+      try {
+        self.importScripts(...deps);
+        callback(null, true);
+      } catch (e) {
+        asyncAll(
+          deps,
+          (d, done) => {
+            this.request.fetch(
+              {
+                url: d,
+                type: 'arrayBuffer',
+              },
+              (err, data) => {
+                if (err) {
+                  done(err, false);
+                  return console.error(err);
+                }
+                const url = URL.createObjectURL(
+                  new Blob([data], { type: 'application/javascript' }),
+                );
+                self.importScripts(url);
+                // Mobile Safari
+                setTimeout(() => {
+                  URL.revokeObjectURL(url);
+                });
+                done(null, true);
+              },
+            );
+          },
+          callback,
+        );
+      }
+    } else {
+      callback(null, true);
     }
   }
 

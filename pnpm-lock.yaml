@@ -120,7 +120,7 @@ importers:
       '@sakitam-gis/vis-engine': ^1.0.0
       wind-gl-worker: workspace:*
     dependencies:
-      '@sakitam-gis/vis-engine': 1.4.2
+      '@sakitam-gis/vis-engine': 1.4.6
       wind-gl-worker: link:../worker-fetch
 
   packages/mapbox-gl:
@@ -131,7 +131,7 @@ importers:
       wind-core: workspace:*
       wind-gl-core: workspace:*
     dependencies:
-      '@sakitam-gis/vis-engine': 1.4.2
+      '@sakitam-gis/vis-engine': 1.4.6
       wind-core: link:../core
       wind-gl-core: link:../gl-core
     devDependencies:
@@ -139,10 +139,7 @@ importers:
       mapbox-gl: 1.13.2
 
   packages/worker-fetch:
-    specifiers:
-      geotiff: ^2.0.7
-    dependencies:
-      geotiff: 2.0.7
+    specifiers: {}
 
 packages:
 
@@ -1925,10 +1922,6 @@ packages:
       fastq: 1.13.0
     dev: true
 
-  /@petamoriken/float16/3.7.1:
-    resolution: {integrity: sha512-oXZOc+aePd0FnhTWk15pyqK+Do87n0TyLV1nxdEougE95X/WXWDqmQobfhgnSY7QsWn5euZUWuDVeTQvoQ5VNw==}
-    dev: false
-
   /@rollup/plugin-alias/4.0.2_rollup@3.2.3:
     resolution: {integrity: sha512-1hv7dBOZZwo3SEupxn4UA2N0EDThqSSS+wI1St1TNTBtOZvUchyIClyHcnDcjjrReTPZ47Faedrhblv4n+T5UQ==}
     engines: {node: '>=14.0.0'}
@@ -2056,8 +2049,8 @@ packages:
       rollup: 3.2.3
     dev: true
 
-  /@sakitam-gis/vis-engine/1.4.2:
-    resolution: {integrity: sha512-Qx8/8TMi4gcTqJTqKAZ/6VdBkobhDTSdvYqLbeyPMVmSduEmeql0N6Iak4p8kLLs78kvrqgHNFhjUdM2d9AQeA==}
+  /@sakitam-gis/vis-engine/1.4.6:
+    resolution: {integrity: sha512-/tSbjL1sXZvZ63uzY3E9JAwiWs275JpPR6xt6AKReM7Jm0GXr09mD2jlUktmBgjUE8x0aFVlZfNt+uzMWB/JxQ==}
     engines: {node: '>= 14.18.1', npm: '>= 6.14.15'}
     dependencies:
       colord: 2.9.3
@@ -4089,19 +4082,6 @@ packages:
     resolution: {integrity: sha512-EvGQQi/zPrDA6zr6BnJD/YhwAkBP8nnJ9emh3EnHQKVMfg/MRVtPbMYdgVy/IaEmn4UfagD2a6fafPDL5hbtwg==}
     dev: true
 
-  /geotiff/2.0.7:
-    resolution: {integrity: sha512-FKvFTNowMU5K6lHYY2f83d4lS2rsCNdpUC28AX61x9ZzzqPNaWFElWv93xj0eJFaNyOYA63ic5OzJ88dHpoA5Q==}
-    engines: {node: '>=10.19'}
-    dependencies:
-      '@petamoriken/float16': 3.7.1
-      lerc: 3.0.0
-      pako: 2.1.0
-      parse-headers: 2.0.5
-      quick-lru: 6.1.1
-      web-worker: 1.2.0
-      xml-utils: 1.3.0
-    dev: false
-
   /get-caller-file/2.0.5:
     resolution: {integrity: sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==}
     engines: {node: 6.* || 8.* || >= 10.*}
@@ -4841,10 +4821,6 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-  /lerc/3.0.0:
-    resolution: {integrity: sha512-Rm4J/WaHhRa93nCN2mwWDZFoRVF18G1f47C+kvQWyHGEZxFpTUi73p7lMVSAndyxGt6lJ2/CFbOcf9ra5p8aww==}
-    dev: false
-
   /levn/0.3.0:
     resolution: {integrity: sha512-0OO4y2iOHix2W6ujICbKIaEQXvFQHue65vUG3pb5EUomzPI90z9hsA1VsO/dbIIpC53J8gxM9Q4Oho0jrCM/yA==}
     engines: {node: '>= 0.8.0'}
@@ -5430,20 +5406,12 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
-  /pako/2.1.0:
-    resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
-    dev: false
-
   /parent-module/1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
     engines: {node: '>=6'}
     dependencies:
       callsites: 3.1.0
     dev: true
-
-  /parse-headers/2.0.5:
-    resolution: {integrity: sha512-ft3iAoLOB/MlwbNXgzy43SWGP6sQki2jQvAyBg/zDFAgr9bfNWZIUj42Kw2eJIl8kEi4PbgE6U1Zau/HwI75HA==}
-    dev: false
 
   /parse-json/5.2.0:
     resolution: {integrity: sha512-ayCKvm/phCGxOkYRSCM82iDwct8/EonSEgCSxWxD7ve6jHggsFl4fZVQBPRNgQoKiuV/odhFrGzQXZwbifC8Rg==}
@@ -5612,11 +5580,6 @@ packages:
     resolution: {integrity: sha512-ARhCpm70fzdcvNQfPoy49IaanKkTlRWF2JMzqhcJbhSFRZv7nPTvZJdcY7301IPmvW+/p0RgIWnQDLJxifsQ7g==}
     engines: {node: '>=8'}
     dev: true
-
-  /quick-lru/6.1.1:
-    resolution: {integrity: sha512-S27GBT+F0NTRiehtbrgaSE1idUAJ5bX8dPAQTdylEyNlrdcH5X4Lz7Edz3DYzecbsCluD5zO8ZNEe04z3D3u6Q==}
-    engines: {node: '>=12'}
-    dev: false
 
   /quickselect/2.0.0:
     resolution: {integrity: sha512-RKJ22hX8mHe3Y6wH/N3wCM6BWtjaxIyyUIkpHOvfFnxdI4yD4tBXEBKSbriGujF6jnSVkJrffuo6vxACiSSxIw==}
@@ -6862,10 +6825,6 @@ packages:
       defaults: 1.0.4
     dev: true
 
-  /web-worker/1.2.0:
-    resolution: {integrity: sha512-PgF341avzqyx60neE9DD+XS26MMNMoUQRz9NOZwW32nPQrF6p77f1htcnjBSEV8BGMKZ16choqUG4hyI0Hx7mA==}
-    dev: false
-
   /webidl-conversions/3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
     dev: true
@@ -6993,10 +6952,6 @@ packages:
     resolution: {integrity: sha512-ICP2e+jsHvAj2E2lIHxa5tjXRlKDJo4IdvPvCXbXQGdzSfmSpNVyIKMvoZHjDY9DP0zV17iI85o90vRFXNccRw==}
     engines: {node: '>=12'}
     dev: true
-
-  /xml-utils/1.3.0:
-    resolution: {integrity: sha512-i4PIrX33Wd66dvwo4syicwlwmnr6wuvvn4f2ku9hA67C2Uk62Xubczuhct+Evnd12/DV71qKNeDdJwES8HX1RA==}
-    dev: false
 
   /xmlchars/2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}

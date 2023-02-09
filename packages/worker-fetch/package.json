@@ -68,9 +68,6 @@
     "url": "https://github.com/sakitam-fdd/wind-layer/issues"
   },
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
-  "dependencies": {
-    "geotiff": "^2.0.7"
-  },
   "publishConfig": {
     "access": "public"
   }

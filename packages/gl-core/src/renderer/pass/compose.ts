@@ -1,14 +1,15 @@
-import { utils, Program, Renderer, RenderTarget } from '@sakitam-gis/vis-engine';
+import { Program, Renderer, RenderTarget, utils } from '@sakitam-gis/vis-engine';
 import Pass from './base';
 import vert from '../../shaders/compose.vert.glsl';
 import frag from '../../shaders/compose.frag.glsl';
 import * as shaderLib from '../../shaders/shaderLib';
 import TileManager from '../../layer/tile/TileManager';
-import { TileState, RenderType } from '../../type';
+import { RenderFrom, RenderType, TileState } from '../../type';
 
 export interface ComposePassOptions {
   tileManager: TileManager;
   renderType: RenderType;
+  renderFrom: RenderFrom;
 }
 
 /**
@@ -38,20 +39,36 @@ export default class ComposePass extends Pass<ComposePassOptions> {
           value: undefined,
         },
       },
-      defines: [`RENDER_TYPE ${this.options.renderType}`, 'USE_WGS84'],
+      defines: [`RENDER_TYPE ${this.options.renderType}`],
       includes: shaderLib,
     });
 
+    // @link https://webgl2fundamentals.org/webgl/lessons/webgl-data-textures.html
     const opt = {
       width: this.renderer.width,
       height: this.renderer.height,
       minFilter: renderer.gl.NEAREST,
       magFilter: renderer.gl.NEAREST,
-      type: this.renderer.gl.FLOAT,
+      type:
+        this.options.renderFrom === RenderFrom.float
+          ? this.renderer.gl.FLOAT
+          : this.renderer.gl.UNSIGNED_BYTE,
+      format: this.renderer.gl.RGBA,
+      // generateMipmaps: false,
+      internalFormat:
+        this.options.renderFrom === RenderFrom.float && this.renderer.isWebGL2
+          ? (this.renderer.gl as WebGL2RenderingContext).RGBA32F
+          : this.renderer.gl.RGBA,
     };
 
-    this.#current = new RenderTarget(renderer, opt);
-    this.#next = new RenderTarget(renderer, opt);
+    this.#current = new RenderTarget(renderer, {
+      ...opt,
+      name: 'currentRenderTargetTexture',
+    });
+    this.#next = new RenderTarget(renderer, {
+      ...opt,
+      name: 'nextRenderTargetTexture',
+    });
   }
 
   resize(width: number, height: number) {
@@ -94,7 +111,10 @@ export default class ComposePass extends Pass<ComposePassOptions> {
         if (tile && tile.state === TileState.loaded) {
           const tileMesh = tile.createMesh(this.#program);
           const mesh = tileMesh.getMesh();
-          mesh.program.setUniform('u_image', tile.textures.get(0));
+
+          for (const [index, texture] of tile.textures) {
+            mesh.program.setUniform(`u_image${index}`, texture);
+          }
 
           mesh.updateMatrix();
           mesh.worldMatrixNeedsUpdate = false;
