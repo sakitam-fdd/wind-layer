@@ -72,7 +72,7 @@ export enum LayerDataType {
 /**
  * 瓦片尺寸
  */
-export type TileSize = [number, number];
+export type TileSize = number | [number, number];
 
 /**
  * 数据范围
@@ -87,7 +87,7 @@ interface ImageData {
    */
   extent: number[][];
   tileSize?: TileSize;
-  dataRange?: DataRange;
+  dataRange?: DataRange | [DataRange, DataRange];
 }
 
 interface JsonArrayData {
@@ -113,6 +113,10 @@ interface TileData {
   tileSize: TileSize;
   url: string | [string, string];
   subdomains?: (number | string)[];
+  dataRange?: DataRange | [DataRange, DataRange];
+  minZoom?: number;
+  maxZoom?: number;
+  roundZoom?: number;
 }
 
 export type LayerData = ImageData | JsonArrayData | TileData;

@@ -5,6 +5,7 @@ import frag from '../../shaders/compose.frag.glsl';
 import * as shaderLib from '../../shaders/shaderLib';
 import TileManager from '../../layer/tile/TileManager';
 import { RenderFrom, RenderType, TileState } from '../../type';
+import { littleEndian } from '../../utils/common';
 
 export interface ComposePassOptions {
   tileManager: TileManager;
@@ -38,8 +39,11 @@ export default class ComposePass extends Pass<ComposePassOptions> {
         texture: {
           value: undefined,
         },
+        dataRange: {
+          value: undefined,
+        },
       },
-      defines: [`RENDER_TYPE ${this.options.renderType}`],
+      defines: [`RENDER_TYPE ${this.options.renderType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
     });
 
@@ -49,16 +53,12 @@ export default class ComposePass extends Pass<ComposePassOptions> {
       height: this.renderer.height,
       minFilter: renderer.gl.NEAREST,
       magFilter: renderer.gl.NEAREST,
-      type:
-        this.options.renderFrom === RenderFrom.float
-          ? this.renderer.gl.FLOAT
-          : this.renderer.gl.UNSIGNED_BYTE,
+      type: this.renderer.gl.FLOAT,
       format: this.renderer.gl.RGBA,
       // generateMipmaps: false,
-      internalFormat:
-        this.options.renderFrom === RenderFrom.float && this.renderer.isWebGL2
-          ? (this.renderer.gl as WebGL2RenderingContext).RGBA32F
-          : this.renderer.gl.RGBA,
+      internalFormat: this.renderer.isWebGL2
+        ? (this.renderer.gl as WebGL2RenderingContext).RGBA32F
+        : this.renderer.gl.RGBA,
     };
 
     this.#current = new RenderTarget(renderer, {
@@ -112,8 +112,16 @@ export default class ComposePass extends Pass<ComposePassOptions> {
           const tileMesh = tile.createMesh(this.#program);
           const mesh = tileMesh.getMesh();
 
+          const dataRange: number[] = [];
           for (const [index, texture] of tile.textures) {
+            if (texture.userData?.dataRange && Array.isArray(texture.userData?.dataRange)) {
+              dataRange.push(...texture.userData.dataRange);
+            }
             mesh.program.setUniform(`u_image${index}`, texture);
+          }
+
+          if (dataRange.length > 0) {
+            mesh.program.setUniform('dataRange', dataRange);
           }
 
           mesh.updateMatrix();

@@ -1,16 +1,10 @@
-precision highp float;
-
 #defines
+precision highp float;
 
 uniform sampler2D u_texture;
 uniform sampler2D colorRampTexture;
 
 uniform vec2 u_image_res;
-#if RENDER_TYPE == 1
-uniform vec4 dataRange;
-#else
-uniform vec2 dataRange;
-#endif
 uniform vec2 colorRange;
 uniform bool useDisplayRange;
 uniform vec2 displayRange;
@@ -25,17 +19,7 @@ vec4 calcTexture(const vec2 puv) {
     return texture2D(u_texture, puv);
 }
 
-#if RENDER_TYPE == 3
-// float
-float decodeValue(const vec2 vc) {
-    return calcTexture(vc).r;
-}
-#elif RENDER_TYPE == 2
-// rgba decode float
-float decodeValue(const vec2 vc) {
-    return decode_float(calcTexture(vc), LITTLE_ENDIAN);
-}
-#elif RENDER_TYPE == 1
+#if RENDER_TYPE == 1
 // rg
 vec2 decodeValue(const vec2 vc) {
     vec4 rgba = calcTexture(vc);
@@ -73,19 +57,8 @@ float bilinear(const vec2 uv) {
 
 #if RENDER_TYPE == 1
 float getValue(const vec2 uv) {
-    float rmin = dataRange.x;
-    float rmax = dataRange.y;
-    float gmin = dataRange.z;
-    float gmax = dataRange.w;
     vec2 rg = bilinear(uv);
-    return length(rg * (vec2(rmax, gmax) - vec2(rmin, gmin)) + vec2(rmin, gmin));
-}
-#elif RENDER_TYPE == 0
-float getValue(const vec2 uv) {
-    float min = dataRange.x;
-    float max = dataRange.y;
-    float r = bilinear(uv);
-    return r * (max - min) + min;
+    return length(rg);
 }
 #else
 // float

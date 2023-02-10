@@ -235,13 +235,15 @@ export default class Tile {
     return this.tileMesh;
   }
 
-  createTextures(index: number, image) {
+  createTextures(index: number, image, userData?: any) {
     const texture = this.#textures.get(index);
     const iib = isImageBitmap(image) || image instanceof Image;
 
     let dataRange;
 
-    if (image.withExif) {
+    if (userData?.dataRange) {
+      dataRange = userData?.dataRange;
+    } else if (image.withExif) {
       dataRange = parseRange(image.exif as string);
     }
 
@@ -293,7 +295,7 @@ export default class Tile {
   /**
    * 执行数据加载
    */
-  async load() {
+  async load(userData?: any) {
     // 在这里我们需要实现 webworker 加载
     try {
       this.state = TileState.loading;
@@ -304,11 +306,11 @@ export default class Tile {
         }
         const data = await Promise.all(p);
         data.forEach((d, index) => {
-          this.createTextures(index, d);
+          this.createTextures(index, d, userData);
         });
       } else {
         const data: any = await this.#loadData(this.url);
-        this.createTextures(0, data);
+        this.createTextures(0, data, userData);
       }
 
       this.#removeRequest();

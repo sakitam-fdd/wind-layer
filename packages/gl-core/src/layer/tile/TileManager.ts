@@ -164,7 +164,11 @@ export default class TileManager {
               this.#cache.add(ctx.tileKey, ctx);
             },
           });
-          tile.load();
+          if ('dataRange' in this.#data) {
+            tile.load(this.#data.dataRange);
+          } else {
+            tile.load();
+          }
         }
         this.addTile(tile);
       }

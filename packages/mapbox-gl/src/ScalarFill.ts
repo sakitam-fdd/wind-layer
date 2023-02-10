@@ -1,6 +1,6 @@
 import * as mapboxgl from 'mapbox-gl';
 
-import { Renderer, Scene, OrthographicCamera } from '@sakitam-gis/vis-engine';
+import { Renderer, Scene, OrthographicCamera, utils } from '@sakitam-gis/vis-engine';
 
 import type { LayerData, ScalarFillOptions } from 'wind-gl-core';
 import { LayerDataType, ScalarFill as ScalarCore } from 'wind-gl-core';
@@ -195,9 +195,11 @@ export default class ScalarFill {
             }
           } else if (data.type === LayerDataType.tile) {
             const tiles = transform.coveringTiles({
-              tileSize: this.data.tileSize?.[0] || 512,
-              minzoom: this.data.minzoom,
-              maxzoom: this.data.maxzoom,
+              tileSize: utils.isNumber(this.data.tileSize)
+                ? this.data.tileSize
+                : this.data.tileSize?.[0] || 512,
+              minzoom: this.data.minZoom,
+              maxzoom: this.data.maxZoom,
               roundZoom: this.data.roundZoom,
             });
 
