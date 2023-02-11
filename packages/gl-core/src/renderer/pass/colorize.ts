@@ -18,6 +18,7 @@ export interface ColorizePassOptions {
   texture: Texture;
   textureNext: Texture;
   renderType: RenderType;
+  hasMask?: boolean;
 }
 
 /**
@@ -91,6 +92,25 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
     const attr = this.renderer.attributes;
     this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
     if (rendererState) {
+      let stencil;
+      if (this.options.hasMask) {
+        stencil = this.renderer.gl.getParameter(this.renderer.gl.STENCIL_TEST);
+        if (!stencil) {
+          this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
+          this.renderer.state.setStencilMask(0xff);
+          this.renderer.state.setStencilFunc(
+            this.renderer.gl.EQUAL, // the test
+            0, // reference value
+            1,
+          );
+
+          this.renderer.state.setStencilOp(
+            this.renderer.gl.KEEP,
+            this.renderer.gl.KEEP,
+            this.renderer.gl.KEEP,
+          );
+        }
+      }
       const uniforms = utils.pick(rendererState, [
         'opacity',
         'colorRange',
@@ -112,7 +132,14 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
       );
 
       this.#mesh.worldMatrixNeedsUpdate = false;
-      this.#mesh.draw(rendererParams);
+      this.#mesh.draw({
+        ...rendererParams,
+        camera: rendererParams.cameras.orthoCamera,
+      });
+
+      if (this.options.hasMask && !stencil) {
+        this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
+      }
     }
   }
 }

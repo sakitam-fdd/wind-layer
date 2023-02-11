@@ -90,13 +90,13 @@ export default class ComposePass extends Pass<ComposePassOptions> {
    */
   render(rendererParams, rendererState) {
     if (this.#current) {
+      this.#current.clear();
       this.#current.bind();
       const attr = this.renderer.attributes;
       if (attr.depth && this.#current.depth) {
         this.renderer.state.enable(this.renderer.gl.DEPTH_TEST);
         this.renderer.state.setDepthMask(true);
       }
-      this.renderer.clear();
       this.renderer.setViewport(this.#current.width, this.#current.height);
     }
 
@@ -127,7 +127,10 @@ export default class ComposePass extends Pass<ComposePassOptions> {
           mesh.updateMatrix();
           mesh.worldMatrixNeedsUpdate = false;
           mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, mesh.localMatrix);
-          mesh.draw(utils.omit(rendererParams, ['target']));
+          mesh.draw({
+            ...utils.omit(rendererParams, ['target']),
+            camera: rendererParams.cameras.camera,
+          });
         }
       }
     }

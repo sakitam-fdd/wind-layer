@@ -1,4 +1,4 @@
-import { Renderer, Scene, Program } from '@sakitam-gis/vis-engine';
+import { Renderer, Scene, Program, EventEmitter } from '@sakitam-gis/vis-engine';
 import Tile from './Tile';
 import LRUCache from './LRUCache';
 import { DecodeType, LayerData, LayerDataType, RenderFrom, TileLike } from '../../type';
@@ -27,7 +27,7 @@ function formatUrl(url: string, data: any) {
   });
 }
 
-export default class TileManager {
+export default class TileManager extends EventEmitter {
   public renderer: Renderer;
   public scene: Scene;
 
@@ -38,6 +38,7 @@ export default class TileManager {
   #data: LayerData;
 
   constructor(renderer: Renderer, scene, options: Partial<TileManagerOptions>) {
+    super();
     this.renderer = renderer;
     this.scene = scene;
     this.#tiles = new Map();
@@ -141,6 +142,7 @@ export default class TileManager {
         tile?.unload();
         // 此处删除后不一定需要资源释放，因为在缓存中可能还存在，只有缓存失效的需要释放资源
         this.#tiles.delete(key);
+        this.emit('unload', tile);
       }
     }
     for (let i = 0; i < tiles.length; i++) {
@@ -162,6 +164,7 @@ export default class TileManager {
             decodeType: this.options.decodeType,
             onLoad: (ctx) => {
               this.#cache.add(ctx.tileKey, ctx);
+              this.emit('load', ctx);
             },
           });
           if ('dataRange' in this.#data) {
@@ -173,5 +176,9 @@ export default class TileManager {
         this.addTile(tile);
       }
     }
+  }
+
+  destroy() {
+    this.reset();
   }
 }

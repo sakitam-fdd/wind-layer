@@ -91,10 +91,10 @@
 
     const fillLayer = new mapboxWind.ScalarFill('temp', {
       type: 'tile',
-      tileSize: [256, 256],
-      url: './data/10.jpeg',
+      tileSize: [257, 257],
+      url: 'http://localhost:5000/{z}/{x}/{y}.jpeg',
       minZoom: 0,
-      maxZoom: 0,
+      maxZoom: 4,
       // subdomains: ['a', 'b', 'c', 'd'],
 
       // type: "image",

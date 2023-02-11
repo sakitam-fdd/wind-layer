@@ -268,13 +268,19 @@ export default class ScalarFill {
     this.scene.worldMatrixNeedsUpdate = true;
     this.scene.updateMatrixWorld();
     this.camera.updateMatrixWorld();
-    this.scalarFill?.prerender(this.camera);
+    this.scalarFill?.prerender({
+      camera: this.camera,
+      orthoCamera: this.orthoCamera,
+    });
   }
 
   render() {
     this.scene.worldMatrixNeedsUpdate = true;
     this.scene.updateMatrixWorld();
     this.camera.updateMatrixWorld();
-    this.scalarFill?.render(this.orthoCamera);
+    this.scalarFill?.render({
+      camera: this.camera,
+      orthoCamera: this.orthoCamera,
+    });
   }
 }

@@ -3,6 +3,7 @@ import wgw from 'wind-gl-worker';
 import TileManager from '../layer/tile/TileManager';
 import Pipelines from './Pipelines';
 import ComposePass from './pass/compose';
+import MaskPass from './pass/mask';
 import ColorizePass from './pass/colorize';
 import { isFunction, resolveURL } from '../utils/common';
 import { createLinearGradient, createZoom } from '../utils/style-parser';
@@ -33,6 +34,10 @@ export interface ScalarFillOptions {
   widthSegments?: number;
   heightSegments?: number;
   wireframe?: boolean;
+  /**
+   * 可以为任意 GeoJSON 数据
+   */
+  mask?: any;
   onInit?: (error, data) => void;
 }
 
@@ -80,9 +85,9 @@ export default class ScalarFill {
   private options: ScalarFillOptions;
   private uid: string;
   private renderPipeline: WithNull<Pipelines>;
+  private tileManager: WithNull<TileManager>;
   private readonly scene: Scene;
   private readonly renderer: Renderer;
-  private readonly tileManager: TileManager;
   private readonly dispatcher: any;
 
   #opacity: number;
@@ -133,6 +138,9 @@ export default class ScalarFill {
       renderFrom: this.options.renderFrom,
     });
 
+    this.tileManager.on('unload', this.onTileChange, this);
+    this.tileManager.on('load', this.onTileChange, this);
+
     this.initialize();
   }
 
@@ -141,7 +149,7 @@ export default class ScalarFill {
     this.renderPipeline = new Pipelines(this.renderer);
     const renderType = getRenderType(this.options.renderFrom ?? RenderFrom.r);
     const composePass = new ComposePass('compose', this.renderer, {
-      tileManager: this.tileManager,
+      tileManager: this.tileManager as TileManager,
       renderType,
       renderFrom: this.options.renderFrom ?? RenderFrom.r,
     });
@@ -152,10 +160,18 @@ export default class ScalarFill {
       texture: textures.current,
       textureNext: textures.next,
       renderType,
+      hasMask: !!this.options.mask,
     });
 
     // 先执行瓦片合并，绘制在 fbo 中
     this.renderPipeline.addPass(composePass);
+    if (this.options.mask) {
+      // 掩膜处理
+      const maskPass = new MaskPass('mask', this.renderer, {
+        renderType,
+      });
+      this.renderPipeline.addPass(maskPass);
+    }
     // 再执行着色
     this.renderPipeline.addPass(colorizePass);
   }
@@ -237,7 +253,9 @@ export default class ScalarFill {
    */
   setData(data: LayerData) {
     if (this.tileManager) {
-      return this.tileManager.setData(data);
+      this.tileManager.setData(data);
+      this.updateTiles();
+      return true;
     }
     return Promise.reject(new Error('数据未更新成功！'));
   }
@@ -245,7 +263,7 @@ export default class ScalarFill {
   /**
    * 获取数据
    */
-  getData(): LayerData {
+  getData(): LayerData | void {
     return this.tileManager?.getData();
   }
 
@@ -254,15 +272,21 @@ export default class ScalarFill {
    */
   updateTiles() {
     const tiles = this.options.getViewTiles(this.getData());
-    this.tileManager.update(tiles);
+    this.tileManager?.update(tiles);
   }
 
-  prerender(camera) {
+  onTileChange() {
+    if (this.options.triggerRepaint && isFunction(this.options.triggerRepaint)) {
+      this.options.triggerRepaint();
+    }
+  }
+
+  prerender(cameras) {
     if (this.renderPipeline) {
       this.renderPipeline.prerender(
         {
           scene: this.scene,
-          camera,
+          cameras,
         },
         {
           opacity: this.#opacity,
@@ -273,7 +297,7 @@ export default class ScalarFill {
     }
   }
 
-  render(camera) {
+  render(cameras) {
     if (this.renderPipeline) {
       const state: any = {
         opacity: this.#opacity,
@@ -285,14 +309,14 @@ export default class ScalarFill {
 
       const data = this.getData();
 
-      if (data.type === LayerDataType.image) {
+      if (data && data.type === LayerDataType.image) {
         state.dataRange = data.dataRange;
       }
 
       this.renderPipeline.render(
         {
           scene: this.scene,
-          camera,
+          cameras,
         },
         state,
       );
@@ -306,6 +330,12 @@ export default class ScalarFill {
     if (this.renderPipeline) {
       this.renderPipeline.destroy();
       this.renderPipeline = null;
+    }
+    if (this.tileManager) {
+      this.tileManager.off('unload', this.onTileChange, this);
+      this.tileManager.off('load', this.onTileChange, this);
+      this.tileManager.destroy();
+      this.tileManager = null;
     }
   }
 }
