@@ -125,6 +125,7 @@ export enum TileState {
   loading = '0',
   loaded = '1',
   errored = '2',
+  unloaded = '3',
 }
 
 /**

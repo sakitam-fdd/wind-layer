@@ -6,6 +6,7 @@ import * as shaderLib from '../../shaders/shaderLib';
 import TileManager from '../../layer/tile/TileManager';
 import { RenderFrom, RenderType, TileState } from '../../type';
 import { littleEndian } from '../../utils/common';
+import Tile from '../../layer/tile/Tile';
 
 export interface ComposePassOptions {
   tileManager: TileManager;
@@ -24,6 +25,8 @@ export default class ComposePass extends Pass<ComposePassOptions> {
 
   #current: RenderTarget;
   #next: RenderTarget;
+
+  #nextStencilID: number;
 
   constructor(
     id: string,
@@ -59,6 +62,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
       internalFormat: this.renderer.isWebGL2
         ? (this.renderer.gl as WebGL2RenderingContext).RGBA32F
         : this.renderer.gl.RGBA,
+      stencil: true,
     };
 
     this.#current = new RenderTarget(renderer, {
@@ -83,6 +87,59 @@ export default class ComposePass extends Pass<ComposePassOptions> {
     };
   }
 
+  #clearStencil() {
+    this.#nextStencilID = 1;
+  }
+
+  #stencilConfigForOverlap(tiles: any[]): [{ [_: number]: any }, Tile[]] {
+    const coords = tiles.sort((a, b) => b.z - a.z);
+    const minTileZ = coords[coords.length - 1].z;
+    const stencilValues = coords[0].z - minTileZ + 1;
+    if (stencilValues > 1) {
+      if (this.#nextStencilID + stencilValues > 256) {
+        this.#clearStencil();
+      }
+      const zToStencilMode = {};
+      for (let i = 0; i < stencilValues; i++) {
+        zToStencilMode[i + minTileZ] = {
+          stencil: true,
+          mask: 0xff,
+          func: {
+            cmp: this.renderer.gl.GEQUAL,
+            ref: i + this.#nextStencilID,
+            mask: 0xff,
+          },
+          op: {
+            fail: this.renderer.gl.KEEP,
+            zfail: this.renderer.gl.KEEP,
+            zpass: this.renderer.gl.REPLACE,
+          },
+        };
+      }
+      this.#nextStencilID += stencilValues;
+      return [zToStencilMode, coords];
+    }
+    return [
+      {
+        [minTileZ]: {
+          stencil: false,
+          mask: 0,
+          func: {
+            cmp: this.renderer.gl.ALWAYS,
+            ref: 0,
+            mask: 0,
+          },
+          op: {
+            fail: this.renderer.gl.KEEP,
+            zfail: this.renderer.gl.KEEP,
+            zpass: this.renderer.gl.KEEP,
+          },
+        },
+      },
+      coords,
+    ];
+  }
+
   /**
    * 此处绘制主要是合并瓦片
    * @param rendererParams
@@ -102,12 +159,22 @@ export default class ComposePass extends Pass<ComposePassOptions> {
 
     const { tileManager } = this.options;
 
+    this.#clearStencil();
+
     if (tileManager) {
       const tiles = tileManager.tiles;
+      const tilesArray: Tile[] = [];
       const entries = tiles.entries();
 
       for (let i = 0; i < tiles.size; i++) {
         const [, tile] = entries.next().value;
+        tilesArray.push(tile);
+      }
+
+      const [stencilModes, tls] = this.#stencilConfigForOverlap(tilesArray);
+
+      for (let i = 0; i < tls.length; i++) {
+        const tile = tls[i];
         if (tile && tile.state === TileState.loaded) {
           const tileMesh = tile.createMesh(this.#program);
           const mesh = tileMesh.getMesh();
@@ -127,6 +194,29 @@ export default class ComposePass extends Pass<ComposePassOptions> {
           mesh.updateMatrix();
           mesh.worldMatrixNeedsUpdate = false;
           mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, mesh.localMatrix);
+
+          const stencilMode = stencilModes[tile.z];
+
+          if (stencilMode) {
+            if (stencilMode.stencil) {
+              console.log(stencilMode);
+              this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
+
+              this.renderer.state.setStencilFunc(
+                stencilMode.func?.cmp,
+                stencilMode.func?.ref,
+                stencilMode.func?.mask,
+              );
+              this.renderer.state.setStencilOp(
+                stencilMode.op?.fail,
+                stencilMode.op?.zfail,
+                stencilMode.op?.zpass,
+              );
+            } else {
+              this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
+            }
+          }
+
           mesh.draw({
             ...utils.omit(rendererParams, ['target']),
             camera: rendererParams.cameras.camera,

@@ -44,6 +44,15 @@ function getTileBBox(x, y, z, wrap = 0) {
   };
 }
 
+function compareTileId(a, b): number {
+  // Different copies of the world are sorted based on their distance to the center.
+  // Wrap values are converted to unsigned distances by reserving odd number for copies
+  // with negative wrap and even numbers for copies with positive wrap.
+  const aWrap = Math.abs(a.wrap * 2) - +(a.wrap < 0);
+  const bWrap = Math.abs(b.wrap * 2) - +(b.wrap < 0);
+  return a.z - b.z || bWrap - aWrap || b.y - a.y || b.x - a.x;
+}
+
 export interface IScalarFillOptions extends ScalarFillOptions {
   wrapX: boolean;
 }
@@ -213,7 +222,7 @@ export default class ScalarFill {
                   z,
                   wrap: tile.wrap,
                   bounds: getTileBBox(x, y, z, tile.wrap),
-                  tileKey: tile.key,
+                  tileKey: `${z}_${x}_${y}_${tile.wrap}`,
                   size: this.data.tileSize,
                 });
               } else if (tile.wrap === 0) {
@@ -223,13 +232,13 @@ export default class ScalarFill {
                   z,
                   wrap: tile.wrap,
                   bounds: getTileBBox(x, y, z, tile.wrap),
-                  tileKey: tile.key,
+                  tileKey: `${z}_${x}_${y}_${tile.wrap}`,
                   size: this.data.tileSize,
                 });
               }
             }
           }
-          return wrapTiles;
+          return wrapTiles.sort(compareTileId);
         },
       },
     );

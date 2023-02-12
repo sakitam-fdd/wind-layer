@@ -1,7 +1,7 @@
-import { Renderer, Scene, Program, EventEmitter } from '@sakitam-gis/vis-engine';
+import {EventEmitter, Program, Renderer, Scene} from '@sakitam-gis/vis-engine';
 import Tile from './Tile';
 import LRUCache from './LRUCache';
-import { DecodeType, LayerData, LayerDataType, RenderFrom, TileLike } from '../../type';
+import {DecodeType, LayerData, LayerDataType, RenderFrom, TileLike, TileState} from '../../type';
 
 export interface TileManagerOptions {
   maxSize: number;
@@ -134,24 +134,79 @@ export default class TileManager extends EventEmitter {
     return this.#data;
   }
 
+  getTileParent(x: number, y: number, z: number, wrap: number) {
+    if (this.#data.type === LayerDataType.tile) {
+      const minZoom = this.#data.minZoom ?? 0;
+      while (z > minZoom) {
+        // eslint-disable-next-line no-param-reassign
+        x = Math.floor(x / 2);
+        // eslint-disable-next-line no-param-reassign
+        y = Math.floor(y / 2);
+        // eslint-disable-next-line no-param-reassign
+        z = z - 1;
+        const parent = this.#cache.get(`${z}_${x}_${y}_${wrap}`);
+        if (parent) {
+          return parent;
+        }
+      }
+    }
+    return null;
+  }
+
+  loadTile(tile: Tile) {
+    if ('dataRange' in this.#data) {
+      tile.load(this.#data.dataRange);
+    } else {
+      tile.load();
+    }
+  }
+
   update(tiles: TileLike[]) {
+    const retainedTile = tiles.slice();
+
+    for (let i = 0; i < tiles.length; i++) {
+      const t = tiles[i];
+
+      let tile = this.getTile(t.tileKey);
+      if (!tile) {
+        tile = this.#cache.get(t.tileKey);
+        if (!tile) {
+          const parentTile = this.getTileParent(t.x, t.y, t.z, t.wrap);
+
+          if (parentTile) {
+            retainedTile.unshift({
+              x: parentTile.x,
+              y: parentTile.y,
+              z: parentTile.z,
+              wrap: parentTile.wrap,
+              bounds: parentTile.tileBounds,
+              tileKey: parentTile.tileKey,
+              size: parentTile.tileSize,
+            });
+          }
+        }
+      }
+    }
+
     const iterator = this.#tiles.entries();
     for (let i = 0; i < this.#tiles.size; i++) {
       const [key, tile] = iterator.next().value;
-      if (tiles.findIndex((t) => t.tileKey === key) < 0) {
+      if (retainedTile.findIndex((t) => t.tileKey === key) < 0) {
         tile?.unload();
         // 此处删除后不一定需要资源释放，因为在缓存中可能还存在，只有缓存失效的需要释放资源
         this.#tiles.delete(key);
         this.emit('unload', tile);
       }
     }
-    for (let i = 0; i < tiles.length; i++) {
-      const t = tiles[i];
+
+    for (let i = 0; i < retainedTile.length; i++) {
+      const t = retainedTile[i];
       let tile = this.getTile(t.tileKey);
       if (!tile) {
         tile = this.#cache.get(t.tileKey);
         if (!tile) {
           const actor = this.options.dispatcher.getActor();
+
           tile = new Tile(this.renderer, t.x, t.y, t.z, {
             actor,
             url: this.getUrl(t.x, t.y, t.z, this.#data),
@@ -167,13 +222,13 @@ export default class TileManager extends EventEmitter {
               this.emit('load', ctx);
             },
           });
-          if ('dataRange' in this.#data) {
-            tile.load(this.#data.dataRange);
-          } else {
-            tile.load();
-          }
+          this.loadTile(tile);
         }
         this.addTile(tile);
+      } else if (tile.state === TileState.unloaded) {
+        this.loadTile(tile);
+      } else if (tile.state === TileState.errored && tile.errorCount < tile.maxErrorCount) {
+        this.loadTile(tile);
       }
     }
   }

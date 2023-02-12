@@ -1,7 +1,7 @@
-import { Geometry, Plane, Program, Renderer, Texture } from '@sakitam-gis/vis-engine';
+import {Geometry, Plane, Program, Renderer, Texture} from '@sakitam-gis/vis-engine';
 import TileMesh from './TileMesh';
-import { DecodeType, LayerData, RenderFrom, TileBounds, TileSize, TileState } from '../../type';
-import { isImageBitmap, parseRange, resolveURL } from '../../utils/common';
+import {DecodeType, LayerData, RenderFrom, TileBounds, TileSize, TileState} from '../../type';
+import {isImageBitmap, parseRange, resolveURL} from '../../utils/common';
 
 export interface TileOptions {
   /**
@@ -53,6 +53,16 @@ export default class Tile {
    * 瓦片数据加载状态
    */
   public state: TileState;
+
+  /**
+   * 瓦片加载失败的次数
+   */
+  public errorCount = 0;
+
+  /**
+   * 允许的瓦片最大失败次数
+   */
+  public maxErrorCount = 3;
 
   /**
    * 瓦片尺寸
@@ -299,6 +309,7 @@ export default class Tile {
     // 在这里我们需要实现 webworker 加载
     try {
       this.state = TileState.loading;
+
       if (Array.isArray(this.url)) {
         const p: Promise<any>[] = [];
         for (let i = 0; i < this.url.length; i++) {
@@ -313,15 +324,16 @@ export default class Tile {
         this.createTextures(0, data, userData);
       }
 
-      this.#removeRequest();
-
       this.state = TileState.loaded;
+
+      this.#removeRequest();
 
       if (this.#onLoad) {
         this.#onLoad(this);
       }
     } catch (e) {
       this.state = TileState.errored;
+      this.errorCount++;
       this.#removeRequest();
       console.error(e);
     }
@@ -346,6 +358,7 @@ export default class Tile {
           });
         }
       }
+      this.state = TileState.unloaded;
     }
   }
 

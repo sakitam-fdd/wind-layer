@@ -1,4 +1,4 @@
-import {utils} from '@sakitam-gis/vis-engine';
+import { utils } from '@sakitam-gis/vis-engine';
 
 export function calcMinMax(array: number[]): [number, number] {
   let min = Infinity;

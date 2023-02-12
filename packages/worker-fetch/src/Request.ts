@@ -127,7 +127,7 @@ function makeFetchRequest(
       .catch((error) => {
         if (error.code === 20) {
           // silence expected AbortError
-          return;
+          // return;
         }
         callback(new Error(error.message));
       });
