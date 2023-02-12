@@ -138,8 +138,10 @@ export default class ScalarFill {
       renderFrom: this.options.renderFrom,
     });
 
-    this.tileManager.on('unload', this.onTileChange, this);
-    this.tileManager.on('load', this.onTileChange, this);
+    this.onTileChange = this.onTileChange.bind(this);
+
+    this.tileManager.on('unload', this.onTileChange);
+    this.tileManager.on('load', this.onTileChange);
 
     this.initialize();
   }
@@ -332,8 +334,8 @@ export default class ScalarFill {
       this.renderPipeline = null;
     }
     if (this.tileManager) {
-      this.tileManager.off('unload', this.onTileChange, this);
-      this.tileManager.off('load', this.onTileChange, this);
+      this.tileManager.off('unload', this.onTileChange);
+      this.tileManager.off('load', this.onTileChange);
       this.tileManager.destroy();
       this.tileManager = null;
     }

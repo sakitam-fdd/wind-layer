@@ -199,7 +199,6 @@ export default class ComposePass extends Pass<ComposePassOptions> {
 
           if (stencilMode) {
             if (stencilMode.stencil) {
-              console.log(stencilMode);
               this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
 
               this.renderer.state.setStencilFunc(

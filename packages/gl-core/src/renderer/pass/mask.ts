@@ -33,7 +33,7 @@ export default class MaskPass extends Pass<MaskPassOptions> {
     this.#geometry = new Geometry(renderer, {
       position: {
         size: 2,
-        data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
+        data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1].map(ii => ii / 2)),
       },
       uv: {
         size: 2,

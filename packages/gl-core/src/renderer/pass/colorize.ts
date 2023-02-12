@@ -100,8 +100,8 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
           this.renderer.state.setStencilMask(0xff);
           this.renderer.state.setStencilFunc(
             this.renderer.gl.EQUAL, // the test
-            0, // reference value
-            1,
+            1, // reference value
+            0xff,
           );
 
           this.renderer.state.setStencilOp(

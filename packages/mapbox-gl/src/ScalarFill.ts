@@ -161,6 +161,7 @@ export default class ScalarFill {
         wireframe: this.options.wireframe,
         getZoom: () => this.map?.getZoom() as number,
         triggerRepaint: () => {
+          console.log('triggerRepaint');
           this.map?.triggerRepaint();
         },
         getViewTiles: (data: LayerData) => {
