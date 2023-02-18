@@ -11,7 +11,7 @@ export interface MaskPassOptions {
 }
 
 /**
- * 掩膜
+ * 遮罩
  */
 export default class MaskPass extends Pass<MaskPassOptions> {
   readonly #program: Program;

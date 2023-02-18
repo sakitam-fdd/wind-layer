@@ -51,6 +51,11 @@ export default class LRUCache<T> {
     return this;
   }
 
+  public clear() {
+    this.reset();
+    this.onRemove = () => undefined;
+  }
+
   public has(key: Key) {
     const node: WithUndef<DoubleQueueNode<T>> = this.map.get(key);
     return node !== undefined;
@@ -111,6 +116,10 @@ export default class LRUCache<T> {
     return deletedNode.val;
   }
 
+  /**
+   * 设置最大缓存大小
+   * @param max
+   */
   public setMaxSize(max: number) {
     this.max = max;
 
@@ -131,6 +140,10 @@ export default class LRUCache<T> {
     temp.pre = node;
   }
 
+  /**
+   * 如果超出缓存限制，那么移除未使用的数据
+   * @private
+   */
   private eliminate() {
     if (this.size < this.max) {
       return;

@@ -1,7 +1,8 @@
-import {Geometry, Plane, Program, Renderer, Texture} from '@sakitam-gis/vis-engine';
+import { Geometry, Plane, Program, Renderer, Texture } from '@sakitam-gis/vis-engine';
 import TileMesh from './TileMesh';
-import {DecodeType, LayerData, RenderFrom, TileBounds, TileSize, TileState} from '../../type';
-import {isImageBitmap, parseRange, resolveURL} from '../../utils/common';
+import { LayerData, RenderFrom, TileBounds, TileSize, TileState } from '../type';
+import { isImageBitmap, parseRange, resolveURL } from '../utils/common';
+import TileID from './TileID';
 
 export interface TileOptions {
   /**
@@ -16,7 +17,6 @@ export interface TileOptions {
   wrap?: number;
   tileZoom?: number;
   tileKey?: string;
-  decodeType?: DecodeType;
   renderFrom?: RenderFrom;
 }
 
@@ -43,11 +43,9 @@ export default class Tile {
   public z: number;
 
   /**
-   * 哪个世界
+   * 瓦片 ID
    */
-  public wrap: number;
-
-  public tileKey: string;
+  public tileID: TileID;
 
   /**
    * 瓦片数据加载状态
@@ -70,19 +68,9 @@ export default class Tile {
   public tileSize: TileSize;
 
   /**
-   * 瓦片路径
-   */
-  public url: string | string[];
-
-  /**
    * 瓦片的世界范围
    */
   public tileBounds: TileBounds;
-
-  /**
-   * 数据解析类型
-   */
-  public decodeType: DecodeType;
 
   public userData: LayerData;
 
@@ -116,20 +104,14 @@ export default class Tile {
     this.x = x;
     this.y = y;
     this.z = z;
-    this.wrap = options.wrap || 0;
     this.actor = options.actor;
 
-    this.tileKey = options.tileKey || `${x}_${y}_${z}_${this.wrap}`;
-
-    this.url = options.url;
     this.tileSize = options.tileSize;
     this.tileBounds = options.tileBounds;
     this.tileCenter = this.getCenter();
-    this.decodeType = options.decodeType ?? DecodeType.image;
     this.renderFrom = options.renderFrom ?? RenderFrom.r;
     this.userData = options.userData;
 
-    this.#onLoad = options.onLoad;
     this.#request = new Map();
 
     this.state = TileState.loading;
@@ -160,7 +142,7 @@ export default class Tile {
           url: resolveURL(url),
           cancelId: url,
           type: 'arrayBuffer',
-          decodeType: this.decodeType,
+          decodeType: '',
         },
         (e, data) => {
           if (e) {
@@ -238,7 +220,7 @@ export default class Tile {
    */
   createMesh(program: Program, force?: boolean) {
     if (!this.tileMesh || force) {
-      this.tileMesh = new TileMesh(this.tileKey, this.renderer, program, this.geometry);
+      this.tileMesh = new TileMesh(this.tileID.tileKey, this.renderer, program, this.geometry);
       this.tileMesh.setCenter(this.tileCenter);
     }
 
@@ -362,16 +344,6 @@ export default class Tile {
     }
   }
 
-  // eslint-disable-next-line
-  parent() {
-    // TODO: 需要实现预加载吗？
-  }
-
-  // eslint-disable-next-line
-  children() {
-    // TODO: 需要实现子集加载失败使用父级瓦片吗？
-  }
-
   /**
    * 获取瓦片世界坐标系下的范围
    */
@@ -390,6 +362,9 @@ export default class Tile {
     ];
   }
 
+  /**
+   * 释放瓦片资源
+   */
   destroy() {
     this.unload();
     for (const [, value] of this.#textures) {

@@ -1,3 +1,5 @@
+#defines
+
 attribute vec2 uv;
 attribute vec3 position;
 uniform vec2 resolution;

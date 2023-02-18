@@ -2,8 +2,8 @@ import * as mapboxgl from 'mapbox-gl';
 
 import { Renderer, Scene, OrthographicCamera, utils } from '@sakitam-gis/vis-engine';
 
-import type { LayerData, ScalarFillOptions } from 'wind-gl-core';
-import { LayerDataType, ScalarFill as ScalarCore } from 'wind-gl-core';
+import type { ScalarFillOptions, SourceType } from 'wind-gl-core';
+import { ScalarFill as ScalarCore, TileID } from 'wind-gl-core';
 
 import CameraSync from './utils/CameraSync';
 import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
@@ -44,15 +44,6 @@ function getTileBBox(x, y, z, wrap = 0) {
   };
 }
 
-function compareTileId(a, b): number {
-  // Different copies of the world are sorted based on their distance to the center.
-  // Wrap values are converted to unsigned distances by reserving odd number for copies
-  // with negative wrap and even numbers for copies with positive wrap.
-  const aWrap = Math.abs(a.wrap * 2) - +(a.wrap < 0);
-  const bWrap = Math.abs(b.wrap * 2) - +(b.wrap < 0);
-  return a.z - b.z || bWrap - aWrap || b.y - a.y || b.x - a.x;
-}
-
 export interface IScalarFillOptions extends ScalarFillOptions {
   wrapX: boolean;
 }
@@ -68,10 +59,10 @@ export default class ScalarFill {
   public orthoCamera: OrthographicCamera;
   public renderer: Renderer;
   private options: any;
-  private data: any;
+  private source: SourceType;
   private scalarFill: ScalarCore | null;
 
-  constructor(id: string, data: any, options?: Partial<IScalarFillOptions>) {
+  constructor(id: string, source: SourceType, options?: Partial<IScalarFillOptions>) {
     this.id = id;
     this.type = 'custom';
     this.renderingMode = '3d';
@@ -79,7 +70,7 @@ export default class ScalarFill {
       ...(options || {}),
     };
 
-    this.data = data;
+    this.source = source;
 
     this.update = this.update.bind(this);
     this.handleZoom = this.handleZoom.bind(this);
@@ -97,7 +88,7 @@ export default class ScalarFill {
       this.orthoCamera.orthographic(0, width, height, 0, 0, 1);
     }
     if (this.scalarFill) {
-      this.scalarFill.updateTiles();
+      this.scalarFill.update();
     }
   }
 
@@ -146,12 +137,14 @@ export default class ScalarFill {
     const { width, height } = (this.map as any).painter as any;
     this.orthoCamera = new OrthographicCamera(0, width, height, 0, 0, 1);
     this.scalarFill = new ScalarCore(
+      this.source,
       {
         renderer: this.renderer,
         scene: this.scene,
       },
       {
         opacity: this.options.opacity,
+        renderPasses: this.options.renderPasses,
         renderFrom: this.options.renderFrom,
         decodeType: this.options.decodeType,
         styleSpec: this.options.styleSpec,
@@ -161,106 +154,59 @@ export default class ScalarFill {
         wireframe: this.options.wireframe,
         getZoom: () => this.map?.getZoom() as number,
         triggerRepaint: () => {
-          console.log('triggerRepaint');
           this.map?.triggerRepaint();
         },
-        getViewTiles: (data: LayerData) => {
+        getViewTiles: (source: SourceType) => {
           const { transform } = this.map as any;
           const wrapTiles: any[] = [];
-          if (data.type === LayerDataType.image) {
-            const cornerCoords = data.extent.map((c: any) =>
+          if (source.type === 'image') {
+            const cornerCoords = source.extent.map((c: any) =>
               mapboxgl.MercatorCoordinate.fromLngLat(c),
             );
             const tileID = getCoordinatesCenterTileID(cornerCoords);
             if (this.options.wrapX) {
               transform.getVisibleUnwrappedCoordinates(tileID).forEach((unwrapped) => {
-                const x = unwrapped.canonical.x;
-                const y = unwrapped.canonical.y;
-                const z = unwrapped.canonical.z;
-                const wrap = unwrapped.wrap;
-                wrapTiles.push({
-                  x,
-                  y,
-                  z,
-                  wrap,
-                  bounds: getTileBBox(x, y, z, wrap),
-                  tileKey: `${z}_${x}_${y}_${wrap}`,
-                  size: this.data.tileSize,
-                });
+                const { canonical, wrap } = unwrapped;
+                const { x, y, z } = canonical;
+                wrapTiles.push(new TileID(z, x, y, z, wrap));
               });
             } else {
               const x = tileID.x;
               const y = tileID.y;
               const z = tileID.z;
               const wrap = 0;
-              wrapTiles.push({
-                x,
-                y,
-                z,
-                wrap,
-                bounds: getTileBBox(x, y, z, wrap),
-                tileKey: `${z}_${x}_${y}_${wrap}`,
-                size: this.data.tileSize,
-              });
+              wrapTiles.push(new TileID(z, x, y, z, wrap));
             }
-          } else if (data.type === LayerDataType.tile) {
+          } else if (source.type === 'tile') {
             const tiles = transform.coveringTiles({
               tileSize: utils.isNumber(this.data.tileSize)
-                ? this.data.tileSize
-                : this.data.tileSize?.[0] || 512,
-              minzoom: this.data.minZoom,
-              maxzoom: this.data.maxZoom,
-              roundZoom: this.data.roundZoom,
+                ? source.tileSize
+                : source.tileSize?.[0] || 512,
+              minzoom: source.minZoom,
+              maxzoom: source.maxZoom,
+              roundZoom: source.roundZoom,
             });
 
             for (let i = 0; i < tiles.length; i++) {
-              const tile = tiles[i].toUnwrapped();
-              const { x, y, z } = tile.canonical;
+              const tile = tiles[i];
+              const { canonical, wrap } = tile;
+              const { x, y, z } = canonical;
               if (this.options.wrapX) {
-                wrapTiles.push({
-                  x,
-                  y,
-                  z,
-                  wrap: tile.wrap,
-                  bounds: getTileBBox(x, y, z, tile.wrap),
-                  tileKey: `${z}_${x}_${y}_${tile.wrap}`,
-                  size: this.data.tileSize,
-                });
+                wrapTiles.push(new TileID(z, x, y, z, wrap));
               } else if (tile.wrap === 0) {
-                wrapTiles.push({
-                  x,
-                  y,
-                  z,
-                  wrap: tile.wrap,
-                  bounds: getTileBBox(x, y, z, tile.wrap),
-                  tileKey: `${z}_${x}_${y}_${tile.wrap}`,
-                  size: this.data.tileSize,
-                });
+                wrapTiles.push(new TileID(z, x, y, z, wrap));
               }
             }
           }
-          return wrapTiles.sort(compareTileId);
+          return wrapTiles;
         },
       },
     );
-    if (this.data) {
-      this.setData(this.data);
-    }
+
     map.on('move', this.update);
     map.on('zoom', this.handleZoom);
     map.on('resize', this.handleResize);
     this.update();
-  }
-
-  setData(data: any) {
-    return new Promise((resolve) => {
-      this.data = data;
-      if (this.data && this.scalarFill) {
-        this.scalarFill.setData(this.data);
-      } else {
-        resolve(false);
-      }
-    });
   }
 
   onRemove() {

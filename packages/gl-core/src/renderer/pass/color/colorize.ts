@@ -7,12 +7,12 @@ import {
   utils,
   Vector2,
 } from '@sakitam-gis/vis-engine';
-import Pass from './base';
-import { littleEndian } from '../../utils/common';
-import fillVert from '../../shaders/fill.vert.glsl';
-import fillFrag from '../../shaders/fill.frag.glsl';
-import * as shaderLib from '../../shaders/shaderLib';
-import { RenderType } from '../../type';
+import Pass from '../base';
+import { littleEndian } from '../../../utils/common';
+import fillVert from '../../../shaders/fill.vert.glsl';
+import fillFrag from '../../../shaders/fill.frag.glsl';
+import * as shaderLib from '../../../shaders/shaderLib';
+import { RenderType } from '../../../type';
 
 export interface ColorizePassOptions {
   texture: Texture;

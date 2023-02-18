@@ -1,19 +1,31 @@
 import { DataTexture, Renderer, Scene, utils, Vector2 } from '@sakitam-gis/vis-engine';
 import wgw from 'wind-gl-worker';
-import TileManager from '../layer/tile/TileManager';
 import Pipelines from './Pipelines';
-import ComposePass from './pass/compose';
 import MaskPass from './pass/mask';
-import ColorizePass from './pass/colorize';
+import ColorizeComposePass from './pass/color/compose';
+import ColorizePass from './pass/color/colorize';
+import RasterPass from './pass/raster/image';
+import RasterComposePass from './pass/raster/compose';
 import { isFunction, resolveURL } from '../utils/common';
 import { createLinearGradient, createZoom } from '../utils/style-parser';
-import { DecodeType, getRenderType, LayerData, LayerDataType, RenderFrom } from '../type';
+import { DecodeType, getRenderType, RenderFrom } from '../type';
+import { SourceType } from '../source';
+import Tile from '../tile/Tile';
+
+const passes = {
+  ColorizeComposePass,
+  ColorizePass,
+  RasterComposePass,
+  RasterPass,
+  MaskPass,
+};
 
 export interface ScalarFillOptions {
   /**
    * 获取当前视野内的瓦片
    */
   getViewTiles: (data: any) => any[];
+  renderPasses: string[];
   /**
    * 指定渲染通道
    */
@@ -43,6 +55,7 @@ export interface ScalarFillOptions {
 
 export const defaultOptions: ScalarFillOptions = {
   getViewTiles: () => [],
+  renderPasses: ['ColorizeComposePass', 'ColorizePass'],
   renderFrom: RenderFrom.r,
   styleSpec: {
     'fill-color': [
@@ -85,18 +98,24 @@ export default class ScalarFill {
   private options: ScalarFillOptions;
   private uid: string;
   private renderPipeline: WithNull<Pipelines>;
-  private tileManager: WithNull<TileManager>;
   private readonly scene: Scene;
   private readonly renderer: Renderer;
   private readonly dispatcher: any;
+  private readonly source: SourceType;
 
   #opacity: number;
   #colorRange: Vector2;
   #colorRampTexture: DataTexture;
+  #nextStencilID: number;
 
-  constructor(rs: { renderer: Renderer; scene: Scene }, options?: Partial<ScalarFillOptions>) {
+  constructor(
+    source: SourceType,
+    rs: { renderer: Renderer; scene: Scene },
+    options?: Partial<ScalarFillOptions>,
+  ) {
     this.renderer = rs.renderer;
     this.scene = rs.scene;
+    this.source = source;
 
     if (!this.renderer) {
       throw new Error('initialize error');
@@ -132,16 +151,15 @@ export default class ScalarFill {
       registerDeps = true;
     }
 
-    this.tileManager = new TileManager(this.renderer, this.scene, {
-      dispatcher: this.dispatcher,
+    this.onTileChange = this.onTileChange.bind(this);
+    //
+    // this.tileManager.on('unload', this.onTileChange);
+    // this.tileManager.on('load', this.onTileChange);
+
+    this.source.prepare(this.renderer, this.dispatcher, {
       decodeType: this.options.decodeType,
       renderFrom: this.options.renderFrom,
     });
-
-    this.onTileChange = this.onTileChange.bind(this);
-
-    this.tileManager.on('unload', this.onTileChange);
-    this.tileManager.on('load', this.onTileChange);
 
     this.initialize();
   }
@@ -150,32 +168,27 @@ export default class ScalarFill {
     this.updateOptions({});
     this.renderPipeline = new Pipelines(this.renderer);
     const renderType = getRenderType(this.options.renderFrom ?? RenderFrom.r);
-    const composePass = new ComposePass('compose', this.renderer, {
-      tileManager: this.tileManager as TileManager,
-      renderType,
-      renderFrom: this.options.renderFrom ?? RenderFrom.r,
-    });
-
-    const textures = composePass.textures;
-
-    const colorizePass = new ColorizePass('colorize', this.renderer, {
-      texture: textures.current,
-      textureNext: textures.next,
-      renderType,
-      hasMask: !!this.options.mask,
-    });
-
-    // 先执行瓦片合并，绘制在 fbo 中
-    this.renderPipeline.addPass(composePass);
-    if (this.options.mask) {
-      // 掩膜处理
-      const maskPass = new MaskPass('mask', this.renderer, {
+    let textures;
+    this.options.renderPasses.forEach((key) => {
+      const opts = textures
+        ? {
+            texture: textures.current,
+            textureNext: textures.next,
+            hasMask: !!this.options.mask,
+          }
+        : {};
+      const pass = new passes[key](key, this, this.renderer, {
+        sourceCache: this.source.sourceCache,
         renderType,
+        renderFrom: this.options.renderFrom ?? RenderFrom.r,
+        stencilConfigForOverlap: this.stencilConfigForOverlap,
+        ...opts,
       });
-      this.renderPipeline.addPass(maskPass);
-    }
-    // 再执行着色
-    this.renderPipeline.addPass(colorizePass);
+      if (pass.prerender) {
+        textures = pass.textures;
+      }
+      this.renderPipeline?.addPass(pass);
+    });
   }
 
   updateOptions(options: Partial<ScalarFillOptions>) {
@@ -245,36 +258,65 @@ export default class ScalarFill {
     }
   }
 
-  /**
-   * 设置数据
-   * 目前设计的支持的数据类型：
-   * 1. 瓦片链接，内部进行处理 xyz
-   * 2. 单张数据图片
-   * 3. jsonArray
-   * @param data
-   */
-  setData(data: LayerData) {
-    if (this.tileManager) {
-      this.tileManager.setData(data);
-      this.updateTiles();
-      return true;
-    }
-    return Promise.reject(new Error('数据未更新成功！'));
+  clearStencil() {
+    this.#nextStencilID = 1;
   }
 
-  /**
-   * 获取数据
-   */
-  getData(): LayerData | void {
-    return this.tileManager?.getData();
+  stencilConfigForOverlap(tiles: any[]): [{ [_: number]: any }, Tile[]] {
+    const coords = tiles.sort((a, b) => b.overscaledZ - a.overscaledZ);
+    const minTileZ = coords[coords.length - 1].z;
+    const stencilValues = coords[0].z - minTileZ + 1;
+    if (stencilValues > 1) {
+      if (this.#nextStencilID + stencilValues > 256) {
+        this.clearStencil();
+      }
+      const zToStencilMode = {};
+      for (let i = 0; i < stencilValues; i++) {
+        zToStencilMode[i + minTileZ] = {
+          stencil: true,
+          mask: 0xff,
+          func: {
+            cmp: this.renderer.gl.GEQUAL,
+            ref: i + this.#nextStencilID,
+            mask: 0xff,
+          },
+          op: {
+            fail: this.renderer.gl.KEEP,
+            zfail: this.renderer.gl.KEEP,
+            zpass: this.renderer.gl.REPLACE,
+          },
+        };
+      }
+      this.#nextStencilID += stencilValues;
+      return [zToStencilMode, coords];
+    }
+    return [
+      {
+        [minTileZ]: {
+          stencil: false,
+          mask: 0,
+          func: {
+            cmp: this.renderer.gl.ALWAYS,
+            ref: 0,
+            mask: 0,
+          },
+          op: {
+            fail: this.renderer.gl.KEEP,
+            zfail: this.renderer.gl.KEEP,
+            zpass: this.renderer.gl.KEEP,
+          },
+        },
+      },
+      coords,
+    ];
   }
 
   /**
    * 更新视野内的瓦片
    */
-  updateTiles() {
-    const tiles = this.options.getViewTiles(this.getData());
-    this.tileManager?.update(tiles);
+  update() {
+    const tiles = this.options.getViewTiles(this.source);
+    this.source.sourceCache?.update(tiles);
   }
 
   onTileChange() {
@@ -309,12 +351,6 @@ export default class ScalarFill {
         useDisplayRange: Boolean(this.options.displayRange),
       };
 
-      const data = this.getData();
-
-      if (data && data.type === LayerDataType.image) {
-        state.dataRange = data.dataRange;
-      }
-
       this.renderPipeline.render(
         {
           scene: this.scene,
@@ -332,12 +368,6 @@ export default class ScalarFill {
     if (this.renderPipeline) {
       this.renderPipeline.destroy();
       this.renderPipeline = null;
-    }
-    if (this.tileManager) {
-      this.tileManager.off('unload', this.onTileChange);
-      this.tileManager.off('load', this.onTileChange);
-      this.tileManager.destroy();
-      this.tileManager = null;
     }
   }
 }

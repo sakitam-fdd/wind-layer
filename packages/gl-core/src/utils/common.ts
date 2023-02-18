@@ -100,3 +100,13 @@ export function parseRange(exif) {
   const gs = group.filter((item) => item !== '');
   return gs.map((item) => item.split(',').map((v) => parseFloat(v)));
 }
+
+export function keysDifference(obj, other) {
+  const difference: (string | number)[] = [];
+  for (const i in obj) {
+    if (!(i in other)) {
+      difference.push(i);
+    }
+  }
+  return difference;
+}
