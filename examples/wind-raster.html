@@ -64,19 +64,21 @@
       ],
     },
     center: { lng: 105.70150033978689, lat: 22.76021405309811 }, // starting position [lng, lat]
-    zoom: 1.5, // starting zoom
+    zoom: 0, // starting zoom
     antialias: true,
   });
 
   map.on('load', function () {
-    const fillLayer = new mapboxWind.ScalarFill('temp', {
+    const source = new mapboxWind.TileSource('temp', {
       type: 'tile',
-      tileSize: [256, 256],
-      url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+      tileSize: 256,
+      url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
       minZoom: 0,
       maxZoom: 18,
       subdomains: ['a', 'b', 'c', 'd'],
-    }, {
+    });
+
+    const layer = new mapboxWind.Layer('temp', source, {
       wrapX: true,
       wireframe: true,
       widthSegments: 1,
@@ -95,7 +97,7 @@
       renderPasses: ['RasterComposePass', 'RasterPass'],
     });
 
-    map.addLayer(fillLayer);
+    map.addLayer(layer);
   });
 </script>
 </body>

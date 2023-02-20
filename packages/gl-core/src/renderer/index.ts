@@ -8,7 +8,7 @@ import RasterPass from './pass/raster/image';
 import RasterComposePass from './pass/raster/compose';
 import { isFunction, resolveURL } from '../utils/common';
 import { createLinearGradient, createZoom } from '../utils/style-parser';
-import { DecodeType, getRenderType, RenderFrom } from '../type';
+import { getRenderType, RenderFrom, TileBounds } from '../type';
 import { SourceType } from '../source';
 import Tile from '../tile/Tile';
 
@@ -20,17 +20,25 @@ const passes = {
   MaskPass,
 };
 
-export interface ScalarFillOptions {
+export interface LayerOptions {
   /**
    * 获取当前视野内的瓦片
    */
   getViewTiles: (data: any) => any[];
+
+  /**
+   * 根据瓦片行列号获取瓦片范围
+   * @param x
+   * @param y
+   * @param z
+   * @param wrap
+   */
+  getTileBBox: (x: number, y: number, z: number, wrap: number) => TileBounds;
   renderPasses: string[];
   /**
    * 指定渲染通道
    */
   renderFrom?: RenderFrom;
-  decodeType?: DecodeType;
   styleSpec?: {
     'fill-color': any[];
     opacity: number | any[];
@@ -53,7 +61,13 @@ export interface ScalarFillOptions {
   onInit?: (error, data) => void;
 }
 
-export const defaultOptions: ScalarFillOptions = {
+export const defaultOptions: LayerOptions = {
+  getTileBBox: (x: number, y: number, z: number, wrap: number): TileBounds => ({
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  }),
   getViewTiles: () => [],
   renderPasses: ['ColorizeComposePass', 'ColorizePass'],
   renderFrom: RenderFrom.r,
@@ -86,7 +100,7 @@ export const defaultOptions: ScalarFillOptions = {
   heightSegments: 1,
   wireframe: false,
   waitTilesLoaded: false,
-  onInit: () => undefined,
+  onInit: () => undefined
 };
 
 /**
@@ -94,8 +108,8 @@ export const defaultOptions: ScalarFillOptions = {
  */
 let registerDeps = false;
 
-export default class ScalarFill {
-  private options: ScalarFillOptions;
+export default class Layer {
+  private options: LayerOptions;
   private uid: string;
   private renderPipeline: WithNull<Pipelines>;
   private readonly scene: Scene;
@@ -111,7 +125,7 @@ export default class ScalarFill {
   constructor(
     source: SourceType,
     rs: { renderer: Renderer; scene: Scene },
-    options?: Partial<ScalarFillOptions>,
+    options?: Partial<LayerOptions>,
   ) {
     this.renderer = rs.renderer;
     this.scene = rs.scene;
@@ -125,7 +139,7 @@ export default class ScalarFill {
 
     if (!options) {
       // eslint-disable-next-line no-param-reassign
-      options = {} as ScalarFillOptions;
+      options = {} as LayerOptions;
     }
 
     this.options = {
@@ -151,15 +165,15 @@ export default class ScalarFill {
       registerDeps = true;
     }
 
-    this.onTileChange = this.onTileChange.bind(this);
-    //
-    // this.tileManager.on('unload', this.onTileChange);
-    // this.tileManager.on('load', this.onTileChange);
+    this.update = this.update.bind(this);
+    this.onTileLoaded = this.onTileLoaded.bind(this);
 
+    this.source.onAdd();
     this.source.prepare(this.renderer, this.dispatcher, {
-      decodeType: this.options.decodeType,
-      renderFrom: this.options.renderFrom,
+      renderFrom: this.options.renderFrom ?? RenderFrom.r,
     });
+    this.source.sourceCache.on('update', this.update);
+    this.source.sourceCache.on('tileLoaded', this.onTileLoaded);
 
     this.initialize();
   }
@@ -177,11 +191,12 @@ export default class ScalarFill {
             hasMask: !!this.options.mask,
           }
         : {};
-      const pass = new passes[key](key, this, this.renderer, {
-        sourceCache: this.source.sourceCache,
+      const pass = new passes[key](key, this.renderer, {
         renderType,
+        sourceCache: this.source.sourceCache,
+        getTileBBox: this.options.getTileBBox,
         renderFrom: this.options.renderFrom ?? RenderFrom.r,
-        stencilConfigForOverlap: this.stencilConfigForOverlap,
+        stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
         ...opts,
       });
       if (pass.prerender) {
@@ -191,7 +206,7 @@ export default class ScalarFill {
     });
   }
 
-  updateOptions(options: Partial<ScalarFillOptions>) {
+  updateOptions(options: Partial<LayerOptions>) {
     this.options = {
       ...this.options,
       ...options,
@@ -319,7 +334,7 @@ export default class ScalarFill {
     this.source.sourceCache?.update(tiles);
   }
 
-  onTileChange() {
+  onTileLoaded() {
     if (this.options.triggerRepaint && isFunction(this.options.triggerRepaint)) {
       this.options.triggerRepaint();
     }
@@ -368,6 +383,11 @@ export default class ScalarFill {
     if (this.renderPipeline) {
       this.renderPipeline.destroy();
       this.renderPipeline = null;
+    }
+    if (this.source) {
+      this.source.sourceCache.off('update', this.update);
+      this.source.sourceCache.off('tileLoaded', this.onTileLoaded);
+      this.source.destroy();
     }
   }
 }

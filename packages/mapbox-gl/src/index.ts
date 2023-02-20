@@ -1,4 +1,4 @@
-import { configDeps } from 'wind-gl-core';
-export { default as ScalarFill } from './ScalarFill';
+import { configDeps, TileID, ImageSource, TileSource } from 'wind-gl-core';
+export { default as Layer } from './layer';
 // export { default as Particles } from './Particles';
-export { configDeps };
+export { configDeps, TileID, ImageSource, TileSource };

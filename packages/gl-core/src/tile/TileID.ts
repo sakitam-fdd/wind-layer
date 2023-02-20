@@ -1,4 +1,4 @@
-import {TileBounds} from "../type";
+import { TileBounds } from '../type';
 
 export default class TileID {
   /**
@@ -51,6 +51,10 @@ export default class TileID {
     this.tileKey = `${z}_${x}_${y}-${wrap}`;
     this.unWrappedTileKey = `${z}_${x}_${y}`;
     this.overscaledZ = overscaledZ;
+  }
+
+  overscaleFactor(): number {
+    return Math.pow(2, this.overscaledZ - this.z);
   }
 
   /**

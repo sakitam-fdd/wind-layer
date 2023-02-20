@@ -1,23 +1,12 @@
 import { Geometry, Plane, Program, Renderer, Texture } from '@sakitam-gis/vis-engine';
 import TileMesh from './TileMesh';
-import { LayerData, RenderFrom, TileBounds, TileSize, TileState } from '../type';
-import { isImageBitmap, parseRange, resolveURL } from '../utils/common';
+import { ParseOptionsType, RenderFrom, TileBounds, TileState } from '../type';
+import { isImageBitmap, parseRange } from '../utils/common';
 import TileID from './TileID';
 
 export interface TileOptions {
-  /**
-   * 针对单个瓦片可能存在多个数据
-   */
-  url: string | string[];
-  actor: any;
-  userData: LayerData;
-  tileBounds: TileBounds;
-  tileSize: TileSize;
-  onLoad: (ctx: Tile) => void;
-  wrap?: number;
-  tileZoom?: number;
-  tileKey?: string;
-  renderFrom?: RenderFrom;
+  tileBounds?: TileBounds;
+  tileSize: number;
 }
 
 /**
@@ -28,19 +17,19 @@ export interface TileOptions {
  */
 export default class Tile {
   /**
-   * 瓦片 x
+   * 瓦片 是否取消请求
    */
-  public x: number;
+  public aborted: boolean;
 
   /**
-   * 瓦片 y
+   * 瓦片重加载回调
    */
-  public y: number;
+  public reloadCallback: any;
 
   /**
-   * 瓦片 z
+   * worker 执行器
    */
-  public z: number;
+  public actor: any;
 
   /**
    * 瓦片 ID
@@ -63,65 +52,59 @@ export default class Tile {
   public maxErrorCount = 3;
 
   /**
-   * 瓦片尺寸
-   */
-  public tileSize: TileSize;
-
-  /**
    * 瓦片的世界范围
    */
   public tileBounds: TileBounds;
 
-  public userData: LayerData;
+  /**
+   * 瓦片尺寸
+   */
+  public tileSize: number;
 
-  public renderFrom: RenderFrom;
-
-  public actor: any;
-
-  public tileCenter: [number, number, number];
-
-  public renderer: Renderer;
+  /**
+   * 瓦片使用次数（在多个 render 共享 source 时，瓦片只能在为被任何渲染器使用时才能被销毁）
+   */
+  public uses = 0;
 
   public tileMesh: TileMesh;
 
   public geometry: Plane;
 
-  #onLoad: any;
-
-  #request: Map<string, any>;
+  request: Map<string, any>;
 
   #textures: Map<number, Texture> = new Map();
 
   /**
-   * @param renderer
-   * @param x 默认为 0
-   * @param y 默认为 0
-   * @param z 默认为 0
+   * @param tileID
    * @param options
    */
-  constructor(renderer: Renderer, x = 0, y = 0, z = 0, options: TileOptions = {} as TileOptions) {
-    this.renderer = renderer;
-    this.x = x;
-    this.y = y;
-    this.z = z;
-    this.actor = options.actor;
+  constructor(tileID: TileID, options: TileOptions = {} as TileOptions) {
+    this.tileID = tileID;
 
     this.tileSize = options.tileSize;
-    this.tileBounds = options.tileBounds;
-    this.tileCenter = this.getCenter();
-    this.renderFrom = options.renderFrom ?? RenderFrom.r;
-    this.userData = options.userData;
 
-    this.#request = new Map();
+    this.request = new Map();
 
     this.state = TileState.loading;
-    this.updateGeometry(true);
   }
 
+  /**
+   * 瓦片是否已经加载到数据
+   */
   hasData() {
     return this.state === TileState.loaded;
   }
 
+  /**
+   * 瓦片是否已经请求过
+   */
+  wasRequested(): boolean {
+    return this.state === TileState.errored || this.state === TileState.loaded;
+  }
+
+  /**
+   * 瓦片是否加载完成
+   */
   isLoaded() {
     return this.state === TileState.loaded || this.state === TileState.errored;
   }
@@ -134,42 +117,22 @@ export default class Tile {
     return this.#textures;
   }
 
-  #loadData(url) {
-    return new Promise((resolve, reject) => {
-      this.actor.send(
-        'loadData',
-        {
-          url: resolveURL(url),
-          cancelId: url,
-          type: 'arrayBuffer',
-          decodeType: '',
-        },
-        (e, data) => {
-          if (e) {
-            return reject(e);
-          }
-          resolve(data);
-        },
-      );
-      this.#request.set(url, url);
-    });
-  }
-
-  #removeRequest() {
-    if (Array.isArray(this.url)) {
-      for (let i = 0; i < this.url.length; i++) {
-        this.#request.delete(this.url[i]);
-      }
-    } else {
-      this.#request.delete(this.url);
-    }
+  get tileCenter() {
+    return [
+      (this.tileBounds.left + this.tileBounds.right) / 2,
+      (this.tileBounds.top + this.tileBounds.bottom) / 2,
+      0,
+    ];
   }
 
   /**
    * 更新瓦片顶点信息
+   * @param tileBounds
+   * @param renderer
    * @param force
    */
-  updateGeometry(force?: boolean) {
+  updateGeometry(tileBounds, renderer: Renderer, force?: boolean) {
+    this.tileBounds = tileBounds;
     if (!this.geometry || force) {
       const position = [
         this.tileBounds.left,
@@ -193,7 +156,7 @@ export default class Tile {
         position[i + 1] = position[i + 1] - this.tileCenter[1];
         position[i + 2] = position[i + 2] - this.tileCenter[2];
       }
-      this.geometry = new Geometry(this.renderer, {
+      this.geometry = new Geometry(renderer, {
         position: {
           size: 3,
           data: new Float32Array(position),
@@ -215,19 +178,36 @@ export default class Tile {
 
   /**
    * 创建 `TileMesh`
+   * @param tileBounds
+   * @param renderer
    * @param program
    * @param force
    */
-  createMesh(program: Program, force?: boolean) {
+  createMesh(tileBounds, renderer: Renderer, program: Program, force?: boolean) {
+    this.updateGeometry(tileBounds, renderer, force);
     if (!this.tileMesh || force) {
-      this.tileMesh = new TileMesh(this.tileID.tileKey, this.renderer, program, this.geometry);
+      this.tileMesh = new TileMesh(this.tileID.tileKey, renderer, program, this.geometry);
       this.tileMesh.setCenter(this.tileCenter);
     }
 
     return this.tileMesh;
   }
 
-  createTextures(index: number, image, userData?: any) {
+  /**
+   * 创建纹理
+   * @param renderer
+   * @param index
+   * @param image
+   * @param parseOptions
+   * @param userData
+   */
+  setTextures(
+    renderer: Renderer,
+    index: number,
+    image: any,
+    parseOptions: ParseOptionsType,
+    userData?: any,
+  ) {
     const texture = this.#textures.get(index);
     const iib = isImageBitmap(image) || image instanceof Image;
 
@@ -247,7 +227,7 @@ export default class Tile {
     } else {
       this.#textures.set(
         index,
-        new Texture(this.renderer, {
+        new Texture(renderer, {
           userData: dataRange
             ? {
                 dataRange,
@@ -256,91 +236,31 @@ export default class Tile {
           image: iib ? image : image.data,
           width: image.width,
           height: image.height,
-          minFilter: this.renderer.gl.LINEAR,
-          magFilter: this.renderer.gl.LINEAR,
-          wrapS: this.renderer.gl.CLAMP_TO_EDGE,
-          wrapT: this.renderer.gl.CLAMP_TO_EDGE,
+          minFilter: renderer.gl.LINEAR,
+          magFilter: renderer.gl.LINEAR,
+          wrapS: renderer.gl.CLAMP_TO_EDGE,
+          wrapT: renderer.gl.CLAMP_TO_EDGE,
           flipY: true, // 注意，对 ImageBitmap 无效
           premultiplyAlpha: false, // 禁用 `Alpha` 预乘
           // generateMipmaps: false,
           type:
-            this.renderFrom === RenderFrom.float
-              ? this.renderer.gl.FLOAT
-              : this.renderer.gl.UNSIGNED_BYTE,
+            parseOptions.renderFrom === RenderFrom.float
+              ? renderer.gl.FLOAT
+              : renderer.gl.UNSIGNED_BYTE,
           format:
-            this.renderFrom === RenderFrom.float
-              ? this.renderer.isWebGL2
-                ? (this.renderer.gl as WebGL2RenderingContext).RED
-                : this.renderer.gl.LUMINANCE
-              : this.renderer.gl.RGBA,
+            parseOptions.renderFrom === RenderFrom.float
+              ? renderer.isWebGL2
+                ? (renderer.gl as WebGL2RenderingContext).RED
+                : renderer.gl.LUMINANCE
+              : renderer.gl.RGBA,
           internalFormat:
-            this.renderFrom === RenderFrom.float
-              ? this.renderer.isWebGL2
-                ? (this.renderer.gl as WebGL2RenderingContext).R32F
-                : this.renderer.gl.LUMINANCE
-              : this.renderer.gl.RGBA,
+            parseOptions.renderFrom === RenderFrom.float
+              ? renderer.isWebGL2
+                ? (renderer.gl as WebGL2RenderingContext).R32F
+                : renderer.gl.LUMINANCE
+              : renderer.gl.RGBA,
         }),
       );
-    }
-  }
-
-  /**
-   * 执行数据加载
-   */
-  async load(userData?: any) {
-    // 在这里我们需要实现 webworker 加载
-    try {
-      this.state = TileState.loading;
-
-      if (Array.isArray(this.url)) {
-        const p: Promise<any>[] = [];
-        for (let i = 0; i < this.url.length; i++) {
-          p.push(this.#loadData(this.url[i]));
-        }
-        const data = await Promise.all(p);
-        data.forEach((d, index) => {
-          this.createTextures(index, d, userData);
-        });
-      } else {
-        const data: any = await this.#loadData(this.url);
-        this.createTextures(0, data, userData);
-      }
-
-      this.state = TileState.loaded;
-
-      this.#removeRequest();
-
-      if (this.#onLoad) {
-        this.#onLoad(this);
-      }
-    } catch (e) {
-      this.state = TileState.errored;
-      this.errorCount++;
-      this.#removeRequest();
-      console.error(e);
-    }
-
-    return this;
-  }
-
-  /**
-   * 如果存在进行中的请求，那么执行 cancel
-   * 如果已经加载完成，执行资源释放
-   */
-  unload() {
-    // 支持取消
-    if (this.#request.size > 0 && this.state === TileState.loading) {
-      const iterator = this.#request.entries();
-      for (let i = 0; i < this.#request.size; i++) {
-        const [url] = iterator.next().value;
-        if (url) {
-          this.actor.send('cancel', {
-            url,
-            cancelId: url,
-          });
-        }
-      }
-      this.state = TileState.unloaded;
     }
   }
 
@@ -352,21 +272,9 @@ export default class Tile {
   }
 
   /**
-   * 获取瓦片世界坐标系下的中心点
-   */
-  getCenter(): [number, number, number] {
-    return [
-      (this.tileBounds.left + this.tileBounds.right) / 2,
-      (this.tileBounds.top + this.tileBounds.bottom) / 2,
-      0,
-    ];
-  }
-
-  /**
    * 释放瓦片资源
    */
   destroy() {
-    this.unload();
     for (const [, value] of this.#textures) {
       if (value) {
         value?.destroy();

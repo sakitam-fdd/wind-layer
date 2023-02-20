@@ -1,9 +1,10 @@
-import { Renderer } from '@sakitam-gis/vis-engine';
+import { EventEmitter } from '@sakitam-gis/vis-engine';
 import LRUCache from '../utils/LRUCache';
 import TileSource from './tile';
 import ImageSource from './image';
 import Tile from '../tile/Tile';
 import { keysDifference } from '../utils/common';
+import { TileState } from '../type';
 
 function compareTileId(a, b) {
   const aWrap = Math.abs(a.wrap * 2) - +(a.wrap < 0);
@@ -11,11 +12,9 @@ function compareTileId(a, b) {
   return a.overscaledZ - b.overscaledZ || bWrap - aWrap || b.y - a.y || b.x - a.x;
 }
 
-export default class SourceCache {
+export default class SourceCache extends EventEmitter {
   public id: string;
   public source: TileSource | ImageSource;
-  public renderer: Renderer;
-  public dispatcher: any;
   private cacheTiles: any;
   private coveredTiles: any;
   private loadedParentTiles: any;
@@ -32,17 +31,13 @@ export default class SourceCache {
   static maxUnderzooming = 3;
 
   constructor(id, source) {
+    super();
     this.id = id;
     this.source = source;
     this.cacheTiles = {};
     this.coveredTiles = {};
     this.loadedParentTiles = {};
-    this.#cache = new LRUCache(200, this.unloadTile.bind(this));
-  }
-
-  prepare(renderer: Renderer, dispatcher) {
-    this.renderer = renderer;
-    this.dispatcher = dispatcher;
+    this.#cache = new LRUCache(this.source.options.maxTileCacheSize, this.unloadTile.bind(this));
   }
 
   loaded() {
@@ -51,7 +46,7 @@ export default class SourceCache {
     }
     for (const t in this.cacheTiles) {
       const tile = this.cacheTiles[t];
-      if (tile.state !== 'loaded' && tile.state !== 'errored') return false;
+      if (tile.state !== TileState.loaded && tile.state !== TileState.errored) return false;
     }
     return true;
   }
@@ -93,17 +88,19 @@ export default class SourceCache {
 
   tileLoaded(tile, id, previousState, err) {
     if (err) {
-      tile.state = 'errored';
+      tile.state = TileState.errored;
       if (err.status !== 404) {
         // this._source.fire(new ErrorEvent(err, {tile}));
       } else {
         // continue to try loading parent/children tiles if a tile doesn't exist (404)
-        // this.update();
+        this.emit('update');
       }
       return;
     }
 
     tile.timeAdded = Date.now();
+    this.emit('update');
+    this.emit('tileLoaded');
   }
 
   _addTile(tileID) {
@@ -119,7 +116,9 @@ export default class SourceCache {
 
     const cached = Boolean(tile);
     if (!cached) {
-      tile = new Tile(tileID, this.source.tileSize);
+      tile = new Tile(tileID, {
+        tileSize: this.source.tileSize * tileID.overscaleFactor(),
+      });
       this.source.loadTile(tile, this.tileLoaded.bind(this, tile, tileID.tileKey, tile.state));
     }
 
@@ -417,5 +416,13 @@ export default class SourceCache {
     }
 
     this.updateLoadedParentTileCache();
+  }
+
+  destroy() {
+    for (const id in this.cacheTiles) {
+      this._removeTile(id);
+    }
+
+    this.#cache.reset();
   }
 }

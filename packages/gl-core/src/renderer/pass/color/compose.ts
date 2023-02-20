@@ -3,7 +3,7 @@ import Pass from '../base';
 import vert from '../../../shaders/compose.vert.glsl';
 import frag from '../../../shaders/compose.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import { RenderFrom, RenderType } from '../../../type';
+import {RenderFrom, RenderType, TileBounds} from '../../../type';
 import { littleEndian } from '../../../utils/common';
 import Tile from '../../../tile/Tile';
 import SourceCache from '../../../source/cahce';
@@ -13,6 +13,7 @@ export interface ComposePassOptions {
   renderType: RenderType;
   renderFrom: RenderFrom;
   stencilConfigForOverlap: (tiles: any[]) => [{ [_: number]: any }, Tile[]];
+  getTileBBox?: (x: number, y: number, z: number, wrap: number) => TileBounds;
 }
 
 /**
@@ -103,7 +104,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
       this.renderer.setViewport(this.#current.width, this.#current.height);
     }
 
-    const { sourceCache, stencilConfigForOverlap } = this.options;
+    const { sourceCache, stencilConfigForOverlap, getTileBBox } = this.options;
 
     if (sourceCache) {
       const coordsAscending = sourceCache.getVisibleCoordinates();
@@ -118,7 +119,15 @@ export default class ComposePass extends Pass<ComposePassOptions> {
         const tile = sourceCache.getTile(coord);
         if (!(tile && tile.hasData())) continue;
 
-        const tileMesh = tile.createMesh(this.#program);
+        const tileBBox = getTileBBox?.(
+          tile.tileID.x,
+          tile.tileID.y,
+          tile.tileID.z,
+          tile.tileID.wrap,
+        );
+        if (!tileBBox) continue;
+
+        const tileMesh = tile.createMesh(tileBBox, this.renderer, this.#program);
         const mesh = tileMesh.getMesh();
 
         const dataRange: number[] = [];

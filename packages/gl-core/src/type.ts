@@ -18,7 +18,7 @@ export enum RenderFrom {
    */
   rgba = 'rgba',
   /**
-   * 浮点值（精度最高）
+   * 浮点值，一般存储在 r 通道或者使用 `LUMINANCE` 通道（精度最高）
    */
   float = 'float',
 }
@@ -72,22 +72,28 @@ export enum LayerDataType {
 /**
  * 瓦片尺寸
  */
-export type TileSize = number | [number, number];
+export type TileSize = number;
 
 /**
  * 数据范围
  */
 export type DataRange = [number, number];
 
-interface ImageData {
+type Coordinates = [[number, number], [number, number], [number, number], [number, number]];
+
+export interface ImageSourceOptions {
   type: LayerDataType.image;
   url: string | [string, string];
   /**
    * top left, top right, bottom right, bottom left
    */
-  extent: number[][];
-  tileSize?: TileSize;
+  coordinates: Coordinates;
   dataRange?: DataRange | [DataRange, DataRange];
+  /**
+   * 指定数据解析类型
+   */
+  decodeType?: DecodeType;
+  maxTileCacheSize?: number;
 }
 
 interface JsonArrayData {
@@ -108,18 +114,25 @@ interface JsonArrayData {
   data: number[];
 }
 
-interface TileData {
+export interface TileSourceOptions {
   type: LayerDataType.tile;
-  tileSize: TileSize;
   url: string | [string, string];
-  subdomains?: (number | string)[];
-  dataRange?: DataRange | [DataRange, DataRange];
+  bounds?: [number, number, number, number];
   minZoom?: number;
   maxZoom?: number;
+  tileSize?: TileSize;
+  dataRange?: DataRange | [DataRange, DataRange];
+  scheme?: 'xyz' | 'tms';
+  subdomains?: (string | number)[];
   roundZoom?: number;
+  /**
+   * 指定数据解析类型
+   */
+  decodeType?: DecodeType;
+  maxTileCacheSize?: number;
 }
 
-export type LayerData = ImageData | JsonArrayData | TileData;
+export type LayerData = ImageSourceOptions | JsonArrayData | TileSourceOptions;
 
 export enum TileState {
   loading = '0',
@@ -138,12 +151,6 @@ export interface TileBounds {
   bottom: number;
 }
 
-export type TileLike = {
-  x: number;
-  y: number;
-  z: number;
-  wrap: number;
-  tileKey: string;
-  bounds: TileBounds;
-  size: TileSize;
+export type ParseOptionsType = {
+  renderFrom: RenderFrom;
 };

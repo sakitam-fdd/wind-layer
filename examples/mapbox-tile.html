@@ -89,31 +89,30 @@
 
     mapboxWind.configDeps(['./geotiff.js', './full.umd.js']);
 
-    const source = new mapboxWind.RasterSource('temp', {
+    const tileSource = new mapboxWind.TileSource('temp', {
       type: 'tile',
-      tileSize: [257, 257],
-      url: 'http://localhost:5000/{z}/{x}/{y}.jpeg',
+      tileSize: [256, 256],
+      url: 'http://localhost:5000/jpeg/{z}/{x}/{y}.jpeg',
       minZoom: 0,
       maxZoom: 4,
       // subdomains: ['a', 'b', 'c', 'd'],
 
-      // type: "image",
-      // url: "https://a.basemaps.cartocdn.com/dark_all/0/0/0.png",
-      // url: "./data/temp.tiff",
-      // url: "./data/1.png",
-      // url: "./data/10.jpeg",
-      // extent: [
-      //   [-180, 85.051129],
-      //   [180, 85.051129],
-      //   [180, -85.051129],
-      //   [-180, -85.051129],
-      // ],
-      // tileSize: [512, 512],
-      // tileSize: [257, 257],
-      // dataRange: [-50.84996643066404, 42.25002441406252], // 如果是多通道的话，以以下方式组织 [[-50.84996643066404, 42.25002441406252], [-50.84996643066404, 42.25002441406252]]
+      decodeType: 3,
     });
 
-    const fillLayer = new mapboxWind.ScalarFill('temp', source, {
+    const imageSource = new mapboxWind.ImageSource('temp', {
+      type: 'image',
+      url: 'http://localhost:5000/jpeg/0/0/0.jpeg',
+      coordinates: [
+        [-180, 85.051129],
+        [180, 85.051129],
+        [180, -85.051129],
+        [-180, -85.051129],
+      ],
+      decodeType: 3,
+    });
+
+    const fillLayer = new mapboxWind.Layer('temp', imageSource, {
       wrapX: true,
       wireframe: true,
       styleSpec: {
@@ -133,13 +132,12 @@
           0.5
         ],
       },
-      decodeType: 3,
       renderFrom: 'r',
       widthSegments: 1,
       heightSegments: 1,
       displayRange: [-80, 80],
-      hasMask: true,
-      renderPasses: ['RasterComposePass'],
+      hasMask: false,
+      renderPasses: ['ColorizeComposePass', 'ColorizePass'],
     });
 
     map.addLayer(fillLayer);

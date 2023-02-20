@@ -1,13 +1,13 @@
 import wgw from 'wind-gl-worker';
-import ScalarFill, { defaultOptions } from './renderer';
+import Layer, { defaultOptions } from './renderer';
 import TileID from './tile/TileID';
-import type { ScalarFillOptions } from './renderer';
+import type { LayerOptions } from './renderer';
 
 export * from './utils/common';
 
 const configDeps = wgw.configDeps;
 
-export { ScalarFill, ScalarFillOptions, TileID, defaultOptions, configDeps };
+export { Layer, LayerOptions, TileID, defaultOptions, configDeps };
 
 export * from './source';
 
