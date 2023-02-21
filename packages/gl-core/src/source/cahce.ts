@@ -37,7 +37,7 @@ export default class SourceCache extends EventEmitter {
     this.cacheTiles = {};
     this.coveredTiles = {};
     this.loadedParentTiles = {};
-    this.#cache = new LRUCache(this.source.options.maxTileCacheSize, this.unloadTile.bind(this));
+    this.#cache = new LRUCache(0, this.unloadTile.bind(this));
   }
 
   loaded() {
@@ -368,9 +368,27 @@ export default class SourceCache extends EventEmitter {
     }
   }
 
+  updateCacheSize() {
+    const tileSize = this.source.tileSize;
+    const { width, height } = this.source.renderer.size;
+    const widthInTiles = Math.ceil((width || 4 * tileSize) / tileSize) + 1;
+    const heightInTiles = Math.ceil((height || 4 * tileSize) / tileSize) + 1;
+    const approxTilesInView = widthInTiles * heightInTiles;
+    const commonZoomRange = 5;
+
+    const viewDependentMaxSize = Math.floor(approxTilesInView * commonZoomRange);
+    const maxSize =
+      typeof this.source.options.maxTileCacheSize === 'number'
+        ? Math.max(this.source.options.maxTileCacheSize, viewDependentMaxSize)
+        : viewDependentMaxSize;
+
+    this.#cache.setMaxSize(maxSize);
+  }
+
   update(wrapTiles) {
     this.coveredTiles = {};
     let tiles = wrapTiles;
+    this.updateCacheSize();
 
     if (this.source.hasTile) {
       tiles = wrapTiles.filter((coord) => this.source.hasTile(coord));
@@ -416,6 +434,14 @@ export default class SourceCache extends EventEmitter {
     }
 
     this.updateLoadedParentTileCache();
+  }
+
+  clearTiles() {
+    for (const id in this.cacheTiles) {
+      this._removeTile(id);
+    }
+
+    this.#cache.reset();
   }
 
   destroy() {

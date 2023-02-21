@@ -3,6 +3,7 @@ import SourceCache from './cahce';
 import { DecodeType, LayerDataType, ParseOptionsType, TileSourceOptions, TileState } from '../type';
 import { resolveURL } from '../utils/common';
 import Tile from '../tile/Tile';
+import Layer from '../renderer';
 
 const URL_PATTERN = /\{ *([\w_]+) *\}/g;
 
@@ -41,7 +42,7 @@ export default class TileSource {
   public maxZoom: number;
 
   /**
-   * 是否对层级进行四舍五入
+   * 生成瓦片时的配置
    */
   public roundZoom = false;
 
@@ -64,6 +65,8 @@ export default class TileSource {
 
   public dispatcher: any;
 
+  public layer: WithNull<Layer>;
+
   public parseOptions: ParseOptionsType;
 
   #loaded = false;
@@ -76,12 +79,12 @@ export default class TileSource {
     this.type = LayerDataType.tile;
     this.minZoom = options.minZoom || 0;
     this.maxZoom = options.maxZoom || 22;
-    this.roundZoom = false;
+    this.roundZoom = Boolean(options.roundZoom);
     this.scheme = options.scheme || 'xyz';
     this.tileSize = options.tileSize || 256;
 
     const decodeType = options.decodeType || DecodeType.image;
-    const maxTileCacheSize = options.maxTileCacheSize || 16;
+    const maxTileCacheSize = options.maxTileCacheSize;
 
     this.options = {
       ...options,
@@ -97,8 +100,16 @@ export default class TileSource {
     return this.#sourceCache;
   }
 
-  onAdd() {
+  onAdd(layer) {
+    this.layer = layer;
     this.load();
+  }
+
+  setUrl(url: TileSourceOptions['url']): this {
+    this.options.url = url;
+    this.reload();
+
+    return this;
   }
 
   prepare(renderer: Renderer, dispatcher, parseOptions) {
@@ -123,9 +134,9 @@ export default class TileSource {
   }
 
   reload() {
-    // cancel Tile JSON 请求
     this.load(() => {
-      console.log('clear');
+      this.#sourceCache.clearTiles();
+      this.layer?.update();
     });
   }
 
@@ -264,6 +275,7 @@ export default class TileSource {
   }
 
   destroy() {
+    this.layer = null;
     this.#loaded = false;
     this.#tileWorkers.clear();
     this.#sourceCache.clear();

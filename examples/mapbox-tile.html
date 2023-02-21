@@ -112,6 +112,10 @@
       decodeType: 3,
     });
 
+    map.on('click', () => {
+      imageSource.setUrl('http://localhost:5000/jpeg/1/0/0.jpeg');
+    });
+
     const fillLayer = new mapboxWind.Layer('temp', imageSource, {
       wrapX: true,
       wireframe: true,

@@ -168,7 +168,7 @@ export default class Layer {
     this.update = this.update.bind(this);
     this.onTileLoaded = this.onTileLoaded.bind(this);
 
-    this.source.onAdd();
+    this.source.onAdd(this);
     this.source.prepare(this.renderer, this.dispatcher, {
       renderFrom: this.options.renderFrom ?? RenderFrom.r,
     });
@@ -279,8 +279,8 @@ export default class Layer {
 
   stencilConfigForOverlap(tiles: any[]): [{ [_: number]: any }, Tile[]] {
     const coords = tiles.sort((a, b) => b.overscaledZ - a.overscaledZ);
-    const minTileZ = coords[coords.length - 1].z;
-    const stencilValues = coords[0].z - minTileZ + 1;
+    const minTileZ = coords[coords.length - 1].overscaledZ;
+    const stencilValues = coords[0].overscaledZ - minTileZ + 1;
     if (stencilValues > 1) {
       if (this.#nextStencilID + stencilValues > 256) {
         this.clearStencil();

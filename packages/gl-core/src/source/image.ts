@@ -9,6 +9,7 @@ import {
 } from '../type';
 import { resolveURL } from '../utils/common';
 import Tile from '../tile/Tile';
+import Layer from '../renderer';
 
 export default class ImageSource {
   /**
@@ -50,6 +51,8 @@ export default class ImageSource {
 
   public dispatcher: any;
 
+  public layer: WithNull<Layer>;
+
   public parseOptions: ParseOptionsType;
 
   /**
@@ -76,7 +79,6 @@ export default class ImageSource {
     this.options = {
       ...options,
       decodeType,
-      maxTileCacheSize: 8,
       type: this.type,
     };
 
@@ -87,7 +89,8 @@ export default class ImageSource {
     return this.#sourceCache;
   }
 
-  onAdd() {
+  onAdd(layer) {
+    this.layer = layer;
     this.load();
   }
 
@@ -97,8 +100,22 @@ export default class ImageSource {
     this.parseOptions = parseOptions;
   }
 
+  setUrl(url) {
+    this.options.url = url;
+    this.reload();
+  }
+
+  updateImage(options: Pick<ImageSourceOptions, 'url' | 'coordinates'>) {
+    this.options = {
+      ...this.options,
+      ...options,
+    };
+    this.reload();
+  }
+
   setCoordinates(coordinates: ImageSourceOptions['coordinates']) {
     this.coordinates = coordinates;
+    this.reload();
   }
 
   asyncActor(tile, url) {
@@ -138,9 +155,9 @@ export default class ImageSource {
   }
 
   reload() {
-    // cancel Tile JSON 请求
     this.load(() => {
-      console.log('clear');
+      this.#sourceCache.clearTiles();
+      this.layer?.update();
     });
   }
 
@@ -217,6 +234,7 @@ export default class ImageSource {
   unloadTile(tile, cb) {}
 
   destroy() {
+    this.layer = null;
     this.#loaded = false;
     this.#tileWorkers.clear();
     this.#sourceCache.clear();

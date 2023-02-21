@@ -4,14 +4,14 @@ import vert from '../../../shaders/compose.vert.glsl';
 import frag from '../../../shaders/raster-texture.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
 import { RenderFrom, RenderType, TileBounds } from '../../../type';
-import Tile from '../../../tile/Tile';
 import SourceCache from '../../../source/cahce';
+import TileID from '../../../tile/TileID';
 
 export interface ComposePassOptions {
   sourceCache: SourceCache;
   renderType: RenderType;
   renderFrom: RenderFrom;
-  stencilConfigForOverlap: (tiles: any[]) => [{ [_: number]: any }, Tile[]];
+  stencilConfigForOverlap: (tiles: any[]) => [{ [_: number]: any }, TileID[]];
   getTileBBox?: (x: number, y: number, z: number, wrap: number) => TileBounds;
 }
 
@@ -129,7 +129,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
         mesh.worldMatrixNeedsUpdate = false;
         mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, mesh.localMatrix);
 
-        const stencilMode = stencilModes[tile.z];
+        const stencilMode = stencilModes[coord.overscaledZ];
 
         if (stencilMode) {
           if (stencilMode.stencil) {

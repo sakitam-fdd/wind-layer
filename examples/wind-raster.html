@@ -74,8 +74,20 @@
       tileSize: 256,
       url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
       minZoom: 0,
-      maxZoom: 18,
+      maxZoom: 22,
+      roundZoom: true,
       subdomains: ['a', 'b', 'c', 'd'],
+    });
+
+    let flag = 0;
+    map.on('click', () => {
+      if (flag === 0) {
+        flag = 1;
+        source.setUrl('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png');
+      } else {
+        flag = 0;
+        source.setUrl('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png');
+      }
     });
 
     const layer = new mapboxWind.Layer('temp', source, {
