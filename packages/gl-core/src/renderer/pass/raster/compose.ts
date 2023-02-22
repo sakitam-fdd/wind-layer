@@ -3,7 +3,7 @@ import Pass from '../base';
 import vert from '../../../shaders/compose.vert.glsl';
 import frag from '../../../shaders/raster-texture.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import { RenderFrom, RenderType, TileBounds } from '../../../type';
+import { RenderFrom, RenderType } from '../../../type';
 import SourceCache from '../../../source/cahce';
 import TileID from '../../../tile/TileID';
 
@@ -12,7 +12,6 @@ export interface ComposePassOptions {
   renderType: RenderType;
   renderFrom: RenderFrom;
   stencilConfigForOverlap: (tiles: any[]) => [{ [_: number]: any }, TileID[]];
-  getTileBBox?: (x: number, y: number, z: number, wrap: number) => TileBounds;
 }
 
 /**
@@ -97,7 +96,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
       this.renderer.setViewport(this.#current.width, this.#current.height);
     }
 
-    const { sourceCache, stencilConfigForOverlap, getTileBBox } = this.options;
+    const { sourceCache, stencilConfigForOverlap } = this.options;
 
     if (sourceCache) {
       const coordsAscending = sourceCache.getVisibleCoordinates();
@@ -111,12 +110,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
         const coord = coords[i];
         const tile = sourceCache.getTile(coord);
         if (!(tile && tile.hasData())) continue;
-        const tileBBox = getTileBBox?.(
-          tile.tileID.x,
-          tile.tileID.y,
-          tile.tileID.z,
-          tile.tileID.wrap,
-        );
+        const tileBBox = coord.getTileBounds();
         if (!tileBBox) continue;
         const tileMesh = tile.createMesh(tileBBox, this.renderer, this.#program);
         const mesh = tileMesh.getMesh();

@@ -19,7 +19,7 @@ function getCoords(x, y, z) {
   return [lng, lat];
 }
 
-function getTileBBox(x, y, z, wrap = 0) {
+function getTileBounds(x, y, z, wrap = 0) {
   // for Google/OSM tile scheme we need to alter the y
   // eslint-disable-next-line no-param-reassign
   y = 2 ** z - y - 1;
@@ -35,6 +35,7 @@ function getTileBBox(x, y, z, wrap = 0) {
     top: p1.y,
     right: p2.x + wrap,
     bottom: p2.y,
+    lngLatBounds: [min[0], min[1], max[0], max[1]],
   };
 }
 
@@ -150,9 +151,10 @@ export default class Layer {
           this.map?.triggerRepaint();
         },
         getViewTiles: (source: SourceType) => {
+          const { type } = source;
           const { transform } = this.map as any;
-          const wrapTiles: any[] = [];
-          if (source.type === 'image') {
+          const wrapTiles: TileID[] = [];
+          if (type === 'image') {
             const cornerCoords = source.coordinates.map((c: any) =>
               mapboxgl.MercatorCoordinate.fromLngLat(c),
             );
@@ -161,16 +163,24 @@ export default class Layer {
               transform.getVisibleUnwrappedCoordinates(tileID).forEach((unwrapped) => {
                 const { canonical, wrap } = unwrapped;
                 const { x, y, z } = canonical;
-                wrapTiles.push(new TileID(z, x, y, z, wrap));
+                wrapTiles.push(
+                  new TileID(z, x, y, z, wrap, {
+                    getTileBounds,
+                  }),
+                );
               });
             } else {
               const x = tileID.x;
               const y = tileID.y;
               const z = tileID.z;
               const wrap = 0;
-              wrapTiles.push(new TileID(z, x, y, z, wrap));
+              wrapTiles.push(
+                new TileID(z, x, y, z, wrap, {
+                  getTileBounds,
+                }),
+              );
             }
-          } else if (source.type === 'tile') {
+          } else if (type === 'tile') {
             const tiles = transform.coveringTiles({
               tileSize: utils.isNumber(this.source.tileSize)
                 ? source.tileSize
@@ -185,15 +195,22 @@ export default class Layer {
               const { canonical, wrap } = tile;
               const { x, y, z } = canonical;
               if (this.options.wrapX) {
-                wrapTiles.push(new TileID(z, x, y, z, wrap));
+                wrapTiles.push(
+                  new TileID(z, x, y, z, wrap, {
+                    getTileBounds,
+                  }),
+                );
               } else if (tile.wrap === 0) {
-                wrapTiles.push(new TileID(z, x, y, z, wrap));
+                wrapTiles.push(
+                  new TileID(z, x, y, z, wrap, {
+                    getTileBounds,
+                  }),
+                );
               }
             }
           }
           return wrapTiles;
         },
-        getTileBBox,
       },
     );
 

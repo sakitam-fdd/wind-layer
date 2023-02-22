@@ -1,7 +1,8 @@
 import { Renderer, utils } from '@sakitam-gis/vis-engine';
 import SourceCache from './cahce';
 import { DecodeType, LayerDataType, ParseOptionsType, TileSourceOptions, TileState } from '../type';
-import { resolveURL } from '../utils/common';
+import { containsExtent, resolveURL } from '../utils/common';
+import TileID from '../tile/TileID';
 import Tile from '../tile/Tile';
 import Layer from '../renderer';
 
@@ -56,6 +57,8 @@ export default class TileSource {
    */
   public tileSize: number;
 
+  public tileBounds: TileSourceOptions['tileBounds'];
+
   /**
    * 配置项
    */
@@ -82,6 +85,7 @@ export default class TileSource {
     this.roundZoom = Boolean(options.roundZoom);
     this.scheme = options.scheme || 'xyz';
     this.tileSize = options.tileSize || 256;
+    this.tileBounds = options.tileBounds;
 
     const decodeType = options.decodeType || DecodeType.image;
     const maxTileCacheSize = options.maxTileCacheSize;
@@ -105,9 +109,9 @@ export default class TileSource {
     this.load();
   }
 
-  setUrl(url: TileSourceOptions['url']): this {
+  setUrl(url: TileSourceOptions['url'], clear = true): this {
     this.options.url = url;
-    this.reload();
+    this.reload(clear);
 
     return this;
   }
@@ -133,15 +137,20 @@ export default class TileSource {
     return this.#loaded;
   }
 
-  reload() {
+  reload(clear) {
     this.load(() => {
-      this.#sourceCache.clearTiles();
+      if (clear) {
+        this.#sourceCache.clearTiles();
+      } else {
+        this.#sourceCache.reload();
+      }
       this.layer?.update();
     });
   }
 
   hasTile(coord) {
-    return true;
+    const bounds = coord.getTileBounds(new TileID(coord.z, coord.x, coord.y, coord.z, 0));
+    return !this.tileBounds || containsExtent(this.tileBounds, bounds.lngLatBounds);
   }
 
   getUrl(x, y, z) {
@@ -196,20 +205,25 @@ export default class TileSource {
     });
   }
 
-  loadTile(tile: Tile, callback) {
-    const tileID = tile.tileID;
+  getTileUrl(tileID) {
     const z = tileID.z;
     const x = tileID.x;
     const y = this.scheme === 'tms' ? Math.pow(2, tileID.z) - tileID.y - 1 : tileID.y;
 
     const url = this.getUrl(x, y, z);
 
+    let urls: string[] = url as string[];
+    if (utils.isString(url)) {
+      urls = [url];
+    }
+
+    return urls;
+  }
+
+  loadTile(tile: Tile, callback) {
     try {
-      if (!tile.actor) {
-        let urls: string[] = url as string[];
-        if (utils.isString(url)) {
-          urls = [url];
-        }
+      if (!tile.actor || tile.state === TileState.reloading) {
+        const urls = this.getTileUrl(tile.tileID);
 
         const key = urls.join(',');
         this.#tileWorkers.set(key, this.#tileWorkers.get(key) || this.dispatcher.getActor());

@@ -77,16 +77,17 @@
       maxZoom: 22,
       roundZoom: true,
       subdomains: ['a', 'b', 'c', 'd'],
+      // tileBounds: [-90, -45, 90, 45],
     });
 
     let flag = 0;
     map.on('click', () => {
       if (flag === 0) {
         flag = 1;
-        source.setUrl('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png');
+        source.setUrl('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', false);
       } else {
         flag = 0;
-        source.setUrl('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png');
+        source.setUrl('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', false);
       }
     });
 

@@ -5,8 +5,9 @@ import ImageSource from './image';
 import Tile from '../tile/Tile';
 import { keysDifference } from '../utils/common';
 import { TileState } from '../type';
+import TileID from '../tile/TileID';
 
-function compareTileId(a, b) {
+function compareTileId(a: TileID, b: TileID) {
   const aWrap = Math.abs(a.wrap * 2) - +(a.wrap < 0);
   const bWrap = Math.abs(b.wrap * 2) - +(b.wrap < 0);
   return a.overscaledZ - b.overscaledZ || bWrap - aWrap || b.y - a.y || b.x - a.x;
@@ -15,9 +16,15 @@ function compareTileId(a, b) {
 export default class SourceCache extends EventEmitter {
   public id: string;
   public source: TileSource | ImageSource;
-  private cacheTiles: any;
-  private coveredTiles: any;
-  private loadedParentTiles: any;
+  private cacheTiles: {
+    [key: string]: Tile;
+  };
+  private coveredTiles: {
+    [key: string]: WithUndef<boolean>;
+  };
+  private loadedParentTiles: {
+    [key: string]: Tile;
+  };
 
   #cache: LRUCache<Tile>;
 
@@ -40,6 +47,9 @@ export default class SourceCache extends EventEmitter {
     this.#cache = new LRUCache(0, this.unloadTile.bind(this));
   }
 
+  /**
+   * 判断当前 source 瓦片是否全部加载完毕（成功加载或者加载错误）
+   */
   loaded() {
     if (!this.source.loaded()) {
       return false;
@@ -51,22 +61,39 @@ export default class SourceCache extends EventEmitter {
     return true;
   }
 
+  /**
+   * 调用 `Source` 的瓦片加载方法
+   * 具体由各个`Source` 实现
+   * @param tile
+   * @param callback
+   */
   loadTile(tile, callback) {
     return this.source.loadTile(tile, callback);
   }
 
+  /**
+   * 移除已加载的瓦片
+   * @param tile
+   */
   unloadTile(tile) {
     if (this.source.unloadTile) {
       return this.source.unloadTile(tile, () => undefined);
     }
   }
 
+  /**
+   * 取消正在加载中的瓦片
+   * @param tile
+   */
   abortTile(tile) {
     if (this.source.abortTile) {
       return this.source.abortTile(tile, () => undefined);
     }
   }
 
+  /**
+   * 获取所有的可渲染的瓦片 id 并且排序（从 0 世界向两边排序）
+   */
   getRenderableIds() {
     const renderables: any[] = [];
     for (const id in this.cacheTiles) {
@@ -86,13 +113,20 @@ export default class SourceCache extends EventEmitter {
     return this.getRenderableIds().map((id) => this.cacheTiles[id].tileID);
   }
 
+  /**
+   * 瓦片加载完成回调
+   * @param tile
+   * @param id
+   * @param previousState
+   * @param err
+   */
   tileLoaded(tile, id, previousState, err) {
     if (err) {
       tile.state = TileState.errored;
       if (err.status !== 404) {
         // this._source.fire(new ErrorEvent(err, {tile}));
       } else {
-        // continue to try loading parent/children tiles if a tile doesn't exist (404)
+        // 如果瓦片不存在，则继续尝试加载父/子瓦片
         this.emit('update');
       }
       return;
@@ -103,7 +137,7 @@ export default class SourceCache extends EventEmitter {
     this.emit('tileLoaded');
   }
 
-  _addTile(tileID) {
+  _addTile(tileID): WithNull<Tile> {
     let tile = this.cacheTiles[tileID.tileKey];
     if (tile) return tile;
 
@@ -131,6 +165,10 @@ export default class SourceCache extends EventEmitter {
     return tile;
   }
 
+  /**
+   * 根据 `tileKey` 移除瓦片
+   * @param id
+   */
   _removeTile(id) {
     const tile = this.cacheTiles[id];
     if (!tile) return;
@@ -140,7 +178,7 @@ export default class SourceCache extends EventEmitter {
 
     if (tile.uses > 0) return;
 
-    if (tile.hasData() && tile.state !== 'reloading') {
+    if (tile.hasData() && tile.state !== TileState.reloading) {
       this.#cache.add(tile.tileID.tileKey, tile);
     } else {
       tile.aborted = true;
@@ -149,6 +187,10 @@ export default class SourceCache extends EventEmitter {
     }
   }
 
+  /**
+   * 根据 `TileID` 获取瓦片
+   * @param tileID
+   */
   getTile(tileID) {
     return this.cacheTiles[tileID?.tileKey];
   }
@@ -157,7 +199,7 @@ export default class SourceCache extends EventEmitter {
    * 该策略会在内存中保留当前层级的瓦片的所有子瓦片（children），直到一直保留到最大覆盖缩放级别（maxCoveringZoom）为止。
    * 简单来说，当当前地图缩放等级超过了当前图层的最大缩放级别时，Mapbox GL JS 会自动加载当前瓦片的所有子瓦片来填充当前视图的空白部分。而 retain any loaded children of ideal tiles up to maxCoveringZoom 这个选项会保留这些子瓦片的缓存，以便在缩放到更高层级时直接使用，而不需要重新加载。
    * 举个例子，假设当前地图缩放等级是 10，最大缩放级别是 14，而 maxCoveringZoom 设置为 12。地图将会加载当前缩放级别为 10 的瓦片，并将其所有子瓦片缓存到内存中，包括缩放级别为 11、12、13 的所有瓦片。但是，因为 maxCoveringZoom 设置为 12，所以缩放到 13 级时，只会使用缓存中缩放级别为 11、12 的子瓦片。当缩放到 14 级时，则不再使用缓存，而是重新加载新的瓦片数据。
-   * 需要注意的是，retain any loaded children of ideal tiles up to maxCoveringZoom 这个选项可能会占用大量内存，因此在使用时需要根据实际情况进行设置。如果需要优化内存使用，可以将 maxCoveringZoom 设置为一个较小的值，以减少缓存的瓦片数量。
+   * 需要注意的是，这个选项可能会占用大量内存，因此在使用时需要根据实际情况进行设置。如果需要优化内存使用，可以将 maxCoveringZoom 设置为一个较小的值，以减少缓存的瓦片数量。
    * @param idealTiles
    * @param zoom
    * @param maxCoveringZoom
@@ -260,7 +302,7 @@ export default class SourceCache extends EventEmitter {
       retain[tileID.tileKey] = tileID;
 
       // 如果已经有数据，跳过，可能从缓存中取
-      if (tile.hasData()) continue;
+      if (tile?.hasData()) continue;
 
       if (minZoom < this.source.maxZoom) {
         // save missing tiles that potentially have loaded children
@@ -273,7 +315,7 @@ export default class SourceCache extends EventEmitter {
     this.retainLoadedChildren(missingTiles, minZoom, maxCoveringZoom, retain);
 
     for (const tileID of wrapTiles) {
-      let tile = this.cacheTiles[tileID.tileKey];
+      let tile: WithNull<Tile> = this.cacheTiles[tileID.tileKey];
 
       if (tile.hasData()) continue;
 
@@ -332,6 +374,8 @@ export default class SourceCache extends EventEmitter {
       }
     }
 
+    console.log('retain', retain);
+
     return retain;
   }
 
@@ -346,10 +390,14 @@ export default class SourceCache extends EventEmitter {
       return tile;
     }
     // TileCache ignores wrap in lookup.
-    const cachedTile = this.#cache.get(tileID.tileKey);
-    return cachedTile;
+    return this.#cache.get(tileID.tileKey);
   }
 
+  /**
+   * 查找已经加载的父级瓦片
+   * @param tileID
+   * @param minCoveringZoom
+   */
   findLoadedParent(tileID, minCoveringZoom) {
     if (tileID.tileKey in this.loadedParentTiles) {
       const parent = this.loadedParentTiles[tileID.tileKey];
@@ -368,6 +416,9 @@ export default class SourceCache extends EventEmitter {
     }
   }
 
+  /**
+   * 更新当前的缓存大小
+   */
   updateCacheSize() {
     const tileSize = this.source.tileSize;
     const { width, height } = this.source.renderer.size;
@@ -386,6 +437,7 @@ export default class SourceCache extends EventEmitter {
   }
 
   update(wrapTiles) {
+    this.emit('tilesLoadStart', wrapTiles);
     this.coveredTiles = {};
     let tiles = wrapTiles;
     this.updateCacheSize();
@@ -394,7 +446,7 @@ export default class SourceCache extends EventEmitter {
       tiles = wrapTiles.filter((coord) => this.source.hasTile(coord));
     }
 
-    const retain = this.updateRetainedTiles(wrapTiles);
+    const retain = this.updateRetainedTiles(tiles);
 
     if (tiles.length !== 0) {
       const parentsForFading = {};
@@ -434,6 +486,34 @@ export default class SourceCache extends EventEmitter {
     }
 
     this.updateLoadedParentTileCache();
+    this.emit('tilesLoadEnd', wrapTiles);
+  }
+
+  /**
+   * 重载当前视野内的瓦片（需要移除缓存）
+   */
+  reload() {
+    this.#cache.reset();
+
+    for (const key in this.cacheTiles) {
+      this._reloadTile(key, TileState.reloading);
+    }
+  }
+
+  _reloadTile(id: string, state: TileState) {
+    const tile = this.cacheTiles[id];
+
+    if (!tile) return;
+
+    // The difference between "loading" tiles and "reloading" or "expired"
+    // tiles is that "reloading"/"expired" tiles are "renderable".
+    // Therefore, a "loading" tile cannot become a "reloading" tile without
+    // first becoming a "loaded" tile.
+    if (tile.state !== TileState.loading) {
+      tile.state = state;
+    }
+
+    this.loadTile(tile, this.tileLoaded.bind(this, tile, id, state));
   }
 
   clearTiles() {

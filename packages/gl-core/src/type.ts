@@ -114,6 +114,8 @@ interface JsonArrayData {
   data: number[];
 }
 
+export type Bounds = [number, number, number, number];
+
 export interface TileSourceOptions {
   type: LayerDataType.tile;
   url: string | [string, string];
@@ -130,6 +132,7 @@ export interface TileSourceOptions {
    */
   decodeType?: DecodeType;
   maxTileCacheSize?: number;
+  tileBounds?: Bounds;
 }
 
 export type LayerData = ImageSourceOptions | JsonArrayData | TileSourceOptions;
@@ -139,6 +142,7 @@ export enum TileState {
   loaded = '1',
   errored = '2',
   unloaded = '3',
+  reloading = '4',
 }
 
 /**
@@ -149,6 +153,7 @@ export interface TileBounds {
   top: number;
   right: number;
   bottom: number;
+  lngLatBounds: Bounds;
 }
 
 export type ParseOptionsType = {

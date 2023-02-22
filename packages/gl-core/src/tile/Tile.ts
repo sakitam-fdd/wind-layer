@@ -1,7 +1,7 @@
-import { Geometry, Plane, Program, Renderer, Texture } from '@sakitam-gis/vis-engine';
+import {Geometry, Plane, Program, Renderer, Texture} from '@sakitam-gis/vis-engine';
 import TileMesh from './TileMesh';
-import { ParseOptionsType, RenderFrom, TileBounds, TileState } from '../type';
-import { isImageBitmap, parseRange } from '../utils/common';
+import {ParseOptionsType, RenderFrom, TileBounds, TileState} from '../type';
+import {isImageBitmap, parseRange} from '../utils/common';
 import TileID from './TileID';
 
 export interface TileOptions {
@@ -92,7 +92,7 @@ export default class Tile {
    * 瓦片是否已经加载到数据
    */
   hasData() {
-    return this.state === TileState.loaded;
+    return this.state === TileState.loaded || this.state === TileState.reloading;
   }
 
   /**
@@ -106,7 +106,7 @@ export default class Tile {
    * 瓦片是否加载完成
    */
   isLoaded() {
-    return this.state === TileState.loaded || this.state === TileState.errored;
+    return this.state === TileState.loaded || this.state === TileState.reloading || this.state === TileState.errored;
   }
 
   getMesh() {

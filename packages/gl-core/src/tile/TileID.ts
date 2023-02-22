@@ -36,14 +36,17 @@ export default class TileID {
    */
   public tileBounds: TileBounds;
 
+  public options: any;
+
   /**
    * @param overscaledZ 扩大的 z 值
    * @param x 列
    * @param y 行
    * @param z 层级
    * @param wrap 所处世界
+   * @param options 瓦片其他配置
    */
-  constructor(overscaledZ: number, x: number, y: number, z: number, wrap = 0) {
+  constructor(overscaledZ: number, x: number, y: number, z: number, wrap = 0, options: any = {}) {
     this.x = x;
     this.y = y;
     this.z = z;
@@ -51,6 +54,14 @@ export default class TileID {
     this.tileKey = `${z}_${x}_${y}-${wrap}`;
     this.unWrappedTileKey = `${z}_${x}_${y}`;
     this.overscaledZ = overscaledZ;
+    this.options = options;
+  }
+
+  /**
+   * 获取瓦片范围
+   */
+  getTileBounds(tileID = this) {
+    return this.options.getTileBounds(tileID.x, tileID.y, tileID.z, tileID.wrap);
   }
 
   overscaleFactor(): number {
@@ -64,9 +75,16 @@ export default class TileID {
   scaledTo(targetZ: number): TileID {
     const zDifference = this.z - targetZ;
     if (targetZ > this.z) {
-      return new TileID(targetZ, this.x, this.y, this.z, this.wrap);
+      return new TileID(targetZ, this.x, this.y, this.z, this.wrap, this.options);
     } else {
-      return new TileID(targetZ, this.x >> zDifference, this.y >> zDifference, targetZ, this.wrap);
+      return new TileID(
+        targetZ,
+        this.x >> zDifference,
+        this.y >> zDifference,
+        targetZ,
+        this.wrap,
+        this.options,
+      );
     }
   }
 
@@ -77,17 +95,17 @@ export default class TileID {
   children(sourceMaxZoom: number): TileID[] {
     // 如果所需层级大于了数据的最大层级，那么不需要寻找子集瓦片
     if (this.overscaledZ >= sourceMaxZoom) {
-      return [new TileID(this.overscaledZ + 1, this.x, this.y, this.z, this.wrap)];
+      return [new TileID(this.overscaledZ + 1, this.x, this.y, this.z, this.wrap, this.options)];
     }
 
     const z = this.z + 1;
     const x = this.x * 2;
     const y = this.y * 2;
     return [
-      new TileID(z, x, y, z, this.wrap),
-      new TileID(z, x + 1, y, z, this.wrap),
-      new TileID(z, x, y + 1, z, this.wrap),
-      new TileID(z, x + 1, y + 1, z, this.wrap),
+      new TileID(z, x, y, z, this.wrap, this.options),
+      new TileID(z, x + 1, y, z, this.wrap, this.options),
+      new TileID(z, x, y + 1, z, this.wrap, this.options),
+      new TileID(z, x + 1, y + 1, z, this.wrap, this.options),
     ];
   }
 }

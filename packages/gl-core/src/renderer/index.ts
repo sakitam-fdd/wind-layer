@@ -8,7 +8,7 @@ import RasterPass from './pass/raster/image';
 import RasterComposePass from './pass/raster/compose';
 import { isFunction, resolveURL } from '../utils/common';
 import { createLinearGradient, createZoom } from '../utils/style-parser';
-import { getRenderType, RenderFrom, TileBounds } from '../type';
+import { getRenderType, RenderFrom } from '../type';
 import { SourceType } from '../source';
 import Tile from '../tile/Tile';
 
@@ -26,14 +26,6 @@ export interface LayerOptions {
    */
   getViewTiles: (data: any) => any[];
 
-  /**
-   * 根据瓦片行列号获取瓦片范围
-   * @param x
-   * @param y
-   * @param z
-   * @param wrap
-   */
-  getTileBBox: (x: number, y: number, z: number, wrap: number) => TileBounds;
   renderPasses: string[];
   /**
    * 指定渲染通道
@@ -62,12 +54,6 @@ export interface LayerOptions {
 }
 
 export const defaultOptions: LayerOptions = {
-  getTileBBox: (x: number, y: number, z: number, wrap: number): TileBounds => ({
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-  }),
   getViewTiles: () => [],
   renderPasses: ['ColorizeComposePass', 'ColorizePass'],
   renderFrom: RenderFrom.r,
@@ -100,7 +86,7 @@ export const defaultOptions: LayerOptions = {
   heightSegments: 1,
   wireframe: false,
   waitTilesLoaded: false,
-  onInit: () => undefined
+  onInit: () => undefined,
 };
 
 /**
@@ -194,7 +180,6 @@ export default class Layer {
       const pass = new passes[key](key, this.renderer, {
         renderType,
         sourceCache: this.source.sourceCache,
-        getTileBBox: this.options.getTileBBox,
         renderFrom: this.options.renderFrom ?? RenderFrom.r,
         stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
         ...opts,

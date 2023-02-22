@@ -100,22 +100,22 @@ export default class ImageSource {
     this.parseOptions = parseOptions;
   }
 
-  setUrl(url) {
+  setUrl(url, clear = true) {
     this.options.url = url;
-    this.reload();
+    this.reload(clear);
   }
 
-  updateImage(options: Pick<ImageSourceOptions, 'url' | 'coordinates'>) {
+  updateImage(options: Pick<ImageSourceOptions, 'url' | 'coordinates'>, clear = true) {
     this.options = {
       ...this.options,
       ...options,
     };
-    this.reload();
+    this.reload(clear);
   }
 
   setCoordinates(coordinates: ImageSourceOptions['coordinates']) {
     this.coordinates = coordinates;
-    this.reload();
+    this.reload(false);
   }
 
   asyncActor(tile, url) {
@@ -154,20 +154,29 @@ export default class ImageSource {
     return this.#loaded;
   }
 
-  reload() {
+  reload(clear) {
     this.load(() => {
-      this.#sourceCache.clearTiles();
+      if (clear) {
+        this.#sourceCache.clearTiles();
+      } else {
+        this.#sourceCache.reload();
+      }
       this.layer?.update();
     });
   }
 
+  getTileUrl(tileID) {
+    let urls: string[] = this.options.url as string[];
+    if (utils.isString(this.options.url)) {
+      urls = [this.options.url];
+    }
+    return urls;
+  }
+
   loadTile(tile: Tile, callback) {
     try {
-      if (!tile.actor) {
-        let urls: string[] = this.options.url as string[];
-        if (utils.isString(this.options.url)) {
-          urls = [this.options.url];
-        }
+      if (!tile.actor || tile.state === TileState.reloading) {
+        const urls = this.getTileUrl(tile.tileID);
 
         const key = urls.join(',');
         this.#tileWorkers.set(key, this.#tileWorkers.get(key) || this.dispatcher.getActor());

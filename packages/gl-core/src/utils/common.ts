@@ -1,4 +1,5 @@
 import { utils } from '@sakitam-gis/vis-engine';
+import {Bounds} from "../type";
 
 export function calcMinMax(array: number[]): [number, number] {
   let min = Infinity;
@@ -101,6 +102,11 @@ export function parseRange(exif) {
   return gs.map((item) => item.split(',').map((v) => parseFloat(v)));
 }
 
+/**
+ * 获取两个对象中不同的 key
+ * @param obj
+ * @param other
+ */
 export function keysDifference(obj, other) {
   const difference: (string | number)[] = [];
   for (const i in obj) {
@@ -109,4 +115,58 @@ export function keysDifference(obj, other) {
     }
   }
   return difference;
+}
+
+/**
+ * extent1 是否包含 extent2
+ *           extent1[3]
+ *           |--------|
+ *           |        |
+ * extent1[0]|        |extent1[2]
+ *           |--------|
+ *           extent1[1]
+ *
+ *            extent2[3]
+ *           |--------|
+ *           |        |
+ * extent2[0]|        |extent2[2]
+ *           |--------|
+ *           extent2[1]
+ * @param extent1
+ * @param extent2
+ */
+export function intersects(extent1: Bounds, extent2: Bounds) {
+  return (
+    extent1[0] <= extent2[2] &&
+    extent1[2] >= extent2[0] &&
+    extent1[1] <= extent2[3] &&
+    extent1[3] >= extent2[1]
+  );
+}
+
+/**
+ * extent1 是否包含 extent2
+ *           extent1[3]
+ *           |--------|
+ *           |        |
+ * extent1[0]|        |extent1[2]
+ *           |--------|
+ *           extent1[1]
+ *
+ *            extent2[3]
+ *           |--------|
+ *           |        |
+ * extent2[0]|        |extent2[2]
+ *           |--------|
+ *           extent2[1]
+ * @param extent1
+ * @param extent2
+ */
+export function containsExtent(extent1: Bounds, extent2: Bounds) {
+  return (
+    extent1[0] <= extent2[0] &&
+    extent2[2] <= extent1[2] &&
+    extent1[1] <= extent2[1] &&
+    extent2[3] <= extent1[3]
+  );
 }
