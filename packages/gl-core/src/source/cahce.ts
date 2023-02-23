@@ -119,8 +119,9 @@ export default class SourceCache extends EventEmitter {
    * @param id
    * @param previousState
    * @param err
+   * @param disableUpdate
    */
-  tileLoaded(tile, id, previousState, err) {
+  tileLoaded(tile, id, previousState, err, disableUpdate = false) {
     if (err) {
       tile.state = TileState.errored;
       if (err.status !== 404) {
@@ -133,8 +134,13 @@ export default class SourceCache extends EventEmitter {
     }
 
     tile.timeAdded = Date.now();
-    this.emit('update');
+    if (!disableUpdate) {
+      this.emit('update');
+    }
     this.emit('tileLoaded');
+    if (this.loaded()) {
+      this.emit('tilesLoadEnd');
+    }
   }
 
   _addTile(tileID): WithNull<Tile> {
@@ -320,7 +326,6 @@ export default class SourceCache extends EventEmitter {
       if (tile.hasData()) continue;
 
       // 需要的瓦片未加载完成或者不存在，查找其子集瓦片
-
       if (tileID.z >= this.source.maxZoom) {
         // 查找过度缩放的子集瓦片
         const childTileLike = tileID.children(this.source.maxZoom)[0];
@@ -373,8 +378,6 @@ export default class SourceCache extends EventEmitter {
         }
       }
     }
-
-    console.log('retain', retain);
 
     return retain;
   }
@@ -437,7 +440,6 @@ export default class SourceCache extends EventEmitter {
   }
 
   update(wrapTiles) {
-    this.emit('tilesLoadStart', wrapTiles);
     this.coveredTiles = {};
     let tiles = wrapTiles;
     this.updateCacheSize();
@@ -480,13 +482,21 @@ export default class SourceCache extends EventEmitter {
       }
     }
 
+    this.emit('tilesLoadStart', retain);
+
     const remove = keysDifference(this.cacheTiles, retain);
     for (const tileKey of remove) {
       this._removeTile(tileKey);
     }
 
     this.updateLoadedParentTileCache();
-    this.emit('tilesLoadEnd', wrapTiles);
+    const currentLength = Object.keys(this.cacheTiles).filter((k) =>
+      this.cacheTiles[k]?.wasRequested(),
+    ).length;
+    const retainLength = Object.keys(retain).length;
+    if (currentLength < retainLength) {
+      this.emit('tilesLoading', currentLength / retainLength);
+    }
   }
 
   /**

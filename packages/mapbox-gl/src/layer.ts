@@ -151,10 +151,13 @@ export default class Layer {
           this.map?.triggerRepaint();
         },
         getViewTiles: (source: SourceType) => {
-          const { type } = source;
+          let { type } = source;
+          // @ts-ignore
+          type = type !== 'timeline' ? type : source.privateType;
           const { transform } = this.map as any;
           const wrapTiles: TileID[] = [];
           if (type === 'image') {
+            // @ts-ignore
             const cornerCoords = source.coordinates.map((c: any) =>
               mapboxgl.MercatorCoordinate.fromLngLat(c),
             );

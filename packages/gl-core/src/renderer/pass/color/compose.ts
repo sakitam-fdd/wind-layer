@@ -6,10 +6,10 @@ import * as shaderLib from '../../../shaders/shaderLib';
 import { RenderFrom, RenderType } from '../../../type';
 import { littleEndian } from '../../../utils/common';
 import TileID from '../../../tile/TileID';
-import SourceCache from '../../../source/cahce';
+import { SourceType } from '../../../source';
 
 export interface ComposePassOptions {
-  sourceCache: SourceCache;
+  source: SourceType;
   renderType: RenderType;
   renderFrom: RenderFrom;
   stencilConfigForOverlap: (tiles: any[]) => [{ [_: number]: any }, TileID[]];
@@ -86,25 +86,19 @@ export default class ComposePass extends Pass<ComposePassOptions> {
     };
   }
 
-  /**
-   * 此处绘制主要是合并瓦片
-   * @param rendererParams
-   * @param rendererState
-   */
-  render(rendererParams, rendererState) {
-    if (this.#current) {
-      this.#current.clear();
-      this.#current.bind();
+  renderTexture(renderTarget, rendererParams, sourceCache) {
+    if (renderTarget) {
+      renderTarget.clear();
+      renderTarget.bind();
       const attr = this.renderer.attributes;
-      if (attr.depth && this.#current.depth) {
+      if (attr.depth && renderTarget.depth) {
         this.renderer.state.enable(this.renderer.gl.DEPTH_TEST);
         this.renderer.state.setDepthMask(true);
       }
-      this.renderer.setViewport(this.#current.width, this.#current.height);
+      this.renderer.setViewport(renderTarget.width, renderTarget.height);
     }
 
-    const { sourceCache, stencilConfigForOverlap } = this.options;
-
+    const { stencilConfigForOverlap } = this.options;
     if (sourceCache) {
       const coordsAscending = sourceCache.getVisibleCoordinates();
       const coordsDescending = coordsAscending.slice().reverse(); // offscreen & opaque
@@ -168,8 +162,19 @@ export default class ComposePass extends Pass<ComposePassOptions> {
       }
     }
 
-    if (this.#current) {
-      this.#current.unbind();
+    if (renderTarget) {
+      renderTarget.unbind();
     }
+  }
+
+  /**
+   * 此处绘制主要是合并瓦片
+   * @param rendererParams
+   * @param rendererState
+   */
+  render(rendererParams, rendererState) {
+    const { source } = this.options;
+    const sourceCache = source.sourceCache;
+    this.renderTexture(this.#current, rendererParams, sourceCache);
   }
 }

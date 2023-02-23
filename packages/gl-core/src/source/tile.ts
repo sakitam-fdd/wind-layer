@@ -84,7 +84,7 @@ export default class TileSource {
     this.maxZoom = options.maxZoom || 22;
     this.roundZoom = Boolean(options.roundZoom);
     this.scheme = options.scheme || 'xyz';
-    this.tileSize = options.tileSize || 256;
+    this.tileSize = options.tileSize || 512;
     this.tileBounds = options.tileBounds;
 
     const decodeType = options.decodeType || DecodeType.image;
@@ -151,6 +151,10 @@ export default class TileSource {
   hasTile(coord) {
     const bounds = coord.getTileBounds(new TileID(coord.z, coord.x, coord.y, coord.z, 0));
     return !this.tileBounds || containsExtent(this.tileBounds, bounds.lngLatBounds);
+  }
+
+  getFadeTime() {
+    return 0;
   }
 
   getUrl(x, y, z) {

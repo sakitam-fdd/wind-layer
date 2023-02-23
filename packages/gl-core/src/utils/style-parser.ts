@@ -18,8 +18,8 @@ import { findStopLessThanOrEqualTo } from './common';
 
 export function parseColorStyle(styleAttrField: any[]) {
   if (Array.isArray(styleAttrField) && styleAttrField.length > 3) {
-    const type = styleAttrField[0]; // interpolate \ step
-    const action = styleAttrField[1]; // linear
+    const type = styleAttrField[0]; // interpolate
+    const action = styleAttrField[1]; // linear / step
     // const expression = styleAttrField[2];
     const interpolateColor: any[] = [];
     for (let i = 3; i < styleAttrField.length; i += 2) {
@@ -75,6 +75,33 @@ export function parseZoomStyle(styleAttrField: any[]) {
   }
 }
 
+function createGradient(interpolateColor, min, max, w, h, gradient, ctx) {
+  for (let i = 0; i < interpolateColor.length; i += 1) {
+    const key = interpolateColor[i].key;
+    const color = interpolateColor[i].value;
+    gradient.addColorStop((key - min) / (max - min), color);
+  }
+
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, w, h);
+}
+function createStepGradient(interpolateColor, min, max, w, h, ctx) {
+  for (let i = 0; i < interpolateColor.length; i += 1) {
+    const key = interpolateColor[i].key;
+    let keyNext = key;
+    if (i < interpolateColor.length - 1) {
+      keyNext = interpolateColor[i + 1].key;
+    } else {
+      keyNext = max;
+    }
+    const color = interpolateColor[i].value;
+    const current = ((key - min) / (max - min)) * w; // 0 - w
+    const next = ((keyNext - min) / (max - min)) * w; // 0 - w
+    ctx.fillStyle = color;
+    ctx.fillRect(current, 0, next - current, 1);
+  }
+}
+
 export function createLinearGradient(
   range: any[],
   styleAttrField: any[],
@@ -85,27 +112,54 @@ export function createLinearGradient(
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
 
-  canvas.width = 256;
-  canvas.height = 1;
-
-  const { input: interpolateColor } = parseColorStyle(styleAttrField);
+  const { input: interpolateColor, interpolation } = parseColorStyle(styleAttrField);
 
   if (ctx && interpolateColor && Array.isArray(interpolateColor)) {
     const keys = interpolateColor.map((d) => parseFloat(d.key));
     const colorRange: [number, number] = [Math.min(...keys), Math.max(...keys)];
     const [min, max] = [range[0] || colorRange[0], range[1] || colorRange[1]];
-    const gradient = ctx.createLinearGradient(0, 0, 256, 0);
+    const w = 256;
+    const h = 1;
+    canvas.width = w;
+    canvas.height = h;
+    const gradient = ctx.createLinearGradient(0, 0, w, 0);
+    if (interpolation?.name === 'linear') {
+      createGradient(interpolateColor, min, max, w, h, gradient, ctx);
+    } else if (interpolation?.name === 'step') {
+      if (interpolation?.base === true || utils.isNumber(interpolation?.base)) {
+        const interval = Number(interpolation?.base); // true == 1
+        createGradient(interpolateColor, min, max, w, h, gradient, ctx);
+        const len = Math.round((max - min) / interval);
+        const canvas2 = document.createElement('canvas');
+        const ctx2 = canvas2.getContext('2d') as CanvasRenderingContext2D;
+        canvas2.width = w;
+        canvas2.height = h;
+        for (let j = 0; j < len; j++) {
+          let keyNext = j;
+          if (j < len - 1) {
+            keyNext = j + 1;
+          } else {
+            keyNext = len;
+          }
+          const current = Math.round((j / len) * w); // 0 - w
+          const color = ctx.getImageData(current, 0, 1, 1).data;
+          const next = Math.round((keyNext / len) * w); // 0 - w
+          ctx2.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3] / 255})`;
+          ctx2.fillRect(current, 0, next - current, h);
+        }
 
-    for (let i = 0; i < interpolateColor.length; i += 1) {
-      const key = interpolateColor[i].key;
-      const color = interpolateColor[i].value;
-      gradient.addColorStop((key - min) / (max - min), color);
+        return {
+          data: new Uint8Array(ctx2.getImageData(0, 0, w, h).data),
+          colorRange,
+        };
+      } else if (interpolation?.base === false) {
+        createStepGradient(interpolateColor, min, max, w, h, ctx);
+      }
+    } else {
+      console.warn(`[wind-core]: invalid action type: ${interpolation}`);
     }
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 256, 1);
     return {
-      data: new Uint8Array(ctx.getImageData(0, 0, 256, 1).data),
+      data: new Uint8Array(ctx.getImageData(0, 0, w, h).data),
       colorRange,
     };
   } else {

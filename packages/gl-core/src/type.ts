@@ -79,7 +79,7 @@ export type TileSize = number;
  */
 export type DataRange = [number, number];
 
-type Coordinates = [[number, number], [number, number], [number, number], [number, number]];
+export type Coordinates = [[number, number], [number, number], [number, number], [number, number]];
 
 export interface ImageSourceOptions {
   type: LayerDataType.image;
@@ -119,7 +119,6 @@ export type Bounds = [number, number, number, number];
 export interface TileSourceOptions {
   type: LayerDataType.tile;
   url: string | [string, string];
-  bounds?: [number, number, number, number];
   minZoom?: number;
   maxZoom?: number;
   tileSize?: TileSize;

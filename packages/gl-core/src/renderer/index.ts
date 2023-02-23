@@ -37,10 +37,6 @@ export interface LayerOptions {
   };
   getZoom?: () => number;
   opacity?: number;
-  /**
-   * 是否等待当前视野瓦片加载完成后再执行渲染
-   */
-  waitTilesLoaded?: boolean;
   triggerRepaint?: () => void;
   displayRange?: [number, number];
   widthSegments?: number;
@@ -85,7 +81,6 @@ export const defaultOptions: LayerOptions = {
   widthSegments: 1,
   heightSegments: 1,
   wireframe: false,
-  waitTilesLoaded: false,
   onInit: () => undefined,
 };
 
@@ -154,12 +149,19 @@ export default class Layer {
     this.update = this.update.bind(this);
     this.onTileLoaded = this.onTileLoaded.bind(this);
 
-    this.source.onAdd(this);
     this.source.prepare(this.renderer, this.dispatcher, {
       renderFrom: this.options.renderFrom ?? RenderFrom.r,
     });
-    this.source.sourceCache.on('update', this.update);
-    this.source.sourceCache.on('tileLoaded', this.onTileLoaded);
+    this.source.onAdd(this);
+    if (Array.isArray(this.source.sourceCache)) {
+      this.source.sourceCache.forEach((s) => {
+        s.on('update', this.update);
+        s.on('tileLoaded', this.onTileLoaded);
+      });
+    } else {
+      this.source.sourceCache.on('update', this.update);
+      this.source.sourceCache.on('tileLoaded', this.onTileLoaded);
+    }
 
     this.initialize();
   }
@@ -179,7 +181,7 @@ export default class Layer {
         : {};
       const pass = new passes[key](key, this.renderer, {
         renderType,
-        sourceCache: this.source.sourceCache,
+        source: this.source,
         renderFrom: this.options.renderFrom ?? RenderFrom.r,
         stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
         ...opts,
@@ -237,6 +239,7 @@ export default class Layer {
    * TODO: 这里我们需要支持渐变色和非渐变色
    */
   buildColorRamp() {
+    if (!this.options.styleSpec?.['fill-color']) return;
     const { data, colorRange } = createLinearGradient(
       [],
       this.options.styleSpec?.['fill-color'] as any[],
@@ -316,7 +319,13 @@ export default class Layer {
    */
   update() {
     const tiles = this.options.getViewTiles(this.source);
-    this.source.sourceCache?.update(tiles);
+    if (Array.isArray(this.source.sourceCache)) {
+      this.source.sourceCache.forEach((s) => {
+        s?.update(tiles);
+      });
+    } else {
+      this.source.sourceCache?.update(tiles);
+    }
   }
 
   onTileLoaded() {
@@ -370,8 +379,15 @@ export default class Layer {
       this.renderPipeline = null;
     }
     if (this.source) {
-      this.source.sourceCache.off('update', this.update);
-      this.source.sourceCache.off('tileLoaded', this.onTileLoaded);
+      if (Array.isArray(this.source.sourceCache)) {
+        this.source.sourceCache.forEach((s) => {
+          s.off('update', this.update);
+          s.off('tileLoaded', this.onTileLoaded);
+        });
+      } else {
+        this.source.sourceCache.off('update', this.update);
+        this.source.sourceCache.off('tileLoaded', this.onTileLoaded);
+      }
       this.source.destroy();
     }
   }

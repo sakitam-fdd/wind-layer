@@ -170,3 +170,7 @@ export function containsExtent(extent1: Bounds, extent2: Bounds) {
     extent2[3] <= extent1[3]
   );
 }
+
+export function inRange(value: number, start: number, end: number) {
+  return value >= start && value < end;
+}

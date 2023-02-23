@@ -4,8 +4,10 @@ import vert from '../../../shaders/common.vert.glsl';
 import frag from '../../../shaders/common.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
 import { RenderType } from '../../../type';
+import {SourceType} from "../../../source";
 
 export interface RasterPassOptions {
+  source: SourceType;
   texture: Texture;
   textureNext: Texture;
   renderType: RenderType;
@@ -34,6 +36,9 @@ export default class RasterPass extends Pass<RasterPassOptions> {
       uniforms: {
         opacity: {
           value: 1,
+        },
+        u_fade_t: {
+          value: 0,
         },
         u_texture: {
           value: this.options.texture,
@@ -95,6 +100,7 @@ export default class RasterPass extends Pass<RasterPassOptions> {
           );
         }
       }
+      const fade = this.options.source?.getFadeTime?.() || 0;
       const uniforms = utils.pick(rendererState, ['opacity']);
 
       Object.keys(uniforms).forEach((key) => {
@@ -102,6 +108,8 @@ export default class RasterPass extends Pass<RasterPassOptions> {
           this.#mesh.program.setUniform(key, uniforms[key]);
         }
       });
+
+      this.#mesh.program.setUniform('u_fade_t', fade);
 
       this.#mesh.worldMatrixNeedsUpdate = false;
       this.#mesh.draw({

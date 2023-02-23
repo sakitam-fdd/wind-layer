@@ -220,6 +220,10 @@ export default class ImageSource {
     return true;
   }
 
+  getFadeTime() {
+    return 0;
+  }
+
   abortTile(tile: Tile, callback) {
     if (tile.request) {
       if (tile.request.size > 0 && tile.actor) {

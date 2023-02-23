@@ -97,6 +97,13 @@
       widthSegments: 1,
       heightSegments: 1,
       styleSpec: {
+        'fill-color': [
+          'interpolate',
+          ['step', 3],
+          ['get', 'value'],
+          0, '#000',
+          1, '#fff'
+        ],
         'opacity': [
           'interpolate',
           ['exponential', 0.5],

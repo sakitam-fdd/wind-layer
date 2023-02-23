@@ -271,6 +271,15 @@ export default class Tile {
     return this.tileBounds;
   }
 
+  copy(tile: Tile) {
+    this.#textures = tile.textures;
+    this.actor = tile.actor;
+    this.state = tile.state !== TileState.errored ? TileState.loaded : TileState.errored;
+    this.request = tile.request;
+    this.reloadCallback = tile.reloadCallback;
+    return this;
+  }
+
   /**
    * 释放瓦片资源
    */
