@@ -218,7 +218,9 @@ export default class Layer {
     );
 
     map.on('move', this.update);
+    map.on('moveend', this.update);
     map.on('zoom', this.handleZoom);
+    map.on('zoomend', this.handleZoom);
     map.on('resize', this.handleResize);
     this.update();
   }
@@ -228,7 +230,9 @@ export default class Layer {
       this.layer = null;
     }
     this.map?.off('zoom', this.handleZoom);
+    this.map?.off('zoomend', this.handleZoom);
     this.map?.off('move', this.update);
+    this.map?.off('moveend', this.update);
     this.map?.off('resize', this.handleResize);
     this.map = null;
     this.gl = null;

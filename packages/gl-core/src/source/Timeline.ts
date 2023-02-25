@@ -1,18 +1,19 @@
 import SourceCache from './cahce';
-import { Renderer, utils } from '@sakitam-gis/vis-engine';
+import {Renderer, utils} from '@sakitam-gis/vis-engine';
 import Layer from '../renderer';
-import { TileSource, ImageSource } from './';
+import {ImageSource, TileSource} from './';
 import {
   Bounds,
+  Coordinates,
   DataRange,
   DecodeType,
   ParseOptionsType,
   TileSize,
-  Coordinates,
   TileSourceOptions,
+  TileState,
 } from '../type';
 import Tile from '../tile/Tile';
-import Track, { defaultTrackOptions, TrackOptions } from '../utils/Track';
+import Track, {defaultTrackOptions, TrackOptions} from '../utils/Track';
 
 const sourceImpl = {
   TileSource,
@@ -174,41 +175,44 @@ class TimelineSource {
     const currentLoadTile = this.#current.loadTile;
     const nextLoadTile = this.#next.loadTile;
 
-    const wrapCurrentLoadTile = (tile: Tile, callback) => {
-      const key = `${tile.tileID.tileKey}-${generateKey(this.#current.options.url)}`;
-      const cacheTile = this.#cache.get(key);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const that = this;
+    function wrapCurrentLoadTile(tile: Tile, callback) {
+      const key = `${tile.tileID.tileKey}-${generateKey(this.options.url)}`;
+      const cacheTile = that.#cache.get(key);
       if (cacheTile) {
         tile.copy(cacheTile);
-        // callback(null, true);
-        requestAnimationFrame(() => {
-          callback(null);
-        });
+        callback(null, true);
+        // requestAnimationFrame(() => {
+        //   callback(null);
+        // });
       } else {
-        currentLoadTile.call(this.#current, tile, (err, data) => {
-          if (!this.#cache.has(key)) {
-            this.#cache.set(key, tile);
+        currentLoadTile.call(this, tile, (err, data) => {
+          if (!err && !that.#cache.has(key) && tile.state === TileState.loaded) {
+            that.#cache.set(key, tile);
           }
           callback(err, data);
         });
       }
-    };
-    const wrapNextLoadTile = (tile: Tile, callback) => {
-      const key = `${tile.tileID.tileKey}-${generateKey(this.#next.options.url)}`;
-      const cacheTile = this.#cache.get(key);
+    }
+    function wrapNextLoadTile(tile: Tile, callback) {
+      const key = `${tile.tileID.tileKey}-${generateKey(this.options.url)}`;
+      const cacheTile = that.#cache.get(key);
       if (cacheTile) {
         tile.copy(cacheTile);
-        requestAnimationFrame(() => {
-          callback(null);
-        });
+        callback(null, true);
+        // requestAnimationFrame(() => {
+        //   callback(null);
+        // });
       } else {
-        nextLoadTile.call(this.#next, tile, (err, data) => {
-          if (!this.#cache.has(key)) {
-            this.#cache.set(key, tile);
+        nextLoadTile.call(this, tile, (err, data) => {
+          if (!err && !that.#cache.has(key) && tile.state === TileState.loaded) {
+            that.#cache.set(key, tile);
           }
           callback(err, data);
         });
       }
-    };
+    }
 
     this.#current.loadTile = wrapCurrentLoadTile;
     this.#next.loadTile = wrapNextLoadTile;

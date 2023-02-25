@@ -28,15 +28,15 @@ export default class SourceCache extends EventEmitter {
 
   #cache: LRUCache<Tile>;
 
-  // #retainTile: {
-  //   [key: string]: TileID;
-  // };
+  #retainTile: {
+    [key: string]: TileID;
+  };
 
   /**
-   * 这两个配置是用于控制瓦片数据的最大过度缩放级别的。
+   * 这两个配置是用于控制瓦片数据的最大缩放级别的。
    * 在瓦片地图中，为了避免图像模糊或者失真，通常不会将某个瓦片数据过度缩放，
    * 而是使用它的父级瓦片或者子集瓦片数据进行显示。
-   * 这个过度缩放的范围就是通过 maxOverzooming 和 maxUnderzooming 属性来控制的
+   * 这个缩放的范围就是通过 maxOverzooming 和 maxUnderzooming 属性来控制的
    */
   static maxOverzooming = 10;
   static maxUnderzooming = 3;
@@ -58,6 +58,7 @@ export default class SourceCache extends EventEmitter {
     if (!this.source.loaded()) {
       return false;
     }
+    console.log(Object.keys(this.#retainTile), Object.keys(this.cacheTiles));
     for (const t in this.cacheTiles) {
       const tile = this.cacheTiles[t];
       if (tile.state !== TileState.loaded && tile.state !== TileState.errored) return false;
@@ -487,7 +488,7 @@ export default class SourceCache extends EventEmitter {
       }
     }
 
-    // this.#retainTile = retain;
+    this.#retainTile = retain;
     this.emit('tilesLoadStart', {
       retain,
     });
