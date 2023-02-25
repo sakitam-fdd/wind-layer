@@ -183,9 +183,6 @@ class TimelineSource {
       if (cacheTile) {
         tile.copy(cacheTile);
         callback(null, true);
-        // requestAnimationFrame(() => {
-        //   callback(null);
-        // });
       } else {
         currentLoadTile.call(this, tile, (err, data) => {
           if (!err && !that.#cache.has(key) && tile.state === TileState.loaded) {
@@ -201,9 +198,6 @@ class TimelineSource {
       if (cacheTile) {
         tile.copy(cacheTile);
         callback(null, true);
-        // requestAnimationFrame(() => {
-        //   callback(null);
-        // });
       } else {
         nextLoadTile.call(this, tile, (err, data) => {
           if (!err && !that.#cache.has(key) && tile.state === TileState.loaded) {

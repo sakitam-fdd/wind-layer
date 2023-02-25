@@ -190,11 +190,12 @@ export default class TileSource {
 
   asyncActor(tile, url) {
     return new Promise((resolve, reject) => {
+      const id = `${tile.tileID.tileKey}-${url}`;
       tile.actor.send(
         'loadData',
         {
           url: resolveURL(url),
-          cancelId: url,
+          cancelId: id,
           type: 'arrayBuffer',
           decodeType: this.options.decodeType,
         },
@@ -205,7 +206,7 @@ export default class TileSource {
           resolve(data);
         },
       );
-      tile.request.set(url, url);
+      tile.request.set(id, url);
     });
   }
 
@@ -258,8 +259,6 @@ export default class TileSource {
       } else if (tile.state === TileState.loading) {
         // schedule tile reloading after it has been loaded
         tile.reloadCallback = callback;
-      } else {
-        // tile.request = tile.actor.send('reloadTile', params, done.bind(this));
       }
     } catch (e) {
       tile.state = TileState.errored;
@@ -272,16 +271,26 @@ export default class TileSource {
       if (tile.request.size > 0 && tile.actor) {
         const iterator = tile.request.entries();
         for (let i = 0; i < tile.request.size; i++) {
-          const [url] = iterator.next().value;
-          if (url) {
-            tile.actor.send('cancel', {
-              url,
-              cancelId: url,
-            });
+          const [id, url] = iterator.next().value;
+          if (id) {
+            tile.actor.send(
+              'cancel',
+              {
+                url,
+                cancelId: id,
+              },
+              (err) => {
+                if (err) {
+                  tile.state = TileState.unloaded;
+                }
+              },
+            );
           }
         }
       }
       tile.request.clear();
+    } else {
+      tile.state = TileState.unloaded;
     }
     callback();
   }

@@ -39,7 +39,7 @@ export default class LRUCache<T> {
       const iterator = this.map.entries();
       for (let i = 0; i < this.map.size; i++) {
         const [, value] = iterator.next().value;
-        this.onRemove(value);
+        this.onRemove(value.val);
       }
     }
 

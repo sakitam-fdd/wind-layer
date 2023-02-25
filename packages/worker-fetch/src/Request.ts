@@ -361,10 +361,6 @@ export class RequestAdapter {
             image
               .readRasters()
               .then((rasters) => {
-                // result.values = rasters.map(
-                //   (valuesInOneDimension) =>
-                //     unflatten(valuesInOneDimension, { height, width }) as any,
-                // );
                 result.rasters = rasters;
                 const r = rasters[0];
                 if (r) {

@@ -28,10 +28,6 @@ export default class SourceCache extends EventEmitter {
 
   #cache: LRUCache<Tile>;
 
-  #retainTile: {
-    [key: string]: TileID;
-  };
-
   /**
    * 这两个配置是用于控制瓦片数据的最大缩放级别的。
    * 在瓦片地图中，为了避免图像模糊或者失真，通常不会将某个瓦片数据过度缩放，
@@ -58,7 +54,6 @@ export default class SourceCache extends EventEmitter {
     if (!this.source.loaded()) {
       return false;
     }
-    console.log(Object.keys(this.#retainTile), Object.keys(this.cacheTiles));
     for (const t in this.cacheTiles) {
       const tile = this.cacheTiles[t];
       if (tile.state !== TileState.loaded && tile.state !== TileState.errored) return false;
@@ -138,8 +133,6 @@ export default class SourceCache extends EventEmitter {
       return;
     }
 
-    // console.log(this.#retainTile);
-
     tile.timeAdded = Date.now();
     if (!disableUpdate) {
       this.emit('update');
@@ -166,7 +159,7 @@ export default class SourceCache extends EventEmitter {
       tile = new Tile(tileID, {
         tileSize: this.source.tileSize * tileID.overscaleFactor(),
       });
-      this.source.loadTile(tile, this.tileLoaded.bind(this, tile, tileID.tileKey, tile.state));
+      this.loadTile(tile, this.tileLoaded.bind(this, tile, tileID.tileKey, tile.state));
     }
 
     // Impossible, but silence flow.
@@ -488,7 +481,6 @@ export default class SourceCache extends EventEmitter {
       }
     }
 
-    this.#retainTile = retain;
     this.emit('tilesLoadStart', {
       retain,
     });
