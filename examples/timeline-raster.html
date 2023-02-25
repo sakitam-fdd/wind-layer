@@ -69,34 +69,56 @@
 
   map.on('load', function () {
     const source = new mapboxWind.TimelineSource('temp', {
-      sourceType: 'TileSource',
-      tileSize: 256,
-      minZoom: 0,
-      maxZoom: 22,
-      roundZoom: true,
-      duration: 500,
+      sourceType: 'ImageSource',
+      // tileSize: 256,
+      // minZoom: 0,
+      // maxZoom: 22,
+      // roundZoom: true,
+      // subdomains: ['a', 'b', 'c', 'd'],
+      coordinates: [
+        [-180, 85.051129],
+        [180, 85.051129],
+        [180, -85.051129],
+        [-180, -85.051129],
+      ],
+      duration: 10,
       endDelay: 0,
       repeat: true,
       autoplay: true,
+      // intervals: [
+      //   {
+      //     url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+      //   },
+      //   {
+      //     url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+      //   },
+      //   {
+      //     url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+      //   },
+      //   {
+      //     url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+      //   },
+      // ],
       intervals: [
         {
-          url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-          subdomains: ['a', 'b', 'c', 'd'],
+          url: './data/num/1.png',
         },
         {
-          url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-          subdomains: ['a', 'b', 'c', 'd'],
+          url: './data/num/2.png',
         },
         {
-          url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-          subdomains: ['a', 'b', 'c', 'd'],
+          url: './data/num/3.png',
         },
         {
-          url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-          subdomains: ['a', 'b', 'c', 'd'],
+          url: './data/num/4.png',
+        },
+        {
+          url: './data/num/5.png',
         },
       ],
     });
+
+    window.source = source;
 
     const layer = new mapboxWind.Layer('temp', source, {
       wrapX: true,

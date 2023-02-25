@@ -16,7 +16,7 @@ function compareTileId(a: TileID, b: TileID) {
 export default class SourceCache extends EventEmitter {
   public id: string;
   public source: TileSource | ImageSource;
-  private cacheTiles: {
+  private readonly cacheTiles: {
     [key: string]: Tile;
   };
   private coveredTiles: {
@@ -27,6 +27,10 @@ export default class SourceCache extends EventEmitter {
   };
 
   #cache: LRUCache<Tile>;
+
+  // #retainTile: {
+  //   [key: string]: TileID;
+  // };
 
   /**
    * 这两个配置是用于控制瓦片数据的最大过度缩放级别的。
@@ -132,6 +136,8 @@ export default class SourceCache extends EventEmitter {
       }
       return;
     }
+
+    // console.log(this.#retainTile);
 
     tile.timeAdded = Date.now();
     if (!disableUpdate) {
@@ -392,7 +398,6 @@ export default class SourceCache extends EventEmitter {
     if (tile && tile.hasData()) {
       return tile;
     }
-    // TileCache ignores wrap in lookup.
     return this.#cache.get(tileID.tileKey);
   }
 
@@ -482,7 +487,10 @@ export default class SourceCache extends EventEmitter {
       }
     }
 
-    this.emit('tilesLoadStart', retain);
+    // this.#retainTile = retain;
+    this.emit('tilesLoadStart', {
+      retain,
+    });
 
     const remove = keysDifference(this.cacheTiles, retain);
     for (const tileKey of remove) {
@@ -495,7 +503,9 @@ export default class SourceCache extends EventEmitter {
     ).length;
     const retainLength = Object.keys(retain).length;
     if (currentLength < retainLength) {
-      this.emit('tilesLoading', currentLength / retainLength);
+      this.emit('tilesLoading', {
+        progress: currentLength / retainLength,
+      });
     }
   }
 

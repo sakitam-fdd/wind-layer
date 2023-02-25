@@ -101,6 +101,7 @@ export default class ImageSource {
   }
 
   setUrl(url, clear = true) {
+    console.log(url);
     this.options.url = url;
     this.reload(clear);
   }

@@ -1,18 +1,18 @@
 import SourceCache from './cahce';
-import { Renderer, Raf, utils } from '@sakitam-gis/vis-engine';
+import { Renderer, utils } from '@sakitam-gis/vis-engine';
 import Layer from '../renderer';
 import { TileSource, ImageSource } from './';
 import {
   Bounds,
   DataRange,
   DecodeType,
-  ImageSourceOptions,
   ParseOptionsType,
   TileSize,
   Coordinates,
   TileSourceOptions,
 } from '../type';
 import Tile from '../tile/Tile';
+import Track, { defaultTrackOptions, TrackOptions } from '../utils/Track';
 
 const sourceImpl = {
   TileSource,
@@ -28,14 +28,14 @@ function generateKey(url: string | string[]) {
   return urls.join(',');
 }
 
-interface TimelineSourceOptions {
+interface TimelineSourceOptions extends TrackOptions {
   sourceType: 'TileSource' | 'ImageSource';
   intervals: {
     url: string;
-    subdomains?: (string | number)[];
   }[];
   type?: 'timeline';
   coordinates?: Coordinates;
+  subdomains?: (string | number)[];
   minZoom?: number;
   maxZoom?: number;
   tileSize?: TileSize;
@@ -48,26 +48,6 @@ interface TimelineSourceOptions {
   decodeType?: DecodeType;
   maxTileCacheSize?: number;
   tileBounds?: Bounds;
-
-  /**
-   * 每帧瓦片的过渡时间
-   */
-  duration?: number; // ms
-
-  /**
-   * 在所有帧瓦片播放完成后是否延迟
-   */
-  endDelay?: number; // ms
-
-  /**
-   * 是否轮播
-   */
-  repeat?: boolean;
-
-  /**
-   * 是否默认启动播放
-   */
-  autoplay?: boolean;
 }
 
 class TimelineSource {
@@ -104,7 +84,7 @@ class TimelineSource {
   /**
    * 影像坐标
    */
-  public coordinates: ImageSourceOptions['coordinates'];
+  public coordinates: WithUndef<Coordinates>;
 
   /**
    * 配置项
@@ -130,11 +110,9 @@ class TimelineSource {
   #next: TileSource | ImageSource;
 
   #index: number;
-  #lastTime = 0;
   #fadeTime = 0;
 
-  #paused: boolean;
-  #raf: Raf;
+  #track: Track;
 
   #cache: Map<string, any> = new Map();
 
@@ -148,12 +126,17 @@ class TimelineSource {
     const scheme = options.scheme || 'xyz';
     this.tileSize = options.tileSize || 512;
     this.tileBounds = options.tileBounds;
+    if (options.sourceType === 'ImageSource' && !options.coordinates) {
+      throw new Error('ImageSource must provide `coordinates`');
+    }
+    this.coordinates = options.coordinates;
     this.intervals = options.intervals;
 
     const decodeType = options.decodeType || DecodeType.image;
     const maxTileCacheSize = options.maxTileCacheSize;
 
     this.options = {
+      ...defaultTrackOptions,
       ...options,
       decodeType,
       maxTileCacheSize,
@@ -168,7 +151,7 @@ class TimelineSource {
 
     this.#current = new (sourceImpl[options.sourceType] as any)(`${this.id}_current`, {
       url: current.url,
-      subdomains: current.subdomains,
+      subdomains: this.options.subdomains,
       minZoom: this.minZoom,
       maxZoom: this.minZoom,
       tileSize: this.tileSize,
@@ -179,7 +162,7 @@ class TimelineSource {
     });
     this.#next = new (sourceImpl[options.sourceType] as any)(`${this.id}_next`, {
       url: current.url,
-      subdomains: current.subdomains,
+      subdomains: this.options.subdomains,
       minZoom: this.minZoom,
       maxZoom: this.minZoom,
       tileSize: this.tileSize,
@@ -196,7 +179,10 @@ class TimelineSource {
       const cacheTile = this.#cache.get(key);
       if (cacheTile) {
         tile.copy(cacheTile);
-        callback(null, true);
+        // callback(null, true);
+        requestAnimationFrame(() => {
+          callback(null);
+        });
       } else {
         currentLoadTile.call(this.#current, tile, (err, data) => {
           if (!this.#cache.has(key)) {
@@ -211,7 +197,9 @@ class TimelineSource {
       const cacheTile = this.#cache.get(key);
       if (cacheTile) {
         tile.copy(cacheTile);
-        callback(null, true);
+        requestAnimationFrame(() => {
+          callback(null);
+        });
       } else {
         nextLoadTile.call(this.#next, tile, (err, data) => {
           if (!this.#cache.has(key)) {
@@ -230,6 +218,14 @@ class TimelineSource {
 
   get privateType() {
     return this.options.sourceType === 'TileSource' ? 'tile' : 'image';
+  }
+
+  get cache() {
+    return this.#cache;
+  }
+
+  get source() {
+    return [this.#current, this.#next];
   }
 
   get sourceCache() {
@@ -267,19 +263,14 @@ class TimelineSource {
     this.resume();
   }
 
-  animate(time) {
-    const duration = this.options.duration || 0;
+  animate({ position }) {
     const len = this.intervals.length;
     const lastIndex = this.#index;
-    // 当 index 大于数据列表长度时，重置 index
-    if (this.#index > len) {
-      this.#lastTime = time;
-      this.#index = 0;
-    } else {
-      this.#index = ((time - this.#lastTime) * 1000) / duration;
-    }
+    this.#index = position * utils.clamp(len - 1, 0, Infinity);
 
-    if (Math.floor(this.#index) - Math.floor(lastIndex) > 0) {
+    const diff = Math.floor(this.#index) - Math.floor(lastIndex);
+
+    if (diff > 0 || diff < 0) {
       // 如果 swap source 有任意一个数据未加载完成，停止动画等待加载完成后再执行动画
       if (!this.#current?.sourceCache.loaded() || !this.#next?.sourceCache.loaded()) {
         this.pause();
@@ -287,6 +278,7 @@ class TimelineSource {
         this.#fadeTime = 0;
         // swap source
         [this.#current, this.#next] = [this.#next, this.#current];
+        this.pause();
         this.#next.setUrl(
           this.intervals[utils.clamp(Math.floor(this.#index), 0, len - 1)].url,
           true,
@@ -302,25 +294,35 @@ class TimelineSource {
   }
 
   play() {
-    this.#raf = new Raf(this.animate);
+    this.#track.play();
   }
 
   pause() {
-    this.#paused = true;
-    this.#raf.stop();
+    this.#track.pause();
   }
 
   resume() {
-    if (!this.#paused) return;
-    this.#paused = false;
-    this.#raf.start();
+    this.#track.resume();
+  }
+
+  stop() {
+    this.#track.stop();
+  }
+
+  restart() {
+    this.#track.restart();
   }
 
   load(cb?: any) {
     this.#loaded = true;
-    if (this.options.autoplay) {
-      this.play();
-    }
+    this.#track = new Track({
+      duration:
+        (this.options.duration as number) * utils.clamp(this.intervals.length - 1, 0, Infinity),
+      endDelay: this.options.endDelay,
+      repeat: this.options.repeat,
+      autoplay: this.options.autoplay,
+    });
+    this.#track.on('track', this.animate);
     if (cb) {
       cb(null);
     }
@@ -333,6 +335,7 @@ class TimelineSource {
   destroy() {
     this.layer = null;
     this.#loaded = false;
+    this.#track.off('track', this.animate);
     if (this.#sourceCache && Array.isArray(this.#sourceCache)) {
       this.#sourceCache.forEach((s) => {
         s.clear();
