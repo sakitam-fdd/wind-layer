@@ -9,12 +9,14 @@ import {
 } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
-import fillVert from '../../../shaders/fill.vert.glsl';
-import fillFrag from '../../../shaders/fill.frag.glsl';
+import vert from '../../../shaders/common.vert.glsl';
+import frag from '../../../shaders/color.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
 import { RenderType } from '../../../type';
+import { SourceType } from '../../../source';
 
 export interface ColorizePassOptions {
+  source: SourceType;
   texture: Texture;
   textureNext: Texture;
   renderType: RenderType;
@@ -38,11 +40,14 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
     super(id, renderer, options);
 
     this.#program = new Program(renderer, {
-      vertexShader: fillVert,
-      fragmentShader: fillFrag,
+      vertexShader: vert,
+      fragmentShader: frag,
       uniforms: {
         opacity: {
           value: 1,
+        },
+        u_fade_t: {
+          value: 0,
         },
         displayRange: {
           value: new Vector2(-Infinity, Infinity),
@@ -126,10 +131,12 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
         }
       });
 
+      const fade = this.options.source?.getFadeTime?.() || 0;
       this.#mesh.program.setUniform(
         'u_image_res',
         new Vector2(this.options.texture.width, this.options.texture.height),
       );
+      this.#mesh.program.setUniform('u_fade_t', fade);
 
       this.#mesh.worldMatrixNeedsUpdate = false;
       this.#mesh.draw({

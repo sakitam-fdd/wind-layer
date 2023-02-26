@@ -67,59 +67,40 @@
     antialias: true,
   });
 
+  const color = {
+    temp: [[203,[115,70,105,255]],
+      [218,[202,172,195,255]],
+      [233,[162,70,145,255]],
+      [248,[143,89,169,255]],
+      [258,[157,219,217,255]],
+      [265,[106,191,181,255]],
+      [269,[100,166,189,255]],
+      [273.15,[93,133,198,255]],
+      [274,[68,125,99,255]],
+      [283,[128,147,24,255]],
+      [294,[243,183,4,255]],
+      [303,[232,83,25,255]],
+      [320,[71,14,0,255]]],
+  };
+
+  mapboxWind.configDeps(['./geotiff.js', './full.umd.js']);
+
   map.on('load', function () {
+    const tempInterpolateColor = color.temp.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);
     const source = new mapboxWind.TimelineSource('temp', {
-      sourceType: 'ImageSource',
-      // tileSize: 256,
-      // minZoom: 0,
-      // maxZoom: 22,
-      // roundZoom: true,
-      // subdomains: ['a', 'b', 'c', 'd'],
-      coordinates: [
-        [-180, 85.051129],
-        [180, 85.051129],
-        [180, -85.051129],
-        [-180, -85.051129],
-      ],
-      duration: 0.3,
-      endDelay: 0.2,
+      sourceType: 'TileSource',
+      tileSize: 256,
+      minZoom: 0,
+      maxZoom: 2,
+      roundZoom: true,
+      duration: 1,
+      endDelay: 0,
       repeat: true,
       autoplay: true,
-      // intervals: [
-      //   {
-      //     url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-      //   },
-      //   {
-      //     url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-      //   },
-      //   {
-      //     url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-      //   },
-      //   {
-      //     url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-      //   },
-      // ],
-      intervals: [
-        {
-          url: './data/num/1.png',
-        },
-        {
-          url: './data/num/2.png',
-        },
-        {
-          url: './data/num/3.png',
-        },
-        {
-          url: './data/num/4.png',
-        },
-        {
-          url: './data/num/5.png',
-        },
-        // 补齐一帧优化 loop 播放效果
-        {
-          url: './data/num/1.png',
-        },
-      ],
+      decodeType: 3,
+      intervals: Array.from({ length: 23 }).map((i, index) => ({
+        url: `http://localhost:5000/processed/2023041300/20230413${index < 10 ? '0' + index.toString() : index.toString()}/{z}/{x}/{y}/temp-surface.jpeg`
+      })),
     });
 
     window.source = source;
@@ -127,9 +108,13 @@
     const layer = new mapboxWind.Layer('temp', source, {
       wrapX: true,
       wireframe: true,
-      widthSegments: 1,
-      heightSegments: 1,
       styleSpec: {
+        'fill-color': [
+          'interpolate',
+          ['step', 1],
+          ['get', 'value'],
+          ...tempInterpolateColor
+        ],
         'opacity': [
           'interpolate',
           ['exponential', 0.5],
@@ -140,7 +125,12 @@
           1
         ],
       },
-      renderPasses: ['RasterComposePass', 'RasterPass'],
+      renderFrom: 'r',
+      widthSegments: 1,
+      heightSegments: 1,
+      displayRange: [-80 + 273.15, 80 + 273.15],
+      hasMask: false,
+      renderPasses: ['ColorizeComposePass', 'ColorizePass'],
     });
 
     map.addLayer(layer);

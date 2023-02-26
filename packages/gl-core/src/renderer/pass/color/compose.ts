@@ -38,7 +38,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
       vertexShader: vert,
       fragmentShader: frag,
       uniforms: {
-        texture: {
+        u_image0: {
           value: undefined,
         },
         dataRange: {
@@ -175,6 +175,15 @@ export default class ComposePass extends Pass<ComposePassOptions> {
   render(rendererParams, rendererState) {
     const { source } = this.options;
     const sourceCache = source.sourceCache;
-    this.renderTexture(this.#current, rendererParams, sourceCache);
+    if (Array.isArray(sourceCache)) {
+      if (sourceCache.length === 2) {
+        this.renderTexture(this.#current, rendererParams, sourceCache[0]);
+        this.renderTexture(this.#next, rendererParams, sourceCache[1]);
+      } else {
+        this.renderTexture(this.#current, rendererParams, sourceCache[0]);
+      }
+    } else {
+      this.renderTexture(this.#current, rendererParams, sourceCache);
+    }
   }
 }

@@ -4,7 +4,7 @@ import vert from '../../../shaders/common.vert.glsl';
 import frag from '../../../shaders/common.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
 import { RenderType } from '../../../type';
-import {SourceType} from "../../../source";
+import { SourceType } from '../../../source';
 
 export interface RasterPassOptions {
   source: SourceType;

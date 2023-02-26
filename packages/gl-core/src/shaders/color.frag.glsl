@@ -2,7 +2,9 @@
 precision highp float;
 
 uniform sampler2D u_texture;
+uniform sampler2D u_textureNext;
 uniform sampler2D colorRampTexture;
+uniform float u_fade_t;
 
 uniform vec2 u_image_res;
 uniform vec2 colorRange;
@@ -16,7 +18,10 @@ varying vec2 vUv;
 #include <decodeFloat>
 
 vec4 calcTexture(const vec2 puv) {
-    return texture2D(u_texture, puv);
+    vec4 color0 = texture2D(u_texture, puv);
+    vec4 color1 = texture2D(u_textureNext, puv);
+
+    return mix(color0, color1, u_fade_t);
 }
 
 #if RENDER_TYPE == 1
