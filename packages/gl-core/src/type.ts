@@ -94,6 +94,11 @@ export interface ImageSourceOptions {
    */
   decodeType?: DecodeType;
   maxTileCacheSize?: number;
+
+  /**
+   * 是否使用内存缓存，这在我们使用 `TimelineSource`
+   */
+  useMemoryCache?: number;
 }
 
 interface JsonArrayData {

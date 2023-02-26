@@ -62,7 +62,9 @@ export default class ImageSource {
 
   #loaded = false;
   #sourceCache: SourceCache;
-  #tileWorkers: Map<string, any> = new Map();
+  #actor: any;
+  #request: Map<string, any> = new Map();
+  #data: any;
 
   constructor(id, options: ImageSourceOptions) {
     this.id = id;
@@ -97,6 +99,7 @@ export default class ImageSource {
   prepare(renderer: Renderer, dispatcher, parseOptions: ParseOptionsType) {
     this.renderer = renderer;
     this.dispatcher = dispatcher;
+    this.#actor = this.dispatcher.getActor();
     this.parseOptions = parseOptions;
   }
 
@@ -120,8 +123,8 @@ export default class ImageSource {
 
   asyncActor(tile, url) {
     return new Promise((resolve, reject) => {
-      const id = `${tile.tileID.tileKey}-${url}`;
-      tile.actor.send(
+      const id = url;
+      this.#actor.send(
         'loadData',
         {
           url: resolveURL(url),
@@ -136,18 +139,38 @@ export default class ImageSource {
           resolve(data);
         },
       );
-      tile.request.set(id, url);
+      this.#request.set(id, url);
     });
   }
 
   /**
-   * 兼容 TileJSON 加载，需要具体实现
+   * 请求所需数据
    * @param cb
+   * @param loaded
    */
-  load(cb?: any) {
-    this.#loaded = true;
-    if (cb) {
-      cb(null);
+  load(cb?: any, loaded?: boolean) {
+    this.#loaded = loaded ?? false;
+    try {
+      const urls = this.getTileUrl();
+      const p: Promise<any>[] = [];
+      for (let i = 0; i < urls.length; i++) {
+        p.push(this.asyncActor(null, urls[i]));
+      }
+      Promise.all(p).then((data) => {
+        this.#request.clear();
+        this.#loaded = true;
+
+        this.#data = data;
+
+        if (cb) {
+          cb(null);
+        }
+      });
+    } catch (e) {
+      this.#loaded = true;
+      if (cb) {
+        cb(e);
+      }
     }
   }
 
@@ -155,7 +178,7 @@ export default class ImageSource {
     return this.#loaded;
   }
 
-  reload(clear) {
+  reload(clear, useCache = false) {
     this.load(() => {
       if (clear) {
         this.#sourceCache.clearTiles();
@@ -166,7 +189,7 @@ export default class ImageSource {
     });
   }
 
-  getTileUrl(tileID) {
+  getTileUrl() {
     let urls: string[] = this.options.url as string[];
     if (utils.isString(this.options.url)) {
       urls = [this.options.url];
@@ -175,46 +198,22 @@ export default class ImageSource {
   }
 
   loadTile(tile: Tile, callback) {
-    try {
-      if (!tile.actor || tile.state === TileState.reloading) {
-        const urls = this.getTileUrl(tile.tileID);
-
-        const key = urls.join(',');
-        this.#tileWorkers.set(key, this.#tileWorkers.get(key) || this.dispatcher.getActor());
-        tile.actor = this.#tileWorkers.get(key);
-
-        const p: Promise<any>[] = [];
-        for (let i = 0; i < urls.length; i++) {
-          p.push(this.asyncActor(tile, urls[i]));
-        }
-
-        Promise.all(p).then((data) => {
-          tile.request.clear();
-
-          if (tile.aborted) {
-            tile.state = TileState.unloaded;
-            return callback(null);
-          }
-
-          if (!data) return callback(null);
-
-          data.forEach((d, index) => {
-            tile.setTextures(this.renderer, index, d, this.parseOptions, this.options);
-          });
-
-          tile.state = TileState.loaded;
-          callback(null);
-        });
-      } else if (tile.state === TileState.loading) {
-        // schedule tile reloading after it has been loaded
-        tile.reloadCallback = callback;
-      } else {
-        // tile.request = tile.actor.send('reloadTile', params, done.bind(this));
-      }
-    } catch (e) {
-      tile.state = TileState.errored;
-      return callback(e);
+    if (!this.#data) {
+      console.log(tile, this.#data);
+      callback(null);
+      // requestAnimationFrame(() => {
+      //
+      // });
+      return;
     }
+
+    this.#data.forEach((d, index) => {
+      tile.setTextures(this.renderer, index, d, this.parseOptions, this.options);
+    });
+
+    tile.state = TileState.loaded;
+
+    callback(null);
   }
 
   hasTile(coord) {
@@ -225,42 +224,32 @@ export default class ImageSource {
     return 0;
   }
 
-  abortTile(tile: Tile, callback) {
-    if (tile.request) {
-      if (tile.request.size > 0 && tile.actor) {
-        const iterator = tile.request.entries();
-        for (let i = 0; i < tile.request.size; i++) {
-          const [id, url] = iterator.next().value;
-          if (id) {
-            tile.actor.send(
-              'cancel',
-              {
-                url,
-                cancelId: id,
-              },
-              (err) => {
-                if (err) {
-                  tile.state = TileState.unloaded;
-                }
-              },
-            );
-          }
-        }
-      }
-      tile.request.clear();
-    } else {
-      tile.state = TileState.unloaded;
-    }
-    callback();
-  }
+  // eslint-disable-next-line
+  abortTile(tile: Tile, callback) {}
 
   // eslint-disable-next-line
-  unloadTile(tile, cb) {}
+  unloadTile(tile: Tile, cb) {}
 
   destroy() {
     this.layer = null;
     this.#loaded = false;
-    this.#tileWorkers.clear();
     this.#sourceCache.clear();
+    this.#cancelRequest();
+  }
+
+  #cancelRequest() {
+    if (this.#request.size > 0 && this.#actor) {
+      const iterator = this.#request.entries();
+      for (let i = 0; i < this.#request.size; i++) {
+        const [id, url] = iterator.next().value;
+        if (id) {
+          this.#actor.send('cancel', {
+            url,
+            cancelId: id,
+          });
+        }
+      }
+    }
+    this.#request.clear();
   }
 }
