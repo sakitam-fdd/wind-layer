@@ -1,90 +1,93 @@
+#defines
+
 precision highp float;
 
-uniform sampler2D u_wind;
+uniform sampler2D u_texture;
+uniform sampler2D u_textureNext;
+
+// 由于使用四通道来保存位置信息，需要两个 fbo 来存储 xy 位置
 uniform sampler2D u_particles;
 
-uniform vec4 u_bbox;
-uniform vec2 u_wind_res;
-uniform vec4 u_wind_range;
-uniform float u_rand_seed;
-uniform float u_nodata;
+uniform float u_fade_t;
+uniform vec2 u_image_res;
 
+uniform vec4 u_bbox;
+uniform mat4 u_data_matrix;
+uniform float u_rand_seed;
 uniform float u_drop_rate;
 uniform float u_drop_rate_bump;
-uniform vec2 u_speed_factor;
+uniform float u_speed_factor;
 
-varying vec2 v_tex_pos;
+varying vec2 vUv;
 
-#pragma glslify: toRGBA = require(../encode)
-#pragma glslify: fromRGBA = require(../decode)
+#include <random>
 
-// pseudo-random generator
-const vec3 rand_constants = vec3(12.9898, 78.233, 4375.85453);
-float rand(const vec2 co) {
-    float t = dot(rand_constants.xy, co);
-    return fract(sin(t) * (rand_constants.z + t));
+vec4 calcTexture(const vec2 puv) {
+    vec4 color0 = texture2D(u_texture, puv);
+    vec4 color1 = texture2D(u_textureNext, puv);
+
+    return mix(color0, color1, u_fade_t);
 }
 
-vec2 decodeValue(const vec2 uv) {
-    vec4 u_color = texture2D(u_wind, uv);
-    float u = u_wind_range[0] + ((u_wind_range[1] - u_wind_range[0]) * (u_color.r * 255.0 - 1.0)) / 254.0;
-    float v = u_wind_range[2] + ((u_wind_range[3] - u_wind_range[2]) * (u_color.g * 255.0 - 1.0)) / 254.0;
+#if RENDER_TYPE == 1
+// rg
+vec2 decodeValue(const vec2 vc) {
+    vec4 rgba = calcTexture(vc);
+    return rgba.rg;
+}
+#else
+float decodeValue(const vec2 vc) {
+    return calcTexture(vc).r;
+}
+#endif
 
-    return vec2(u, v);
+vec2 bilinear(const vec2 uv) {
+    vec2 px = 1.0 / u_image_res;
+    vec2 vc = (floor(uv * u_image_res)) * px;
+    vec2 f = fract(uv * u_image_res);
+    vec2 tl = decodeValue(vc);
+    vec2 tr = decodeValue(vc + vec2(px.x, 0));
+    vec2 bl = decodeValue(vc + vec2(0, px.y));
+    vec2 br = decodeValue(vc + px);
+    return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
 }
 
-vec2 getColor(const vec2 uv) {
-    vec2 px = 1.0 / (u_wind_res);
-    vec2 vc = (floor(uv * (u_wind_res))) * px;
-
-    vec4 u_color = texture2D(u_wind, vc);
-
-    return vec2(u_color.r, u_color.g);
-}
-
-// wind speed lookup; use manual bilinear filtering based on 4 adjacent pixels for smooth interpolation
-vec2 lookup_wind(const vec2 uv) {
-  // return texture2D(u_wind, uv).rg; // lower-res hardware filtering
-  vec2 px = 1.0 / u_wind_res;
-  vec2 vc = (floor(uv * u_wind_res)) * px;
-  vec2 f = fract(uv * u_wind_res);
-  vec2 tl = decodeValue(vc);
-  vec2 tr = decodeValue(vc + vec2(px.x, 0));
-  vec2 bl = decodeValue(vc + vec2(0, px.y));
-  vec2 br = decodeValue(vc + px);
-  // mix(x, y, level)
-  // dest = x * (1 - level) + y * level;
-  return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
+vec2 transformData(vec2 pos, mat4 matrix) {
+    vec4 transformed = matrix * vec4(pos.xy, 1.0, 1.0);
+    return transformed.xy / transformed.w;
 }
 
 void main() {
-    vec4 color = texture2D(u_particles, v_tex_pos);
-    vec2 pos = fromRGBA(color);
+    vec2 pos = texture2D(u_particles, vUv).xy;
 
-    vec2 global_pos = u_bbox.xy + pos * (u_bbox.zw - u_bbox.xy);
+    vec2 uv = pos;
 
-    vec2 alphas = getColor(global_pos);
+//    uv = vec2(u_bbox.x + (uv.x * u_bbox.z), u_bbox.y + (uv.y * u_bbox.w));
+    uv = transformData(uv, u_data_matrix);
 
-    if (alphas.x <= u_nodata || alphas.y <= u_nodata) {
+    if (calcTexture(uv).a == 0.0) {
         discard;
     }
 
-    vec2 velocity = lookup_wind(global_pos);
+    vec2 velocity = bilinear(uv);
 
-    float speed_t = length(velocity);
-    vec2 offset =  vec2(velocity.x, -velocity.y) * u_speed_factor;
-    // 更新粒子位置
+    float speed = length(velocity);
+
+    vec2 offset = vec2(velocity.x, -velocity.y) * 0.0001 * u_speed_factor;
+
+    // update particle position, wrapping around the date line
+
     pos = fract(1.0 + pos + offset);
 
     // a random seed to use for the particle drop
-    vec2 seed = (pos + v_tex_pos) * u_rand_seed;
-    // 抛弃率是粒子在随机位置重新启动的机会，以避免退化
-    float drop_rate = u_drop_rate + speed_t * u_drop_rate_bump;
-    float drop = step(1.0 - drop_rate, rand(seed));
 
+    vec2 seed = (pos + vUv) * u_rand_seed;
+
+    float drop_rate = u_drop_rate + speed * u_drop_rate_bump;
+    float drop = step(1.0 - drop_rate, rand(seed));
     vec2 random_pos = vec2(rand(seed + 1.3), rand(seed + 2.1));
 
     pos = mix(pos, random_pos, drop);
 
-    gl_FragColor = toRGBA(pos);
+    gl_FragColor = vec4(pos.xy, 0.0, 1.0);
 }

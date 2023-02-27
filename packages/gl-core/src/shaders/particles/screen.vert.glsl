@@ -1,9 +1,15 @@
-attribute vec2 a_pos;
-attribute vec2 a_tex_pos;
+#defines
 
-varying vec2 v_tex_pos;
+attribute vec2 uv;
+attribute vec3 position;
+uniform vec2 resolution;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
 
-void main() {
-    v_tex_pos = a_tex_pos;
-    gl_Position = vec4(a_pos * 2.0 - 1.0, 0, 1);
+varying vec2 vUv;
+
+void main () {
+    vUv = uv;
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position.xy * resolution, 0.0, 1.0);
 }

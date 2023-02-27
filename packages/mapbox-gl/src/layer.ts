@@ -68,6 +68,8 @@ export default class Layer {
     this.source = source;
 
     this.update = this.update.bind(this);
+    this.moveStart = this.moveStart.bind(this);
+    this.moveEnd = this.moveEnd.bind(this);
     this.handleZoom = this.handleZoom.bind(this);
     this.handleResize = this.handleResize.bind(this);
   }
@@ -84,6 +86,18 @@ export default class Layer {
     }
     if (this.layer) {
       this.layer.update();
+    }
+  }
+
+  moveStart() {
+    if (this.layer) {
+      this.layer.moveStart();
+    }
+  }
+
+  moveEnd() {
+    if (this.layer) {
+      this.layer.moveEnd();
     }
   }
 
@@ -217,8 +231,9 @@ export default class Layer {
       },
     );
 
+    map.on('movestart', this.moveStart);
     map.on('move', this.update);
-    map.on('moveend', this.update);
+    map.on('moveend', this.moveEnd);
     map.on('zoom', this.handleZoom);
     map.on('zoomend', this.handleZoom);
     map.on('resize', this.handleResize);
@@ -231,8 +246,9 @@ export default class Layer {
     }
     this.map?.off('zoom', this.handleZoom);
     this.map?.off('zoomend', this.handleZoom);
+    this.map?.off('movestart', this.moveStart);
     this.map?.off('move', this.update);
-    this.map?.off('moveend', this.update);
+    this.map?.off('moveend', this.moveEnd);
     this.map?.off('resize', this.handleResize);
     this.map = null;
     this.gl = null;

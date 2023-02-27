@@ -6,6 +6,9 @@ import ColorizeComposePass from './pass/color/compose';
 import ColorizePass from './pass/color/colorize';
 import RasterPass from './pass/raster/image';
 import RasterComposePass from './pass/raster/compose';
+import UpdatePass from './pass/particles/update';
+import ScreenPass from './pass/particles/screen';
+import ParticlesPass from './pass/particles/particles';
 import { isFunction, resolveURL } from '../utils/common';
 import { createLinearGradient, createZoom } from '../utils/style-parser';
 import { getRenderType, RenderFrom } from '../type';
@@ -18,6 +21,9 @@ const passes = {
   RasterComposePass,
   RasterPass,
   MaskPass,
+  UpdatePass,
+  ScreenPass,
+  ParticlesPass,
 };
 
 export interface LayerOptions {
@@ -193,6 +199,10 @@ export default class Layer {
     });
   }
 
+  initializeParticles() {
+    console.log('Particles');
+  }
+
   updateOptions(options: Partial<LayerOptions>) {
     this.options = {
       ...this.options,
@@ -236,7 +246,6 @@ export default class Layer {
 
   /**
    * 构建渲染所需色带
-   * TODO: 这里我们需要支持渐变色和非渐变色
    */
   buildColorRamp() {
     if (!this.options.styleSpec?.['fill-color']) return;
@@ -314,6 +323,10 @@ export default class Layer {
     ];
   }
 
+  moveStart() {}
+
+  moveEnd() {}
+
   /**
    * 更新视野内的瓦片
    */
@@ -345,6 +358,11 @@ export default class Layer {
           opacity: this.#opacity,
           colorRange: this.#colorRange,
           colorRampTexture: this.#colorRampTexture,
+          u_bbox: [0, 0, 1, 1],
+          u_data_matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+          u_drop_rate: 0.003,
+          u_drop_rate_bump: 0.002,
+          u_speed_factor: 1,
         },
       );
     }
