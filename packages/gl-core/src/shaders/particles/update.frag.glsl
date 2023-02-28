@@ -5,7 +5,6 @@ precision highp float;
 uniform sampler2D u_texture;
 uniform sampler2D u_textureNext;
 
-// 由于使用四通道来保存位置信息，需要两个 fbo 来存储 xy 位置
 uniform sampler2D u_particles;
 
 uniform float u_fade_t;

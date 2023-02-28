@@ -1,4 +1,9 @@
-export type RenderType = 0 | 1 | 2 | 3; // 对应以下四种数据类型，用于在着色器中标识使用何种数据解码方式
+export type BandType = 0 | 1 | 2 | 3; // 对应以下四种数据类型，用于在着色器中标识使用何种数据解码方式
+export enum RenderType {
+  image = 0,
+  colorize = 1,
+  particles = 2,
+} // 0: raster image, 1: raster colorize 2: wind particles
 
 export enum RenderFrom {
   /**
@@ -23,7 +28,7 @@ export enum RenderFrom {
   float = 'float',
 }
 
-export function getRenderType(renderFrom: RenderFrom) {
+export function getBandType(renderFrom: RenderFrom) {
   if (renderFrom === RenderFrom.rg) {
     return 1;
   }

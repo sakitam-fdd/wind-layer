@@ -4,23 +4,23 @@ import {
   Mesh,
   Geometry,
   Texture,
-  utils,
   Vector2,
   RenderTarget,
 } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
-import vert from '../../../shaders/compose.vert.glsl';
-import frag from '../../../shaders/particles/update.frag.glsl';
+import vert from '../../../shaders/particles/draw.vert.glsl';
+import frag from '../../../shaders/particles/draw.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import { RenderType } from '../../../type';
+import { BandType } from '../../../type';
 import { SourceType } from '../../../source';
 
 export interface ParticlesPassOptions {
   source: SourceType;
   texture: Texture;
   textureNext: Texture;
-  renderType: RenderType;
+  particles: Texture;
+  bandType: BandType;
   hasMask?: boolean;
 }
 
@@ -36,8 +36,8 @@ export default class Particles extends Pass<ParticlesPassOptions> {
   public particleStateResolution: number;
 
   #privateNumParticles: number;
-  #current: RenderTarget;
-  #next: RenderTarget;
+  #screenTexture: RenderTarget;
+  #backgroundTexture: RenderTarget;
 
   constructor(
     id: string,
@@ -61,13 +61,13 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       stencil: false,
     };
 
-    this.#current = new RenderTarget(renderer, {
+    this.#screenTexture = new RenderTarget(renderer, {
       ...opt,
-      name: 'currentUpdateTexture',
+      name: 'screenTexture',
     });
-    this.#next = new RenderTarget(renderer, {
+    this.#backgroundTexture = new RenderTarget(renderer, {
       ...opt,
-      name: 'nextUpdateTexture',
+      name: 'backgroundTexture',
     });
 
     this.#program = new Program(renderer, {
@@ -87,13 +87,18 @@ export default class Particles extends Pass<ParticlesPassOptions> {
           value: this.options.textureNext,
         },
         u_particles: {
-          value: this.#current,
+          value: null,
+        },
+        u_particleSize: {
+          value: 2.0,
         },
       },
-      defines: [`RENDER_TYPE ${this.options.renderType}`, `LITTLE_ENDIAN ${littleEndian}`],
+      defines: [`RENDER_TYPE ${this.options.bandType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
       transparent: true,
     });
+
+    const { particleIndices, particleReferences } = this.getParticleBuffer(4096);
 
     this.#geometry = new Geometry(renderer, {
       position: {
@@ -104,14 +109,18 @@ export default class Particles extends Pass<ParticlesPassOptions> {
         size: 2,
         data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
       },
-      index: {
+      a_index: {
         size: 1,
-        data: new Uint16Array([0, 1, 2, 2, 1, 3]),
+        data: particleIndices,
+      },
+      reference: {
+        size: 2,
+        data: particleReferences,
       },
     });
 
     this.#mesh = new Mesh(renderer, {
-      mode: renderer.gl.TRIANGLES,
+      mode: renderer.gl.POINTS,
       program: this.#program,
       geometry: this.#geometry,
     });
@@ -119,9 +128,18 @@ export default class Particles extends Pass<ParticlesPassOptions> {
 
   get textures() {
     return {
-      current: this.#current.texture,
-      next: this.#next.texture,
+      screenTexture: this.#screenTexture.texture,
+      backgroundTexture: this.#backgroundTexture.texture,
     };
+  }
+
+  get renderTarget() {
+    return this.#screenTexture;
+  }
+
+  resetParticles() {
+    this.#screenTexture.clear();
+    this.#backgroundTexture.clear();
   }
 
   getParticleBuffer(numParticles) {
@@ -141,41 +159,41 @@ export default class Particles extends Pass<ParticlesPassOptions> {
     return { particleIndices, particleReferences };
   }
 
+  swapRenderTarget() {
+    [this.#screenTexture, this.#backgroundTexture] = [this.#backgroundTexture, this.#screenTexture];
+  }
+
   /**
    * @param rendererParams
    * @param rendererState
    */
   render(rendererParams, rendererState) {
-    const attr = this.renderer.attributes;
-    this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
+    if (this.renderTarget) {
+      this.renderTarget.bind();
+      this.renderer.setViewport(this.renderTarget.width, this.renderTarget.height);
+    }
     if (rendererState) {
-      const uniforms = utils.pick(rendererState, [
-        'opacity',
-        'colorRange',
-        'dataRange',
-        'colorRampTexture',
-        'useDisplayRange',
-        'displayRange',
-      ]);
-
-      Object.keys(uniforms).forEach((key) => {
-        if (uniforms[key] !== undefined) {
-          this.#mesh.program.setUniform(key, uniforms[key]);
-        }
-      });
-
-      const fade = this.options.source?.getFadeTime?.() || 0;
       this.#mesh.program.setUniform(
         'u_image_res',
         new Vector2(this.options.texture.width, this.options.texture.height),
       );
+      const fade = this.options.source?.getFadeTime?.() || 0;
       this.#mesh.program.setUniform('u_fade_t', fade);
+      this.#mesh.program.setUniform('u_colorRamp', rendererState.colorRampTexture);
+      this.#mesh.program.setUniform('u_data_matrix', rendererState.u_data_matrix);
+      this.#mesh.program.setUniform('u_colorRange', rendererState.colorRange);
+      this.#mesh.program.setUniform('u_particles', this.options.particles);
 
       this.#mesh.worldMatrixNeedsUpdate = false;
       this.#mesh.draw({
         ...rendererParams,
         camera: rendererParams.cameras.orthoCamera,
       });
+    }
+
+    if (this.renderTarget) {
+      // this.#next.clear();
+      this.renderTarget.unbind();
     }
   }
 }

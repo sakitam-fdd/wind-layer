@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset='utf-8'/>
-  <title>Timeline Raster</title>
+  <title>wind Particles</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
   <meta name="renderer" content="webkit"/>
   <meta name="force-rendering" content="webkit"/>
@@ -107,25 +107,20 @@
 
   map.on('load', function () {
     const interpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);
-    const source = new mapboxWind.TimelineSource('wind', {
-      sourceType: 'TileSource',
+
+    const tileSource = new mapboxWind.TileSource('wind', {
+      type: 'tile',
       tileSize: 256,
       minZoom: 0,
       maxZoom: 2,
       roundZoom: true,
-      duration: 0.1,
-      endDelay: 0,
-      repeat: true,
-      autoplay: true,
       decodeType: 3,
-      intervals: Array.from({ length: 23 }).map((i, index) => ({
-        url: `http://localhost:5000/processed/2023041700/20230417${index < 10 ? '0' + index.toString() : index.toString()}/{z}/{x}/{y}/wind-surface.jpeg`
-      })),
+      url: 'http://localhost:5000/processed/2023041700/2023041712/{z}/{x}/{y}/wind-surface.jpeg',
     });
 
-    window.source = source;
+    window.source = tileSource;
 
-    const layer = new mapboxWind.Layer('temp', source, {
+    const layer = new mapboxWind.Layer('temp', tileSource, {
       wrapX: true,
       wireframe: true,
       styleSpec: {
@@ -150,7 +145,7 @@
       heightSegments: 1,
       displayRange: [0, 104],
       hasMask: false,
-      renderType: 1,
+      renderType: 2,
     });
 
     map.addLayer(layer);

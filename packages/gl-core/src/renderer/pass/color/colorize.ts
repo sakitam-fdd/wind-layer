@@ -12,14 +12,14 @@ import { littleEndian } from '../../../utils/common';
 import vert from '../../../shaders/common.vert.glsl';
 import frag from '../../../shaders/color.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import { RenderType } from '../../../type';
+import { BandType } from '../../../type';
 import { SourceType } from '../../../source';
 
 export interface ColorizePassOptions {
   source: SourceType;
   texture: Texture;
   textureNext: Texture;
-  renderType: RenderType;
+  bandType: BandType;
   hasMask?: boolean;
 }
 
@@ -62,7 +62,7 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
           value: null,
         },
       },
-      defines: [`RENDER_TYPE ${this.options.renderType}`, `LITTLE_ENDIAN ${littleEndian}`],
+      defines: [`RENDER_TYPE ${this.options.bandType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
       transparent: true,
     });

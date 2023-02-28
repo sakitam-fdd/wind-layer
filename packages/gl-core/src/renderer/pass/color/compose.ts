@@ -3,14 +3,14 @@ import Pass from '../base';
 import vert from '../../../shaders/compose.vert.glsl';
 import frag from '../../../shaders/compose.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import { RenderFrom, RenderType } from '../../../type';
+import { RenderFrom, BandType } from '../../../type';
 import { littleEndian } from '../../../utils/common';
 import TileID from '../../../tile/TileID';
 import { SourceType } from '../../../source';
 
 export interface ComposePassOptions {
   source: SourceType;
-  renderType: RenderType;
+  bandType: BandType;
   renderFrom: RenderFrom;
   stencilConfigForOverlap: (tiles: any[]) => [{ [_: number]: any }, TileID[]];
 }
@@ -45,7 +45,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
           value: undefined,
         },
       },
-      defines: [`RENDER_TYPE ${this.options.renderType}`, `LITTLE_ENDIAN ${littleEndian}`],
+      defines: [`RENDER_TYPE ${this.options.bandType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
     });
 
@@ -181,9 +181,11 @@ export default class ComposePass extends Pass<ComposePassOptions> {
         this.renderTexture(this.#next, rendererParams, sourceCache[1]);
       } else {
         this.renderTexture(this.#current, rendererParams, sourceCache[0]);
+        this.renderTexture(this.#next, rendererParams, sourceCache[0]);
       }
     } else {
       this.renderTexture(this.#current, rendererParams, sourceCache);
+      this.renderTexture(this.#next, rendererParams, sourceCache);
     }
   }
 }

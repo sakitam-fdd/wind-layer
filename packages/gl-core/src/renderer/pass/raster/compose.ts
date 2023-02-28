@@ -3,13 +3,13 @@ import Pass from '../base';
 import vert from '../../../shaders/compose.vert.glsl';
 import frag from '../../../shaders/raster-texture.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import { RenderFrom, RenderType } from '../../../type';
+import { RenderFrom, BandType } from '../../../type';
 import TileID from '../../../tile/TileID';
 import { SourceType } from '../../../source';
 
 export interface ComposePassOptions {
   source: SourceType;
-  renderType: RenderType;
+  bandType: BandType;
   renderFrom: RenderFrom;
   stencilConfigForOverlap: (tiles: any[]) => [{ [_: number]: any }, TileID[]];
 }

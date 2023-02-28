@@ -10,23 +10,20 @@ import {
 } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
-import vert from '../../../shaders/common.vert.glsl';
+import vert from '../../../shaders/particles/update.vert.glsl';
 import frag from '../../../shaders/particles/update.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import { RenderType } from '../../../type';
+import { BandType } from '../../../type';
 import { SourceType } from '../../../source';
 
 export interface UpdatePassOptions {
   source: SourceType;
   texture: Texture;
   textureNext: Texture;
-  renderType: RenderType;
+  bandType: BandType;
   hasMask?: boolean;
 }
 
-/**
- * 着色
- */
 export default class UpdatePass extends Pass<UpdatePassOptions> {
   readonly #program: Program;
   readonly #mesh: Mesh;
@@ -42,14 +39,14 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
   ) {
     super(id, renderer, options);
 
-    const particleRes = Math.ceil(Math.sqrt(65535));
+    const particleRes = Math.ceil(Math.sqrt(4096));
 
     // @link https://webgl2fundamentals.org/webgl/lessons/webgl-data-textures.html
     const opt = {
       width: particleRes,
       height: particleRes,
-      minFilter: renderer.gl.NEAREST,
-      magFilter: renderer.gl.NEAREST,
+      minFilter: renderer.gl.LINEAR,
+      magFilter: renderer.gl.LINEAR,
       type: this.renderer.gl.FLOAT,
       format: this.renderer.gl.RGBA,
       // generateMipmaps: false,
@@ -85,10 +82,10 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
           value: this.options.textureNext,
         },
         u_particles: {
-          value: this.#current,
+          value: null,
         },
       },
-      defines: [`RENDER_TYPE ${this.options.renderType}`, `LITTLE_ENDIAN ${littleEndian}`],
+      defines: [`RENDER_TYPE ${this.options.bandType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
       transparent: true,
     });
@@ -116,16 +113,19 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
   }
 
   resize() {
-    const particleRes = Math.ceil(Math.sqrt(65535));
+    const particleRes = Math.ceil(Math.sqrt(4096));
     this.#current.resize(particleRes, particleRes);
     this.#next.resize(particleRes, particleRes);
   }
 
   get textures() {
     return {
-      current: this.#current.texture,
-      next: this.#next.texture,
+      particles: this.#current.texture,
     };
+  }
+
+  swapRenderTarget() {
+    [this.#current, this.#next] = [this.#next, this.#current];
   }
 
   /**
@@ -168,7 +168,7 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
       );
       this.#mesh.program.setUniform('u_fade_t', fade);
       this.#mesh.program.setUniform('u_rand_seed', Math.random());
-      this.#mesh.program.setUniform('u_particles', this.#current);
+      this.#mesh.program.setUniform('u_particles', this.#current.texture);
 
       this.#mesh.worldMatrixNeedsUpdate = false;
       this.#mesh.draw({
@@ -179,6 +179,6 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
     if (this.#next) {
       this.#next.unbind();
     }
-    [this.#current, this.#next] = [this.#next, this.#current];
+    this.swapRenderTarget();
   }
 }

@@ -4,10 +4,10 @@ import { littleEndian } from '../../utils/common';
 import composeVert from '../../shaders/compose.vert.glsl';
 import maskFrag from '../../shaders/mask.frag.glsl';
 import * as shaderLib from '../../shaders/shaderLib';
-import { RenderType } from '../../type';
+import { BandType } from '../../type';
 
 export interface MaskPassOptions {
-  renderType: RenderType;
+  renderType: BandType;
 }
 
 /**
@@ -25,7 +25,7 @@ export default class MaskPass extends Pass<MaskPassOptions> {
     this.#program = new Program(renderer, {
       vertexShader: composeVert,
       fragmentShader: maskFrag,
-      defines: [`RENDER_TYPE ${this.options.renderType}`, `LITTLE_ENDIAN ${littleEndian}`],
+      defines: [`RENDER_TYPE ${this.options.bandType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
       transparent: true,
     });

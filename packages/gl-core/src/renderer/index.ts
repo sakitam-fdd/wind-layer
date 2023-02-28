@@ -1,7 +1,6 @@
-import { DataTexture, Renderer, Scene, utils, Vector2 } from '@sakitam-gis/vis-engine';
+import { DataTexture, Renderer, Scene, Raf, utils, Vector2 } from '@sakitam-gis/vis-engine';
 import wgw from 'wind-gl-worker';
 import Pipelines from './Pipelines';
-import MaskPass from './pass/mask';
 import ColorizeComposePass from './pass/color/compose';
 import ColorizePass from './pass/color/colorize';
 import RasterPass from './pass/raster/image';
@@ -11,20 +10,9 @@ import ScreenPass from './pass/particles/screen';
 import ParticlesPass from './pass/particles/particles';
 import { isFunction, resolveURL } from '../utils/common';
 import { createLinearGradient, createZoom } from '../utils/style-parser';
-import { getRenderType, RenderFrom } from '../type';
+import { getBandType, RenderFrom, RenderType } from '../type';
 import { SourceType } from '../source';
 import Tile from '../tile/Tile';
-
-const passes = {
-  ColorizeComposePass,
-  ColorizePass,
-  RasterComposePass,
-  RasterPass,
-  MaskPass,
-  UpdatePass,
-  ScreenPass,
-  ParticlesPass,
-};
 
 export interface LayerOptions {
   /**
@@ -32,7 +20,14 @@ export interface LayerOptions {
    */
   getViewTiles: (data: any) => any[];
 
-  renderPasses: string[];
+  /**
+   * 渲染类型
+   * 目前支持三种类型：
+   * 0：普通 raster 瓦片渲染
+   * 1：气象数据的色斑图渲染
+   * 2：风等 vector 数据的粒子渲染
+   */
+  renderType: RenderType;
   /**
    * 指定渲染通道
    */
@@ -57,7 +52,7 @@ export interface LayerOptions {
 
 export const defaultOptions: LayerOptions = {
   getViewTiles: () => [],
-  renderPasses: ['ColorizeComposePass', 'ColorizePass'],
+  renderType: 1,
   renderFrom: RenderFrom.r,
   styleSpec: {
     'fill-color': [
@@ -103,6 +98,7 @@ export default class Layer {
   private readonly renderer: Renderer;
   private readonly dispatcher: any;
   private readonly source: SourceType;
+  private raf: Raf;
 
   #opacity: number;
   #colorRange: Vector2;
@@ -175,32 +171,91 @@ export default class Layer {
   initialize() {
     this.updateOptions({});
     this.renderPipeline = new Pipelines(this.renderer);
-    const renderType = getRenderType(this.options.renderFrom ?? RenderFrom.r);
-    let textures;
-    this.options.renderPasses.forEach((key) => {
-      const opts = textures
-        ? {
-            texture: textures.current,
-            textureNext: textures.next,
-            hasMask: !!this.options.mask,
-          }
-        : {};
-      const pass = new passes[key](key, this.renderer, {
-        renderType,
+    const bandType = getBandType(this.options.renderFrom ?? RenderFrom.r);
+    if (this.options.renderType === RenderType.image) {
+      const composePass = new RasterComposePass('RasterComposePass', this.renderer, {
+        bandType,
         source: this.source,
         renderFrom: this.options.renderFrom ?? RenderFrom.r,
         stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
-        ...opts,
       });
-      if (pass.prerender) {
-        textures = pass.textures;
-      }
-      this.renderPipeline?.addPass(pass);
-    });
-  }
+      const rasterPass = new RasterPass('RasterPass', this.renderer, {
+        bandType,
+        source: this.source,
+        texture: composePass.textures.current,
+        textureNext: composePass.textures.next,
+      });
+      this.renderPipeline?.addPass(composePass);
+      this.renderPipeline?.addPass(rasterPass);
+    } else if (this.options.renderType === RenderType.colorize) {
+      const composePass = new ColorizeComposePass('ColorizeComposePass', this.renderer, {
+        bandType,
+        source: this.source,
+        renderFrom: this.options.renderFrom ?? RenderFrom.r,
+        stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
+      });
+      const colorizePass = new ColorizePass('ColorizePass', this.renderer, {
+        bandType,
+        source: this.source,
+        texture: composePass.textures.current,
+        textureNext: composePass.textures.next,
+      });
+      this.renderPipeline?.addPass(composePass);
+      this.renderPipeline?.addPass(colorizePass);
+    } else if (this.options.renderType === RenderType.particles) {
+      const composePass = new ColorizeComposePass('ParticlesComposePass', this.renderer, {
+        bandType,
+        source: this.source,
+        renderFrom: this.options.renderFrom ?? RenderFrom.r,
+        stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
+      });
+      this.renderPipeline?.addPass(composePass);
+      const updatePass = new UpdatePass('UpdatePass', this.renderer, {
+        bandType,
+        source: this.source,
+        texture: composePass.textures.current,
+        textureNext: composePass.textures.next,
+      });
+      this.renderPipeline?.addPass(updatePass);
 
-  initializeParticles() {
-    console.log('Particles');
+      const particlesPass = new ParticlesPass('ParticlesPass', this.renderer, {
+        bandType,
+        source: this.source,
+        texture: composePass.textures.current,
+        textureNext: composePass.textures.next,
+        particles: updatePass.textures.particles,
+      });
+
+      const particlesTexturePass = new ScreenPass('ParticlesTexturePass', this.renderer, {
+        bandType,
+        source: this.source,
+        prerender: true,
+        enableBlend: false,
+        particlesPass,
+      });
+
+      this.renderPipeline?.addPass(particlesTexturePass);
+      this.renderPipeline?.addPass(particlesPass);
+
+      const screenPass = new ScreenPass('ScreenPass', this.renderer, {
+        bandType,
+        source: this.source,
+        prerender: false,
+        enableBlend: true,
+        particlesPass,
+      });
+
+      this.renderPipeline?.addPass(screenPass);
+
+      this.raf = new Raf(
+        () => {
+          if (this.options.triggerRepaint) {
+            this.options.triggerRepaint();
+          }
+        },
+        { autoStart: true },
+      );
+    }
   }
 
   updateOptions(options: Partial<LayerOptions>) {
@@ -376,6 +431,11 @@ export default class Layer {
         colorRampTexture: this.#colorRampTexture,
         displayRange: this.options.displayRange,
         useDisplayRange: Boolean(this.options.displayRange),
+        u_bbox: [0, 0, 1, 1],
+        u_data_matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+        u_drop_rate: 0.003,
+        u_drop_rate_bump: 0.002,
+        u_speed_factor: 1,
       };
 
       this.renderPipeline.render(
@@ -392,6 +452,9 @@ export default class Layer {
    * 销毁此 Renderer
    */
   destroy() {
+    if (this.raf) {
+      this.raf.stop();
+    }
     if (this.renderPipeline) {
       this.renderPipeline.destroy();
       this.renderPipeline = null;

@@ -1,36 +1,27 @@
-import {
-  Program,
-  Renderer,
-  Mesh,
-  Geometry,
-  Texture,
-  utils,
-  Vector2,
-} from '@sakitam-gis/vis-engine';
+import { Program, Renderer, Mesh, Geometry } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
 import vert from '../../../shaders/particles/screen.vert.glsl';
 import frag from '../../../shaders/particles/screen.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import { RenderType } from '../../../type';
+import { BandType } from '../../../type';
 import { SourceType } from '../../../source';
+import ParticlesPass from './particles';
 
 export interface ScreenPassOptions {
   source: SourceType;
-  texture: Texture;
-  textureNext: Texture;
-  renderType: RenderType;
+  bandType: BandType;
+  prerender: boolean;
+  enableBlend: boolean;
+  particlesPass?: ParticlesPass;
   hasMask?: boolean;
 }
 
-/**
- * 着色
- */
 export default class ScreenPass extends Pass<ScreenPassOptions> {
   readonly #program: Program;
   readonly #mesh: Mesh;
   readonly #geometry: Geometry;
-  readonly prerender = false;
+  public prerender: boolean;
 
   constructor(
     id: string,
@@ -38,6 +29,7 @@ export default class ScreenPass extends Pass<ScreenPassOptions> {
     options: ScreenPassOptions = {} as ScreenPassOptions,
   ) {
     super(id, renderer, options);
+    this.prerender = Boolean(options.prerender);
 
     this.#program = new Program(renderer, {
       vertexShader: vert,
@@ -46,25 +38,24 @@ export default class ScreenPass extends Pass<ScreenPassOptions> {
         opacity: {
           value: 1,
         },
-        u_fade_t: {
-          value: 0,
+        u_fade: {
+          value: 1,
         },
-        displayRange: {
-          value: new Vector2(-Infinity, Infinity),
-        },
-        u_texture: {
-          value: this.options.texture,
-        },
-        u_textureNext: {
-          value: this.options.textureNext,
-        },
-        colorRampTexture: {
+        u_screen: {
           value: null,
         },
       },
-      defines: [`RENDER_TYPE ${this.options.renderType}`, `LITTLE_ENDIAN ${littleEndian}`],
+      defines: [`RENDER_TYPE ${this.options.bandType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
       transparent: true,
+      blendFunc: {
+        src: this.renderer.gl.ONE,
+        dst: this.renderer.gl.ONE_MINUS_SRC_ALPHA,
+      },
+      blendEquation: {
+        modeAlpha: this.renderer.gl.FUNC_ADD,
+        modeRGB: this.renderer.gl.FUNC_ADD,
+      },
     });
 
     this.#geometry = new Geometry(renderer, {
@@ -89,64 +80,66 @@ export default class ScreenPass extends Pass<ScreenPassOptions> {
     });
   }
 
+  get renderTarget() {
+    if (this.options.particlesPass && this.prerender) {
+      return this.options.particlesPass.renderTarget;
+    }
+  }
+
   /**
    * @param rendererParams
    * @param rendererState
    */
   render(rendererParams, rendererState) {
-    const attr = this.renderer.attributes;
-    this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
+    if (this.renderTarget) {
+      this.renderTarget.bind();
+      this.renderer.setViewport(this.renderTarget.width, this.renderTarget.height);
+    } else {
+      const attr = this.renderer.attributes;
+      this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
+    }
     if (rendererState) {
-      let stencil;
-      if (this.options.hasMask) {
-        stencil = this.renderer.gl.getParameter(this.renderer.gl.STENCIL_TEST);
-        if (!stencil) {
-          this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
-          this.renderer.state.setStencilMask(0xff);
-          this.renderer.state.setStencilFunc(
-            this.renderer.gl.EQUAL, // the test
-            1, // reference value
-            0xff,
-          );
-
-          this.renderer.state.setStencilOp(
-            this.renderer.gl.KEEP,
-            this.renderer.gl.KEEP,
-            this.renderer.gl.KEEP,
-          );
+      const enableBlend = this.renderer.gl.getParameter(this.renderer.gl.BLEND);
+      if (this.options.enableBlend) {
+        if (!enableBlend) {
+          this.renderer.state.enable(this.renderer.gl.BLEND);
+        }
+      } else {
+        if (enableBlend) {
+          this.renderer.state.disable(this.renderer.gl.BLEND);
         }
       }
-      const uniforms = utils.pick(rendererState, [
-        'opacity',
-        'colorRange',
-        'dataRange',
-        'colorRampTexture',
-        'useDisplayRange',
-        'displayRange',
-      ]);
-
-      Object.keys(uniforms).forEach((key) => {
-        if (uniforms[key] !== undefined) {
-          this.#mesh.program.setUniform(key, uniforms[key]);
-        }
-      });
-
-      const fade = this.options.source?.getFadeTime?.() || 0;
+      this.#mesh.program.setUniform('u_fade', 1);
+      this.#mesh.program.setUniform('u_opacity', rendererState.opacity);
       this.#mesh.program.setUniform(
-        'u_image_res',
-        new Vector2(this.options.texture.width, this.options.texture.height),
+        'u_screen',
+        this.prerender
+          ? this.options.particlesPass?.textures.backgroundTexture
+          : this.options.particlesPass?.textures.screenTexture,
       );
-      this.#mesh.program.setUniform('u_fade_t', fade);
 
       this.#mesh.worldMatrixNeedsUpdate = false;
       this.#mesh.draw({
         ...rendererParams,
         camera: rendererParams.cameras.orthoCamera,
       });
-
-      if (this.options.hasMask && !stencil) {
-        this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
+      if (this.options.enableBlend) {
+        if (!enableBlend) {
+          this.renderer.state.disable(this.renderer.gl.BLEND);
+        }
+      } else {
+        if (enableBlend) {
+          this.renderer.state.enable(this.renderer.gl.BLEND);
+        }
       }
+    }
+
+    if (this.renderTarget) {
+      this.renderTarget.unbind();
+    }
+
+    if (this.options.particlesPass && !this.prerender) {
+      this.options.particlesPass?.swapRenderTarget();
     }
   }
 }

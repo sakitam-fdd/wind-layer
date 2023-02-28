@@ -153,7 +153,7 @@ export default class Layer {
       },
       {
         opacity: this.options.opacity,
-        renderPasses: this.options.renderPasses,
+        renderType: this.options.renderType,
         renderFrom: this.options.renderFrom,
         styleSpec: this.options.styleSpec,
         displayRange: this.options.displayRange,

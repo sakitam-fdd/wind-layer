@@ -1,7 +1,7 @@
+import { Renderer, utils } from '@sakitam-gis/vis-engine';
 import SourceCache from './cahce';
-import {Renderer, utils} from '@sakitam-gis/vis-engine';
 import Layer from '../renderer';
-import {ImageSource, TileSource} from './';
+import { ImageSource, TileSource } from './';
 import {
   Bounds,
   Coordinates,
@@ -13,7 +13,7 @@ import {
   TileState,
 } from '../type';
 import Tile from '../tile/Tile';
-import Track, {defaultTrackOptions, TrackOptions} from '../utils/Track';
+import Track, { defaultTrackOptions, TrackOptions } from '../utils/Track';
 
 const sourceImpl = {
   TileSource,
