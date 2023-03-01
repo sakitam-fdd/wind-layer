@@ -21,6 +21,7 @@ export interface UpdatePassOptions {
   texture: Texture;
   textureNext: Texture;
   bandType: BandType;
+  getParticleNumber: () => number;
   hasMask?: boolean;
 }
 
@@ -39,7 +40,7 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
   ) {
     super(id, renderer, options);
 
-    const particleRes = Math.ceil(Math.sqrt(4096));
+    const particleRes = Math.ceil(Math.sqrt(this.options.getParticleNumber()));
 
     // @link https://webgl2fundamentals.org/webgl/lessons/webgl-data-textures.html
     const opt = {
@@ -49,7 +50,6 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
       magFilter: renderer.gl.LINEAR,
       type: this.renderer.gl.FLOAT,
       format: this.renderer.gl.RGBA,
-      // generateMipmaps: false,
       internalFormat: this.renderer.isWebGL2
         ? (this.renderer.gl as WebGL2RenderingContext).RGBA32F
         : this.renderer.gl.RGBA,
@@ -113,7 +113,7 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
   }
 
   resize() {
-    const particleRes = Math.ceil(Math.sqrt(4096));
+    const particleRes = Math.ceil(Math.sqrt(this.options.getParticleNumber()));
     this.#current.resize(particleRes, particleRes);
     this.#next.resize(particleRes, particleRes);
   }
@@ -175,6 +175,10 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
         ...rendererParams,
         camera: rendererParams.cameras.orthoCamera,
       });
+      // 此处计算出的是 0-1 之间的值
+      // const a = new Float32Array(this.#next.width * this.#next.height * 4);
+      // this.renderer.gl.readPixels(0, 0, this.#next.width, this.#next.height, this.renderer.gl.RGBA, this.renderer.gl.FLOAT, a);
+      // console.log(a);
     }
     if (this.#next) {
       this.#next.unbind();

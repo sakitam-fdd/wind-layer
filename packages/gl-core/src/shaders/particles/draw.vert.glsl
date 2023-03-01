@@ -4,6 +4,7 @@ attribute vec2 uv;
 
 attribute float a_index;
 
+uniform vec2 resolution;
 uniform mat4 modelViewMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 modelMatrix;
@@ -21,5 +22,5 @@ void main() {
     vec2 pos = vec2(texture2D(u_particles, uv).xy);
     v_particle_pos = pos;
     gl_PointSize = u_particleSize;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 0.0, 1.0);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos * resolution, 0.0, 1.0);
 }

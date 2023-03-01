@@ -21,6 +21,7 @@ export interface ParticlesPassOptions {
   textureNext: Texture;
   particles: Texture;
   bandType: BandType;
+  getParticleNumber: () => number;
   hasMask?: boolean;
 }
 
@@ -31,7 +32,7 @@ export default class Particles extends Pass<ParticlesPassOptions> {
   readonly #program: Program;
   readonly #mesh: Mesh;
   readonly #geometry: Geometry;
-  readonly prerender = true;
+  #prerender = true;
 
   public particleStateResolution: number;
 
@@ -59,6 +60,7 @@ export default class Particles extends Pass<ParticlesPassOptions> {
         ? (this.renderer.gl as WebGL2RenderingContext).RGBA32F
         : this.renderer.gl.RGBA,
       stencil: false,
+      premultipliedAlpha: true,
     };
 
     this.#screenTexture = new RenderTarget(renderer, {
@@ -98,7 +100,7 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       transparent: true,
     });
 
-    const { particleIndices, particleReferences } = this.getParticleBuffer(4096);
+    const { particleIndices, particleReferences } = this.getParticleBuffer();
 
     this.#geometry = new Geometry(renderer, {
       position: {
@@ -126,6 +128,14 @@ export default class Particles extends Pass<ParticlesPassOptions> {
     });
   }
 
+  get prerender() {
+    return this.#prerender;
+  }
+
+  set prerender(prerender) {
+    this.#prerender = prerender;
+  }
+
   get textures() {
     return {
       screenTexture: this.#screenTexture.texture,
@@ -134,7 +144,7 @@ export default class Particles extends Pass<ParticlesPassOptions> {
   }
 
   get renderTarget() {
-    return this.#screenTexture;
+    return this.#prerender && this.#screenTexture;
   }
 
   resetParticles() {
@@ -142,8 +152,8 @@ export default class Particles extends Pass<ParticlesPassOptions> {
     this.#backgroundTexture.clear();
   }
 
-  getParticleBuffer(numParticles) {
-    const particleRes = Math.ceil(Math.sqrt(numParticles));
+  getParticleBuffer() {
+    const particleRes = Math.ceil(Math.sqrt(this.options.getParticleNumber()));
     this.particleStateResolution = particleRes;
     this.#privateNumParticles = particleRes * particleRes;
     const particleIndices = new Float32Array(this.#privateNumParticles);
@@ -171,6 +181,9 @@ export default class Particles extends Pass<ParticlesPassOptions> {
     if (this.renderTarget) {
       this.renderTarget.bind();
       this.renderer.setViewport(this.renderTarget.width, this.renderTarget.height);
+    } else {
+      const attr = this.renderer.attributes;
+      this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
     }
     if (rendererState) {
       this.#mesh.program.setUniform(
@@ -192,7 +205,6 @@ export default class Particles extends Pass<ParticlesPassOptions> {
     }
 
     if (this.renderTarget) {
-      // this.#next.clear();
       this.renderTarget.unbind();
     }
   }

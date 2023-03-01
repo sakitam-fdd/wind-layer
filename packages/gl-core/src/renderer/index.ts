@@ -1,4 +1,4 @@
-import { DataTexture, Renderer, Scene, Raf, utils, Vector2 } from '@sakitam-gis/vis-engine';
+import {DataTexture, Raf, Renderer, Scene, utils, Vector2} from '@sakitam-gis/vis-engine';
 import wgw from 'wind-gl-worker';
 import Pipelines from './Pipelines';
 import ColorizeComposePass from './pass/color/compose';
@@ -8,10 +8,10 @@ import RasterComposePass from './pass/raster/compose';
 import UpdatePass from './pass/particles/update';
 import ScreenPass from './pass/particles/screen';
 import ParticlesPass from './pass/particles/particles';
-import { isFunction, resolveURL } from '../utils/common';
-import { createLinearGradient, createZoom } from '../utils/style-parser';
-import { getBandType, RenderFrom, RenderType } from '../type';
-import { SourceType } from '../source';
+import {isFunction, resolveURL} from '../utils/common';
+import {createLinearGradient, createZoom} from '../utils/style-parser';
+import {getBandType, RenderFrom, RenderType} from '../type';
+import {SourceType} from '../source';
 import Tile from '../tile/Tile';
 
 export interface LayerOptions {
@@ -33,8 +33,13 @@ export interface LayerOptions {
    */
   renderFrom?: RenderFrom;
   styleSpec?: {
-    'fill-color': any[];
-    opacity: number | any[];
+    'fill-color'?: any[];
+    opacity?: number | any[];
+    numParticles?: number | any[];
+    speedFactor?: number | any[];
+    fadeOpacity?: number | any[];
+    dropRate?: number | any[];
+    dropRateBump?: number | any[];
   };
   getZoom?: () => number;
   opacity?: number;
@@ -77,6 +82,11 @@ export const defaultOptions: LayerOptions = {
       '#d53e4f',
     ],
     opacity: 1,
+    numParticles: 65535,
+    speedFactor: 1,
+    fadeOpacity: 0.93,
+    dropRate: 0.003,
+    dropRateBump: 0.002,
   },
   displayRange: [Infinity, Infinity],
   widthSegments: 1,
@@ -101,6 +111,11 @@ export default class Layer {
   private raf: Raf;
 
   #opacity: number;
+  #numParticles: number;
+  #speedFactor: number;
+  #fadeOpacity: number;
+  #dropRate: number;
+  #dropRateBump: number;
   #colorRange: Vector2;
   #colorRampTexture: DataTexture;
   #nextStencilID: number;
@@ -215,6 +230,7 @@ export default class Layer {
         source: this.source,
         texture: composePass.textures.current,
         textureNext: composePass.textures.next,
+        getParticleNumber: () => this.#numParticles,
       });
       this.renderPipeline?.addPass(updatePass);
 
@@ -224,6 +240,7 @@ export default class Layer {
         texture: composePass.textures.current,
         textureNext: composePass.textures.next,
         particles: updatePass.textures.particles,
+        getParticleNumber: () => this.#numParticles,
       });
 
       const particlesTexturePass = new ScreenPass('ParticlesTexturePass', this.renderer, {
@@ -265,12 +282,7 @@ export default class Layer {
     };
 
     this.buildColorRamp();
-
-    if (isFunction(this.options.getZoom)) {
-      this.setOpacity(
-        createZoom(this.uid, this.options.getZoom(), 'opacity', this.options.styleSpec, true),
-      );
-    }
+    this.parseStyleSpec(true);
   }
 
   resize() {
@@ -280,23 +292,88 @@ export default class Layer {
     }
   }
 
+  /**
+   * 设置填色色阶
+   */
   setFillColor() {
     this.buildColorRamp();
   }
 
+  /**
+   * 设置图层透明度
+   * @param opacity
+   */
   setOpacity(opacity: number) {
     this.#opacity = opacity;
+  }
+
+  /**
+   * 设置粒子图层的粒子数量
+   * @param numParticles
+   */
+  setNumParticles(numParticles: number) {
+    this.#numParticles = numParticles;
+  }
+
+  /**
+   * 设置粒子图层的粒子数量
+   * @param speedFactor
+   */
+  setSpeedFactor(speedFactor: number) {
+    this.#speedFactor = speedFactor;
+  }
+
+  /**
+   * 设置粒子图层的粒子数量
+   * @param fadeOpacity
+   */
+  setFadeOpacity(fadeOpacity: number) {
+    this.#fadeOpacity = fadeOpacity;
+  }
+
+  /**
+   * 设置粒子图层的粒子数量
+   * @param dropRate
+   */
+  setDropRate(dropRate: number) {
+    this.#dropRate = dropRate;
+  }
+
+  /**
+   * 设置粒子图层的粒子数量
+   * @param dropRateBump
+   */
+  setDropRateBump(dropRateBump: number) {
+    this.#dropRateBump = dropRateBump;
+  }
+
+  parseStyleSpec(clear) {
+    if (isFunction(this.options.getZoom)) {
+      const zoom = this.options.getZoom();
+      this.setOpacity(createZoom(this.uid, zoom, 'opacity', this.options.styleSpec, clear));
+      if (this.options.renderType === RenderType.particles) {
+        this.setNumParticles(
+          createZoom(this.uid, zoom, 'numParticles', this.options.styleSpec, clear),
+        );
+        this.setFadeOpacity(
+          createZoom(this.uid, zoom, 'fadeOpacity', this.options.styleSpec, clear),
+        );
+        this.setSpeedFactor(
+          createZoom(this.uid, zoom, 'speedFactor', this.options.styleSpec, clear),
+        );
+        this.setDropRate(createZoom(this.uid, zoom, 'dropRate', this.options.styleSpec, clear));
+        this.setDropRateBump(
+          createZoom(this.uid, zoom, 'dropRateBump', this.options.styleSpec, clear),
+        );
+      }
+    }
   }
 
   /**
    * 处理地图缩放事件
    */
   handleZoom() {
-    if (isFunction(this.options.getZoom)) {
-      this.setOpacity(
-        createZoom(this.uid, this.options.getZoom(), 'opacity', this.options.styleSpec),
-      );
-    }
+    this.parseStyleSpec(false);
   }
 
   /**
@@ -378,9 +455,32 @@ export default class Layer {
     ];
   }
 
-  moveStart() {}
+  moveStart() {
+    if (this.renderPipeline && this.options.renderType === RenderType.particles) {
+      this.renderPipeline.passes.forEach((pass) => {
+        if (pass.id === 'ParticlesTexturePass' || pass.id === 'ScreenPass') {
+          pass.enabled = false;
+        }
+        if (pass.id === 'ParticlesPass') {
+          pass.prerender = false;
+        }
+      });
+    }
+  }
 
-  moveEnd() {}
+  moveEnd() {
+    if (this.renderPipeline && this.options.renderType === RenderType.particles) {
+      this.renderPipeline.passes.forEach((pass) => {
+        if (pass.id === 'ParticlesTexturePass' || pass.id === 'ScreenPass') {
+          pass.enabled = true;
+        }
+
+        if (pass.id === 'ParticlesPass') {
+          pass.prerender = true;
+        }
+      });
+    }
+  }
 
   /**
    * 更新视野内的瓦片
@@ -411,13 +511,15 @@ export default class Layer {
         },
         {
           opacity: this.#opacity,
+          fadeOpacity: this.#fadeOpacity,
+          numParticles: this.#numParticles,
           colorRange: this.#colorRange,
           colorRampTexture: this.#colorRampTexture,
           u_bbox: [0, 0, 1, 1],
           u_data_matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-          u_drop_rate: 0.003,
-          u_drop_rate_bump: 0.002,
-          u_speed_factor: 1,
+          u_drop_rate: this.#dropRate,
+          u_drop_rate_bump: this.#dropRateBump,
+          u_speed_factor: this.#speedFactor,
         },
       );
     }
@@ -427,15 +529,17 @@ export default class Layer {
     if (this.renderPipeline) {
       const state: any = {
         opacity: this.#opacity,
+        fadeOpacity: this.#fadeOpacity,
+        numParticles: this.#numParticles,
         colorRange: this.#colorRange,
         colorRampTexture: this.#colorRampTexture,
         displayRange: this.options.displayRange,
         useDisplayRange: Boolean(this.options.displayRange),
         u_bbox: [0, 0, 1, 1],
         u_data_matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-        u_drop_rate: 0.003,
-        u_drop_rate_bump: 0.002,
-        u_speed_factor: 1,
+        u_drop_rate: this.#dropRate,
+        u_drop_rate_bump: this.#dropRateBump,
+        u_speed_factor: this.#speedFactor,
       };
 
       this.renderPipeline.render(
