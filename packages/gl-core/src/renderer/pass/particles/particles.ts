@@ -98,19 +98,20 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       defines: [`RENDER_TYPE ${this.options.bandType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
       transparent: true,
+      blending: 5,
+      blendFunc: {
+        src: this.renderer.gl.ONE,
+        dst: this.renderer.gl.ONE_MINUS_SRC_ALPHA,
+      },
+      blendEquation: {
+        modeAlpha: this.renderer.gl.FUNC_ADD,
+        modeRGB: this.renderer.gl.FUNC_ADD,
+      },
     });
 
     const { particleIndices, particleReferences } = this.getParticleBuffer();
 
     this.#geometry = new Geometry(renderer, {
-      position: {
-        size: 2,
-        data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
-      },
-      uv: {
-        size: 2,
-        data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
-      },
       a_index: {
         size: 1,
         data: particleIndices,
@@ -197,10 +198,12 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       this.#mesh.program.setUniform('u_colorRange', rendererState.colorRange);
       this.#mesh.program.setUniform('u_particles', this.options.particles);
 
+      this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;
+      this.#mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, this.#mesh.localMatrix);
       this.#mesh.draw({
         ...rendererParams,
-        camera: rendererParams.cameras.orthoCamera,
+        camera: rendererParams.cameras.camera,
       });
     }
 

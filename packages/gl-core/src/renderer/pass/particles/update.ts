@@ -10,7 +10,7 @@ import {
 } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
-import vert from '../../../shaders/particles/update.vert.glsl';
+import vert from '../../../shaders/compose.vert.glsl';
 import frag from '../../../shaders/particles/update.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
 import { BandType } from '../../../type';
@@ -87,6 +87,7 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
       },
       defines: [`RENDER_TYPE ${this.options.bandType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
+      blending: 0,
       transparent: true,
     });
 
@@ -134,8 +135,8 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
    */
   render(rendererParams, rendererState) {
     const attr = this.renderer.attributes;
+    const camera = rendererParams.cameras.planeCamera;
     if (this.#next) {
-      // this.#next.clear();
       this.#next.bind();
       if (attr.depth && this.#next.depth) {
         this.renderer.state.enable(this.renderer.gl.DEPTH_TEST);
@@ -173,7 +174,7 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
       this.#mesh.worldMatrixNeedsUpdate = false;
       this.#mesh.draw({
         ...rendererParams,
-        camera: rendererParams.cameras.orthoCamera,
+        camera,
       });
       // 此处计算出的是 0-1 之间的值
       // const a = new Float32Array(this.#next.width * this.#next.height * 4);

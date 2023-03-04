@@ -1,7 +1,7 @@
 import { Program, Renderer, Mesh, Geometry } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
-import vert from '../../../shaders/particles/screen.vert.glsl';
+import vert from '../../../shaders/compose.vert.glsl';
 import frag from '../../../shaders/particles/screen.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
 import { BandType } from '../../../type';
@@ -48,7 +48,7 @@ export default class ScreenPass extends Pass<ScreenPassOptions> {
       defines: [`RENDER_TYPE ${this.options.bandType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
       transparent: true,
-      blending: options.enableBlend ? 1 : 0,
+      blending: options.enableBlend ? 5 : 0,
       blendFunc: {
         src: this.renderer.gl.ONE,
         dst: this.renderer.gl.ONE_MINUS_SRC_ALPHA,
@@ -100,6 +100,7 @@ export default class ScreenPass extends Pass<ScreenPassOptions> {
       this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
     }
     if (rendererState) {
+      const camera = rendererParams.cameras.planeCamera;
       this.#mesh.program.setUniform('u_fade', 1);
       this.#mesh.program.setUniform(
         'u_opacity',
@@ -113,10 +114,9 @@ export default class ScreenPass extends Pass<ScreenPassOptions> {
       );
 
       this.#mesh.worldMatrixNeedsUpdate = false;
-      this.renderer.state.premultiplyAlpha = true;
       this.#mesh.draw({
         ...rendererParams,
-        camera: rendererParams.cameras.orthoCamera,
+        camera,
       });
     }
 

@@ -1,17 +1,18 @@
-import {DataTexture, Raf, Renderer, Scene, utils, Vector2} from '@sakitam-gis/vis-engine';
+import { DataTexture, Raf, Renderer, Scene, utils, Vector2 } from '@sakitam-gis/vis-engine';
 import wgw from 'wind-gl-worker';
 import Pipelines from './Pipelines';
 import ColorizeComposePass from './pass/color/compose';
 import ColorizePass from './pass/color/colorize';
 import RasterPass from './pass/raster/image';
 import RasterComposePass from './pass/raster/compose';
+import ParticlesComposePass from './pass/particles/compose';
 import UpdatePass from './pass/particles/update';
 import ScreenPass from './pass/particles/screen';
 import ParticlesPass from './pass/particles/particles';
-import {isFunction, resolveURL} from '../utils/common';
-import {createLinearGradient, createZoom} from '../utils/style-parser';
-import {getBandType, RenderFrom, RenderType} from '../type';
-import {SourceType} from '../source';
+import { isFunction, resolveURL } from '../utils/common';
+import { createLinearGradient, createZoom } from '../utils/style-parser';
+import { getBandType, RenderFrom, RenderType } from '../type';
+import { SourceType } from '../source';
 import Tile from '../tile/Tile';
 
 export interface LayerOptions {
@@ -218,13 +219,14 @@ export default class Layer {
       this.renderPipeline?.addPass(composePass);
       this.renderPipeline?.addPass(colorizePass);
     } else if (this.options.renderType === RenderType.particles) {
-      const composePass = new ColorizeComposePass('ParticlesComposePass', this.renderer, {
+      const composePass = new ParticlesComposePass('ParticlesComposePass', this.renderer, {
         bandType,
         source: this.source,
         renderFrom: this.options.renderFrom ?? RenderFrom.r,
         stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
       });
       this.renderPipeline?.addPass(composePass);
+
       const updatePass = new UpdatePass('UpdatePass', this.renderer, {
         bandType,
         source: this.source,
@@ -510,6 +512,7 @@ export default class Layer {
           cameras,
         },
         {
+          zoom: this.options?.getZoom?.() ?? 0,
           opacity: this.#opacity,
           fadeOpacity: this.#fadeOpacity,
           numParticles: this.#numParticles,
@@ -528,6 +531,7 @@ export default class Layer {
   render(cameras) {
     if (this.renderPipeline) {
       const state: any = {
+        zoom: this.options?.getZoom?.() ?? 0,
         opacity: this.#opacity,
         fadeOpacity: this.#fadeOpacity,
         numParticles: this.#numParticles,

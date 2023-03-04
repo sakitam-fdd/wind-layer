@@ -51,8 +51,32 @@
     style: {
       version: 8,
       sources: {
+        carto: {
+          type: 'raster',
+          tiles: [
+            '//a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            '//b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            '//c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            '//d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            // 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          ],
+          tileSize: 256,
+          // minzoom: 1,
+          // maxzoom: 18,
+        },
       },
       layers: [
+        // {
+        //   id: 'carto',
+        //   type: 'raster',
+        //   source: 'carto',
+        //   // minzoom: 1,
+        //   // maxzoom: 22,
+        //   paint: {
+        //     // 'raster-resampling': 'nearest',
+        //     // 'raster-fade-duration': 0,
+        //   },
+        // },
         {
           id: 'background',
           type: 'background',
@@ -108,6 +132,22 @@
   map.on('load', function () {
     const interpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);
 
+    const imageSource = new mapboxWind.ImageSource('wind1', {
+      type: 'image',
+      // tileSize: 256,
+      // minZoom: 0,
+      // maxZoom: 0,
+      // roundZoom: false,
+      decodeType: 3,
+      coordinates: [
+        [-180, 85.051129],
+        [180, 85.051129],
+        [180, -85.051129],
+        [-180, -85.051129],
+      ],
+      url: 'http://localhost:5000/processed/2023041700/2023041712/0/0/0/wind-surface.jpeg',
+    });
+
     const tileSource = new mapboxWind.TileSource('wind', {
       type: 'tile',
       tileSize: 256,
@@ -118,7 +158,8 @@
       url: 'http://localhost:5000/processed/2023041700/2023041712/{z}/{x}/{y}/wind-surface.jpeg',
     });
 
-    window.source = tileSource;
+    window.imageSource = imageSource;
+    window.tileSource = tileSource;
 
     const fill = new mapboxWind.Layer('fill', tileSource, {
       wrapX: true,
@@ -148,8 +189,8 @@
       renderType: 1,
     });
     const wind = new mapboxWind.Layer('wind', tileSource, {
-      wrapX: true,
-      wireframe: true,
+      wrapX: false,
+      wireframe: false,
       styleSpec: {
         'fill-color': [
           'interpolate',
@@ -181,7 +222,7 @@
       renderType: 2,
     });
 
-    map.addLayer(fill);
+    // map.addLayer(fill);
     map.addLayer(wind);
   });
 </script>

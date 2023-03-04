@@ -92,6 +92,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
     }
 
     const { stencilConfigForOverlap } = this.options;
+    const camera = rendererParams.cameras.camera;
     if (sourceCache) {
       const coordsAscending = sourceCache.getVisibleCoordinates();
       const coordsDescending = coordsAscending.slice().reverse(); // offscreen & opaque
@@ -140,7 +141,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
 
         mesh.draw({
           ...utils.omit(rendererParams, ['target']),
-          camera: rendererParams.cameras.camera,
+          camera,
         });
       }
     }

@@ -52,6 +52,7 @@ export default class Layer {
   public sync: CameraSync;
   public scene: Scene;
   public orthoCamera: OrthographicCamera;
+  public planeCamera: OrthographicCamera;
   public renderer: Renderer;
   private options: any;
   private source: SourceType;
@@ -145,6 +146,7 @@ export default class Layer {
     this.sync = new CameraSync(map, 'perspective', this.scene);
     const { width, height } = (this.map as any).painter as any;
     this.orthoCamera = new OrthographicCamera(0, width, height, 0, 0, 1);
+    this.planeCamera = new OrthographicCamera(0, 1, 1, 0, 0, 1);
     this.layer = new LayerCore(
       this.source,
       {
@@ -261,6 +263,7 @@ export default class Layer {
     this.layer?.prerender({
       camera: this.camera,
       orthoCamera: this.orthoCamera,
+      planeCamera: this.planeCamera,
     });
   }
 
@@ -271,6 +274,7 @@ export default class Layer {
     this.layer?.render({
       camera: this.camera,
       orthoCamera: this.orthoCamera,
+      planeCamera: this.planeCamera,
     });
   }
 }

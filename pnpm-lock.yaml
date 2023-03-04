@@ -140,7 +140,7 @@ importers:
       '@sakitam-gis/vis-engine': ^1.0.0
       wind-gl-worker: workspace:*
     dependencies:
-      '@sakitam-gis/vis-engine': 1.4.8
+      '@sakitam-gis/vis-engine': 1.5.0
       wind-gl-worker: link:../worker-fetch
 
   packages/leaflet:
@@ -164,7 +164,7 @@ importers:
       wind-core: workspace:*
       wind-gl-core: workspace:*
     dependencies:
-      '@sakitam-gis/vis-engine': 1.4.8
+      '@sakitam-gis/vis-engine': 1.5.0
       wind-core: link:../core
       wind-gl-core: link:../gl-core
     devDependencies:
@@ -178,7 +178,7 @@ importers:
       wind-core: workspace:*
       wind-gl-core: workspace:*
     dependencies:
-      '@sakitam-gis/vis-engine': 1.4.8
+      '@sakitam-gis/vis-engine': 1.5.0
       wind-core: link:../core
       wind-gl-core: link:../gl-core
     devDependencies:
@@ -2132,8 +2132,8 @@ packages:
       rollup: 3.2.3
     dev: true
 
-  /@sakitam-gis/vis-engine/1.4.8:
-    resolution: {integrity: sha512-s8calK5UV3DHxesfvmbh6mAF/kchdUswHdFLGtvHzL7wtIuTfIRMUNgjY8L2hr7DhdtPkmfp5/bNn7JPgQoHUQ==}
+  /@sakitam-gis/vis-engine/1.5.0:
+    resolution: {integrity: sha512-Ku6GkEdsIWoUyw9lZjLvCTeFbePgf/NEx9Vp4bC0p8x7M09NIM0FVPphNiXS8FhFvgxtLTRDd33awVNFuk3qoA==}
     engines: {node: '>= 14.18.1', npm: '>= 6.14.15'}
     dependencies:
       colord: 2.9.3
