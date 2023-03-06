@@ -138,21 +138,22 @@
       // minZoom: 0,
       // maxZoom: 0,
       // roundZoom: false,
-      decodeType: 3,
+      decodeType: 0,
       coordinates: [
         [-180, 85.051129],
         [180, 85.051129],
         [180, -85.051129],
         [-180, -85.051129],
       ],
-      url: 'http://localhost:5000/processed/2023041700/2023041712/0/0/0/wind-surface.jpeg',
+      url: 'https://sakitam.oss-cn-beijing.aliyuncs.com/codepen/assets/image/uv-mc.png',
+      dataRange: [-34.37186050415039, 46.51813888549805, -42.12305450439453, 49.66694259643555],
     });
 
     const tileSource = new mapboxWind.TileSource('wind', {
       type: 'tile',
       tileSize: 256,
       minZoom: 0,
-      maxZoom: 2,
+      maxZoom: 0,
       roundZoom: true,
       decodeType: 3,
       url: 'http://localhost:5000/processed/2023041700/2023041712/{z}/{x}/{y}/wind-surface.jpeg',
@@ -161,7 +162,7 @@
     window.imageSource = imageSource;
     window.tileSource = tileSource;
 
-    const fill = new mapboxWind.Layer('fill', tileSource, {
+    const fill = new mapboxWind.Layer('fill', imageSource, {
       wrapX: true,
       wireframe: true,
       styleSpec: {
@@ -188,8 +189,8 @@
       hasMask: false,
       renderType: 1,
     });
-    const wind = new mapboxWind.Layer('wind', tileSource, {
-      wrapX: false,
+    const wind = new mapboxWind.Layer('wind', imageSource, {
+      wrapX: true,
       wireframe: false,
       styleSpec: {
         'fill-color': [
@@ -208,9 +209,9 @@
           2,
           1
         ],
-        numParticles: 1024,
+        numParticles: 1024 * 8,
         speedFactor: 1,
-        fadeOpacity: 0.98,
+        fadeOpacity: 0.93,
         dropRate: 0.003,
         dropRateBump: 0.002,
       },
@@ -222,7 +223,7 @@
       renderType: 2,
     });
 
-    // map.addLayer(fill);
+    map.addLayer(fill);
     map.addLayer(wind);
   });
 </script>

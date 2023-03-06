@@ -19,7 +19,7 @@ export interface ParticlesPassOptions {
   source: SourceType;
   texture: Texture;
   textureNext: Texture;
-  particles: Texture;
+  getParticles: () => Texture;
   bandType: BandType;
   getParticleNumber: () => number;
   hasMask?: boolean;
@@ -47,31 +47,7 @@ export default class Particles extends Pass<ParticlesPassOptions> {
   ) {
     super(id, renderer, options);
 
-    // @link https://webgl2fundamentals.org/webgl/lessons/webgl-data-textures.html
-    const opt = {
-      width: this.renderer.width,
-      height: this.renderer.height,
-      minFilter: renderer.gl.NEAREST,
-      magFilter: renderer.gl.NEAREST,
-      type: this.renderer.gl.FLOAT,
-      format: this.renderer.gl.RGBA,
-      // generateMipmaps: false,
-      internalFormat: this.renderer.isWebGL2
-        ? (this.renderer.gl as WebGL2RenderingContext).RGBA32F
-        : this.renderer.gl.RGBA,
-      stencil: false,
-      premultipliedAlpha: true,
-    };
-
-    this.#screenTexture = new RenderTarget(renderer, {
-      ...opt,
-      name: 'screenTexture',
-    });
-    this.#backgroundTexture = new RenderTarget(renderer, {
-      ...opt,
-      name: 'backgroundTexture',
-    });
-
+    this.initializeRenderTarget();
     this.#program = new Program(renderer, {
       vertexShader: vert,
       fragmentShader: frag,
@@ -170,6 +146,35 @@ export default class Particles extends Pass<ParticlesPassOptions> {
     return { particleIndices, particleReferences };
   }
 
+  /**
+   * 创建 RenderTarget
+   */
+  initializeRenderTarget() {
+    // @link https://webgl2fundamentals.org/webgl/lessons/webgl-data-textures.html
+    const opt = {
+      width: this.renderer.width,
+      height: this.renderer.height,
+      minFilter: this.renderer.gl.LINEAR,
+      magFilter: this.renderer.gl.LINEAR,
+      type: this.renderer.gl.UNSIGNED_BYTE,
+      format: this.renderer.gl.RGBA,
+      stencil: false,
+      premultipliedAlpha: false,
+    };
+
+    this.#screenTexture = new RenderTarget(this.renderer, {
+      ...opt,
+      name: 'screenTexture',
+    });
+    this.#backgroundTexture = new RenderTarget(this.renderer, {
+      ...opt,
+      name: 'backgroundTexture',
+    });
+  }
+
+  /**
+   * 交换 RenderTarget
+   */
   swapRenderTarget() {
     [this.#screenTexture, this.#backgroundTexture] = [this.#backgroundTexture, this.#screenTexture];
   }
@@ -196,7 +201,7 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       this.#mesh.program.setUniform('u_colorRamp', rendererState.colorRampTexture);
       this.#mesh.program.setUniform('u_data_matrix', rendererState.u_data_matrix);
       this.#mesh.program.setUniform('u_colorRange', rendererState.colorRange);
-      this.#mesh.program.setUniform('u_particles', this.options.particles);
+      this.#mesh.program.setUniform('u_particles', this.options.getParticles());
 
       this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;

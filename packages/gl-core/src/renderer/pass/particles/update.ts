@@ -40,30 +40,7 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
   ) {
     super(id, renderer, options);
 
-    const particleRes = Math.ceil(Math.sqrt(this.options.getParticleNumber()));
-
-    // @link https://webgl2fundamentals.org/webgl/lessons/webgl-data-textures.html
-    const opt = {
-      width: particleRes,
-      height: particleRes,
-      minFilter: renderer.gl.LINEAR,
-      magFilter: renderer.gl.LINEAR,
-      type: this.renderer.gl.FLOAT,
-      format: this.renderer.gl.RGBA,
-      internalFormat: this.renderer.isWebGL2
-        ? (this.renderer.gl as WebGL2RenderingContext).RGBA32F
-        : this.renderer.gl.RGBA,
-      stencil: false,
-    };
-
-    this.#current = new RenderTarget(renderer, {
-      ...opt,
-      name: 'currentUpdateTexture',
-    });
-    this.#next = new RenderTarget(renderer, {
-      ...opt,
-      name: 'nextUpdateTexture',
-    });
+    this.initializeRenderTarget();
 
     this.#program = new Program(renderer, {
       vertexShader: vert,
@@ -115,6 +92,7 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
 
   resize() {
     const particleRes = Math.ceil(Math.sqrt(this.options.getParticleNumber()));
+
     this.#current.resize(particleRes, particleRes);
     this.#next.resize(particleRes, particleRes);
   }
@@ -125,6 +103,46 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
     };
   }
 
+  /**
+   * 创建 RenderTarget
+   */
+  initializeRenderTarget() {
+    const particleRes = Math.ceil(Math.sqrt(this.options.getParticleNumber()));
+
+    const particleState = new Float32Array(particleRes ** 2 * 4);
+    for (let i = 0; i < particleState.length; i++) {
+      // randomize the initial particle positions
+      particleState[i] = Math.floor(Math.random() * 256);
+    }
+
+    // @link https://webgl2fundamentals.org/webgl/lessons/webgl-data-textures.html
+    const opt = {
+      data: particleState,
+      width: particleRes,
+      height: particleRes,
+      minFilter: this.renderer.gl.NEAREST,
+      magFilter: this.renderer.gl.NEAREST,
+      type: this.renderer.gl.FLOAT,
+      format: this.renderer.gl.RGBA,
+      internalFormat: this.renderer.isWebGL2
+        ? (this.renderer.gl as WebGL2RenderingContext).RGBA32F
+        : this.renderer.gl.RGBA,
+      stencil: false,
+    };
+
+    this.#current = new RenderTarget(this.renderer, {
+      ...opt,
+      name: 'currentUpdateTexture',
+    });
+    this.#next = new RenderTarget(this.renderer, {
+      ...opt,
+      name: 'nextUpdateTexture',
+    });
+  }
+
+  /**
+   * 交换 RenderTarget
+   */
   swapRenderTarget() {
     [this.#current, this.#next] = [this.#next, this.#current];
   }
@@ -171,15 +189,13 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
       this.#mesh.program.setUniform('u_rand_seed', Math.random());
       this.#mesh.program.setUniform('u_particles', this.#current.texture);
 
+      this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;
+      this.#mesh.worldMatrix.multiply(camera.worldMatrix, this.#mesh.localMatrix);
       this.#mesh.draw({
         ...rendererParams,
         camera,
       });
-      // 此处计算出的是 0-1 之间的值
-      // const a = new Float32Array(this.#next.width * this.#next.height * 4);
-      // this.renderer.gl.readPixels(0, 0, this.#next.width, this.#next.height, this.renderer.gl.RGBA, this.renderer.gl.FLOAT, a);
-      // console.log(a);
     }
     if (this.#next) {
       this.#next.unbind();

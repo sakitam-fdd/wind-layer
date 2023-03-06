@@ -113,7 +113,9 @@ export default class ScreenPass extends Pass<ScreenPassOptions> {
           : this.options.particlesPass?.textures.screenTexture,
       );
 
+      this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;
+      this.#mesh.worldMatrix.multiply(camera.worldMatrix, this.#mesh.localMatrix);
       this.#mesh.draw({
         ...rendererParams,
         camera,

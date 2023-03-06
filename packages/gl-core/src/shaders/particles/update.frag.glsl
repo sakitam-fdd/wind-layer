@@ -51,18 +51,12 @@ vec2 bilinear(const vec2 uv) {
     return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
 }
 
-vec2 transformData(vec2 pos, mat4 matrix) {
-    vec4 transformed = matrix * vec4(pos.xy, 1.0, 1.0);
-    return transformed.xy / transformed.w;
-}
-
 void main() {
     vec2 pos = texture2D(u_particles, vUv).xy;
 
     vec2 uv = pos;
 
 //    uv = vec2(u_bbox.x + (uv.x * u_bbox.z), u_bbox.y + (uv.y * u_bbox.w));
-    uv = transformData(uv, u_data_matrix);
 
     if (calcTexture(uv).a == 0.0) {
         discard;

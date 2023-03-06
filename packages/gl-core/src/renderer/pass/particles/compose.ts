@@ -111,15 +111,21 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     let ymin = Infinity;
     let xmax = -Infinity;
     let ymax = -Infinity;
+    let wrapMin = Infinity;
+    let wrapMax = -Infinity;
     for (let n = 0; n < coordsDescending.length; n++) {
       const tileId = coordsDescending[n];
       xmin = Math.min(tileId.x, xmin);
       xmax = Math.max(tileId.x, xmax);
       ymin = Math.min(tileId.y, ymin);
       ymax = Math.max(tileId.y, ymax);
+      wrapMin = Math.min(tileId.wrap, wrapMin);
+      wrapMax = Math.max(tileId.wrap, wrapMax);
     }
 
-    const w = xmax - xmin + 1;
+    // @ts-ignore
+    const wraps = wrapMax - wrapMin + 1;
+    const w = (xmax - xmin + 1);
     const h = ymax - ymin + 1;
 
     if (renderTarget) {

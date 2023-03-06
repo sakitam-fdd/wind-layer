@@ -241,7 +241,7 @@ export default class Layer {
         source: this.source,
         texture: composePass.textures.current,
         textureNext: composePass.textures.next,
-        particles: updatePass.textures.particles,
+        getParticles: () => updatePass.textures.particles,
         getParticleNumber: () => this.#numParticles,
       });
 
@@ -472,6 +472,12 @@ export default class Layer {
 
   moveEnd() {
     if (this.renderPipeline && this.options.renderType === RenderType.particles) {
+      const updatePass = this.renderPipeline.getPass('UpdatePass');
+
+      if (updatePass) {
+        updatePass.initializeRenderTarget();
+      }
+
       this.renderPipeline.passes.forEach((pass) => {
         if (pass.id === 'ParticlesTexturePass' || pass.id === 'ScreenPass') {
           pass.enabled = true;
@@ -479,6 +485,7 @@ export default class Layer {
 
         if (pass.id === 'ParticlesPass') {
           pass.prerender = true;
+          pass.resetParticles();
         }
       });
     }
