@@ -70,6 +70,9 @@ export default class Particles extends Pass<ParticlesPassOptions> {
         u_particleSize: {
           value: 2.0,
         },
+        u_particlesRes: {
+          value: 0,
+        },
       },
       defines: [`RENDER_TYPE ${this.options.bandType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
@@ -191,6 +194,7 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       const attr = this.renderer.attributes;
       this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
     }
+    const camera = rendererParams.cameras.camera;
     if (rendererState) {
       this.#mesh.program.setUniform(
         'u_image_res',
@@ -202,13 +206,14 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       this.#mesh.program.setUniform('u_data_matrix', rendererState.u_data_matrix);
       this.#mesh.program.setUniform('u_colorRange', rendererState.colorRange);
       this.#mesh.program.setUniform('u_particles', this.options.getParticles());
+      this.#mesh.program.setUniform('u_particlesRes', this.#privateNumParticles);
 
       this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;
       this.#mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, this.#mesh.localMatrix);
       this.#mesh.draw({
         ...rendererParams,
-        camera: rendererParams.cameras.camera,
+        camera,
       });
     }
 

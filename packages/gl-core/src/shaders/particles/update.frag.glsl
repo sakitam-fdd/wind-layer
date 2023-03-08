@@ -28,17 +28,10 @@ vec4 calcTexture(const vec2 puv) {
     return mix(color0, color1, u_fade_t);
 }
 
-#if RENDER_TYPE == 1
-// rg
 vec2 decodeValue(const vec2 vc) {
     vec4 rgba = calcTexture(vc);
     return rgba.rg;
 }
-#else
-float decodeValue(const vec2 vc) {
-    return calcTexture(vc).r;
-}
-#endif
 
 vec2 bilinear(const vec2 uv) {
     vec2 px = 1.0 / u_image_res;

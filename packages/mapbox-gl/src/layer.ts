@@ -40,7 +40,7 @@ function getTileBounds(x, y, z, wrap = 0) {
 }
 
 export interface ILayerOptions extends LayerOptions {
-  wrapX: boolean;
+  renderingMode: '2d' | '3d';
 }
 
 export default class Layer {
@@ -61,7 +61,7 @@ export default class Layer {
   constructor(id: string, source: SourceType, options?: ILayerOptions) {
     this.id = id;
     this.type = 'custom';
-    this.renderingMode = '3d';
+    this.renderingMode = options?.renderingMode || '3d';
     this.options = {
       ...(options || {}),
     };
@@ -178,7 +178,7 @@ export default class Layer {
               mapboxgl.MercatorCoordinate.fromLngLat(c),
             );
             const tileID = getCoordinatesCenterTileID(cornerCoords);
-            if (this.options.wrapX) {
+            if (source.wrapX) {
               transform.getVisibleUnwrappedCoordinates(tileID).forEach((unwrapped) => {
                 const { canonical, wrap } = unwrapped;
                 const { x, y, z } = canonical;
@@ -213,7 +213,7 @@ export default class Layer {
               const tile = tiles[i];
               const { canonical, wrap } = tile;
               const { x, y, z } = canonical;
-              if (this.options.wrapX) {
+              if (source.wrapX) {
                 wrapTiles.push(
                   new TileID(z, x, y, z, wrap, {
                     getTileBounds,

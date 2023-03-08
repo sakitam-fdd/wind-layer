@@ -70,6 +70,11 @@ export default class TileSource {
 
   public layer: WithNull<Layer>;
 
+  /**
+   * 是否跨世界渲染
+   */
+  public wrapX: boolean;
+
   public parseOptions: ParseOptionsType;
 
   #loaded = false;
@@ -86,6 +91,7 @@ export default class TileSource {
     this.scheme = options.scheme || 'xyz';
     this.tileSize = options.tileSize || 512;
     this.tileBounds = options.tileBounds;
+    this.wrapX = Boolean(options.wrapX);
 
     const decodeType = options.decodeType || DecodeType.image;
     const maxTileCacheSize = options.maxTileCacheSize;

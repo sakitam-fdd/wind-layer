@@ -98,6 +98,11 @@ export interface ImageSourceOptions {
    * 指定数据解析类型
    */
   decodeType?: DecodeType;
+
+  /**
+   * 是否跨世界渲染
+   */
+  wrapX?: number;
   maxTileCacheSize?: number;
 }
 
@@ -135,6 +140,10 @@ export interface TileSourceOptions {
    * 指定数据解析类型
    */
   decodeType?: DecodeType;
+  /**
+   * 是否跨世界渲染
+   */
+  wrapX?: number;
   maxTileCacheSize?: number;
   tileBounds?: Bounds;
 }

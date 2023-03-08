@@ -47,6 +47,12 @@ interface TimelineSourceOptions extends TrackOptions {
    * 指定数据解析类型
    */
   decodeType?: DecodeType;
+
+  /**
+   * 是否跨世界渲染
+   */
+  wrapX?: boolean;
+
   maxTileCacheSize?: number;
   tileBounds?: Bounds;
 }
@@ -92,6 +98,11 @@ class TimelineSource {
    */
   public options: TimelineSourceOptions;
 
+  /**
+   * 是否跨世界渲染
+   */
+  public wrapX: boolean;
+
   public renderer: Renderer;
 
   public dispatcher: any;
@@ -127,6 +138,7 @@ class TimelineSource {
     const scheme = options.scheme || 'xyz';
     this.tileSize = options.tileSize || 512;
     this.tileBounds = options.tileBounds;
+    this.wrapX = Boolean(options.wrapX);
     if (options.sourceType === 'ImageSource' && !options.coordinates) {
       throw new Error('ImageSource must provide `coordinates`');
     }
@@ -141,6 +153,7 @@ class TimelineSource {
       ...options,
       decodeType,
       maxTileCacheSize,
+      wrapX: this.wrapX,
       type: this.type,
     };
 

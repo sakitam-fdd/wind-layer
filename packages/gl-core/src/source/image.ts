@@ -60,6 +60,11 @@ export default class ImageSource {
    */
   public coordinates: ImageSourceOptions['coordinates'];
 
+  /**
+   * 是否跨世界渲染
+   */
+  public wrapX: boolean;
+
   #loaded = false;
   #sourceCache: SourceCache;
   #tileWorkers: Map<string, any> = new Map();
@@ -73,6 +78,7 @@ export default class ImageSource {
     this.roundZoom = false;
     this.tileSize = 512;
     this.coordinates = options.coordinates;
+    this.wrapX = Boolean(options.wrapX);
 
     const decodeType = options.decodeType || DecodeType.image;
 
