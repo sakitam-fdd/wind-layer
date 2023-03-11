@@ -61,7 +61,7 @@ export default class Layer {
   constructor(id: string, source: SourceType, options?: ILayerOptions) {
     this.id = id;
     this.type = 'custom';
-    this.renderingMode = options?.renderingMode || '3d';
+    this.renderingMode = options?.renderingMode || '2d';
     this.options = {
       ...(options || {}),
     };

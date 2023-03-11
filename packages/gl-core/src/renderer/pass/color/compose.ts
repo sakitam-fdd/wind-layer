@@ -116,7 +116,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
         const tileBBox = coord.getTileBounds();
         if (!tileBBox) continue;
 
-        const tileMesh = tile.createMesh(tileBBox, this.renderer, this.#program);
+        const tileMesh = tile.createMesh(this.id, tileBBox, this.renderer, this.#program);
         const mesh = tileMesh.getMesh();
 
         const dataRange: number[] = [];

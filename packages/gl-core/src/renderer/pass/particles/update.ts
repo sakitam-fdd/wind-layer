@@ -10,7 +10,7 @@ import {
 } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
-import vert from '../../../shaders/compose.vert.glsl';
+import vert from '../../../shaders/common.vert.glsl';
 import frag from '../../../shaders/particles/update.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
 import { BandType } from '../../../type';

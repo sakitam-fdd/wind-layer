@@ -96,7 +96,7 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
   render(rendererParams, rendererState) {
     const attr = this.renderer.attributes;
     this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
-    const camera = rendererParams.cameras.orthoCamera;
+    const camera = rendererParams.cameras.planeCamera;
     if (rendererState) {
       let stencil;
       if (this.options.hasMask) {

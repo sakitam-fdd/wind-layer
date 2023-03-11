@@ -1,6 +1,6 @@
 import { Program, Renderer, RenderTarget, utils } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
-import vert from '../../../shaders/compose.vert.glsl';
+import vert from '../../../shaders/common.vert.glsl';
 import frag from '../../../shaders/compose.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
 import { RenderFrom, BandType } from '../../../type';
@@ -155,11 +155,11 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
       const tileBBox = coord.getTileBounds();
       if (!tileBBox) continue;
 
-      const tileMesh = tile.createMesh(tileBBox, this.renderer, this.#program);
+      const tileMesh = tile.createMesh(this.id, tileBBox, this.renderer, this.#program);
       const mesh = tileMesh.planeMesh;
 
       mesh.scale.set(1 / w, 1 / h, 1);
-      mesh.position.set((coord.x - xmin) / w, (ymax - coord.y) / h, 0);
+      mesh.position.set((coord.x - xmin) / w, (coord.y + ymin) / h, 0);
 
       // console.log(mesh.position.toArray(), [coord.x, coord.y].join('-'));
 

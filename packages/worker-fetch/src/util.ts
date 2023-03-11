@@ -149,10 +149,7 @@ export function arrayBufferToImageBitmap(
   callback: (err?: Error | null, image?: ImageBitmap | null) => void,
 ) {
   const blob: Blob = new Blob([new Uint8Array(data)], { type: 'image/png' });
-  createImageBitmap(blob, {
-    imageOrientation: 'flipY',
-    premultiplyAlpha: 'none',
-  })
+  createImageBitmap(blob)
     .then((imgBitmap) => {
       callback(null, imgBitmap);
     })
