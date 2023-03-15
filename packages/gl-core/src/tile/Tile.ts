@@ -66,7 +66,7 @@ export default class Tile {
    */
   public uses = 0;
 
-  public tileMesh: TileMesh;
+  public tileMeshs: Map<string, TileMesh> = new Map();
 
   public geometry: Plane;
 
@@ -113,8 +113,8 @@ export default class Tile {
     );
   }
 
-  getMesh() {
-    return this.tileMesh.getMesh();
+  getMesh(passId) {
+    return this.tileMeshs.get(passId);
   }
 
   get textures() {
@@ -182,19 +182,21 @@ export default class Tile {
 
   /**
    * 创建 `TileMesh`
+   * @param passId
    * @param tileBounds
    * @param renderer
    * @param program
    * @param force
    */
-  createMesh(tileBounds, renderer: Renderer, program: Program, force?: boolean) {
+  createMesh(passId, tileBounds, renderer: Renderer, program: Program, force?: boolean) {
     this.updateGeometry(tileBounds, renderer, force);
-    if (!this.tileMesh || force) {
-      this.tileMesh = new TileMesh(this.tileID.tileKey, renderer, program, this.geometry);
-      this.tileMesh.setCenter(this.tileCenter);
+    if (!this.tileMeshs.get(passId) || force) {
+      const tileMesh = new TileMesh(this.tileID.tileKey, renderer, program, this.geometry);
+      tileMesh.setCenter(this.tileCenter);
+      this.tileMeshs.set(passId, tileMesh);
     }
 
-    return this.tileMesh;
+    return this.tileMeshs.get(passId);
   }
 
   /**
@@ -244,9 +246,8 @@ export default class Tile {
           magFilter: renderer.gl.LINEAR,
           wrapS: renderer.gl.CLAMP_TO_EDGE,
           wrapT: renderer.gl.CLAMP_TO_EDGE,
-          flipY: true, // 注意，对 ImageBitmap 无效
+          flipY: false, // 注意，对 ImageBitmap 无效
           premultiplyAlpha: false, // 禁用 `Alpha` 预乘
-          // generateMipmaps: false,
           type:
             parseOptions.renderFrom === RenderFrom.float
               ? renderer.gl.FLOAT
@@ -297,5 +298,11 @@ export default class Tile {
     if (this.geometry) {
       this.geometry.destroy();
     }
+    for (const [, value] of this.tileMeshs) {
+      if (value) {
+        value?.destroy();
+      }
+    }
+    this.tileMeshs.clear();
   }
 }

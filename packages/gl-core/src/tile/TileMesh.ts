@@ -59,4 +59,9 @@ export default class TileMesh {
   getMesh() {
     return this.mesh;
   }
+
+  destroy() {
+    this.mesh.destroy();
+    this.planeMesh.destroy();
+  }
 }
