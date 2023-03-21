@@ -207,6 +207,7 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       this.#mesh.program.setUniform('u_colorRange', rendererState.colorRange);
       this.#mesh.program.setUniform('u_particles', this.options.getParticles());
       this.#mesh.program.setUniform('u_particlesRes', this.#privateNumParticles);
+      this.#mesh.program.setUniform('u_bbox', rendererState.u_bbox);
 
       this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;

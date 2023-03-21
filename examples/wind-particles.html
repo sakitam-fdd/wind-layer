@@ -138,15 +138,16 @@
       // minZoom: 0,
       // maxZoom: 0,
       // roundZoom: false,
-      decodeType: 0,
+      decodeType: 3,
       coordinates: [
         [-180, 85.051129],
         [180, 85.051129],
         [180, -85.051129],
         [-180, -85.051129],
       ],
-      url: 'https://sakitam.oss-cn-beijing.aliyuncs.com/codepen/assets/image/uv-mc.png',
-      dataRange: [-34.37186050415039, 46.51813888549805, -42.12305450439453, 49.66694259643555],
+      wrapX: false,
+      url: 'http://localhost:5000/processed/2023042600/2023042601/0/0/0/wind-surface.jpeg',
+      // dataRange: [-34.37186050415039, 46.51813888549805, -42.12305450439453, 49.66694259643555],
     });
 
     const tileSource = new mapboxWind.TileSource('wind', {
@@ -156,14 +157,14 @@
       maxZoom: 0,
       roundZoom: true,
       decodeType: 3,
-      url: 'http://localhost:5000/processed/2023041700/2023041712/{z}/{x}/{y}/wind-surface.jpeg',
+      wrapX: true,
+      url: 'http://localhost:5000/processed/2023042600/2023042601/{z}/{x}/{y}/wind-surface.jpeg',
     });
 
     window.imageSource = imageSource;
     window.tileSource = tileSource;
 
-    const fill = new mapboxWind.Layer('fill', imageSource, {
-      wrapX: true,
+    const fill = new mapboxWind.Layer('fill', tileSource, {
       wireframe: true,
       styleSpec: {
         'fill-color': [
@@ -172,15 +173,7 @@
           ['get', 'value'],
           ...interpolateColor
         ],
-        'opacity': [
-          'interpolate',
-          ['exponential', 0.5],
-          ['zoom'],
-          1,
-          1,
-          2,
-          1
-        ],
+        'opacity': 1,
       },
       renderFrom: 'rg',
       widthSegments: 1,
@@ -189,8 +182,7 @@
       hasMask: false,
       renderType: 1,
     });
-    const wind = new mapboxWind.Layer('wind', imageSource, {
-      wrapX: true,
+    const wind = new mapboxWind.Layer('wind', tileSource, {
       wireframe: false,
       styleSpec: {
         'fill-color': [
@@ -209,7 +201,7 @@
           2,
           1
         ],
-        numParticles: 1024 * 8,
+        numParticles: 1024,
         speedFactor: 1,
         fadeOpacity: 0.93,
         dropRate: 0.003,
@@ -223,7 +215,7 @@
       renderType: 2,
     });
 
-    map.addLayer(fill);
+    // map.addLayer(fill);
     map.addLayer(wind);
   });
 </script>

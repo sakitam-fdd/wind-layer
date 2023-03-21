@@ -46,7 +46,10 @@ vec2 bilinear(const vec2 uv) {
 
 void main() {
     vec2 pos = v_particle_pos;
+
     vec2 uv = pos;
+
+    uv = u_bbox.xy + uv * (u_bbox.zw - u_bbox.xy);
 
     if (calcTexture(uv).a == 0.0) {
         discard;
@@ -67,5 +70,4 @@ void main() {
     }
 
     gl_FragColor = vec4(floor(255.0 * color * color.a) / 255.0);
-//    gl_FragColor.rgb *= gl_FragColor.a;
 }

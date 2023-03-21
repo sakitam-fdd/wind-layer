@@ -4,7 +4,7 @@ import vert from '../../../shaders/common.vert.glsl';
 import frag from '../../../shaders/compose.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
 import { RenderFrom, BandType } from '../../../type';
-import { littleEndian } from '../../../utils/common';
+import { containsXY, littleEndian } from '../../../utils/common';
 import TileID from '../../../tile/TileID';
 import { SourceType } from '../../../source';
 
@@ -95,7 +95,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     };
   }
 
-  renderTexture(renderTarget, rendererParams, sourceCache) {
+  renderTexture(renderTarget, rendererParams, rendererState, sourceCache) {
     if (!sourceCache) {
       return;
     }
@@ -111,22 +111,34 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     let ymin = Infinity;
     let xmax = -Infinity;
     let ymax = -Infinity;
-    let wrapMin = Infinity;
-    let wrapMax = -Infinity;
+    let zmax = -Infinity;
+    // 1. 计算mapbox墨卡托坐标的最大最小值，构建真实瓦片范围
     for (let n = 0; n < coordsDescending.length; n++) {
       const tileId = coordsDescending[n];
-      xmin = Math.min(tileId.x, xmin);
-      xmax = Math.max(tileId.x, xmax);
-      ymin = Math.min(tileId.y, ymin);
-      ymax = Math.max(tileId.y, ymax);
-      wrapMin = Math.min(tileId.wrap, wrapMin);
-      wrapMax = Math.max(tileId.wrap, wrapMax);
+      const bounds = tileId.getTileBounds();
+      xmin = Math.min(bounds.left, xmin);
+      xmax = Math.max(bounds.right, xmax);
+      ymin = Math.min(bounds.top, ymin);
+      ymax = Math.max(bounds.bottom, ymax);
+      zmax = Math.max(tileId.z, zmax);
     }
 
-    // @ts-ignore
-    const wraps = wrapMax - wrapMin + 1;
-    const w = (xmax - xmin + 1);
-    const h = ymax - ymin + 1;
+    const zz = 1 / Math.pow(2, zmax);
+
+    const dx = xmax - xmin;
+    const dy = ymax - ymin;
+
+    // 2. 计算 x 方向和 y 方向的行列数
+    const w = dx / zz;
+    const h = dy / zz;
+
+    // 更新采样范围
+    rendererState.u_bbox = [
+      (rendererState.extent[0] - xmin) / dx,
+      (rendererState.extent[1] - ymin) / dy,
+      (rendererState.extent[2] - xmin) / dx,
+      (rendererState.extent[3] - ymin) / dy,
+    ];
 
     if (renderTarget) {
       renderTarget.clear();
@@ -137,6 +149,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
         this.renderer.state.setDepthMask(true);
       }
 
+      // 3. 计算出 fbo 所需大小
       const width = w * (this.options.source.tileSize ?? defaultSize);
       const height = h * (this.options.source.tileSize ?? defaultSize);
 
@@ -147,63 +160,74 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
 
     const [stencilModes, coords] = stencilConfigForOverlap(coordsDescending);
 
-    for (let i = 0; i < coords.length; i++) {
-      const coord = coords[i];
-      const tile = sourceCache.getTile(coord);
-      if (!(tile && tile.hasData())) continue;
+    // 4. 根据 y 方向递增和 x 方向递增，依次循环找出对应的瓦片
+    for (let j = ymin; j < ymax; j += zz) {
+      const y = j + zz / 2; // 防止越界
+      for (let i = xmin; i < xmax; i += zz) {
+        const x = i + zz / 2;
+        const coord = coords.find((c) => {
+          const tileBBox = c.getTileBounds();
+          if (!tileBBox) return false;
+          return containsXY([tileBBox.left, tileBBox.top, tileBBox.right, tileBBox.bottom], x, y);
+        });
 
-      const tileBBox = coord.getTileBounds();
-      if (!tileBBox) continue;
+        // 5. 进行渲染
+        if (coord) {
+          const tile = sourceCache.getTile(coord);
+          if (!(tile && tile.hasData())) continue;
 
-      const tileMesh = tile.createMesh(this.id, tileBBox, this.renderer, this.#program);
-      const mesh = tileMesh.planeMesh;
+          const tileBBox = coord.getTileBounds();
+          if (!tileBBox) continue;
 
-      mesh.scale.set(1 / w, 1 / h, 1);
-      mesh.position.set((coord.x - xmin) / w, (coord.y + ymin) / h, 0);
+          const tileMesh = tile.createMesh(this.id, tileBBox, this.renderer, this.#program);
+          const mesh = tileMesh.planeMesh;
 
-      // console.log(mesh.position.toArray(), [coord.x, coord.y].join('-'));
+          mesh.scale.set(1 / w, 1 / h, 1);
+          mesh.position.set((tileBBox.left - xmin) / dx, (tileBBox.top - ymin) / dy, 0);
 
-      const dataRange: number[] = [];
-      for (const [index, texture] of tile.textures) {
-        if (texture.userData?.dataRange && Array.isArray(texture.userData?.dataRange)) {
-          dataRange.push(...texture.userData.dataRange);
+          const dataRange: number[] = [];
+          for (const [index, texture] of tile.textures) {
+            if (texture.userData?.dataRange && Array.isArray(texture.userData?.dataRange)) {
+              dataRange.push(...texture.userData.dataRange);
+            }
+            mesh.program.setUniform(`u_image${index}`, texture);
+          }
+
+          if (dataRange.length > 0) {
+            mesh.program.setUniform('dataRange', dataRange);
+          }
+
+          mesh.updateMatrix();
+          mesh.worldMatrixNeedsUpdate = false;
+          mesh.worldMatrix.multiply(camera.worldMatrix, mesh.localMatrix);
+
+          const stencilMode = stencilModes[coord.overscaledZ];
+
+          if (stencilMode) {
+            if (stencilMode.stencil) {
+              this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
+
+              this.renderer.state.setStencilFunc(
+                stencilMode.func?.cmp,
+                stencilMode.func?.ref,
+                stencilMode.func?.mask,
+              );
+              this.renderer.state.setStencilOp(
+                stencilMode.op?.fail,
+                stencilMode.op?.zfail,
+                stencilMode.op?.zpass,
+              );
+            } else {
+              this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
+            }
+          }
+
+          mesh.draw({
+            ...utils.omit(rendererParams, ['target']),
+            camera,
+          });
         }
-        mesh.program.setUniform(`u_image${index}`, texture);
       }
-
-      if (dataRange.length > 0) {
-        mesh.program.setUniform('dataRange', dataRange);
-      }
-
-      mesh.updateMatrix();
-      mesh.worldMatrixNeedsUpdate = false;
-      mesh.worldMatrix.multiply(camera.worldMatrix, mesh.localMatrix);
-
-      const stencilMode = stencilModes[coord.overscaledZ];
-
-      if (stencilMode) {
-        if (stencilMode.stencil) {
-          this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
-
-          this.renderer.state.setStencilFunc(
-            stencilMode.func?.cmp,
-            stencilMode.func?.ref,
-            stencilMode.func?.mask,
-          );
-          this.renderer.state.setStencilOp(
-            stencilMode.op?.fail,
-            stencilMode.op?.zfail,
-            stencilMode.op?.zpass,
-          );
-        } else {
-          this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
-        }
-      }
-
-      mesh.draw({
-        ...utils.omit(rendererParams, ['target']),
-        camera,
-      });
     }
 
     if (renderTarget) {
@@ -221,15 +245,15 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     const sourceCache = source.sourceCache;
     if (Array.isArray(sourceCache)) {
       if (sourceCache.length === 2) {
-        this.renderTexture(this.#current, rendererParams, sourceCache[0]);
-        this.renderTexture(this.#next, rendererParams, sourceCache[1]);
+        this.renderTexture(this.#current, rendererParams, rendererState, sourceCache[0]);
+        this.renderTexture(this.#next, rendererParams, rendererState, sourceCache[1]);
       } else {
-        this.renderTexture(this.#current, rendererParams, sourceCache[0]);
-        this.renderTexture(this.#next, rendererParams, sourceCache[0]);
+        this.renderTexture(this.#current, rendererParams, rendererState, sourceCache[0]);
+        this.renderTexture(this.#next, rendererParams, rendererState, sourceCache[0]);
       }
     } else {
-      this.renderTexture(this.#current, rendererParams, sourceCache);
-      this.renderTexture(this.#next, rendererParams, sourceCache);
+      this.renderTexture(this.#current, rendererParams, rendererState, sourceCache);
+      this.renderTexture(this.#next, rendererParams, rendererState, sourceCache);
     }
   }
 }

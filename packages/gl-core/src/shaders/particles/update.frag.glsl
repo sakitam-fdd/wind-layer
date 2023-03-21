@@ -46,10 +46,8 @@ vec2 bilinear(const vec2 uv) {
 
 void main() {
     vec2 pos = texture2D(u_particles, vUv).xy;
-
     vec2 uv = pos;
-
-//    uv = vec2(u_bbox.x + (uv.x * u_bbox.z), u_bbox.y + (uv.y * u_bbox.w));
+    uv = u_bbox.xy + uv * (u_bbox.zw - u_bbox.xy);
 
     if (calcTexture(uv).a == 0.0) {
         discard;

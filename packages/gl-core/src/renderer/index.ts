@@ -43,6 +43,7 @@ export interface LayerOptions {
     dropRateBump?: number | any[];
   };
   getZoom?: () => number;
+  getExtent?: () => number[];
   opacity?: number;
   triggerRepaint?: () => void;
   displayRange?: [number, number];
@@ -520,6 +521,7 @@ export default class Layer {
         },
         {
           zoom: this.options?.getZoom?.() ?? 0,
+          extent: this.options?.getExtent?.(),
           opacity: this.#opacity,
           fadeOpacity: this.#fadeOpacity,
           numParticles: this.#numParticles,
@@ -539,6 +541,7 @@ export default class Layer {
     if (this.renderPipeline) {
       const state: any = {
         zoom: this.options?.getZoom?.() ?? 0,
+        extent: this.options?.getExtent?.(),
         opacity: this.#opacity,
         fadeOpacity: this.#fadeOpacity,
         numParticles: this.#numParticles,
