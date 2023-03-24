@@ -49,9 +49,7 @@ void main() {
 
     vec2 uv = pos;
 
-    uv = u_bbox.xy + uv * (u_bbox.zw - u_bbox.xy);
-
-    if (calcTexture(uv).a == 0.0) {
+    if (calcTexture(uv).a < 1.0) {
         discard;
     }
 

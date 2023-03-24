@@ -27,8 +27,8 @@ function getTileBounds(x, y, z, wrap = 0) {
   const min = getCoords(x, y, z);
   const max = getCoords(x + 1, y + 1, z);
 
-  const p1 = mapboxgl.MercatorCoordinate.fromLngLat([min[0], max[1]]);
-  const p2 = mapboxgl.MercatorCoordinate.fromLngLat([max[0], min[1]]);
+  const p1 = mapboxgl.MercatorCoordinate.fromLngLat([min[0], max[1]]); // 左上
+  const p2 = mapboxgl.MercatorCoordinate.fromLngLat([max[0], min[1]]); // 右下
 
   return {
     left: p1.x + wrap,
@@ -51,7 +51,6 @@ export default class Layer {
   public renderingMode: '2d' | '3d';
   public sync: CameraSync;
   public scene: Scene;
-  public orthoCamera: OrthographicCamera;
   public planeCamera: OrthographicCamera;
   public renderer: Renderer;
   private options: any;
@@ -81,10 +80,6 @@ export default class Layer {
 
   update() {
     this.sync.update();
-    if (this.orthoCamera) {
-      const { width, height } = (this.map as any).painter as any;
-      this.orthoCamera.orthographic(0, width, height, 0, 0, 1);
-    }
     if (this.layer) {
       this.layer.update();
     }
@@ -144,8 +139,6 @@ export default class Layer {
 
     this.scene = new Scene();
     this.sync = new CameraSync(map, 'perspective', this.scene);
-    const { width, height } = (this.map as any).painter as any;
-    this.orthoCamera = new OrthographicCamera(0, width, height, 0, 0, 1);
     this.planeCamera = new OrthographicCamera(0, 1, 1, 0, 0, 1);
     this.layer = new LayerCore(
       this.source,
@@ -273,7 +266,6 @@ export default class Layer {
     this.camera.updateMatrixWorld();
     this.layer?.prerender({
       camera: this.camera,
-      orthoCamera: this.orthoCamera,
       planeCamera: this.planeCamera,
     });
   }
@@ -284,7 +276,6 @@ export default class Layer {
     this.camera.updateMatrixWorld();
     this.layer?.render({
       camera: this.camera,
-      orthoCamera: this.orthoCamera,
       planeCamera: this.planeCamera,
     });
   }

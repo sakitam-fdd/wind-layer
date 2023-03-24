@@ -111,6 +111,11 @@ export default class Layer {
   private readonly dispatcher: any;
   private readonly source: SourceType;
   private raf: Raf;
+  private sharedState: {
+    u_bbox: [number, number, number, number];
+    u_offset: [number, number];
+    u_scale: [number, number];
+  };
 
   #opacity: number;
   #numParticles: number;
@@ -187,6 +192,11 @@ export default class Layer {
 
   initialize() {
     this.updateOptions({});
+    this.sharedState = {
+      u_bbox: [0, 0, 1, 1],
+      u_offset: [0, 0],
+      u_scale: [1, 1],
+    };
     this.renderPipeline = new Pipelines(this.renderer);
     const bandType = getBandType(this.options.renderFrom ?? RenderFrom.r);
     if (this.options.renderType === RenderType.image) {
@@ -527,7 +537,7 @@ export default class Layer {
           numParticles: this.#numParticles,
           colorRange: this.#colorRange,
           colorRampTexture: this.#colorRampTexture,
-          u_bbox: [0, 0, 1, 1],
+          sharedState: this.sharedState,
           u_data_matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
           u_drop_rate: this.#dropRate,
           u_drop_rate_bump: this.#dropRateBump,
@@ -549,7 +559,7 @@ export default class Layer {
         colorRampTexture: this.#colorRampTexture,
         displayRange: this.options.displayRange,
         useDisplayRange: Boolean(this.options.displayRange),
-        u_bbox: [0, 0, 1, 1],
+        sharedState: this.sharedState,
         u_data_matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
         u_drop_rate: this.#dropRate,
         u_drop_rate_bump: this.#dropRateBump,

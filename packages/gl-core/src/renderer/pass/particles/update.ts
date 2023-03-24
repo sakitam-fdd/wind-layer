@@ -167,7 +167,6 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
         'dataRange',
         'useDisplayRange',
         'displayRange',
-        'u_bbox',
         'u_data_matrix',
         'u_drop_rate',
         'u_drop_rate_bump',
@@ -188,6 +187,7 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
       this.#mesh.program.setUniform('u_fade_t', fade);
       this.#mesh.program.setUniform('u_rand_seed', Math.random());
       this.#mesh.program.setUniform('u_particles', this.#current.texture);
+      this.#mesh.program.setUniform('u_bbox', rendererState.sharedState.u_bbox);
 
       this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;

@@ -113,6 +113,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     let ymax = -Infinity;
     let zmax = -Infinity;
     // 1. 计算mapbox墨卡托坐标的最大最小值，构建真实瓦片范围
+    // mapbox 的坐标原点是左上角
     for (let n = 0; n < coordsDescending.length; n++) {
       const tileId = coordsDescending[n];
       const bounds = tileId.getTileBounds();
@@ -133,12 +134,21 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     const h = dy / zz;
 
     // 更新采样范围
-    rendererState.u_bbox = [
+    // 这里注意一个点我们的常规显示范围一定小于等于数据的范围
+    // ---------
+    // | ----- |
+    // | |   | |
+    // | |   | |
+    // | ----- |
+    // ---------
+    rendererState.sharedState.u_bbox = [
       (rendererState.extent[0] - xmin) / dx,
-      (rendererState.extent[1] - ymin) / dy,
+      utils.clamp((rendererState.extent[1] - ymin) / dy, 0, 1),
       (rendererState.extent[2] - xmin) / dx,
-      (rendererState.extent[3] - ymin) / dy,
+      utils.clamp((rendererState.extent[3] - ymin) / dy, 0, 1),
     ];
+    rendererState.sharedState.u_offset = [xmin, ymin]; // top left
+    rendererState.sharedState.u_scale = [dx, dy];
 
     if (renderTarget) {
       renderTarget.clear();
