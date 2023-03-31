@@ -121,12 +121,12 @@
       intervals: Array.from({ length: 23 }).map((i, index) => ({
         url: `http://localhost:5000/processed/2023041700/20230417${index < 10 ? '0' + index.toString() : index.toString()}/{z}/{x}/{y}/wind-surface.jpeg`
       })),
+      wrapX: true,
     });
 
     window.source = source;
 
     const layer = new mapboxWind.Layer('temp', source, {
-      wrapX: true,
       wireframe: true,
       styleSpec: {
         'fill-color': [

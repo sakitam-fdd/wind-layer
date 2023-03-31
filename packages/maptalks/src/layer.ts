@@ -1,7 +1,6 @@
 import * as maptalks from 'maptalks';
 import {
   Scene,
-  Matrix4,
   Vector3,
   Renderer,
   RenderTarget,
@@ -11,7 +10,7 @@ import {
   highPrecision,
 } from '@sakitam-gis/vis-engine';
 
-import { ScalarFill as ScalarCore } from 'wind-gl-core';
+import { Layer as LayerCore, SourceType, TileID } from 'wind-gl-core';
 
 import { Extent, getWidth } from './utils';
 
@@ -33,6 +32,39 @@ function coordinateToPoint(map, coordinate, res, out?: any) {
 const TEMP_COORD = new maptalks.Coordinate(0, 0);
 const TEMP_POINT = new maptalks.Point(0, 0);
 
+function getCoords(x, y, z) {
+  const zz = Math.pow(2, z);
+
+  const lng = (x / zz) * 360 - 180;
+  // const lng = x / zz;
+  let lat = (y / zz) * 360 - 180;
+  lat = (180 / Math.PI) * (2 * Math.atan(Math.exp((lat * Math.PI) / 180)) - Math.PI / 2);
+
+  return [lng, lat];
+}
+
+function getTileBounds(map, x, y, z, wrap = 0) {
+  // for Google/OSM tile scheme we need to alter the y
+  // eslint-disable-next-line no-param-reassign
+  y = 2 ** z - y - 1;
+
+  const min = getCoords(x, y, z);
+  const max = getCoords(x + 1, y + 1, z);
+
+  const res = getGLRes(map);
+
+  const p1 = coordinateToPoint(map, new maptalks.Coordinate([min[0], max[1]]), res); // 左上
+  const p2 = coordinateToPoint(map, new maptalks.Coordinate([max[0], min[1]]), res); // 右下
+
+  return {
+    left: p1.x + wrap,
+    top: p1.y,
+    right: p2.x + wrap,
+    bottom: p2.y,
+    lngLatBounds: [min[0], min[1], max[0], max[1]],
+  };
+}
+
 // from https://github.com/maptalks/maptalks.three/blob/master/src/index.ts
 class VeRenderer extends maptalks.renderer.CanvasLayerRenderer {
   scene: Scene;
@@ -40,10 +72,9 @@ class VeRenderer extends maptalks.renderer.CanvasLayerRenderer {
   canvas: HTMLCanvasElement & {
     gl: any;
   };
-  layer: VeLayer;
+  layer: Layer;
   gl: WebGLRenderingContext | WebGL2RenderingContext;
   context: Renderer;
-  matrix4: Matrix4;
   #renderTarget: RenderTarget | undefined;
 
   getPrepareParams(): Array<any> {
@@ -86,9 +117,14 @@ class VeRenderer extends maptalks.renderer.CanvasLayerRenderer {
   }
 
   #initRenderer() {
-    this.matrix4 = new Matrix4();
     const renderer = new Renderer(this.gl, {
       autoClear: false,
+      extensions: [
+        'OES_texture_float',
+        'OES_texture_float_linear',
+        'WEBGL_color_buffer_float',
+        'EXT_color_buffer_float',
+      ],
     });
     renderer.setSize(this.canvas.width, this.canvas.height);
     this.context = renderer;
@@ -103,6 +139,7 @@ class VeRenderer extends maptalks.renderer.CanvasLayerRenderer {
     const map = this.layer.getMap();
     const fov = (map.getFov() * Math.PI) / 180;
     this.camera = new PerspectiveCamera(fov, map.width / map.height, map.cameraNear, map.cameraFar);
+    this.planeCamera = new OrthographicCamera(0, 1, 1, 0, 0, 1);
     this.camera.matrixAutoUpdate = false;
     this.#syncCamera();
   }
@@ -186,9 +223,13 @@ class VeRenderer extends maptalks.renderer.CanvasLayerRenderer {
       });
       this.#renderTarget.restoreHandle();
     } else {
-      this.context.render({
+      this.layer.layer?.prerender({
         camera: this.camera,
-        scene: this.scene,
+        planeCamera: this.planeCamera,
+      });
+      this.layer.layer?.render({
+        camera: this.camera,
+        planeCamera: this.planeCamera,
       });
     }
     this.completeRender();
@@ -268,7 +309,7 @@ class VeRenderer extends maptalks.renderer.CanvasLayerRenderer {
   }
 }
 
-export type BaseLayerOptionType = {
+export interface BaseLayerOptionType {
   renderer?: string;
   doubleBuffer?: boolean;
   glOptions?: {
@@ -278,7 +319,7 @@ export type BaseLayerOptionType = {
   forceRenderOnRotating?: boolean;
   forceRenderOnZooming?: boolean;
   requestWebGl2?: boolean;
-};
+}
 
 const options: BaseLayerOptionType = {
   renderer: 'gl',
@@ -287,62 +328,130 @@ const options: BaseLayerOptionType = {
   forceRenderOnZooming: true,
 };
 
-class VeLayer extends maptalks.CanvasLayer {
-  options: BaseLayerOptionType;
+class Layer extends maptalks.CanvasLayer {
+  options: any;
   map: any;
   type: string;
   _needsUpdate = true;
+  _coordCache = {};
+  public layer: WithNull<LayerCore>;
+  private source: SourceType;
 
-  constructor(id: string, opts: BaseLayerOptionType) {
+  constructor(id: string, source: SourceType, opts: BaseLayerOptionType) {
     super(id, opts);
+    this.source = source;
     this.type = 'VeLayer';
+
+    this.tempLayer = new maptalks.TileLayer(`temp__${id}`, {
+      urlTemplate: 'custom',
+      tileSize: this.source.tileSize,
+      repeatWorld: false,
+    });
   }
 
-  public handleZoom() {
-    if (this.scalarRender) {
-      this.scalarRender.handleZoom();
+  handleZoom() {
+    if (this.layer) {
+      this.layer.update();
+      this.layer.handleZoom();
+    }
+  }
+
+  moveStart() {
+    if (this.layer) {
+      this.layer.update();
+      this.layer.moveStart();
+    }
+  }
+
+  moveEnd() {
+    if (this.layer) {
+      this.layer.update();
+      this.layer.moveEnd();
+    }
+  }
+
+  handleResize() {
+    this.update();
+  }
+
+  update() {
+    if (this.layer) {
+      this.layer.update();
     }
   }
 
   prepareToDraw(gl, scene) {
-    const opt = this.getOptions();
-    const data = this.getData();
-    this.scalarRender = new ScalarCore(
+    const opt = this.options;
+    const map = this.getMap();
+    const renderer = this._getRenderer();
+    if (!map || !renderer) {
+      return false;
+    }
+    this.layer = new LayerCore(
+      this.source,
       {
-        // @ts-ignore
-        renderer: this.renderer,
-        // @ts-ignore
-        scene: this.scene,
+        renderer: renderer.context,
+        scene: renderer.scene,
       },
       {
         opacity: opt.opacity,
-        renderForm: opt.renderForm,
+        renderType: opt.renderType,
+        renderFrom: opt.renderFrom,
         styleSpec: opt.styleSpec,
         displayRange: opt.displayRange,
         widthSegments: opt.widthSegments,
         heightSegments: opt.heightSegments,
-        createPlaneBuffer: opt.createPlaneBuffer,
         wireframe: opt.wireframe,
-        getZoom: () => this.getMap().getZoom(),
+        getZoom: () => map.getZoom(),
         triggerRepaint: () => {
-          this._redraw();
+          renderer.setToRedraw();
+        },
+        getViewTiles: (source: SourceType) => {
+          let { type } = source;
+          // @ts-ignore
+          type = type !== 'timeline' ? type : source.privateType;
+          const wrapTiles: TileID[] = [];
+          if (type === 'image') {
+            const x = 0;
+            const y = 0;
+            const z = 0;
+            const wrap = 0;
+            wrapTiles.push(
+              new TileID(z, x, y, z, wrap, {
+                getTileBounds: getTileBounds.bind(this, map),
+              }),
+            );
+          } else {
+            const { tileGrids } = this.tempLayer.getTiles();
+            const { tiles } = tileGrids[0];
+
+            for (let i = 0; i < tiles.length; i++) {
+              const tile = tiles[i];
+              wrapTiles.push(
+                new TileID(tile.z, tile.x, tile.y, tile.z, 0, {
+                  getTileBounds: getTileBounds.bind(this, map),
+                }),
+              );
+            }
+          }
+          return wrapTiles;
+        },
+        getExtent: () => {
+          const projExtent = map.getProjExtent();
+          return [projExtent.xmin, projExtent.ymin, projExtent.xmax, projExtent.ymax];
         },
       },
     );
 
-    this.scalarRender.getWorldCoordinate = ([lng, lat]: [number, number]) => {
-      const coords = coordinateToPoint(map, new Coordinate(lng, lat), getGLRes(map));
-      return [coords.x, coords.y];
-    };
+    map.on('zooming', this.handleZoom, this);
+    map.on('movestart', this.moveStart, this);
+    map.on('moving', this.update, this);
+    map.on('moveend', this.moveEnd, this);
+    map.on('zoomend', this.handleZoom, this);
+    map.on('resize', this.handleResize, this);
+    map.on('viewchange', this.update, this);
 
-    const map = this.getMap();
-    if (!map) {
-      return false;
-    }
-
-    map.on('zoom', this.handleZoom, this);
-
-    this.scalarRender.setData(data);
+    this.update();
   }
 
   isRendering(): boolean {
@@ -577,14 +686,6 @@ class VeLayer extends maptalks.CanvasLayer {
     return this;
   }
 
-  getVeRenderer(): WithNull<Renderer> {
-    const renderer = this._getRenderer();
-    if (renderer) {
-      return renderer.context;
-    }
-    return null;
-  }
-
   /**
    * 添加 Mesh
    * @param meshes
@@ -638,6 +739,8 @@ class VeLayer extends maptalks.CanvasLayer {
     const map = this.map || this.getMap();
     if (!map) return this;
 
+    map.addLayer(this.tempLayer);
+
     this._needsUpdate = true;
 
     return this;
@@ -647,13 +750,25 @@ class VeLayer extends maptalks.CanvasLayer {
     super.onRemove();
     const map = this.map || this.getMap();
     if (!map) return this;
+    this.tempLayer.remove();
+    map?.off('zooming', this.handleZoom, this);
+    map?.off('zoomend', this.handleZoom, this);
+    map?.off('movestart', this.moveStart, this);
+    map?.off('moving', this.update, this);
+    map?.off('moveend', this.moveEnd, this);
+    map?.off('resize', this.handleResize, this);
+    map?.off('viewchange', this.update, this);
+
     this.clear();
+    if (this.layer) {
+      this.layer = null;
+    }
     return this;
   }
 }
 
-VeLayer.mergeOptions(options);
+Layer.mergeOptions(options);
 
-VeLayer.registerRenderer('gl', VeRenderer);
+Layer.registerRenderer('gl', VeRenderer);
 
-export { VeLayer, VeRenderer };
+export { Layer, VeRenderer };

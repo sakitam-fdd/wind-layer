@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import RequestScheduler from './RequestScheduler';
 import {
   arrayBufferToImageBitmap,
@@ -317,6 +316,11 @@ export class RequestAdapter {
     }
   }
 
+  /**
+   * geotiff 解析
+   * @param data
+   * @param callback
+   */
   arrayBuffer2tiff(data: ArrayBuffer, callback: any) {
     // @ts-ignore
     if (!self.GeoTIFF) {
@@ -394,6 +398,11 @@ export class RequestAdapter {
       });
   }
 
+  /**
+   * 解析 exif 信息
+   * @param data
+   * @param callback
+   */
   parseExif(data: ArrayBuffer, callback: any) {
     // @ts-ignore
     if (!self.exifr) {
@@ -427,32 +436,29 @@ export class RequestAdapter {
   fetch(params, callback) {
     let aborted = false;
 
-    const promise = this.requestScheduler.scheduleRequest(params);
-
-    const cb = (...args) => {
-      promise.then((requestToken) => {
-        if (!requestToken) {
-          aborted = true;
-          return;
-        }
-
-        if (aborted) {
-          requestToken.done();
-          return;
-        }
-
-        callback(...args);
-
-        requestToken.done();
+    const r = this.requestScheduler.scheduleRequest(() => {
+      const p = new Promise((resolve) => {
+        const request = makeRequest(params, (...args) => {
+          if (aborted) {
+            resolve(false);
+            return;
+          }
+          callback(...args);
+          resolve(args);
+        });
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        p.cancel = () => {
+          request.cancel();
+        };
       });
-    };
-
-    const request = makeRequest(params, cb);
+      return p;
+    });
 
     return {
       cancel: () => {
         aborted = true;
-        request.cancel();
+        r.cancel();
       },
     };
   }

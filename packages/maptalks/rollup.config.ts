@@ -92,9 +92,9 @@ const umdBuild: RollupOptions = {
       var __warnings = {};
 
       function __warnOnce(msg) {
-        if (!warnings[msg]) {
+        if (!__warnings[msg]) {
           console.warn('[maptalks-wind]: ', msg);
-          warnings[msg] = true;
+          __warnings[msg] = true;
         }
       }
       var G = typeof window === "undefined" ? global : window;
