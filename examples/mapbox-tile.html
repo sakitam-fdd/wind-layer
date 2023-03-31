@@ -87,7 +87,7 @@
   map.on('load', function () {
     const tempInterpolateColor = color.temp.reduce((result, item, key) => result.concat(item[0] - 273.15, 'rgba(' + item[1].join(',') + ')'), []);
 
-    mapboxWind.configDeps(['./geotiff.js', './full.umd.js']);
+    mapboxWind.configDeps(['https://unpkg.com/geotiff/dist-browser/geotiff.js', 'https://unpkg.com/exifr/dist/full.umd.js']);
 
     const tileSource = new mapboxWind.TileSource('temp', {
       type: 'tile',

@@ -6,7 +6,7 @@ export type Coordinates = [number, number];
 export function containsCoordinate(extent: Extent, coordinate: Coordinates): boolean {
   const x = coordinate[0];
   const y = coordinate[1];
-  return extent[0] <= x && x <= extent[2] && extent[1] <= y && y <= extent[3]
+  return extent[0] <= x && x <= extent[2] && extent[1] <= y && y <= extent[3];
 }
 
 export function containsExtent(extent1: Extent, extent2: Extent): boolean {
@@ -61,13 +61,18 @@ export function transform(input: number[], opt_output: number[], opt_dimension: 
   }
   for (let i = 0; i < length; i += dimension) {
     output[i] = (180 * input[i]) / 20037508.342789244;
-    output[i + 1] =
-      (360 * Math.atan(Math.exp(input[i + 1] / 6378137))) / Math.PI - 90;
+    output[i + 1] = (360 * Math.atan(Math.exp(input[i + 1] / 6378137))) / Math.PI - 90;
   }
   return output;
 }
 
-export function createOrUpdate(minX: number, minY: number, maxX: number, maxY: number, opt_extent: Extent | undefined) {
+export function createOrUpdate(
+  minX: number,
+  minY: number,
+  maxX: number,
+  maxY: number,
+  opt_extent: Extent | undefined,
+) {
   if (opt_extent) {
     opt_extent[0] = minX;
     opt_extent[1] = minY;
@@ -87,7 +92,12 @@ export function boundingExtentXYs(xs: number[], ys: number[], opt_extent: Extent
   return createOrUpdate(minX, minY, maxX, maxY, opt_extent);
 }
 
-export function applyTransform(extent: Extent, transformFn: typeof transform, opt_extent: Extent | undefined, opt_stops: number) {
+export function applyTransform(
+  extent: Extent,
+  transformFn: typeof transform,
+  opt_extent: Extent | undefined,
+  opt_stops: number,
+) {
   let coordinates: number[] = [];
   if (opt_stops > 1) {
     const width = extent[2] - extent[0];
@@ -101,7 +111,7 @@ export function applyTransform(extent: Extent, transformFn: typeof transform, op
         extent[2] - (width * i) / opt_stops,
         extent[3],
         extent[0],
-        extent[3] - (height * i) / opt_stops
+        extent[3] - (height * i) / opt_stops,
       );
     }
   } else {

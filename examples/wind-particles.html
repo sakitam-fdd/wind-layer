@@ -127,7 +127,7 @@
       [104,[128,128,128,255]]]
   };
 
-  mapboxWind.configDeps(['./geotiff.js', './full.umd.js']);
+  mapboxWind.configDeps(['https://unpkg.com/geotiff/dist-browser/geotiff.js', 'https://unpkg.com/exifr/dist/full.umd.js']);
 
   map.on('load', function () {
     const interpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);

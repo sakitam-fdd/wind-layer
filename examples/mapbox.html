@@ -4,8 +4,8 @@
   <meta charset='utf-8'/>
   <title>mapbox wind</title>
   <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'/>
-  <script src="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.js"></script>
-  <link href="https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/mapbox-gl@1.13.3/dist/mapbox-gl.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/mapbox-gl@1.13.3/dist/mapbox-gl.css">
   <style>
     body {
       margin: 0;
@@ -88,63 +88,55 @@
   };
 
   map.on('load', function () {
-    const tempInterpolateColor = color.temp.reduce((result, item, key) => result.concat(item[0] - 273.15, 'rgba(' + item[1].join(',') + ')'), []);
-
-    const fillLayer = new mapboxWind.ScalarFill('wind', {
-      // "type": "jsonArray",
-      // "data": data,
-      "type": "image",
-      "url": "./data/var_tmp.png",
-      // 'extent': [
-      //   [data[0]['header'].lo1, data[0]['header'].la1],
-      //   [data[0]['header'].lo1, data[0]['header'].la2],
-      //   [data[0]['header'].lo2, data[0]['header'].la1],
-      //   [data[0]['header'].lo2, data[0]['header'].la2],
-      // ],
-      // top left, top right, bottom right, bottom left
-      "extent": [
-        [-180 / 2, 85.051129 / 2, 1000],
-        [180 / 2, 85.051129 / 2, 1000],
-        [180 / 2, -85.051129 / 2, 1000],
-        [-180 / 2, -85.051129 / 2, 1000],
-      ],
-      "width": 1440,
-      "height": 720,
-      // "width": data[0]['header']['nx'],
-      // "height": data[0]['header']['ny'] - 1,
-      "min": -50.84996643066404,
-      // "min": -63.83,
-      "max": 42.25002441406252,
-      // "max": 36.86,
-    }, {
-      wrapX: true,
-      wireframe: true,
-      styleSpec: {
-        'fill-color': [
-          'interpolate',
-          ['linear'],
-          ['get', 'value'],
-          ...tempInterpolateColor
-        ],
-        'opacity': [
-          'interpolate',
-          ['exponential', 0.5],
-          ['zoom'],
-          1,
-          1,
-          2,
-          1
-        ],
-      },
-      renderForm: 'r',
-      widthSegments: 64,
-      heightSegments: 32,
-      // widthSegments: 1,
-      // heightSegments: 1,
-      // displayRange: [0, 80],
-    });
-
-    map.addLayer(fillLayer);
+    fetch('https://blog.sakitam.com/wind-layer/data/wind.json')
+      // fetch('./data/uv.json')
+      .then(res => res.json())
+      .then(data => {
+        console.log(data);
+        window.windLayer = new mapboxWind.WindLayer('wind', data, {
+          windOptions: {
+            // colorScale: (m) => {
+            //   // console.log(m);
+            //   return '#fff';
+            // },
+            colorScale: [
+              "rgb(36,104, 180)",
+              "rgb(60,157, 194)",
+              "rgb(128,205,193 )",
+              "rgb(151,218,168 )",
+              "rgb(198,231,181)",
+              "rgb(238,247,217)",
+              "rgb(255,238,159)",
+              "rgb(252,217,125)",
+              "rgb(255,182,100)",
+              "rgb(252,150,75)",
+              "rgb(250,112,52)",
+              "rgb(245,64,32)",
+              "rgb(237,45,28)",
+              "rgb(220,24,32)",
+              "rgb(180,0,35)"
+            ],
+            // velocityScale: 1 / 20,
+            // paths: 5000,
+            frameRate: 16,
+            maxAge: 60,
+            globalAlpha: 0.9,
+            velocityScale: 0.01,
+            // velocityScale: () => {
+            // 	const zoom = map.getZoom();
+            // 	return velocityScales[zoom] || 0.01
+            // },
+            // paths: 10000,
+            paths: 3782,
+          },
+          fieldOptions: {
+            wrapX: true,
+          },
+        });
+        console.log(map, window.windLayer);
+        // map.addLayer(window.windLayer);
+        window.windLayer.addTo(map);
+      });
   });
 </script>
 </body>

@@ -39,7 +39,7 @@
 
   window.map = map;
 
-  mtkWind.configDeps(['./geotiff.js', './full.umd.js']);
+  mtkWind.configDeps(['https://unpkg.com/geotiff/dist-browser/geotiff.js', 'https://unpkg.com/exifr/dist/full.umd.js']);
 
   const source = new mtkWind.TimelineSource('temp', {
     sourceType: 'TileSource',

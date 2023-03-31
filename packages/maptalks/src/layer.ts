@@ -12,8 +12,6 @@ import {
 
 import { Layer as LayerCore, SourceType, TileID } from 'wind-gl-core';
 
-import { Extent, getWidth } from './utils';
-
 type WithNull<T> = T | null;
 
 highPrecision(true);
@@ -55,6 +53,31 @@ function getTileBounds(map, x, y, z, wrap = 0) {
 
   const p1 = coordinateToPoint(map, new maptalks.Coordinate([min[0], max[1]]), res); // 左上
   const p2 = coordinateToPoint(map, new maptalks.Coordinate([max[0], min[1]]), res); // 右下
+
+  // const projObject = map.getProjection().fullExtent;
+  // const projectionExtent = [
+  //   projObject.left,
+  //   projObject.bottom,
+  //   projObject.right,
+  //   projObject.top,
+  // ] as Extent;
+  //
+  // const projWorldWidth = Math.abs(
+  //   coordinateToPoint(
+  //     map,
+  //     map
+  //       .getProjection()
+  //       .unprojectCoords(new maptalks.Coordinate([projectionExtent[0], projectionExtent[1]])),
+  //     getGLRes(map),
+  //   ).x -
+  //     coordinateToPoint(
+  //       map,
+  //       map
+  //         .getProjection()
+  //         .unprojectCoords(new maptalks.Coordinate([projectionExtent[2], projectionExtent[3]])),
+  //       getGLRes(map),
+  //     ).x,
+  // );
 
   return {
     left: p1.x + wrap,
@@ -253,59 +276,8 @@ class VeRenderer extends maptalks.renderer.CanvasLayerRenderer {
     camera.updateMatrixWorld();
   }
 
-  getWrappedWorlds() {
-    const map = this.getMap();
-    const projObject = map.getProjection().fullExtent;
-    const projectionExtent = [
-      projObject.left,
-      projObject.bottom,
-      projObject.right,
-      projObject.top,
-    ] as Extent;
-    const projExtent = map.getProjExtent();
-    const extent = [projExtent.xmin, projExtent.ymin, projExtent.xmax, projExtent.ymax];
-    let startX = extent[0];
-    const worldWidth = getWidth(projectionExtent);
-    const projWorldWidth = Math.abs(
-      coordinateToPoint(
-        map,
-        map
-          .getProjection()
-          .unprojectCoords(new maptalks.Coordinate([projectionExtent[0], projectionExtent[1]])),
-        getGLRes(map),
-      ).x -
-        coordinateToPoint(
-          map,
-          map
-            .getProjection()
-            .unprojectCoords(new maptalks.Coordinate([projectionExtent[2], projectionExtent[3]])),
-          getGLRes(map),
-        ).x,
-    );
-    let world = 0;
-
-    const result: number[] = [];
-
-    const layer = this.layer;
-    const opt = layer.getOptions();
-    if (opt.wrapX) {
-      while (startX < projectionExtent[0]) {
-        --world;
-        result.push(world * projWorldWidth);
-        startX += worldWidth;
-      }
-      world = 0;
-      startX = extent[2];
-      while (startX > projectionExtent[2]) {
-        ++world;
-        result.push(world * projWorldWidth);
-        startX -= worldWidth;
-      }
-    }
-
-    result.push(0);
-
-    return result;
+  isTileCachedOrLoading() {
+    return false;
   }
 }
 
@@ -328,7 +300,7 @@ const options: BaseLayerOptionType = {
   forceRenderOnZooming: true,
 };
 
-class Layer extends maptalks.CanvasLayer {
+class Layer extends maptalks.TileLayer {
   options: any;
   map: any;
   type: string;
@@ -338,40 +310,51 @@ class Layer extends maptalks.CanvasLayer {
   private source: SourceType;
 
   constructor(id: string, source: SourceType, opts: BaseLayerOptionType) {
-    super(id, opts);
-    this.source = source;
-    this.type = 'VeLayer';
-
-    this.tempLayer = new maptalks.TileLayer(`temp__${id}`, {
+    super(id, {
+      ...opts,
       urlTemplate: 'custom',
-      tileSize: this.source.tileSize,
+      tileSize: source.tileSize,
       repeatWorld: false,
     });
+    this.source = source;
+    this.type = 'VeLayer';
   }
 
-  handleZoom() {
-    if (this.layer) {
-      this.layer.update();
-      this.layer.handleZoom();
-    }
-  }
-
-  moveStart() {
+  onMoveStart() {
     if (this.layer) {
       this.layer.update();
       this.layer.moveStart();
     }
   }
 
-  moveEnd() {
+  onMoving() {
+    this.layer?.update();
+  }
+
+  onMoveEnd() {
     if (this.layer) {
       this.layer.update();
       this.layer.moveEnd();
     }
   }
 
-  handleResize() {
+  onResize() {
     this.update();
+  }
+
+  onZoomStart() {
+    this.layer?.update();
+  }
+
+  onZooming() {
+    if (this.layer) {
+      this.layer.update();
+      this.layer.handleZoom();
+    }
+  }
+
+  onZoomEnd() {
+    this.layer?.update();
   }
 
   update() {
@@ -422,11 +405,15 @@ class Layer extends maptalks.CanvasLayer {
               }),
             );
           } else {
-            const { tileGrids } = this.tempLayer.getTiles();
+            const { tileGrids } = this.getTiles();
             const { tiles } = tileGrids[0];
-
             for (let i = 0; i < tiles.length; i++) {
               const tile = tiles[i];
+
+              // const res = map._getResolution(tile.z);
+              // const tileConfig = this._getTileConfig();
+              // const tileExtent = tileConfig.getTilePrjExtent(tile.x, tile.y, res);
+
               wrapTiles.push(
                 new TileID(tile.z, tile.x, tile.y, tile.z, 0, {
                   getTileBounds: getTileBounds.bind(this, map),
@@ -443,12 +430,6 @@ class Layer extends maptalks.CanvasLayer {
       },
     );
 
-    map.on('zooming', this.handleZoom, this);
-    map.on('movestart', this.moveStart, this);
-    map.on('moving', this.update, this);
-    map.on('moveend', this.moveEnd, this);
-    map.on('zoomend', this.handleZoom, this);
-    map.on('resize', this.handleResize, this);
     map.on('viewchange', this.update, this);
 
     this.update();
@@ -739,8 +720,6 @@ class Layer extends maptalks.CanvasLayer {
     const map = this.map || this.getMap();
     if (!map) return this;
 
-    map.addLayer(this.tempLayer);
-
     this._needsUpdate = true;
 
     return this;
@@ -750,13 +729,7 @@ class Layer extends maptalks.CanvasLayer {
     super.onRemove();
     const map = this.map || this.getMap();
     if (!map) return this;
-    this.tempLayer.remove();
-    map?.off('zooming', this.handleZoom, this);
-    map?.off('zoomend', this.handleZoom, this);
-    map?.off('movestart', this.moveStart, this);
-    map?.off('moving', this.update, this);
-    map?.off('moveend', this.moveEnd, this);
-    map?.off('resize', this.handleResize, this);
+
     map?.off('viewchange', this.update, this);
 
     this.clear();

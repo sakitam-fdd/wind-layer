@@ -1,16 +1,7 @@
 import { CanvasLayer, renderer, Coordinate, Point } from 'maptalks';
 
-import {
-  WindCore,
-  Field,
-  isArray,
-  formatData,
-  assign,
-  defaultOptions,
-} from 'wind-core';
+import { WindCore, Field, isArray, formatData, assign, defaultOptions } from 'wind-core';
 import type { IField, IOptions } from 'wind-core';
-
-import { ScalarLayer, ScalarLayerRenderer } from './ScalarLayer';
 
 import { containsCoordinate, Extent, transformExtent } from './utils';
 
@@ -26,7 +17,7 @@ const _options = {
   windOptions: {},
 };
 
-export interface IWindLayerRenderer {}
+export type IWindLayerRenderer = any;
 
 export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements IWindLayerRenderer {
   private _drawContext: CanvasRenderingContext2D;
@@ -79,7 +70,7 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
       }
 
       if (this.wind) {
-        this.wind.prerender()
+        this.wind.prerender();
 
         this.wind.render();
       }
@@ -90,10 +81,7 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
   project(coordinate: [number, number]): [number, number] {
     const map = this.getMap();
     const pixel = map.coordinateToContainerPoint(new Coordinate(coordinate[0], coordinate[1]));
-    return [
-      pixel.x,
-      pixel.y,
-    ];
+    return [pixel.x, pixel.y];
   }
 
   unproject(pixel: [number, number]): [number, number] {
@@ -182,7 +170,6 @@ export class WindLayerRenderer extends renderer.CanvasLayerRenderer implements I
     return super.prepareCanvas();
   }
 
-
   private prepareDrawContext() {
     super.prepareDrawContext();
   }
@@ -232,7 +219,7 @@ class MaptalksWind extends CanvasLayer {
   /**
    * get wind layer data
    */
-  public getData () {
+  public getData() {
     return this.field;
   }
 
@@ -242,7 +229,7 @@ class MaptalksWind extends CanvasLayer {
    * @param options
    * @returns {WindLayer}
    */
-  public setData (data: any, options: Partial<IField> = {}) {
+  public setData(data: any, options: Partial<IField> = {}) {
     if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
@@ -251,9 +238,9 @@ class MaptalksWind extends CanvasLayer {
       console.error('Illegal data');
     }
 
-    const renderer = this._getRenderer();
-    if (renderer && renderer.wind && this.field) {
-      renderer.wind.updateData(this.field);
+    const r = this._getRenderer();
+    if (r && r.wind && this.field) {
+      r.wind.updateData(this.field);
     }
 
     return this;
@@ -265,10 +252,10 @@ class MaptalksWind extends CanvasLayer {
       windOptions: assign(beforeOptions, options || {}),
     });
 
-    const renderer = this._getRenderer();
-    if (renderer && renderer.wind) {
+    const r = this._getRenderer();
+    if (r && r.wind) {
       const windOptions = this.options.windOptions;
-      renderer.wind.setOptions(windOptions);
+      r.wind.setOptions(windOptions);
     }
   }
 
@@ -301,11 +288,6 @@ MaptalksWind.registerRenderer('canvas', WindLayerRenderer);
 
 const WindLayer = MaptalksWind;
 
-export {
-  Field,
-  WindLayer,
-  ScalarLayer,
-  ScalarLayerRenderer,
-};
+export { Field, WindCore, WindLayer, formatData };
 
 export default MaptalksWind;
