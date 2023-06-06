@@ -14,5 +14,7 @@
     "openlayers-wind": "1.1.2",
     "wind-gl-worker": "1.1.2"
   },
-  "changesets": []
+  "changesets": [
+    "weak-eagles-watch"
+  ]
 }
