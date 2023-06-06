@@ -137,7 +137,7 @@ importers:
 
   packages/gl-core:
     specifiers:
-      '@sakitam-gis/vis-engine': ^1.0.0
+      '@sakitam-gis/vis-engine': ^1.5.0
       wind-gl-worker: workspace:*
     dependencies:
       '@sakitam-gis/vis-engine': 1.5.0
@@ -158,7 +158,7 @@ importers:
 
   packages/mapbox-gl:
     specifiers:
-      '@sakitam-gis/vis-engine': ^1.0.0
+      '@sakitam-gis/vis-engine': ^1.5.0
       '@types/mapbox-gl': ^1.9.1
       mapbox-gl: ^1.8.0
       wind-core: workspace:*
@@ -173,7 +173,7 @@ importers:
 
   packages/maptalks:
     specifiers:
-      '@sakitam-gis/vis-engine': ^1.0.0
+      '@sakitam-gis/vis-engine': ^1.5.0
       maptalks: ^1.0.0-rc.10
       wind-core: workspace:*
       wind-gl-core: workspace:*
