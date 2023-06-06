@@ -1,6 +1,6 @@
 {
   "name": "wind-gl-worker",
-  "version": "1.1.2",
+  "version": "2.0.0-alpha.0",
   "description": "webworker for wind-gl-core",
   "keywords": [
     "weather",
