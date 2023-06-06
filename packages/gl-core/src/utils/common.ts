@@ -1,5 +1,5 @@
 import { utils } from '@sakitam-gis/vis-engine';
-import {Bounds} from "../type";
+import { Bounds } from '../type';
 
 export function calcMinMax(array: number[]): [number, number] {
   let min = Infinity;
@@ -78,9 +78,9 @@ export function resolveURL(path: string): string {
  * 判断大小端
  */
 export const littleEndian = (function machineIsLittleEndian() {
-  const uint8Array = new Uint8Array([0xAA, 0xBB]);
+  const uint8Array = new Uint8Array([0xaa, 0xbb]);
   const uint16array = new Uint16Array(uint8Array.buffer);
-  return uint16array[0] === 0xBBAA;
+  return uint16array[0] === 0xbbaa;
 })();
 
 /**
