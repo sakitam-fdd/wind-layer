@@ -36,9 +36,11 @@ Getting Started
 - [x] TimelineSource（时序数据源）支持。
 - [ ] 粒子渲染，支持瓦片和单张。
 
-![fill](https://sakitam-fdd.github.io/wind-layer/wind-animation.mp4)
+- fill
+  https://sakitam-fdd.github.io/wind-layer/wind-animation.mp4
 
-![particles](https://sakitam-fdd.github.io/wind-layer/particles.mp4)
+- particles
+  https://sakitam-fdd.github.io/wind-layer/particles.mp4
 
 示例请查看
 
