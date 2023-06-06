@@ -21,12 +21,20 @@ extension to show wind field。
 ## 关于webgl
 
 其中的大部分代码来自于 [webgl-wind](https://github.com/mapbox/webgl-wind) 和 [windgl](https://github.com/astrosat/windgl),
-并且色斑图目前只针对 `mapbox` 和 `maptalks` 做了相关适配, 相关示例请查看[mapbox](https://github.com/sakitam-fdd/wind-layer/examples/mapbox.html)和[maptalks](https://github.com/sakitam-fdd/wind-layer/examples/maptalks.html)。
-其所使用的数据为单通道或者双通道图片，需要对原始grib做预处理。
+并且色斑图目前只针对 `mapbox` 和 `maptalks` 做了相关适配。
 
-粒子图层暂时只适配了 `mapbox-gl`，示例请查看 [mapbox-particles](https://codepen.io/sakitam-fdd/pen/vYjdQbr)。
+目前计划支持的图层如下：
 
-对于 webgl 图层，目前处于积极开发状态，会有较大的 api 变动。
+- [x] 常规 raster 图层，为了解决多时次瓦片序列播放问题。
+- [x] 常规 Image 图层，单张 raster 图层。
+- [x] 色斑图渲染，支持瓦片和单张。
+- [x] 多数据源支持（geotiff、灰度图-可解析带 exif 信息、png-多通道浮点数压缩）。
+- [x] TimelineSource（时序数据源）支持。
+- [ ] 粒子渲染，支持瓦片和单张。
+
+![fill](https://sakitam-fdd.github.io/wind-layer/wind-animation.mp4)
+
+![particles](https://sakitam-fdd.github.io/wind-layer/particles.mp4)
 
 ## 示例图片
 

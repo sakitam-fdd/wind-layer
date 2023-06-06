@@ -182,7 +182,7 @@
       hasMask: false,
       renderType: 1,
     });
-    const wind = new mapboxWind.Layer('wind', tileSource, {
+    const wind = new mapboxWind.Layer('wind', imageSource, {
       wireframe: false,
       styleSpec: {
         'fill-color': [
@@ -215,7 +215,7 @@
       renderType: 2,
     });
 
-    // map.addLayer(fill);
+    map.addLayer(fill);
     map.addLayer(wind);
   });
 </script>
