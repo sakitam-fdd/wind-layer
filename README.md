@@ -38,10 +38,6 @@ extension to show wind field。
 
 ## 示例图片
 
-![mapbox](https://sakitam-fdd.github.io/wind-layer/mapbox.gif)
-
-![maptalks](https://sakitam-fdd.github.io/wind-layer/maptalks.gif)
-
 ![wind](https://sakitam-fdd.github.io/wind-layer/wind.png)
 
 ## 扩展
