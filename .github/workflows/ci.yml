@@ -38,7 +38,7 @@ jobs:
             ${{ runner.os }}-${{ matrix.node-version }}-test-
             ${{ runner.os }}-
       - name: Install pnpm
-        run: npm i -g pnpm
+        run: npm i -g pnpm@7.14.0
 
       - name: Install deps
         run: pnpm i
@@ -76,7 +76,7 @@ jobs:
             ${{ runner.os }}-${{ matrix.node-version }}-release-${{ env.cache-name }}-
             ${{ runner.os }}-${{ matrix.node-version }}-release-
             ${{ runner.os }}-
-      - run: npm i -g pnpm
+      - run: npm i -g pnpm@7.14.0
       - run: pnpm i
 
       - name: Create Release Pull Request or Publish to npm
@@ -111,7 +111,7 @@ jobs:
             ${{ runner.os }}-${{ matrix.node-version }}-release-${{ env.cache-name }}-
             ${{ runner.os }}-${{ matrix.node-version }}-release-
             ${{ runner.os }}-
-      - run: npm i -g pnpm
+      - run: npm i -g pnpm@7.14.0
       - run: pnpm i
       - run: pnpm build
       - run: pnpm docs:api
