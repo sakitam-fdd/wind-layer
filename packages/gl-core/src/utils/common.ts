@@ -186,3 +186,7 @@ export function containsXY(extent, x, y) {
 export function inRange(value: number, start: number, end: number) {
   return value >= start && value < end;
 }
+
+export function mod(x, y) {
+  return ((x % y) + y) % y;
+}

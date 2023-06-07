@@ -19,7 +19,10 @@ export interface ParticlesPassOptions {
   source: SourceType;
   texture: Texture;
   textureNext: Texture;
-  getParticles: () => Texture;
+  getParticles: () => {
+    currentParticles: Texture;
+    nextParticles: Texture;
+  };
   bandType: BandType;
   getParticleNumber: () => number;
   hasMask?: boolean;
@@ -136,10 +139,11 @@ export default class Particles extends Pass<ParticlesPassOptions> {
     const particleRes = Math.ceil(Math.sqrt(this.options.getParticleNumber()));
     this.particleStateResolution = particleRes;
     this.#privateNumParticles = particleRes * particleRes;
-    const particleIndices = new Float32Array(this.#privateNumParticles);
-    const particleReferences = new Float32Array(this.#privateNumParticles * 2);
+    const indexCount = this.#privateNumParticles;
+    const particleIndices = new Float32Array(indexCount);
+    const particleReferences = new Float32Array(indexCount * 2);
 
-    for (let i = 0; i < this.#privateNumParticles; i++) {
+    for (let i = 0; i < indexCount; i++) {
       const t = (i % particleRes) / particleRes;
       const a = Math.trunc(i / particleRes) / particleRes;
       particleReferences.set([t, a], 2 * i);
@@ -205,17 +209,17 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       this.#mesh.program.setUniform('u_colorRamp', rendererState.colorRampTexture);
       this.#mesh.program.setUniform('u_data_matrix', rendererState.u_data_matrix);
       this.#mesh.program.setUniform('u_colorRange', rendererState.colorRange);
-      this.#mesh.program.setUniform('u_particles', this.options.getParticles());
+
+      const particleTextures = this.options.getParticles();
+
+      this.#mesh.program.setUniform('u_particles', particleTextures.currentParticles);
+      this.#mesh.program.setUniform('u_particles_next', particleTextures.nextParticles);
       this.#mesh.program.setUniform('u_particlesRes', this.#privateNumParticles);
 
       const sharedState = rendererState.sharedState;
 
-      this.#mesh.program.setUniform('u_bbox', sharedState.u_bbox);
-      const u_offset = sharedState.u_offset;
-      if (u_offset) {
-        this.#mesh.scale.set(sharedState.u_scale[0], sharedState.u_scale[1], 1);
-        this.#mesh.position.set(u_offset[0], u_offset[1], 0);
-      }
+      this.#mesh.program.setUniform('u_bbox', rendererState.extent);
+      this.#mesh.program.setUniform('u_data_bbox', sharedState.u_data_bbox);
 
       this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;

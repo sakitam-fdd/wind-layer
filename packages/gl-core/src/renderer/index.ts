@@ -113,6 +113,7 @@ export default class Layer {
   private raf: Raf;
   private sharedState: {
     u_bbox: [number, number, number, number];
+    u_data_bbox: [number, number, number, number];
     u_offset: [number, number];
     u_scale: [number, number];
   };
@@ -194,6 +195,7 @@ export default class Layer {
     this.updateOptions({});
     this.sharedState = {
       u_bbox: [0, 0, 1, 1],
+      u_data_bbox: [0, 0, 1, 1],
       u_offset: [0, 0],
       u_scale: [1, 1],
     };
@@ -252,7 +254,7 @@ export default class Layer {
         source: this.source,
         texture: composePass.textures.current,
         textureNext: composePass.textures.next,
-        getParticles: () => updatePass.textures.particles,
+        getParticles: () => updatePass.textures,
         getParticleNumber: () => this.#numParticles,
       });
 
@@ -360,6 +362,10 @@ export default class Layer {
     this.#dropRateBump = dropRateBump;
   }
 
+  /**
+   * 解析样式配置
+   * @param clear
+   */
   parseStyleSpec(clear) {
     if (isFunction(this.options.getZoom)) {
       const zoom = this.options.getZoom();
@@ -470,6 +476,12 @@ export default class Layer {
 
   moveStart() {
     if (this.renderPipeline && this.options.renderType === RenderType.particles) {
+      const particlesPass = this.renderPipeline.getPass('ParticlesPass');
+
+      if (particlesPass) {
+        particlesPass.resetParticles();
+      }
+
       this.renderPipeline.passes.forEach((pass) => {
         if (pass.id === 'ParticlesTexturePass' || pass.id === 'ScreenPass') {
           pass.enabled = false;
@@ -486,7 +498,7 @@ export default class Layer {
       const updatePass = this.renderPipeline.getPass('UpdatePass');
 
       if (updatePass) {
-        updatePass.initializeRenderTarget();
+        // updatePass.initializeRenderTarget();
       }
 
       this.renderPipeline.passes.forEach((pass) => {
@@ -496,7 +508,6 @@ export default class Layer {
 
         if (pass.id === 'ParticlesPass') {
           pass.prerender = true;
-          pass.resetParticles();
         }
       });
     }

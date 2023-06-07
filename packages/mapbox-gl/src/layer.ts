@@ -1,12 +1,12 @@
 import * as mapboxgl from 'mapbox-gl';
 
-import { Renderer, Scene, OrthographicCamera, utils } from '@sakitam-gis/vis-engine';
+import {OrthographicCamera, Renderer, Scene, utils} from '@sakitam-gis/vis-engine';
 
-import type { LayerOptions, SourceType } from 'wind-gl-core';
-import { Layer as LayerCore, TileID } from 'wind-gl-core';
+import type {LayerOptions, SourceType} from 'wind-gl-core';
+import {Layer as LayerCore, mod, TileID} from 'wind-gl-core';
 
 import CameraSync from './utils/CameraSync';
-import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
+import {getCoordinatesCenterTileID} from './utils/mercatorCoordinate';
 
 function getCoords(x, y, z) {
   const zz = Math.pow(2, z);
@@ -230,8 +230,32 @@ export default class Layer {
           const xmax = bounds[1][0];
           const ymax = bounds[1][1];
 
-          const p0 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmin, ymax));
-          const p1 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmax, ymin));
+          const dx = xmax - xmin;
+
+          const minLng = dx < 360 ? mod(xmin + 180, 360) - 180 : -180;
+          let maxLng = 180;
+          if (dx < 360) {
+            maxLng = mod(xmax + 180, 360) - 180;
+            if (maxLng < minLng) {
+              maxLng += 360;
+            }
+          }
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          const minLat = Math.max(ymin, this.map.transform.latRange[0]);
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          const maxLat = Math.min(ymax, this.map.transform.latRange[1]);
+
+          const mapBounds = [minLng, minLat, maxLng, maxLat];
+
+          const p0 = mapboxgl.MercatorCoordinate.fromLngLat(
+            new mapboxgl.LngLat(mapBounds[0], mapBounds[3]),
+          );
+          const p1 = mapboxgl.MercatorCoordinate.fromLngLat(
+            new mapboxgl.LngLat(mapBounds[2], mapBounds[1]),
+          );
+
           return [p0.x, p0.y, p1.x, p1.y];
         },
       },

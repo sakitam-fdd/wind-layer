@@ -99,7 +99,8 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
 
   get textures() {
     return {
-      particles: this.#current.texture,
+      currentParticles: this.#current.texture,
+      nextParticles: this.#next.texture,
     };
   }
 
@@ -187,7 +188,8 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
       this.#mesh.program.setUniform('u_fade_t', fade);
       this.#mesh.program.setUniform('u_rand_seed', Math.random());
       this.#mesh.program.setUniform('u_particles', this.#current.texture);
-      this.#mesh.program.setUniform('u_bbox', rendererState.sharedState.u_bbox);
+      this.#mesh.program.setUniform('u_bbox', rendererState.extent);
+      this.#mesh.program.setUniform('u_data_bbox', rendererState.sharedState.u_data_bbox);
 
       this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;

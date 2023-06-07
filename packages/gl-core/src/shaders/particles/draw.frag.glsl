@@ -8,7 +8,7 @@ uniform vec2 u_colorRange;
 uniform sampler2D u_colorRamp;
 
 uniform vec4 u_bbox;
-uniform mat4 u_data_matrix;
+uniform vec4 u_data_bbox;
 uniform float u_fade_t;
 uniform vec2 u_image_res;
 

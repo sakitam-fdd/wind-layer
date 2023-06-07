@@ -117,11 +117,13 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     for (let n = 0; n < coordsDescending.length; n++) {
       const tileId = coordsDescending[n];
       const bounds = tileId.getTileBounds();
-      xmin = Math.min(bounds.left, xmin);
-      xmax = Math.max(bounds.right, xmax);
-      ymin = Math.min(bounds.top, ymin);
-      ymax = Math.max(bounds.bottom, ymax);
-      zmax = Math.max(tileId.z, zmax);
+      if (tileId.wrap === 0) {
+        xmin = Math.min(bounds.left, xmin);
+        xmax = Math.max(bounds.right, xmax);
+        ymin = Math.min(bounds.top, ymin);
+        ymax = Math.max(bounds.bottom, ymax);
+        zmax = Math.max(tileId.z, zmax);
+      }
     }
 
     const zz = 1 / Math.pow(2, zmax);
@@ -133,22 +135,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     const w = dx / zz;
     const h = dy / zz;
 
-    // 更新采样范围
-    // 这里注意一个点我们的常规显示范围一定小于等于数据的范围
-    // ---------
-    // | ----- |
-    // | |   | |
-    // | |   | |
-    // | ----- |
-    // ---------
-    rendererState.sharedState.u_bbox = [
-      (rendererState.extent[0] - xmin) / dx,
-      utils.clamp((rendererState.extent[1] - ymin) / dy, 0, 1),
-      (rendererState.extent[2] - xmin) / dx,
-      utils.clamp((rendererState.extent[3] - ymin) / dy, 0, 1),
-    ];
-    rendererState.sharedState.u_offset = [xmin, ymin]; // top left
-    rendererState.sharedState.u_scale = [dx, dy];
+    rendererState.sharedState.u_data_bbox = [xmin, ymin, xmax, ymax];
 
     if (renderTarget) {
       renderTarget.clear();

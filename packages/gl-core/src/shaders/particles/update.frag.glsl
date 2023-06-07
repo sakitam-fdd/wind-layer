@@ -11,7 +11,7 @@ uniform float u_fade_t;
 uniform vec2 u_image_res;
 
 uniform vec4 u_bbox;
-uniform mat4 u_data_matrix;
+uniform vec4 u_data_bbox;
 uniform float u_rand_seed;
 uniform float u_drop_rate;
 uniform float u_drop_rate_bump;
@@ -44,11 +44,20 @@ vec2 bilinear(const vec2 uv) {
     return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
 }
 
+const vec4 drop_pos = vec4(0);
+
+bool containsXY(vec2 pos, vec4 bbox) {
+    return (
+        bbox.x <= pos.x && pos.x <= bbox.z &&
+        bbox.y <= pos.y && pos.y <= bbox.w
+    );
+}
+
 void main() {
     vec2 pos = texture2D(u_particles, vUv).xy;
-    vec2 uv = pos;
-    uv = u_bbox.xy + uv * (u_bbox.zw - u_bbox.xy);
+    vec2 uv = u_bbox.xy + pos * (u_bbox.zw - u_bbox.xy);
 
+    // 如果是无数据，直接赋值为初始值
     if (calcTexture(uv).a == 0.0) {
         discard;
     }
