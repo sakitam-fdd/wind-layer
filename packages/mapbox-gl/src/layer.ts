@@ -1,12 +1,12 @@
 import * as mapboxgl from 'mapbox-gl';
 
-import {OrthographicCamera, Renderer, Scene, utils} from '@sakitam-gis/vis-engine';
+import { OrthographicCamera, Renderer, Scene, utils } from '@sakitam-gis/vis-engine';
 
-import type {LayerOptions, SourceType} from 'wind-gl-core';
-import {Layer as LayerCore, mod, TileID} from 'wind-gl-core';
+import type { LayerOptions, SourceType } from 'wind-gl-core';
+import { Layer as LayerCore, mod, TileID } from 'wind-gl-core';
 
 import CameraSync from './utils/CameraSync';
-import {getCoordinatesCenterTileID} from './utils/mercatorCoordinate';
+import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
 
 function getCoords(x, y, z) {
   const zz = Math.pow(2, z);
@@ -270,6 +270,35 @@ export default class Layer {
     this.update();
   }
 
+  calcWrappedWorlds() {
+    const result = [0];
+
+    if (this.source?.wrapX) {
+      // @ts-ignore
+      const { width, height } = this.map.transform;
+      // @ts-ignore
+      const utl = this.map.transform.pointCoordinate(new mapboxgl.Point(0, 0));
+      // @ts-ignore
+      const utr = this.map.transform.pointCoordinate(new mapboxgl.Point(width, 0));
+      // @ts-ignore
+      const ubl = this.map.transform.pointCoordinate(new mapboxgl.Point(width, height));
+      // @ts-ignore
+      const ubr = this.map.transform.pointCoordinate(new mapboxgl.Point(0, height));
+      const w0 = Math.floor(Math.min(utl.x, utr.x, ubl.x, ubr.x));
+      const w1 = Math.floor(Math.max(utl.x, utr.x, ubl.x, ubr.x));
+
+      const extraWorldCopy = 0;
+
+      for (let w = w0 - extraWorldCopy; w <= w1 + extraWorldCopy; w++) {
+        if (w === 0) {
+          continue;
+        }
+        result.push(w);
+      }
+    }
+    return result;
+  }
+
   onRemove() {
     if (this.layer) {
       this.layer = null;
@@ -288,7 +317,9 @@ export default class Layer {
     this.scene.worldMatrixNeedsUpdate = true;
     this.scene.updateMatrixWorld();
     this.camera.updateMatrixWorld();
+    const worlds = this.calcWrappedWorlds();
     this.layer?.prerender({
+      worlds,
       camera: this.camera,
       planeCamera: this.planeCamera,
     });
@@ -298,7 +329,9 @@ export default class Layer {
     this.scene.worldMatrixNeedsUpdate = true;
     this.scene.updateMatrixWorld();
     this.camera.updateMatrixWorld();
+    const worlds = this.calcWrappedWorlds();
     this.layer?.render({
+      worlds,
       camera: this.camera,
       planeCamera: this.planeCamera,
     });

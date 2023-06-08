@@ -14,6 +14,7 @@ uniform sampler2D u_particles_next;
 
 uniform float u_particleSize;
 uniform float u_particlesRes;
+uniform float u_offset;
 
 varying vec2 v_particle_pos;
 
@@ -73,8 +74,10 @@ void main() {
 
     v_particle_pos = mix(vePos, vePos1, 0.5);
 
+    vec2 v_current_particle_pos = vePos + vec2(u_offset, 0.0);
+
     gl_PointSize = u_particleSize;
 
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(v_particle_pos, 0.0, 1.0);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(v_current_particle_pos, 0.0, 1.0);
 }
 
