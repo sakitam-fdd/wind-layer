@@ -116,7 +116,7 @@
       duration: 0.1,
       endDelay: 0,
       repeat: true,
-      autoplay: true,
+      autoplay: false,
       decodeType: 3,
       intervals: Array.from({ length: 23 }).map((i, index) => ({
         url: `http://localhost:5000/processed/2023041700/20230417${index < 10 ? '0' + index.toString() : index.toString()}/{z}/{x}/{y}/wind-surface.jpeg`
@@ -151,9 +151,16 @@
       displayRange: [0, 104],
       hasMask: false,
       renderType: 1,
+      picking: true,
     });
 
     map.addLayer(layer);
+
+    map.on('click', e => {
+      layer.picker(e.lngLat).then((v) => {
+        console.log(v)
+      })
+    });
   });
 </script>
 </body>

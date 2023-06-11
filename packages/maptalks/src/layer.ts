@@ -12,8 +12,6 @@ import {
 
 import { Layer as LayerCore, SourceType, TileID } from 'wind-gl-core';
 
-type WithNull<T> = T | null;
-
 highPrecision(true);
 
 function getGLRes(map) {
@@ -51,7 +49,10 @@ function getTileBounds(map, x, y, z, wrap = 0) {
 
   const res = getGLRes(map);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // @ts-ignore
   const p1 = coordinateToPoint(map, new maptalks.Coordinate([min[0], max[1]]), res); // 左上
+  // @ts-ignore
   const p2 = coordinateToPoint(map, new maptalks.Coordinate([max[0], min[1]]), res); // 右下
 
   // const projObject = map.getProjection().fullExtent;
@@ -80,10 +81,10 @@ function getTileBounds(map, x, y, z, wrap = 0) {
   // );
 
   return {
-    left: p1.x + wrap,
-    top: p1.y,
-    right: p2.x + wrap,
-    bottom: p2.y,
+    left: 0 + wrap,
+    top: 0,
+    right: 1 + wrap,
+    bottom: 1,
     lngLatBounds: [min[0], min[1], max[0], max[1]],
   };
 }
@@ -301,8 +302,6 @@ const options: BaseLayerOptionType = {
 };
 
 class Layer extends maptalks.TileLayer {
-  options: any;
-  map: any;
   type: string;
   _needsUpdate = true;
   _coordCache = {};
