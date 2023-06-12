@@ -43,7 +43,8 @@ export function TypeOf(value: any) {
  * @param value
  * @returns {boolean}
  */
-export function isFunction(value: any): boolean {
+export function isFunction(value: any): value is (...args: any[]) => any {
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
   if (!isObject(value)) {
     return false;
   }

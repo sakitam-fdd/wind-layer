@@ -1,6 +1,6 @@
 {
   "name": "wind-core",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "wind layer core",
   "keywords": [
     "weather",
@@ -54,6 +54,10 @@
     "url": "git+https://github.com/sakitam-fdd/wind-layer.git",
     "directory": "packages/core"
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "clean": "rimraf dist",
     "dev": "cross-env NODE_ENV=development rollup -wm -c rollup.config.ts --configPlugin esbuild",
@@ -69,8 +73,5 @@
     "url": "https://github.com/sakitam-fdd/wind-layer/issues"
   },
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
-  "publishConfig": {
-    "access": "public"
-  },
   "dependencies": {}
 }
