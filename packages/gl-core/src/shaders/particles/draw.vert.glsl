@@ -78,6 +78,6 @@ void main() {
 
     gl_PointSize = u_particleSize;
 
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(v_current_particle_pos, 0.0, 1.0);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(v_current_particle_pos * vec2(262144.0 * 2.0, 262144.0 * 2.0) + vec2(-262144.0, -262144.0), 0.0, 1.0);
 }
 

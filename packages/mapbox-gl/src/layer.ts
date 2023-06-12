@@ -155,6 +155,7 @@ export default class Layer {
         widthSegments: this.options.widthSegments,
         heightSegments: this.options.heightSegments,
         wireframe: this.options.wireframe,
+        picking: this.options.picking,
         getZoom: () => this.map?.getZoom() as number,
         triggerRepaint: () => {
           this.map?.triggerRepaint();
@@ -323,6 +324,19 @@ export default class Layer {
       camera: this.camera,
       planeCamera: this.planeCamera,
     });
+  }
+
+  async picker(coordinates) {
+    if (!this.options.picking) {
+      console.warn('[Layer]: please enable picking options!');
+      return null;
+    }
+    if (!this.layer || !coordinates || !this.map) {
+      console.warn('[Layer]: layer not initialized!');
+      return null;
+    }
+    const point = this.map.project(coordinates);
+    return this.layer.picker([point.x, point.y]);
   }
 
   render() {

@@ -115,9 +115,16 @@
         ],
       },
       renderType: 0,
+      picking: true,
     });
 
     map.addLayer(layer);
+
+    map.on('click', e => {
+      layer.picker(e.lngLat).then((v) => {
+        console.log(v)
+      })
+    })
   });
 </script>
 </body>

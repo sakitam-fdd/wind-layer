@@ -41,28 +41,21 @@
 
   mtkWind.configDeps(['https://unpkg.com/geotiff/dist-browser/geotiff.js', 'https://unpkg.com/exifr/dist/full.umd.js']);
 
-  const source = new mtkWind.TimelineSource('temp', {
-    sourceType: 'ImageSource',
+  const source = new mtkWind.ImageSource('temp', {
+    type: 'image',
+    tileSize: 256,
+    // minZoom: 0,
+    // maxZoom: 0,
+    // roundZoom: false,
+    decodeType: 3,
     coordinates: [
       [-180, 85.051129],
       [180, 85.051129],
       [180, -85.051129],
       [-180, -85.051129],
     ],
-    // sourceType: 'TileSource',
-    // tileSize: 256,
-    // minZoom: 0,
-    // maxZoom: 2,
-    // roundZoom: true,
-    duration: 0.1,
-    endDelay: 0,
-    repeat: true,
-    autoplay: false,
-    decodeType: 3,
-    intervals: Array.from({ length: 23 }).map((i, index) => ({
-      url: `http://localhost:5000/processed/2023041700/20230417${index < 10 ? '0' + index.toString() : index.toString()}/0/0/0/wind-surface.jpeg`
-    })),
     wrapX: true,
+    url: 'http://localhost:5000/processed/2023042600/2023042601/0/0/0/wind-surface.jpeg',
   });
 
   window.source = source;
@@ -136,6 +129,7 @@
     displayRange: [0, 104],
     hasMask: false,
     renderType: 2,
+    picking: true
   });
 
   map.addLayer(layer);

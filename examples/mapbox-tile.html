@@ -92,7 +92,7 @@
     const tileSource = new mapboxWind.TileSource('temp', {
       type: 'tile',
       tileSize: [256, 256],
-      url: 'http://localhost:5000/jpeg/{z}/{x}/{y}.jpeg',
+      url: 'http://localhost:5000/processed/2023040400/2023040409/{z}/{x}/{y}/temp-surface.png',
       minZoom: 0,
       maxZoom: 4,
       // subdomains: ['a', 'b', 'c', 'd'],
@@ -102,7 +102,7 @@
 
     const imageSource = new mapboxWind.ImageSource('temp', {
       type: 'image',
-      url: 'http://localhost:5000/jpeg/0/0/0.jpeg',
+      url: 'http://localhost:5000/processed/2023040400/2023040409/0/0/0/temp-surface.png',
       coordinates: [
         [-180, 85.051129],
         [180, 85.051129],
@@ -110,14 +110,14 @@
         [-180, -85.051129],
       ],
       decodeType: 3,
+      dataRange: [-60, 60]
     });
 
     map.on('click', () => {
-      imageSource.setUrl('http://localhost:5000/jpeg/1/0/0.jpeg');
+      // imageSource.setUrl('http://localhost:5000/jpeg/1/0/0.jpeg');
     });
 
     const fillLayer = new mapboxWind.Layer('temp', imageSource, {
-      wrapX: true,
       wireframe: true,
       styleSpec: {
         'fill-color': [
@@ -141,10 +141,17 @@
       heightSegments: 1,
       displayRange: [-80, 80],
       hasMask: false,
-      renderPasses: ['ColorizeComposePass', 'ColorizePass'],
+      picking: true,
+      renderType: 1,
     });
 
     map.addLayer(fillLayer);
+
+    map.on('click', e => {
+      fillLayer.picker(e.lngLat).then((v) => {
+        console.log(v)
+      })
+    });
     // map.addLayer(fillLayer1);
   });
 </script>

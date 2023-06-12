@@ -25,7 +25,7 @@ export default class Pass<T> {
     this.#enabled = state;
   }
 
-  render(rendererParams, rendererState) {
+  render(rendererParams, rendererState, cb) {
     throw new Error(ERR_PASS_METHOD_UNDEFINED);
   }
 

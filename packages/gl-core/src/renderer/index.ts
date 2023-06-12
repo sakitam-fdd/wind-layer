@@ -1,4 +1,4 @@
-import { DataTexture, Raf, Renderer, Scene, utils, Vector2 } from '@sakitam-gis/vis-engine';
+import {DataTexture, Raf, Renderer, Scene, utils, Vector2} from '@sakitam-gis/vis-engine';
 import wgw from 'wind-gl-worker';
 import Pipelines from './Pipelines';
 import ColorizeComposePass from './pass/color/compose';
@@ -9,10 +9,11 @@ import ParticlesComposePass from './pass/particles/compose';
 import UpdatePass from './pass/particles/update';
 import ScreenPass from './pass/particles/screen';
 import ParticlesPass from './pass/particles/particles';
-import { isFunction, resolveURL } from '../utils/common';
-import { createLinearGradient, createZoom } from '../utils/style-parser';
-import { getBandType, RenderFrom, RenderType } from '../type';
-import { SourceType } from '../source';
+import PickerPass from './pass/picker';
+import {isFunction, resolveURL} from '../utils/common';
+import {createLinearGradient, createZoom} from '../utils/style-parser';
+import {getBandType, RenderFrom, RenderType} from '../type';
+import {SourceType} from '../source';
 import Tile from '../tile/Tile';
 
 export interface LayerOptions {
@@ -50,6 +51,10 @@ export interface LayerOptions {
   widthSegments?: number;
   heightSegments?: number;
   wireframe?: boolean;
+  /**
+   * 是否开启拾取
+   */
+  picking?: boolean;
   /**
    * 可以为任意 GeoJSON 数据
    */
@@ -215,6 +220,15 @@ export default class Layer {
         textureNext: composePass.textures.next,
       });
       this.renderPipeline?.addPass(composePass);
+      if (this.options.picking) {
+        const pickerPass = new PickerPass('PickerPass', this.renderer, {
+          source: this.source,
+          texture: composePass.textures.current,
+          textureNext: composePass.textures.next,
+          useFloatTexture: false,
+        });
+        this.renderPipeline?.addPass(pickerPass);
+      }
       this.renderPipeline?.addPass(rasterPass);
     } else if (this.options.renderType === RenderType.colorize) {
       const composePass = new ColorizeComposePass('ColorizeComposePass', this.renderer, {
@@ -230,6 +244,17 @@ export default class Layer {
         textureNext: composePass.textures.next,
       });
       this.renderPipeline?.addPass(composePass);
+
+      if (this.options.picking) {
+        const pickerPass = new PickerPass('PickerPass', this.renderer, {
+          source: this.source,
+          texture: composePass.textures.current,
+          textureNext: composePass.textures.next,
+          useFloatTexture: true,
+        });
+        this.renderPipeline?.addPass(pickerPass);
+      }
+
       this.renderPipeline?.addPass(colorizePass);
     } else if (this.options.renderType === RenderType.particles) {
       const composePass = new ParticlesComposePass('ParticlesComposePass', this.renderer, {
@@ -531,6 +556,13 @@ export default class Layer {
     if (this.options.triggerRepaint && isFunction(this.options.triggerRepaint)) {
       this.options.triggerRepaint();
     }
+  }
+
+  async picker(pixel = [0, 0]) {
+    if (!this.renderPipeline) return null;
+    const pickerPass = this.renderPipeline.getPass('PickerPass');
+    if (!pickerPass) return null;
+    return pickerPass.render(undefined, undefined, pixel);
   }
 
   prerender(cameras) {
