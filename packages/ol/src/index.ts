@@ -1,13 +1,8 @@
 import { Layer } from 'ol/layer';
+import type { PluggableMap } from 'ol';
 import WindLayerRender from './renderer';
 
-import {
-  isArray,
-  formatData,
-  assign,
-  defaultOptions,
-  Field,
-} from 'wind-core';
+import { isArray, formatData, assign, defaultOptions, Field } from 'wind-core';
 
 import type { IOptions, IField } from 'wind-core';
 
@@ -39,8 +34,7 @@ export class WindLayer extends Layer<any, any> {
 
     // @tip overwrite for layer className and disable containerReused
     // @ts-ignore
-    this.className_ =
-      options.className !== undefined ? options.className : 'wind-layer';
+    this.className_ = options.className !== undefined ? options.className : 'wind-layer';
 
     this.pickWindOptions();
 
@@ -59,7 +53,7 @@ export class WindLayer extends Layer<any, any> {
     }
   }
 
-  protected createRenderer() {
+  protected createRenderer(): any {
     // @ts-ignore
     return new WindLayerRender(this);
   }
@@ -70,7 +64,6 @@ export class WindLayer extends Layer<any, any> {
         if (this.options.windOptions === undefined) {
           this.options.windOptions = {};
         }
-        // @ts-ignore
         this.options.windOptions[key] = this.options[key];
       }
     });
@@ -80,7 +73,7 @@ export class WindLayer extends Layer<any, any> {
    * get wind layer data
    */
   // @ts-ignore
-  public getData () {
+  public getData() {
     return this.field;
   }
 
@@ -90,7 +83,7 @@ export class WindLayer extends Layer<any, any> {
    * @param options
    * @returns {WindLayer}
    */
-  public setData (data: any, options: Partial<IField> = {}) {
+  public setData(data: any, options: Partial<IField> = {}) {
     if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
@@ -122,5 +115,28 @@ export class WindLayer extends Layer<any, any> {
 
   public getWindOptions() {
     return this.options.windOptions || {};
+  }
+
+  render(frameState, target) {
+    const layerRenderer = this.getRenderer();
+
+    if (layerRenderer.prepareFrame(frameState)) {
+      this.rendered = true;
+      return layerRenderer.renderFrame(frameState, target);
+    }
+    return null;
+  }
+
+  public setMap(map: PluggableMap) {
+    super.setMap(map);
+    // * 支持以 setMap 方式添加图层
+    if (!map) {
+      this.unrender();
+    } else {
+      const renderer = this.getRenderer();
+      if (renderer) {
+        renderer.wind?.start();
+      }
+    }
   }
 }

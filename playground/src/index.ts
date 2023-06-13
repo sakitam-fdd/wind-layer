@@ -9,6 +9,7 @@ import Circle from 'ol/geom/Circle';
 import { Vector as VectorLayer, Image as ImageLayer } from 'ol/layer';
 import { OSM, Vector as VectorSource, ImageStatic } from 'ol/source';
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
+import { Draw, Modify, Snap } from 'ol/interaction';
 
 import { WindLayer } from 'ol-wind';
 
@@ -196,6 +197,30 @@ function initMap() {
     // pixelRatio: 2,
   });
 
+  let draw, snap; // global so we can remove them later
+
+  const drawSource = new VectorSource();
+  const drawVector = new VectorLayer({
+    source: drawSource,
+  });
+
+  const modify = new Modify({source: drawSource});
+  map.addInteraction(modify);
+
+  function addInteractions() {
+    draw = new Draw({
+      source: drawSource,
+      type: 'LineString',
+    });
+    map.addInteraction(draw);
+    snap = new Snap({source: drawSource});
+    map.addInteraction(snap);
+  }
+
+  map.addLayer(drawVector);
+
+  addInteractions();
+
   // @ts-ignore
   window.map = map;
 
@@ -314,10 +339,12 @@ function initMap() {
 
       // @ts-ignore
       map.addLayer(windLayer);
+      // windLayer.setMap(map)
       map.addLayer(windLayer1);
 
       setTimeout(() => {
-        map.removeLayer(windLayer1);
+        // map.removeLayer(windLayer1);
+        windLayer.setData(res)
       }, 5 * 1000);
 
       map.addLayer(image);

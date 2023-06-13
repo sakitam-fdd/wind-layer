@@ -1,6 +1,6 @@
 {
   "name": "ol-wind",
-  "version": "1.1.2",
+  "version": "1.1.4",
   "description": "ol wind",
   "keywords": [
     "openlayers",
@@ -52,6 +52,10 @@
     "url": "git+https://github.com/sakitam-fdd/wind-layer.git",
     "directory": "packages/ol"
   },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "clean": "rimraf dist",
     "dev": "cross-env NODE_ENV=development rollup -wm -c rollup.config.ts --configPlugin esbuild",
@@ -68,7 +72,7 @@
   },
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
   "dependencies": {
-    "wind-core": "workspace:*"
+    "wind-core": "^1.1.3"
   },
   "peerDependencies": {
     "ol": ">=6.0.0"
@@ -76,8 +80,5 @@
   "devDependencies": {
     "@types/ol": "^6.1.0",
     "ol": "^6.0.0"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

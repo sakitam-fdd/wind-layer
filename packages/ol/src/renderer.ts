@@ -1,15 +1,28 @@
 import { FrameState } from 'ol/PluggableMap';
 import { Coordinate } from 'ol/coordinate';
 import { Pixel } from 'ol/pixel';
-import { fromUserExtent, fromUserCoordinate, toUserCoordinate, transform as transformProj } from 'ol/proj';
+import {
+  fromUserExtent,
+  fromUserCoordinate,
+  toUserCoordinate,
+  transform as transformProj,
+} from 'ol/proj';
 import CanvasLayerRenderer from 'ol/renderer/canvas/Layer';
 import {
   toString as transformToString,
   makeScale,
   makeInverse,
   apply as applyTransform,
+  create as createTransform,
+  type Transform,
 } from 'ol/transform';
-import {containsExtent, intersects, containsCoordinate, getIntersection, isEmpty} from 'ol/extent';
+import {
+  containsExtent,
+  intersects,
+  containsCoordinate,
+  getIntersection,
+  isEmpty,
+} from 'ol/extent';
 import type { Extent } from 'ol/extent';
 
 import { WindCore, Field } from 'wind-core';
@@ -19,18 +32,31 @@ import { WindLayer } from './index';
 
 const ViewHint = {
   ANIMATING: 0,
-  INTERACTING: 1
+  INTERACTING: 1,
 };
 
 // @ts-ignore
 export default class WindLayerRender extends CanvasLayerRenderer {
-  private pixelTransform: any;
-  private inversePixelTransform: any;
-  private context: CanvasRenderingContext2D;
-  private containerReused: boolean;
-  private container: HTMLDivElement | HTMLCanvasElement;
+  private readonly context: CanvasRenderingContext2D;
+  private readonly containerReused: boolean;
+  protected container: WithNull<HTMLDivElement | HTMLCanvasElement>;
+  protected inversePixelTransform: Transform;
+  protected pixelTransform: Transform;
+  protected renderedResolution: number;
+  protected tempTransform: Transform;
 
   public wind: WindCore;
+
+  constructor(layer) {
+    super(layer);
+
+    this.container = null;
+
+    this.renderedResolution;
+    this.tempTransform = createTransform();
+    this.pixelTransform = createTransform();
+    this.inversePixelTransform = createTransform();
+  }
 
   useContainer(target: HTMLElement | null, transform: string, opacity: number) {
     // 此处强制新建 canvas
@@ -45,10 +71,21 @@ export default class WindLayerRender extends CanvasLayerRenderer {
 
     let renderedExtent = frameState.extent;
     if (layerState.extent !== undefined) {
-      renderedExtent = getIntersection(renderedExtent as Extent, fromUserExtent(layerState.extent, viewState.projection));
+      renderedExtent = getIntersection(
+        renderedExtent as Extent,
+        fromUserExtent(layerState.extent, viewState.projection),
+      );
     }
 
-    if (!hints[ViewHint.ANIMATING] && !frameState.animate && !hints[ViewHint.INTERACTING] && !isEmpty(renderedExtent as Extent)) {
+    if (
+      !hints[ViewHint.ANIMATING] &&
+      !frameState.animate &&
+      !hints[ViewHint.INTERACTING] &&
+      !isEmpty(renderedExtent as Extent)
+    ) {
+      if (this.wind?.isStop?.()) {
+        this.wind.start();
+      }
       return true;
     } else {
       // @ts-ignore
@@ -63,8 +100,8 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     const viewState = frameState.viewState;
     const size = frameState.size;
 
-    let width = Math.round(size[0] * pixelRatio);
-    let height = Math.round(size[1] * pixelRatio);
+    const width = Math.round(size[0] * pixelRatio);
+    const height = Math.round(size[1] * pixelRatio);
 
     // set forward and inverse pixel transforms
     makeScale(this.pixelTransform, 1 / pixelRatio, 1 / pixelRatio);
@@ -110,7 +147,15 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     const data = layer.getData();
 
     // @ts-ignore
-    const transformOrigin = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, 0);
+    const transformOrigin = this.getRenderTransform(
+      center,
+      resolution,
+      rotation,
+      pixelRatio,
+      width,
+      height,
+      0,
+    );
 
     this.execute(this.context, frameState, transformOrigin, transformOrigin, opt, data);
 
@@ -172,11 +217,11 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     if (!frameState) {
       return null;
     } else {
-      const pixel = applyTransform(frameState.coordinateToPixelTransform, viewCoordinate.slice(0, 2));
-      return [
-        pixel[0] * pixelRatio,
-        pixel[1] * pixelRatio
-      ];
+      const pixel = applyTransform(
+        frameState.coordinateToPixelTransform,
+        viewCoordinate.slice(0, 2),
+      );
+      return [pixel[0] * pixelRatio, pixel[1] * pixelRatio];
     }
   }
 
@@ -187,13 +232,13 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     if (!frameState) {
       return null;
     } else {
-      const viewCoordinate = applyTransform(frameState.pixelToCoordinateTransform, pixel.slice(0, 2));
+      const viewCoordinate = applyTransform(
+        frameState.pixelToCoordinateTransform,
+        pixel.slice(0, 2),
+      );
       const coordinate = toUserCoordinate(viewCoordinate, viewState.projection);
       const point = transformProj(coordinate, viewState.projection, 'EPSG:4326');
-      return [
-        point[0],
-        point[1]
-      ];
+      return [point[0], point[1]];
     }
   }
 
