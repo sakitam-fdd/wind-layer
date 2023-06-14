@@ -178,7 +178,18 @@ export default class Layer {
                 const { x, y, z } = canonical;
                 wrapTiles.push(
                   new TileID(z, x, y, z, wrap, {
-                    getTileBounds,
+                    getTileBounds: () => ({
+                      left: tileID.extent[0] + wrap,
+                      top: tileID.extent[1],
+                      right: tileID.extent[2] + wrap,
+                      bottom: tileID.extent[3],
+                      lngLatBounds: [
+                        (source as any).coordinates[0][0],
+                        (source as any).coordinates[2][1],
+                        (source as any).coordinates[1][0],
+                        (source as any).coordinates[0][1],
+                      ],
+                    }),
                   }),
                 );
               });
@@ -189,7 +200,18 @@ export default class Layer {
               const wrap = 0;
               wrapTiles.push(
                 new TileID(z, x, y, z, wrap, {
-                  getTileBounds,
+                  getTileBounds: () => ({
+                    left: tileID.extent[0] + wrap,
+                    top: tileID.extent[1],
+                    right: tileID.extent[2] + wrap,
+                    bottom: tileID.extent[3],
+                    lngLatBounds: [
+                      (source as any).coordinates[0][0],
+                      (source as any).coordinates[2][1],
+                      (source as any).coordinates[1][0],
+                      (source as any).coordinates[0][1],
+                    ],
+                  }),
                 }),
               );
             }

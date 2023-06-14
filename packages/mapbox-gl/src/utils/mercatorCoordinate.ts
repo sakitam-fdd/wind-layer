@@ -95,7 +95,7 @@ export function getTileCenter(x, y, z) {
   };
 }
 
-export function getCoordinatesCenterTileID(coords: Array<any>) {
+export function getCoordinatesCenterTileID(coords: Array<{ x: number; y: number }>) {
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
@@ -117,6 +117,7 @@ export function getCoordinatesCenterTileID(coords: Array<any>) {
   return {
     z: zoom,
     x: Math.floor((minX + maxX) / 2 * tilesAtZoom),
-    y: Math.floor((minY + maxY) / 2 * tilesAtZoom)
+    y: Math.floor((minY + maxY) / 2 * tilesAtZoom),
+    extent: [minX, minY, maxX, maxY],
   };
 }

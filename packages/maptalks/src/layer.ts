@@ -10,7 +10,7 @@ import {
   highPrecision,
 } from '@sakitam-gis/vis-engine';
 
-import { Layer as LayerCore, SourceType, TileID } from 'wind-gl-core';
+import { ImageSource, Layer as LayerCore, SourceType, TileID } from 'wind-gl-core';
 
 highPrecision(true);
 
@@ -81,10 +81,10 @@ function getTileBounds(map, x, y, z, wrap = 0) {
   // );
 
   return {
-    left: 0 + wrap,
-    top: 0,
-    right: 1 + wrap,
-    bottom: 1,
+    left: p1.x + wrap,
+    top: p1.y,
+    right: p2.x + wrap,
+    bottom: p2.y,
     lngLatBounds: [min[0], min[1], max[0], max[1]],
   };
 }
@@ -394,13 +394,30 @@ class Layer extends maptalks.TileLayer {
           type = type !== 'timeline' ? type : source.privateType;
           const wrapTiles: TileID[] = [];
           if (type === 'image') {
+            const res = getGLRes(map);
+            const { coordinates } = source as ImageSource;
+            const [min, max] = [
+              [coordinates[0][0], coordinates[2][1]],
+              [coordinates[1][0], coordinates[0][1]],
+            ];
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // @ts-ignore
+            const p1 = coordinateToPoint(map, new maptalks.Coordinate([min[0], max[1]]), res); // 左上
+            // @ts-ignore
+            const p2 = coordinateToPoint(map, new maptalks.Coordinate([max[0], min[1]]), res); // 右下
             const x = 0;
             const y = 0;
             const z = 0;
             const wrap = 0;
             wrapTiles.push(
               new TileID(z, x, y, z, wrap, {
-                getTileBounds: getTileBounds.bind(this, map),
+                getTileBounds: () => ({
+                  left: p1.x + wrap,
+                  top: p1.y,
+                  right: p2.x + wrap,
+                  bottom: p2.y,
+                  lngLatBounds: [min[0], min[1], max[0], max[1]],
+                }),
               }),
             );
           } else {
