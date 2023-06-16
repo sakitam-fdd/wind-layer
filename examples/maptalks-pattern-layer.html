@@ -65,6 +65,23 @@
     wrapX: true,
   });
 
+  const imageSource = new mtkWind.ImageSource('rain', {
+    type: 'image',
+    url: './data/2.png',
+    coordinates: [
+      // [109.4, 25.7],
+      // [118, 25.7],
+      // [118, 20],
+      // [109.4, 20],
+        [-180, 85.051129],
+        [180, 85.051129],
+        [180, -85.051129],
+        [-180, -85.051129],
+    ],
+    decodeType: 0,
+    dataRange: [-60, 60]
+  });
+
   window.source = source;
 
   const color = {
@@ -103,14 +120,14 @@
       [104,[128,128,128,255]]]
   };
 
-  const interpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);
+  const interpolateColor = color.temp.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);
 
-  const layer = new mtkWind.Layer('temp', source, {
+  const layer = new mtkWind.Layer('temp', imageSource, {
     wireframe: true,
     styleSpec: {
       'fill-color': [
         'interpolate',
-        ['step', 1],
+        ['linear'],
         ['get', 'value'],
         ...interpolateColor
       ],
@@ -124,10 +141,10 @@
         1
       ],
     },
-    renderFrom: 'rg',
+    renderFrom: 'r',
     widthSegments: 1,
     heightSegments: 1,
-    displayRange: [0, 104],
+    displayRange: [-60, 60],
     hasMask: false,
     renderType: 1,
   });

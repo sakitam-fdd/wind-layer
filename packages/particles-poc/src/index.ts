@@ -9,7 +9,26 @@ import screenVert from './shaders/screen.vert.glsl';
 import screenFrag from './shaders/screen.frag.glsl';
 
 function mod(x, y) {
+  // 取余（%）运算符返回左侧操作数除以右侧操作数的余数。它总是与被除数的符号保持一致。
   return ((x % y) + y) % y;
+}
+
+function wrapLongitude(lng, minLng?: number) {
+  let wrappedLng = mod(lng + 180, 360) - 180;
+  if (typeof minLng === 'number' && wrappedLng < minLng) {
+    wrappedLng += 360;
+  }
+  return wrappedLng;
+}
+
+function wrapBounds(bounds) {
+  const dx = bounds[2] - bounds[0];
+  const minLng = dx < 360 ? wrapLongitude(bounds[0]) : -180;
+  const maxLng = dx < 360 ? wrapLongitude(bounds[2], minLng) : 180;
+  const minLat = Math.max(bounds[1], -85.051129);
+  const maxLat = Math.min(bounds[3], 85.051129);
+
+  return [minLng, minLat, maxLng, maxLat];
 }
 
 /* eslint-disable @typescript-eslint/no-namespace */
@@ -514,7 +533,9 @@ export default class ParticlesLayer {
     const minLat = Math.max(ymin, this.map.transform.minLat);
     const maxLat = Math.min(ymax, this.map.transform.maxLat);
 
-    const mapBounds = [minLng, minLat, maxLng, maxLat];
+    let mapBounds = [minLng, minLat, maxLng, maxLat];
+    mapBounds = wrapBounds([xmin, ymin, xmax, ymax]);
+    // console.log(wrapBounds([xmin, ymin, xmax, ymax]), '\n', mapBounds);
 
     const p0 = mapboxgl.MercatorCoordinate.fromLngLat(
       new mapboxgl.LngLat(mapBounds[0], mapBounds[3]),

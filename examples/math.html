@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<script src="https://unpkg.com/lodash@4.17.21/lodash.js"></script>
+<script>
+  function mod(x, y) {
+    // 取余（%）运算符返回左侧操作数除以右侧操作数的余数。它总是与被除数的符号保持一致。
+    return ((x % y) + y) % y;
+  }
+
+  const coords = []
+
+  for (let i = 0; i < 10; i++) {
+    coords.push(_.random(-540.01, 540.01))
+  }
+
+  const ta = []
+  for (let j = 0; j < coords.length; j++) {
+    const item = coords[j];
+    const v = mod(item + 180., 360.) - 180.
+    ta.push(v)
+  }
+</script>
+</body>
+</html>

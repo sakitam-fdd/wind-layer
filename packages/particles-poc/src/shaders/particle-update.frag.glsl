@@ -36,8 +36,15 @@ vec2 lookup_wind(const vec2 uv) {
     return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
 }
 
+vec2 getUV(vec2 pos) {
+    return vec2(
+    (pos.x - u_data_bbox[0]) / (u_data_bbox[2] - u_data_bbox[0]),
+    (pos.y - u_data_bbox[3]) / (u_data_bbox[1] - u_data_bbox[3])
+    );
+}
+
 vec2 update(vec2 pos) {
-    vec2 uv = u_bbox.xy + pos * (u_bbox.zw - u_bbox.xy);
+    vec2 uv = getUV(pos);
 
     vec2 velocity = mix(u_wind_min, u_wind_max, lookup_wind(uv));
     float speed_t = length(velocity) / length(u_wind_max);
