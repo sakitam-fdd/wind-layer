@@ -1,4 +1,4 @@
-import {DataTexture, Raf, Renderer, Scene, utils, Vector2} from '@sakitam-gis/vis-engine';
+import { DataTexture, Raf, Renderer, Scene, utils, Vector2 } from '@sakitam-gis/vis-engine';
 import wgw from 'wind-gl-worker';
 import Pipelines from './Pipelines';
 import ColorizeComposePass from './pass/color/compose';
@@ -10,10 +10,10 @@ import UpdatePass from './pass/particles/update';
 import ScreenPass from './pass/particles/screen';
 import ParticlesPass from './pass/particles/particles';
 import PickerPass from './pass/picker';
-import {isFunction, resolveURL} from '../utils/common';
-import {createLinearGradient, createZoom} from '../utils/style-parser';
-import {getBandType, RenderFrom, RenderType} from '../type';
-import {SourceType} from '../source';
+import { isFunction } from '../utils/common';
+import { createLinearGradient, createZoom } from '../utils/style-parser';
+import { getBandType, RenderFrom, RenderType } from '../type';
+import { SourceType } from '../source';
 import Tile from '../tile/Tile';
 
 export interface LayerOptions {
@@ -102,11 +102,6 @@ export const defaultOptions: LayerOptions = {
   onInit: () => undefined,
 };
 
-/**
- * 因为使用的是共享 worker 所以外部依赖仅需要注册一次
- */
-let registerDeps = false;
-
 export default class Layer {
   private options: LayerOptions;
   private uid: string;
@@ -163,18 +158,6 @@ export default class Layer {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.dispatcher = new wgw.Dispatcher(wgw.getGlobalWorkerPool(), this, this.uid);
-
-    if (!registerDeps) {
-      const deps = wgw.getConfigDeps();
-      this.dispatcher.broadcast(
-        'configDeps',
-        deps.map((d) => resolveURL(d)),
-        (err, data) => {
-          this.options.onInit?.(err, data);
-        },
-      );
-      registerDeps = true;
-    }
 
     this.update = this.update.bind(this);
     this.onTileLoaded = this.onTileLoaded.bind(this);

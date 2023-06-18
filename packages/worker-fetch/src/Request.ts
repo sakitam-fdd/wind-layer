@@ -1,13 +1,5 @@
 import RequestScheduler from './RequestScheduler';
-import {
-  arrayBufferToImageBitmap,
-  getReferrer,
-  isWorker,
-  warnOnce,
-  parseMetedata,
-  isImageBitmap,
-} from './util';
-import { decode, toRGBA8 } from './UPNG';
+import { arrayBufferToImageBitmap, getReferrer, isWorker, warnOnce } from './util';
 
 export type RequestParameters = {
   url: string;
@@ -257,18 +249,6 @@ export const makeRequest = function (
   return makeXMLHttpRequest(requestParameters, callback);
 };
 
-let pool;
-
-export function getPool() {
-  if (!pool) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    pool = new self.GeoTIFF.Pool();
-  }
-
-  return pool;
-}
-
 export class RequestAdapter {
   public requestScheduler: RequestScheduler;
 
@@ -289,14 +269,13 @@ export class RequestAdapter {
    * @param data
    * @param callback
    */
-  arrayBuffer2unit8(data: ArrayBuffer, callback: any) {
-    const pngImage = decode(data);
-
-    const pixels = toRGBA8(pngImage);
+  arrayBuffer2float(data: ArrayBuffer, callback: any) {
+    const d = new Float32Array(data);
+    const w = Math.sqrt(d.length);
     callback(null, {
-      data: new Uint8Array(pixels[0]),
-      width: pngImage.width,
-      height: pngImage.height,
+      data: d,
+      width: w,
+      height: w,
     });
   }
 
@@ -312,125 +291,8 @@ export class RequestAdapter {
     if (imageBitmapSupported) {
       arrayBufferToImageBitmap(data, callback);
     } else {
-      this.arrayBuffer2unit8(data, callback);
+      this.arrayBuffer2float(data, callback);
     }
-  }
-
-  /**
-   * geotiff 解析
-   * @param data
-   * @param callback
-   */
-  arrayBuffer2tiff(data: ArrayBuffer, callback: any) {
-    // @ts-ignore
-    if (!self.GeoTIFF) {
-      throw new Error(
-        'Must config [geotiff](https://github.com/geotiffjs/geotiff.js) dep use `configDeps`',
-      );
-    }
-    // @ts-ignore
-    self.GeoTIFF.fromArrayBuffer(data)
-      .then((geotiff) => {
-        geotiff
-          .getImage()
-          .then((image) => {
-            const result: any = {};
-            const fileDirectory = image.fileDirectory;
-
-            const { GeographicTypeGeoKey, ProjectedCSTypeGeoKey } = image.getGeoKeys();
-
-            result.projection = ProjectedCSTypeGeoKey || GeographicTypeGeoKey;
-
-            const height = image.getHeight();
-            result.height = height;
-            const width = image.getWidth();
-            result.width = width;
-
-            const [resolutionX, resolutionY] = image.getResolution();
-            result.pixelHeight = Math.abs(resolutionY);
-            result.pixelWidth = Math.abs(resolutionX);
-
-            const [originX, originY] = image.getOrigin();
-            result.xmin = originX;
-            result.xmax = result.xmin + width * result.pixelWidth;
-            result.ymax = originY;
-            result.ymin = result.ymax - height * result.pixelHeight;
-
-            result.noDataValue = fileDirectory.GDAL_NODATA
-              ? parseFloat(fileDirectory.GDAL_NODATA)
-              : null;
-
-            result.numberOfRasters = fileDirectory.SamplesPerPixel;
-
-            image
-              .readRasters()
-              .then((rasters) => {
-                result.rasters = rasters;
-                const r = rasters[0];
-                if (r) {
-                  let i = 0;
-                  const bands = rasters.length;
-                  const d = new r.constructor(r.length * bands);
-                  for (; i < r.length; i++) {
-                    for (let j = 0; j < bands; j++) {
-                      d[i + j] = rasters[j][i];
-                    }
-                  }
-                  result.data = d;
-                }
-                result.metadata = image.getGDALMetadata();
-                const metadata = parseMetedata(fileDirectory.ImageDescription || '');
-                result.min = metadata.min;
-                result.max = metadata.max;
-                result.isTiff = true;
-                callback(null, result);
-              })
-              .catch((err) => {
-                callback(err);
-              });
-          })
-          .catch((err) => {
-            callback(err);
-          });
-      })
-      .catch((err) => {
-        callback(err);
-      });
-  }
-
-  /**
-   * 解析 exif 信息
-   * @param data
-   * @param callback
-   */
-  parseExif(data: ArrayBuffer, callback: any) {
-    // @ts-ignore
-    if (!self.exifr) {
-      throw new Error(
-        'Must config [exifr](https://github.com/MikeKovarik/exifr) dep use `configDeps`',
-      );
-    }
-    // @ts-ignore
-    self.exifr
-      .parse(data)
-      .then((res) => {
-        this.arrayBuffer2Image(data, (error, image) => {
-          if (error) {
-            callback(error);
-          } else {
-            callback(null, {
-              data: isImageBitmap(image) ? image : image.data,
-              width: image.width,
-              height: image.height,
-              exif: res,
-              withExif: true,
-            });
-          }
-        });
-      })
-      .catch((err) => {
-        callback(err);
-      });
   }
 
   fetch(params, callback) {

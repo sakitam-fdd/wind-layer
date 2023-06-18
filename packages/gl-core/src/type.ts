@@ -51,21 +51,7 @@ export enum DecodeType {
    */
   image = 0,
 
-  /**
-   * 解析为 `Uint8Array`
-   */
-  unit8 = 1,
-
-  /**
-   * 使用 `GeoTIFF` 作为解析器
-   */
-  tiff = 2,
-
-  /**
-   * 解析带有 `Exif` 的图像，一般我们使用单通道 `RenderFrom.r` 或者 `RenderFrom.rg`
-   * 可能从 Exif 信息中提取原始值范围。
-   */
-  imageWithExif = 3,
+  float = 1,
 }
 
 export enum LayerDataType {
