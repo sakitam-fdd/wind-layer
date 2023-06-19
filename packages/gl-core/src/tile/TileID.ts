@@ -89,6 +89,14 @@ export default class TileID {
   }
 
   /**
+   * 获取父级瓦片
+   */
+  parent() {
+    if (this.z > 0) return new TileID(this.z - 1, this.x >> 1, this.y >> 1, this.wrap);
+    else return new TileID(this.z, this.x, this.y, this.wrap);
+  }
+
+  /**
    * 查找当前瓦片的子瓦片
    * @param sourceMaxZoom
    */
@@ -107,5 +115,46 @@ export default class TileID {
       new TileID(z, x, y + 1, z, this.wrap, this.options),
       new TileID(z, x + 1, y + 1, z, this.wrap, this.options),
     ];
+  }
+
+  /**
+   * 查找兄弟瓦片
+   */
+  siblings() {
+    return this.z === 0
+      ? []
+      : this.parent()
+          .children(this.overscaledZ)
+          .filter((t) => !this.isEqual(t));
+  }
+
+  /**
+   * 查找相临瓦片
+   * @param hor 横向偏移
+   * @param ver 纵向偏移
+   */
+  neighbor(hor, ver) {
+    if (this.z === 0) {
+      return new TileID(0, 0, 0, this.wrap + hor);
+    }
+    const max = Math.pow(2, this.z);
+    return new TileID(
+      this.z,
+      (this.x + hor + max) % max,
+      (this.y + ver + max) % max,
+      this.x + hor < 0 ? this.wrap - 1 : this.x + hor > max ? this.wrap + 1 : this.wrap,
+    );
+  }
+
+  isEqual(tile: TileID) {
+    return tile.x === this.x && tile.y === this.y && tile.z === this.z && tile.wrap === this.wrap;
+  }
+
+  /**
+   * 判断是否是根节点
+   * @returns {boolean}
+   */
+  isRoot() {
+    return this.z === 0;
   }
 }

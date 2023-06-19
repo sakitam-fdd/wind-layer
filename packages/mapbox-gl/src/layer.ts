@@ -1,5 +1,5 @@
 import * as mapboxgl from 'mapbox-gl';
-
+import { mat4 } from 'gl-matrix';
 import { OrthographicCamera, Renderer, Scene, utils } from '@sakitam-gis/vis-engine';
 
 import type { LayerOptions, SourceType } from 'wind-gl-core';
@@ -7,6 +7,7 @@ import { Layer as LayerCore, mod, TileID } from 'wind-gl-core';
 
 import CameraSync from './utils/CameraSync';
 import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
+import { coveringTiles } from './utils/tile';
 
 function getCoords(x, y, z) {
   const zz = Math.pow(2, z);
@@ -216,19 +217,32 @@ export default class Layer {
               );
             }
           } else if (type === 'tile') {
-            const tiles = transform.coveringTiles({
-              tileSize: utils.isNumber(this.source.tileSize)
-                ? source.tileSize
-                : source.tileSize?.[0] || 512,
-              minzoom: source.minZoom,
-              maxzoom: source.maxZoom,
-              roundZoom: source.roundZoom,
-            });
+            const m = new Float64Array(16) as any;
+            mat4.rotateX(m, transform.projMatrix, -transform._pitch);
+            // mat4.rotateZ(m, transform.projMatrix, -transform.angle);
+            const tiles = coveringTiles(
+              {
+                zoom: transform.zoom,
+                center: transform.center,
+                tileSize: transform.tileSize,
+                pitch: transform.pitch,
+                worldSize: transform.worldSize,
+                invProjMatrix: mat4.invert([] as any, m),
+              },
+              {
+                tileSize: utils.isNumber(this.source.tileSize)
+                  ? source.tileSize
+                  : source.tileSize?.[0] || 512,
+                minzoom: source.minZoom,
+                maxzoom: source.maxZoom,
+                roundZoom: source.roundZoom,
+                renderWorldCopies: source.wrapX,
+              },
+            );
 
             for (let i = 0; i < tiles.length; i++) {
               const tile = tiles[i];
-              const { canonical, wrap } = tile;
-              const { x, y, z } = canonical;
+              const { x, y, z, wrap } = tile;
               if (source.wrapX) {
                 wrapTiles.push(
                   new TileID(z, x, y, z, wrap, {
@@ -243,6 +257,34 @@ export default class Layer {
                 );
               }
             }
+
+            // const tiles = transform.coveringTiles({
+            //   tileSize: utils.isNumber(this.source.tileSize)
+            //     ? source.tileSize
+            //     : source.tileSize?.[0] || 512,
+            //   minzoom: source.minZoom,
+            //   maxzoom: source.maxZoom,
+            //   roundZoom: source.roundZoom,
+            // });
+
+            // for (let i = 0; i < tiles.length; i++) {
+            //   const tile = tiles[i];
+            //   const { canonical, wrap } = tile;
+            //   const { x, y, z } = canonical;
+            //   if (source.wrapX) {
+            //     wrapTiles.push(
+            //       new TileID(z, x, y, z, wrap, {
+            //         getTileBounds,
+            //       }),
+            //     );
+            //   } else if (tile.wrap === 0) {
+            //     wrapTiles.push(
+            //       new TileID(z, x, y, z, wrap, {
+            //         getTileBounds,
+            //       }),
+            //     );
+            //   }
+            // }
           }
           return wrapTiles;
         },

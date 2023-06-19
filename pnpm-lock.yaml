@@ -221,6 +221,9 @@ importers:
       '@sakitam-gis/vis-engine':
         specifier: ^1.5.0
         version: 1.5.0
+      gl-matrix:
+        specifier: ^3.4.3
+        version: 3.4.3
       wind-core:
         specifier: workspace:*
         version: link:../core
@@ -254,7 +257,7 @@ importers:
   packages/ol:
     dependencies:
       wind-core:
-        specifier: workspace:*
+        specifier: ^1.1.3
         version: link:../core
     devDependencies:
       '@types/ol':
