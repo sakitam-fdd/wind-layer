@@ -198,35 +198,6 @@ export function getOSMTileIndices(
   return root.getSelected();
 }
 
-export type URLTemplate = string | string[] | null;
-
-export const urlType = {
-  type: 'object' as const,
-  value: null as URLTemplate,
-  validate: (value, propType) =>
-    (propType.optional && value === null) ||
-    typeof value === 'string' ||
-    (Array.isArray(value) && value.every((url) => typeof url === 'string')),
-  equal: (value1, value2) => {
-    if (value1 === value2) {
-      return true;
-    }
-    if (!Array.isArray(value1) || !Array.isArray(value2)) {
-      return false;
-    }
-    const len = value1.length;
-    if (len !== value2.length) {
-      return false;
-    }
-    for (let i = 0; i < len; i++) {
-      if (value1[i] !== value2[i]) {
-        return false;
-      }
-    }
-    return true;
-  },
-};
-
 function transformBox(bbox: Bounds, modelMatrix: Matrix4): Bounds {
   const transformedCoords = [
     // top-left
@@ -269,16 +240,7 @@ function getBoundingBox(viewport: Viewport, zRange: number[] | null, extent: Bou
   } else {
     bounds = viewport.getBounds();
   }
-  if (!viewport.isGeospatial) {
-    return [
-      // Top corner should not be more then bottom corner in either direction
-      Math.max(Math.min(bounds[0], extent[2]), extent[0]),
-      Math.max(Math.min(bounds[1], extent[3]), extent[1]),
-      // Bottom corner should not be less then top corner in either direction
-      Math.min(Math.max(bounds[2], extent[0]), extent[2]),
-      Math.min(Math.max(bounds[3], extent[1]), extent[3]),
-    ];
-  }
+
   return [
     Math.max(bounds[0], extent[0]),
     Math.max(bounds[1], extent[1]),
@@ -439,9 +401,7 @@ export function getTileIndices({
   modelMatrixInverse?: Matrix4;
   zoomOffset?: number;
 }) {
-  let z = viewport.isGeospatial
-    ? Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize)) + zoomOffset
-    : Math.ceil(viewport.zoom) + zoomOffset;
+  let z = Math.round(viewport.zoom + Math.log2(TILE_SIZE / tileSize)) + zoomOffset;
   if (typeof minZoom === 'number' && Number.isFinite(minZoom) && z < minZoom) {
     if (!extent) {
       return [];
@@ -451,19 +411,8 @@ export function getTileIndices({
   if (typeof maxZoom === 'number' && Number.isFinite(maxZoom) && z > maxZoom) {
     z = maxZoom;
   }
-  let transformedExtent = extent;
-  if (modelMatrix && modelMatrixInverse && extent && !viewport.isGeospatial) {
-    transformedExtent = transformBox(extent, modelMatrix);
-  }
-  return viewport.isGeospatial
-    ? getOSMTileIndices(viewport, z, zRange, extent)
-    : getIdentityTileIndices(
-        viewport,
-        z,
-        tileSize,
-        transformedExtent || DEFAULT_EXTENT,
-        modelMatrixInverse,
-      );
+
+  return getOSMTileIndices(viewport, z, zRange, extent);
 }
 
 /**

@@ -246,3 +246,54 @@ export function coveringTiles(
 
   return result.sort((a, b) => a.distanceSq - b.distanceSq).map((a) => a.tileID);
 }
+
+function getIdentityTileIndices(viewport, z) {
+  const { bbox } = viewport;
+
+  if (bbox[3] > 85.05) bbox[3] = 85.05;
+  if (bbox[1] < -85.05) bbox[1] = -85.05;
+
+  const { x: xminMercator, y: yminMercator } = mapboxgl.MercatorCoordinate.fromLngLat([
+    bbox[0],
+    bbox[3],
+  ]);
+  const { x: xmaxMercator, y: ymaxMercator } = mapboxgl.MercatorCoordinate.fromLngLat([
+    bbox[2],
+    bbox[1],
+  ]);
+
+  const tileSize = 1.0 / 2 ** z;
+
+  const minX = Math.ceil(xminMercator / tileSize) - 1;
+  const minY = Math.ceil(yminMercator / tileSize) - 1;
+  const maxX = Math.ceil(xmaxMercator / tileSize) - 1;
+  const maxY = Math.ceil(ymaxMercator / tileSize) - 1;
+
+  const indices: any[] = [];
+
+  for (let x = Math.floor(minX); x <= maxX; x++) {
+    for (let y = Math.floor(minY); y <= maxY; y++) {
+      indices.push({ x, y, z });
+    }
+  }
+
+  return indices;
+}
+
+/**
+ * Returns all tile indices in the current viewport. If the current zoom level is smaller
+ * than minZoom, return an empty array. If the current zoom level is greater than maxZoom,
+ * return tiles that are on maxZoom.
+ */
+export function getTileIndices(viewport, minZoom, maxZoom) {
+  let z = Math.ceil(viewport.z);
+
+  if (Number.isFinite(minZoom) && z < minZoom) {
+    return [];
+  }
+  if (Number.isFinite(maxZoom) && z > maxZoom) {
+    z = maxZoom;
+  }
+
+  return getIdentityTileIndices(viewport, z);
+}

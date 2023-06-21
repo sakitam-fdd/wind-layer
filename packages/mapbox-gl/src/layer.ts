@@ -1,5 +1,5 @@
 import * as mapboxgl from 'mapbox-gl';
-import { mat4 } from 'gl-matrix';
+// import { mat4 } from 'gl-matrix';
 import { OrthographicCamera, Renderer, Scene, utils } from '@sakitam-gis/vis-engine';
 
 import type { LayerOptions, SourceType } from 'wind-gl-core';
@@ -7,7 +7,7 @@ import { Layer as LayerCore, mod, TileID } from 'wind-gl-core';
 
 import CameraSync from './utils/CameraSync';
 import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
-import { coveringTiles } from './utils/tile';
+import { coveringTiles, getTileIndices } from './utils/tile';
 
 function getCoords(x, y, z) {
   const zz = Math.pow(2, z);
@@ -217,8 +217,8 @@ export default class Layer {
               );
             }
           } else if (type === 'tile') {
-            const m = new Float64Array(16) as any;
-            mat4.rotateX(m, transform.projMatrix, -transform._pitch);
+            // const m = new Float64Array(16) as any;
+            // mat4.rotateX(m, transform.projMatrix, -transform._pitch);
             // mat4.rotateZ(m, transform.projMatrix, -transform.angle);
             const tiles = coveringTiles(
               {
@@ -227,7 +227,7 @@ export default class Layer {
                 tileSize: transform.tileSize,
                 pitch: transform.pitch,
                 worldSize: transform.worldSize,
-                invProjMatrix: mat4.invert([] as any, m),
+                invProjMatrix: transform.invProjMatrix,
               },
               {
                 tileSize: utils.isNumber(this.source.tileSize)
@@ -239,6 +239,18 @@ export default class Layer {
                 renderWorldCopies: source.wrapX,
               },
             );
+
+            const [[mapXmin, mapYmin], [mapXmax, mapYmax]] = this.map?.getBounds().toArray() as any;
+            const tiles1 = getTileIndices(
+              {
+                bbox: [mapXmin, mapYmin, mapXmax, mapYmax],
+                z: transform.zoom,
+              },
+              source.minZoom,
+              source.maxZoom,
+            );
+
+            console.log(tiles1, tiles);
 
             for (let i = 0; i < tiles.length; i++) {
               const tile = tiles[i];
