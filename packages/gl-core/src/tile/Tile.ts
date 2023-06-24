@@ -1,6 +1,6 @@
 import { Geometry, Plane, Program, Renderer, Texture } from '@sakitam-gis/vis-engine';
 import TileMesh from './TileMesh';
-import { ParseOptionsType, RenderFrom, TileBounds, TileState } from '../type';
+import {ParseOptionsType, ProjTileBounds, RenderFrom, TileBounds, TileState} from '../type';
 import { isImageBitmap, parseRange } from '../utils/common';
 import TileID from './TileID';
 
@@ -54,7 +54,7 @@ export default class Tile {
   /**
    * 瓦片的世界范围
    */
-  public tileBounds: TileBounds;
+  public tileBounds: ProjTileBounds;
 
   /**
    * 瓦片尺寸
@@ -131,12 +131,12 @@ export default class Tile {
 
   /**
    * 更新瓦片顶点信息
-   * @param tileBounds
+   * @param bbox
    * @param renderer
    * @param force
    */
-  updateGeometry(tileBounds, renderer: Renderer, force?: boolean) {
-    this.tileBounds = tileBounds;
+  updateGeometry(bbox: ProjTileBounds, renderer: Renderer, force?: boolean) {
+    this.tileBounds = bbox;
     if (!this.geometry || force) {
       const position = [
         this.tileBounds.left,
@@ -183,13 +183,13 @@ export default class Tile {
   /**
    * 创建 `TileMesh`
    * @param passId
-   * @param tileBounds
+   * @param bbox
    * @param renderer
    * @param program
    * @param force
    */
-  createMesh(passId, tileBounds, renderer: Renderer, program: Program, force?: boolean) {
-    this.updateGeometry(tileBounds, renderer, force);
+  createMesh(passId: string, bbox: ProjTileBounds, renderer: Renderer, program: Program, force?: boolean) {
+    this.updateGeometry(bbox, renderer, force);
     if (!this.tileMeshs.get(passId) || force) {
       const tileMesh = new TileMesh(this.tileID.tileKey, renderer, program, this.geometry);
       tileMesh.setCenter(this.tileCenter);

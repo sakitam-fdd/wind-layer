@@ -6,6 +6,7 @@ import {
   Texture,
   Vector2,
   RenderTarget,
+  BlendType,
 } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
@@ -80,7 +81,7 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       defines: [`RENDER_TYPE ${this.options.bandType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
       transparent: true,
-      blending: 5,
+      blending: BlendType.NoBlending,
       blendFunc: {
         src: this.renderer.gl.ONE,
         dst: this.renderer.gl.ONE_MINUS_SRC_ALPHA,
@@ -198,7 +199,7 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       const attr = this.renderer.attributes;
       this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
     }
-    const { camera, worlds = [0] } = rendererParams.cameras;
+    const { camera } = rendererParams.cameras;
     if (rendererState) {
       this.#mesh.program.setUniform(
         'u_image_res',
@@ -207,7 +208,6 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       const fade = this.options.source?.getFadeTime?.() || 0;
       this.#mesh.program.setUniform('u_fade_t', fade);
       this.#mesh.program.setUniform('u_colorRamp', rendererState.colorRampTexture);
-      this.#mesh.program.setUniform('u_data_matrix', rendererState.u_data_matrix);
       this.#mesh.program.setUniform('u_colorRange', rendererState.colorRange);
 
       const particleTextures = this.options.getParticles();
@@ -224,13 +224,10 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;
       this.#mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, this.#mesh.localMatrix);
-      for (let i = 0; i < worlds.length; i++) {
-        this.#mesh.program.setUniform('u_offset', worlds[i]);
-        this.#mesh.draw({
-          ...rendererParams,
-          camera,
-        });
-      }
+      this.#mesh.draw({
+        ...rendererParams,
+        camera,
+      });
     }
 
     if (this.renderTarget) {

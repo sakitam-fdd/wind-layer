@@ -145,14 +145,18 @@ export enum TileState {
 }
 
 /**
- * 瓦片范围
+ * 瓦片范围 (经纬度) [xmin, ymin, xmax, ymax]
  */
-export interface TileBounds {
+export type TileBounds = Bounds;
+
+/**
+ * 投影后的瓦片范围
+ */
+export interface ProjTileBounds {
   left: number;
   top: number;
   right: number;
   bottom: number;
-  lngLatBounds: Bounds;
 }
 
 export type ParseOptionsType = {

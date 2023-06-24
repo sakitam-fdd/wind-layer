@@ -85,8 +85,8 @@ export default class TileSource {
     this.id = id;
 
     this.type = LayerDataType.tile;
-    this.minZoom = options.minZoom || 0;
-    this.maxZoom = options.maxZoom || 22;
+    this.minZoom = options.minZoom ?? 0;
+    this.maxZoom = options.maxZoom ?? 22;
     this.roundZoom = Boolean(options.roundZoom);
     this.scheme = options.scheme || 'xyz';
     this.tileSize = options.tileSize || 512;
@@ -143,7 +143,7 @@ export default class TileSource {
     return this.#loaded;
   }
 
-  reload(clear) {
+  reload(clear: boolean) {
     this.load(() => {
       if (clear) {
         this.#sourceCache.clearTiles();
@@ -154,16 +154,15 @@ export default class TileSource {
     });
   }
 
-  hasTile(coord) {
-    const bounds = coord.getTileBounds(new TileID(coord.z, coord.x, coord.y, coord.z, 0));
-    return !this.tileBounds || containsExtent(this.tileBounds, bounds.lngLatBounds);
+  hasTile(coord: TileID) {
+    return !this.tileBounds || containsExtent(this.tileBounds, coord.tileBounds);
   }
 
   getFadeTime() {
     return 0;
   }
 
-  getUrl(x, y, z) {
+  getUrl(x: number, y: number, z: number) {
     const { url, subdomains } = this.options;
     let domain: string | number = '';
     if (subdomains && Array.isArray(subdomains) && subdomains.length > 0) {
@@ -194,7 +193,7 @@ export default class TileSource {
     return formatUrl(url, data);
   }
 
-  asyncActor(tile, url) {
+  asyncActor(tile: Tile, url: string) {
     return new Promise((resolve, reject) => {
       const id = `${tile.tileID.tileKey}-${url}`;
       tile.actor.send(
@@ -216,7 +215,7 @@ export default class TileSource {
     });
   }
 
-  getTileUrl(tileID) {
+  getTileUrl(tileID: TileID) {
     const z = tileID.z;
     const x = tileID.x;
     const y = this.scheme === 'tms' ? Math.pow(2, tileID.z) - tileID.y - 1 : tileID.y;
@@ -272,7 +271,7 @@ export default class TileSource {
     }
   }
 
-  abortTile(tile, callback) {
+  abortTile(tile: Tile, callback) {
     if (tile.request) {
       if (tile.request.size > 0 && tile.actor) {
         const iterator = tile.request.entries();
@@ -301,7 +300,7 @@ export default class TileSource {
     callback();
   }
 
-  unloadTile(tile, callback) {
+  unloadTile(tile: Tile, callback) {
     if (tile.actor) {
       // tile.actor.send('removeTile', {uid: tile.uid, type: this.type, source: this.id});
     }

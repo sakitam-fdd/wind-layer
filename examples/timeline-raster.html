@@ -7,8 +7,8 @@
   <meta name="renderer" content="webkit"/>
   <meta name="force-rendering" content="webkit"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-  <script src="https://unpkg.com/mapbox-gl@1.13.3/dist/mapbox-gl.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/mapbox-gl@1.13.3/dist/mapbox-gl.css">
+  <script src="https://unpkg.com/mapbox-gl/dist/mapbox-gl.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/mapbox-gl/dist/mapbox-gl.css">
   <style>
     body {
       margin: 0;
@@ -30,20 +30,6 @@
 <script src="../packages/mapbox-gl/dist/mapbox-wind.js"></script>
 <script>
   mapboxgl.accessToken = 'pk.eyJ1IjoidTEwaW50IiwiYSI6InQtMnZvTkEifQ.c8mhXquPE7_xoB3P4Ag8cA';
-
-  if (mapboxgl.Map.prototype._setupPainter.toString().indexOf('webgl2') === -1) {
-    const setupPainterPrev = mapboxgl.Map.prototype._setupPainter;
-    mapboxgl.Map.prototype._setupPainter = function () {
-      const getContextPrev = this._canvas.getContext;
-      this._canvas.getContext = function (name, attrib) {
-        return getContextPrev.apply(this, ['webgl2', attrib]) ||
-          getContextPrev.apply(this, ['webgl', attrib]) ||
-          getContextPrev.apply(this, ['experimental-webgl', attrib]);
-      };
-      setupPainterPrev.apply(this);
-      this._canvas.getContext = getContextPrev;
-    };
-  }
 
   const map = new mapboxgl.Map({
     container: 'map',

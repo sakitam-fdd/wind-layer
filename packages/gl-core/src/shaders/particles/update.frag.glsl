@@ -10,8 +10,8 @@ uniform sampler2D u_particles;
 uniform float u_fade_t;
 uniform vec2 u_image_res;
 
-uniform vec4 u_bbox;
-uniform vec4 u_data_bbox;
+uniform vec4 u_bbox; // 当前地图范围
+uniform vec4 u_data_bbox; // 数据范围
 uniform float u_rand_seed;
 uniform float u_drop_rate;
 uniform float u_drop_rate_bump;
@@ -42,15 +42,6 @@ vec2 bilinear(const vec2 uv) {
     vec2 bl = decodeValue(vc + vec2(0, px.y));
     vec2 br = decodeValue(vc + px);
     return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
-}
-
-const vec4 drop_pos = vec4(0);
-
-bool containsXY(vec2 pos, vec4 bbox) {
-    return (
-        bbox.x <= pos.x && pos.x <= bbox.z &&
-        bbox.y <= pos.y && pos.y <= bbox.w
-    );
 }
 
 void main() {

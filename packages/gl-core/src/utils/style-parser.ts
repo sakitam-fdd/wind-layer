@@ -110,7 +110,7 @@ export function createLinearGradient(
   colorRange: [number, number];
 } {
   const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
   const { input: interpolateColor, interpolation } = parseColorStyle(styleAttrField);
 
@@ -131,7 +131,7 @@ export function createLinearGradient(
         createGradient(interpolateColor, min, max, w, h, gradient, ctx);
         const len = Math.round((max - min) / interval);
         const canvas2 = document.createElement('canvas');
-        const ctx2 = canvas2.getContext('2d') as CanvasRenderingContext2D;
+        const ctx2 = canvas2.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D;
         canvas2.width = w;
         canvas2.height = h;
         for (let j = 0; j < len; j++) {

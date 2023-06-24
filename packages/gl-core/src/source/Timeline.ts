@@ -132,8 +132,8 @@ class TimelineSource {
     this.id = id;
     this.type = 'timeline';
 
-    this.minZoom = options.minZoom || 0;
-    this.maxZoom = options.maxZoom || 22;
+    this.minZoom = options.minZoom ?? 0;
+    this.maxZoom = options.maxZoom ?? 22;
     this.roundZoom = Boolean(options.roundZoom);
     const scheme = options.scheme || 'xyz';
     this.tileSize = options.tileSize || 512;

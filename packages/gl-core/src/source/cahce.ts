@@ -109,6 +109,9 @@ export default class SourceCache extends EventEmitter {
     return this.cacheTiles[id] && this.cacheTiles[id].hasData() && !this.coveredTiles[id];
   }
 
+  /**
+   * 获取已经加载的瓦片
+   */
   getVisibleCoordinates() {
     return this.getRenderableIds().map((id) => this.cacheTiles[id].tileID);
   }

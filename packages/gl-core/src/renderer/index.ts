@@ -15,12 +15,13 @@ import { createLinearGradient, createZoom } from '../utils/style-parser';
 import { getBandType, RenderFrom, RenderType } from '../type';
 import { SourceType } from '../source';
 import Tile from '../tile/Tile';
+import TileID from '../tile/TileID';
 
 export interface LayerOptions {
   /**
    * 获取当前视野内的瓦片
    */
-  getViewTiles: (data: any) => any[];
+  getViewTiles: (data: any, renderType: RenderType) => TileID[];
 
   /**
    * 渲染类型
@@ -104,7 +105,7 @@ export const defaultOptions: LayerOptions = {
 
 export default class Layer {
   private options: LayerOptions;
-  private uid: string;
+  private readonly uid: string;
   private renderPipeline: WithNull<Pipelines>;
   private readonly scene: Scene;
   private readonly renderer: Renderer;
@@ -114,7 +115,6 @@ export default class Layer {
   private sharedState: {
     u_bbox: [number, number, number, number];
     u_data_bbox: [number, number, number, number];
-    u_offset: [number, number];
     u_scale: [number, number];
   };
 
@@ -184,7 +184,6 @@ export default class Layer {
     this.sharedState = {
       u_bbox: [0, 0, 1, 1],
       u_data_bbox: [0, 0, 1, 1],
-      u_offset: [0, 0],
       u_scale: [1, 1],
     };
     this.renderPipeline = new Pipelines(this.renderer);
@@ -516,6 +515,7 @@ export default class Layer {
 
         if (pass.id === 'ParticlesPass') {
           pass.prerender = true;
+          // pass.resetParticles();
         }
       });
     }
@@ -525,7 +525,7 @@ export default class Layer {
    * 更新视野内的瓦片
    */
   update() {
-    const tiles = this.options.getViewTiles(this.source);
+    const tiles = this.options.getViewTiles(this.source, this.options.renderType);
     if (Array.isArray(this.source.sourceCache)) {
       this.source.sourceCache.forEach((s) => {
         s?.update(tiles);
@@ -564,7 +564,6 @@ export default class Layer {
           colorRange: this.#colorRange,
           colorRampTexture: this.#colorRampTexture,
           sharedState: this.sharedState,
-          u_data_matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
           u_drop_rate: this.#dropRate,
           u_drop_rate_bump: this.#dropRateBump,
           u_speed_factor: this.#speedFactor,
@@ -586,7 +585,6 @@ export default class Layer {
         displayRange: this.options.displayRange,
         useDisplayRange: Boolean(this.options.displayRange),
         sharedState: this.sharedState,
-        u_data_matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
         u_drop_rate: this.#dropRate,
         u_drop_rate_bump: this.#dropRateBump,
         u_speed_factor: this.#speedFactor,

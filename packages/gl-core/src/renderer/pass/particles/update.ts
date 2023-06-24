@@ -1,12 +1,13 @@
 import {
+  BlendType,
+  Geometry,
+  Mesh,
   Program,
   Renderer,
-  Mesh,
-  Geometry,
+  RenderTarget,
   Texture,
   utils,
   Vector2,
-  RenderTarget,
 } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
@@ -64,7 +65,7 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
       },
       defines: [`RENDER_TYPE ${this.options.bandType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
-      blending: 0,
+      blending: BlendType.NoBlending,
       transparent: true,
     });
 
@@ -168,7 +169,6 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
         'dataRange',
         'useDisplayRange',
         'displayRange',
-        'u_data_matrix',
         'u_drop_rate',
         'u_drop_rate_bump',
         'u_speed_factor',

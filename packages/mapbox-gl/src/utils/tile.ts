@@ -1,299 +1,140 @@
-import mapboxgl from 'mapbox-gl';
-import { vec2 } from 'gl-matrix';
-import { TileID } from 'wind-gl-core';
-import { Aabb, Frustum } from './Aabb';
+import {TileBounds, TileID} from 'wind-gl-core';
+import {utils} from '@sakitam-gis/vis-engine';
+import {mercatorXfromLng, mercatorYfromLat} from './mercatorCoordinate';
 
-// const tile2WSG84 = (c, z) => c / Math.pow(2, z);
-
-// const TILE_SIZE = 512;
-
-// function getScale(z: number, tileSize: number): number {
-//   return (Math.pow(2, z) * TILE_SIZE) / tileSize;
-// }
-
-// function tile2lngLat(x: number, y: number, z: number): [number, number] {
-//   const scale = getScale(z, TILE_SIZE);
-//   const lng = (x / scale) * 360 - 180;
-//   const n = Math.PI - (2 * Math.PI * y) / scale;
-//   const lat = (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
-//   return [lng, lat];
-// }
-
-// class TileID1 {
-//   public z: number;
-//   public x: number;
-//   public y: number;
-//   public wrap: number;
-//
-//   constructor(z: number, x: number, y: number, wrap = 0) {
-//     this.z = z;
-//     this.x = x;
-//     this.y = y;
-//     this.wrap = wrap;
-//   }
-//
-//   toString() {
-//     return `${this.z}/${this.x}/${this.y}`;
-//   }
-//
-//   parent() {
-//     if (this.z > 0) return new TileID(this.z - 1, this.x >> 1, this.y >> 1, this.wrap);
-//     else return new TileID(this.z, this.x, this.y, this.wrap);
-//   }
-//   children() {
-//     return [
-//       new TileID(this.z + 1, this.x * 2, this.y * 2, this.wrap),
-//       new TileID(this.z + 1, this.x * 2 + 1, this.y * 2, this.wrap),
-//       new TileID(this.z + 1, this.x * 2 + 1, this.y * 2 + 1, this.wrap),
-//       new TileID(this.z + 1, this.x * 2, this.y * 2 + 1, this.wrap),
-//     ];
-//   }
-//   siblings() {
-//     return this.z === 0
-//       ? []
-//       : this.parent()
-//           .children()
-//           .filter((t) => !this.isEqual(t));
-//   }
-//   isEqual(tile: TileID) {
-//     return tile.x === this.x && tile.y === this.y && tile.z === this.z && tile.wrap === this.wrap;
-//   }
-//
-//   getBounds() {
-//     const xy = tile2lngLat(this.x, this.y, this.z);
-//     const xy1 = tile2lngLat(this.x + 1, this.y + 1, this.z);
-//     return [...xy, ...xy1];
-//   }
-//
-//   /**
-//    * 判断是否是根节点
-//    * @returns {boolean}
-//    */
-//   isRoot() {
-//     return this.z === 0;
-//   }
-//   neighbor(hor, ver) {
-//     if (this.z === 0) {
-//       return new TileID(0, 0, 0, this.wrap + hor);
-//     }
-//     const max = Math.pow(2, this.z);
-//     return new TileID(
-//       this.z,
-//       (this.x + hor + max) % max,
-//       (this.y + ver + max) % max,
-//       this.x + hor < 0 ? this.wrap - 1 : this.x + hor > max ? this.wrap + 1 : this.wrap,
-//     );
-//   }
-//   quadrant() {
-//     return [this.x % 2, this.y % 2];
-//   }
-// }
-
-export function coveringTiles1(map, { maxzoom, minzoom }) {
-  const zoom = map.getZoom();
-
-  const practicalZoom = Math.max(Math.min(maxzoom, Math.floor(zoom)), minzoom);
-
-  const bounds = map.getBounds();
-
-  const tileCount = 2 ** practicalZoom;
-
-  const top = Math.floor(((85.051129 - bounds.getNorth()) / 180) * tileCount);
-  const bottom = Math.ceil(((85.051129 - bounds.getSouth()) / 180) * tileCount);
-  const left = Math.floor(((bounds.getWest() + 180) / 360) * tileCount);
-  const right = Math.ceil(((bounds.getEast() + 180) / 360) * tileCount);
-
-  const tiles: TileID[] = [];
-  for (let y = top; y < bottom; y++) {
-    for (let x = left; x < right; x++) {
-      let properX = x % tileCount;
-      if (properX < 0) {
-        properX += tileCount;
-      }
-      tiles.push(new TileID(practicalZoom, properX, y, Math.floor(x / tileCount)));
-    }
-  }
-  return tiles;
+export function zoomScale(z) {
+  return Math.pow(2, z);
 }
 
-function scaleZoom(scale: number) {
+export function scaleZoom(scale) {
   return Math.log(scale) / Math.LN2;
 }
 
-function coveringZoomLevel(
-  view: { zoom: number; tileSize: number },
-  options: { roundZoom?: boolean; tileSize: number },
-): number {
+/**
+ * 计算最高层级，这个层级包含了 Tr 边界内的所有瓦片
+ * 1. 先不管round还是floor，在计算层级时 mapbox 内部使用的事 512 大小的瓦片，那么在你使用 256 的瓦片时，层级需要加 1
+ * 即在当前 zoom 的下一级
+ * 2. 当瓦片大小为 1024 时，那么需要的层级应该是 mapbox 当前层级的上一级
+ * 3. 当当前 zoom 不为整数时，我们需要考虑是四舍五入还是向下取整，默认情况下
+ * 是向下取整（实际应用起来是当地图层级未到 2 时，就算是 1.98 那么默认清情况下计算瓦片的最大
+ * 层级也是 1），这样可以减少设业内瓦片加载的数量
+ * @param options
+ * @returns {number}
+ */
+function coveringZoomLevel(options) {
   const z = (options.roundZoom ? Math.round : Math.floor)(
-    view.zoom + scaleZoom(view.tileSize / options.tileSize),
+    options.zoom + scaleZoom(512 / options.tileSize),
   );
-  // At negative zoom levels load tiles from z0 because negative tile zoom levels don't exist.
   return Math.max(0, z);
 }
 
-export function coveringTiles(
-  view: {
-    center: [number, number];
-    zoom: number;
-    pitch: number;
-    tileSize: number;
-    worldSize: number;
-    invProjMatrix: any;
-  },
-  options: {
-    tileSize: number;
-    minzoom?: number;
-    maxzoom?: number;
-    roundZoom?: boolean;
-    reparseOverscaled?: boolean;
-    renderWorldCopies?: boolean;
-  },
-): Array<TileID> {
-  let z = coveringZoomLevel(view, options);
-  const actualZ = z;
-
-  if (options.minzoom !== undefined && z < options.minzoom) return [];
-  if (options.maxzoom !== undefined && z > options.maxzoom) z = options.maxzoom;
-
-  const centerCoord = mapboxgl.MercatorCoordinate.fromLngLat(view.center);
-  const numTiles = Math.pow(2, z);
-  const centerPoint = [numTiles * centerCoord.x, numTiles * centerCoord.y, 0];
-  const cameraFrustum = Frustum.fromInvProjectionMatrix(view.invProjMatrix, view.worldSize, z);
-
-  // No change of LOD behavior for pitch lower than 60 and when there is no top padding: return only tile ids from the requested zoom level
-  let minZoom = options.minzoom || 0;
-  // Use 0.1 as an epsilon to avoid for explicit == 0.0 floating point checks
-  if (view.pitch <= 60.0) minZoom = z;
-
-  const radiusOfMaxLvlLodInTiles = 3;
-
-  const newRootTile = (wrap: number): any => ({
-    aabb: new Aabb([wrap * numTiles, 0, 0], [(wrap + 1) * numTiles, numTiles, 0]),
-    zoom: 0,
-    x: 0,
-    y: 0,
-    wrap,
-    fullyVisible: false,
-  });
-
-  // Do a depth-first traversal to find visible tiles and proper levels of detail
-  const stack: any[] = [];
-  const result: any[] = [];
-  const maxZoom = z;
-  const overscaledZ = options.reparseOverscaled ? actualZ : z;
-
-  if (options.renderWorldCopies) {
-    // Render copy of the globe thrice on both sides
-    for (let i = 1; i <= 3; i++) {
-      stack.push(newRootTile(-i));
-      stack.push(newRootTile(i));
-    }
-  }
-
-  stack.push(newRootTile(0));
-
-  while (stack.length > 0) {
-    const it = stack.pop();
-    const x = it.x;
-    const y = it.y;
-    let fullyVisible = it.fullyVisible;
-
-    // Visibility of a tile is not required if any of its ancestor if fully inside the frustum
-    if (!fullyVisible) {
-      const intersectResult = it.aabb.intersects(cameraFrustum);
-
-      if (intersectResult === 0) continue;
-
-      fullyVisible = intersectResult === 2;
-    }
-
-    const refPoint = centerPoint;
-    const distanceX = it.aabb.distanceX(refPoint);
-    const distanceY = it.aabb.distanceY(refPoint);
-    const longestDim = Math.max(Math.abs(distanceX), Math.abs(distanceY));
-
-    // We're using distance based heuristics to determine if a tile should be split into quadrants or not.
-    // radiusOfMaxLvlLodInTiles defines that there's always a certain number of maxLevel tiles next to the map center.
-    // Using the fact that a parent node in quadtree is twice the size of its children (per dimension)
-    // we can define distance thresholds for each relative level:
-    // f(k) = offset + 2 + 4 + 8 + 16 + ... + 2^k. This is the same as "offset+2^(k+1)-2"
-    const distToSplit = radiusOfMaxLvlLodInTiles + (1 << (maxZoom - it.zoom)) - 2;
-
-    // Have we reached the target depth or is the tile too far away to be any split further?
-    if (it.zoom === maxZoom || (longestDim > distToSplit && it.zoom >= minZoom)) {
-      result.push({
-        tileID: new TileID(it.zoom === maxZoom ? overscaledZ : it.zoom, x, y, it.zoom, it.wrap),
-        distanceSq: vec2.sqrLen([centerPoint[0] - 0.5 - x, centerPoint[1] - 0.5 - y]),
-      });
-      continue;
-    }
-
-    for (let i = 0; i < 4; i++) {
-      const childX = (x << 1) + (i % 2);
-      const childY = (y << 1) + (i >> 1);
-      const childZ = it.zoom + 1;
-      const quadrant = it.aabb.quadrant(i);
-      stack.push({
-        aabb: quadrant,
-        zoom: childZ,
-        x: childX,
-        y: childY,
-        wrap: it.wrap,
-        fullyVisible,
-      });
-    }
-  }
-
-  return result.sort((a, b) => a.distanceSq - b.distanceSq).map((a) => a.tileID);
+/**
+ * 判断包含关系
+ *                      a - maxY
+ * a - minX -------------------------- a - maxX
+ *          |          b - maxY         |
+ *          |      --------------       |
+ *          |     |              |      |
+ *          |     |              |      |
+ *          |     |              |      |
+ *          |minX |              |maxX  |
+ *          |     |              |      |
+ *          |     |              |      |
+ *          |      --------------       |
+ *          |          b - minY         |
+ *          ---------------------------
+ *                     a - minY
+ * @param a
+ * @param b
+ * @returns {boolean}
+ */
+export function containsStrict(a: TileBounds, b: TileBounds): boolean {
+  return a[0] <= b[0] && a[1] <= b[1] && b[2] <= a[2] && b[3] <= a[3];
 }
 
-function getIdentityTileIndices(viewport, z) {
-  const { bbox } = viewport;
+const TILE_SIZE = 512;
 
-  if (bbox[3] > 85.05) bbox[3] = 85.05;
-  if (bbox[1] < -85.05) bbox[1] = -85.05;
+function lngLatToTile(lng: number, lat: number, zoom: number) {
+  const worldSize = TILE_SIZE * zoomScale(zoom);
+  const x = mercatorXfromLng(lng) * worldSize;
+  // 注意此处理论 y 方向永远在 0-1，但是由于 js 浮点数精度问题，可能溢出
+  const y = utils.clamp(mercatorYfromLat(lat), 0, 1) * worldSize;
+  // 还需要注意当 y 为 worldSize 时，计算出的 tileY 可能溢出
+  const tileX = Math.floor(x / TILE_SIZE);
+  const tileY = Math.floor(y / TILE_SIZE);
+  return { x: tileX, y: tileY, z: zoom };
+}
 
-  const { x: xminMercator, y: yminMercator } = mapboxgl.MercatorCoordinate.fromLngLat([
-    bbox[0],
-    bbox[3],
-  ]);
-  const { x: xmaxMercator, y: ymaxMercator } = mapboxgl.MercatorCoordinate.fromLngLat([
-    bbox[2],
-    bbox[1],
-  ]);
+export function getTileProjBounds(tileID: TileID) {
+  const numTiles = 1 << tileID.z;
+  return {
+    left: tileID.wrapedX / numTiles,
+    top: tileID.wrapedY / numTiles,
+    right: (tileID.wrapedX + 1) / numTiles,
+    bottom: (tileID.wrapedY + 1) / numTiles,
+  };
+}
 
-  const tileSize = 1.0 / 2 ** z;
+export function createTileID(z, wrapedX, wrapedY, wrap) {
+  // wrap = -1 zoom = 1 max 2
+  // -2 0 -1-0 | 0-0 1-0 | 2-0 3-0
+  // w: -1 -1/2
 
-  const minX = Math.ceil(xminMercator / tileSize) - 1;
-  const minY = Math.ceil(yminMercator / tileSize) - 1;
-  const maxX = Math.ceil(xmaxMercator / tileSize) - 1;
-  const maxY = Math.ceil(ymaxMercator / tileSize) - 1;
-
-  const indices: any[] = [];
-
-  for (let x = Math.floor(minX); x <= maxX; x++) {
-    for (let y = Math.floor(minY); y <= maxY; y++) {
-      indices.push({ x, y, z });
-    }
-  }
-
-  return indices;
+  const max = Math.pow(2, z);
+  // 注意此处 wrapedY 一般在0-max 范围内，我们主要关注 x 方向处理
+  return new TileID(z, wrap, z, (wrapedX - max * wrap) % max, (wrapedY + max) % max);
 }
 
 /**
- * Returns all tile indices in the current viewport. If the current zoom level is smaller
- * than minZoom, return an empty array. If the current zoom level is greater than maxZoom,
- * return tiles that are on maxZoom.
+ * 获取经纬度范围内的某个层级的瓦片（允许跨世界）
+ * @param bounds
+ * @param zoom
+ * @param options
  */
-export function getTileIndices(viewport, minZoom, maxZoom) {
-  let z = Math.ceil(viewport.z);
+export function getBoundsTiles(
+  bounds: TileBounds,
+  zoom: number,
+  options: {
+    tileSize: number;
+    minZoom?: number;
+    maxZoom?: number;
+    roundZoom?: boolean;
+  },
+) {
+  const topLeft = { lng: bounds[0], lat: bounds[3] };
+  const bottomRight = { lng: bounds[2], lat: bounds[1] };
 
-  if (Number.isFinite(minZoom) && z < minZoom) {
-    return [];
-  }
-  if (Number.isFinite(maxZoom) && z > maxZoom) {
-    z = maxZoom;
+  let z = coveringZoomLevel({
+    zoom,
+    tileSize: options.tileSize,
+    roundZoom: options.roundZoom,
+  });
+
+  if (options.minZoom !== undefined && z < options.minZoom) return [];
+  if (options.maxZoom !== undefined && z > options.maxZoom) z = options.maxZoom;
+
+  const max = Math.pow(2, z);
+
+  // 此处注意 mapbox 瓦片是从左上到右下递增
+  const minTile = lngLatToTile(topLeft.lng, topLeft.lat, z);
+  const maxTile = lngLatToTile(bottomRight.lng, bottomRight.lat, z);
+
+  const ts: TileID[] = [];
+  const maxX = maxTile.x;
+  const maxY = maxTile.y >= 1 && z === 0 ? maxTile.y - 1 : maxTile.y;
+  // const maxY = maxTile.y;
+  // 注意：在 0 瓦片 xy 方向递增时不可到达边界，如果到达 1 的边界，瓦片计算会多出一行或者一列
+  for (let x = minTile.x; x <= maxX; x++) {
+    for (let y = minTile.y; y <= maxY; y++) {
+      const wrap = Math.floor(x / max);
+
+      const tile = new TileID(z, wrap, z, (x - max * wrap) % max, (y + max) % max, {
+        getTileProjBounds,
+      });
+
+      ts.push(tile);
+    }
   }
 
-  return getIdentityTileIndices(viewport, z);
+  return ts;
 }

@@ -68,6 +68,9 @@
     "url": "https://github.com/sakitam-fdd/wind-layer/issues"
   },
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
+  "dependencies": {
+    "exifr": "^7.1.3"
+  },
   "publishConfig": {
     "access": "public"
   }

@@ -1,44 +1,13 @@
 import * as mapboxgl from 'mapbox-gl';
-// import { mat4 } from 'gl-matrix';
 import { OrthographicCamera, Renderer, Scene, utils } from '@sakitam-gis/vis-engine';
 
 import type { LayerOptions, SourceType } from 'wind-gl-core';
-import { Layer as LayerCore, mod, TileID } from 'wind-gl-core';
+import { Layer as LayerCore, mod, RenderType, TileID } from 'wind-gl-core';
 
 import CameraSync from './utils/CameraSync';
 import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
-import { coveringTiles, getTileIndices } from './utils/tile';
 
-function getCoords(x, y, z) {
-  const zz = Math.pow(2, z);
-
-  const lng = (x / zz) * 360 - 180;
-  // const lng = x / zz;
-  let lat = (y / zz) * 360 - 180;
-  lat = (180 / Math.PI) * (2 * Math.atan(Math.exp((lat * Math.PI) / 180)) - Math.PI / 2);
-
-  return [lng, lat];
-}
-
-function getTileBounds(x, y, z, wrap = 0) {
-  // for Google/OSM tile scheme we need to alter the y
-  // eslint-disable-next-line no-param-reassign
-  y = 2 ** z - y - 1;
-
-  const min = getCoords(x, y, z);
-  const max = getCoords(x + 1, y + 1, z);
-
-  const p1 = mapboxgl.MercatorCoordinate.fromLngLat([min[0], max[1]]); // 左上
-  const p2 = mapboxgl.MercatorCoordinate.fromLngLat([max[0], min[1]]); // 右下
-
-  return {
-    left: p1.x + wrap,
-    top: p1.y,
-    right: p2.x + wrap,
-    bottom: p2.y,
-    lngLatBounds: [min[0], min[1], max[0], max[1]],
-  };
-}
+import { getBoundsTiles, getTileProjBounds } from './utils/tile';
 
 export interface ILayerOptions extends LayerOptions {
   renderingMode: '2d' | '3d';
@@ -124,9 +93,9 @@ export default class Layer {
     }
   }
 
-  onAdd(map: mapboxgl.Map, gl: WebGLRenderingContext) {
+  onAdd(m: mapboxgl.Map, gl: WebGLRenderingContext) {
     this.gl = gl;
-    this.map = map;
+    this.map = m;
 
     this.renderer = new Renderer(gl, {
       autoClear: false,
@@ -139,7 +108,7 @@ export default class Layer {
     });
 
     this.scene = new Scene();
-    this.sync = new CameraSync(map, 'perspective', this.scene);
+    this.sync = new CameraSync(this.map, 'perspective', this.scene);
     this.planeCamera = new OrthographicCamera(0, 1, 1, 0, 0, 1);
     this.layer = new LayerCore(
       this.source,
@@ -161,7 +130,7 @@ export default class Layer {
         triggerRepaint: () => {
           this.map?.triggerRepaint();
         },
-        getViewTiles: (source: SourceType) => {
+        getViewTiles: (source: SourceType, renderType: RenderType) => {
           let { type } = source;
           // @ts-ignore
           type = type !== 'timeline' ? type : source.privateType;
@@ -178,18 +147,18 @@ export default class Layer {
                 const { canonical, wrap } = unwrapped;
                 const { x, y, z } = canonical;
                 wrapTiles.push(
-                  new TileID(z, x, y, z, wrap, {
-                    getTileBounds: () => ({
+                  new TileID(z, wrap, z, x, y, {
+                    getTileBounds: () => [
+                      (source as any).coordinates[0][0],
+                      (source as any).coordinates[2][1],
+                      (source as any).coordinates[1][0],
+                      (source as any).coordinates[0][1],
+                    ],
+                    getTileProjBounds: () => ({
                       left: tileID.extent[0] + wrap,
                       top: tileID.extent[1],
                       right: tileID.extent[2] + wrap,
                       bottom: tileID.extent[3],
-                      lngLatBounds: [
-                        (source as any).coordinates[0][0],
-                        (source as any).coordinates[2][1],
-                        (source as any).coordinates[1][0],
-                        (source as any).coordinates[0][1],
-                      ],
                     }),
                   }),
                 );
@@ -200,150 +169,134 @@ export default class Layer {
               const z = tileID.z;
               const wrap = 0;
               wrapTiles.push(
-                new TileID(z, x, y, z, wrap, {
-                  getTileBounds: () => ({
+                new TileID(z, wrap, z, x, y, {
+                  getTileBounds: () => [
+                    (source as any).coordinates[0][0],
+                    (source as any).coordinates[2][1],
+                    (source as any).coordinates[1][0],
+                    (source as any).coordinates[0][1],
+                  ],
+                  getTileProjBounds: () => ({
                     left: tileID.extent[0] + wrap,
                     top: tileID.extent[1],
                     right: tileID.extent[2] + wrap,
                     bottom: tileID.extent[3],
-                    lngLatBounds: [
-                      (source as any).coordinates[0][0],
-                      (source as any).coordinates[2][1],
-                      (source as any).coordinates[1][0],
-                      (source as any).coordinates[0][1],
-                    ],
                   }),
                 }),
               );
             }
           } else if (type === 'tile') {
-            // const m = new Float64Array(16) as any;
-            // mat4.rotateX(m, transform.projMatrix, -transform._pitch);
-            // mat4.rotateZ(m, transform.projMatrix, -transform.angle);
-            const tiles = coveringTiles(
-              {
-                zoom: transform.zoom,
-                center: transform.center,
-                tileSize: transform.tileSize,
-                pitch: transform.pitch,
-                worldSize: transform.worldSize,
-                invProjMatrix: transform.invProjMatrix,
-              },
-              {
-                tileSize: utils.isNumber(this.source.tileSize)
-                  ? source.tileSize
-                  : source.tileSize?.[0] || 512,
-                minzoom: source.minZoom,
-                maxzoom: source.maxZoom,
-                roundZoom: source.roundZoom,
-                renderWorldCopies: source.wrapX,
-              },
-            );
+            const opts = {
+              tileSize: utils.isNumber(this.source.tileSize)
+                ? source.tileSize
+                : source.tileSize?.[0] || 512,
+              minzoom: source.minZoom,
+              maxzoom: source.maxZoom,
+              roundZoom: source.roundZoom,
+            };
 
-            const [[mapXmin, mapYmin], [mapXmax, mapYmax]] = this.map?.getBounds().toArray() as any;
-            const tiles1 = getTileIndices(
-              {
-                bbox: [mapXmin, mapYmin, mapXmax, mapYmax],
-                z: transform.zoom,
-              },
-              source.minZoom,
-              source.maxZoom,
-            );
+            // 当为瓦片状态下的粒子渲染时需要按照获取的瓦片范围补齐周边缺失的瓦片，构建一个矩形
+            // eslint-disable-next-line no-empty
+            if (renderType === RenderType.particles) {
+              const ts = getBoundsTiles(
+                (this.map as any)?.getBounds().toArray().flat(),
+                transform.zoom,
+                opts,
+              );
 
-            console.log(tiles1, tiles);
+              for (let i = 0; i < ts.length; i++) {
+                const tile = ts[i];
+                if (source.wrapX) {
+                  wrapTiles.push(tile);
+                } else if (tile.wrap === 0) {
+                  wrapTiles.push(tile);
+                }
+              }
+            } else {
+              const tiles = transform.coveringTiles(opts);
 
-            for (let i = 0; i < tiles.length; i++) {
-              const tile = tiles[i];
-              const { x, y, z, wrap } = tile;
-              if (source.wrapX) {
-                wrapTiles.push(
-                  new TileID(z, x, y, z, wrap, {
-                    getTileBounds,
-                  }),
-                );
-              } else if (tile.wrap === 0) {
-                wrapTiles.push(
-                  new TileID(z, x, y, z, wrap, {
-                    getTileBounds,
-                  }),
-                );
+              for (let i = 0; i < tiles.length; i++) {
+                const tile = tiles[i];
+                const { canonical, wrap } = tile;
+                const { x, y, z } = canonical;
+                if (source.wrapX) {
+                  wrapTiles.push(
+                    new TileID(z, wrap, z, x, y, {
+                      getTileProjBounds,
+                    }),
+                  );
+                } else if (tile.wrap === 0) {
+                  wrapTiles.push(
+                    new TileID(z, wrap, z, x, y, {
+                      getTileProjBounds,
+                    }),
+                  );
+                }
               }
             }
-
-            // const tiles = transform.coveringTiles({
-            //   tileSize: utils.isNumber(this.source.tileSize)
-            //     ? source.tileSize
-            //     : source.tileSize?.[0] || 512,
-            //   minzoom: source.minZoom,
-            //   maxzoom: source.maxZoom,
-            //   roundZoom: source.roundZoom,
-            // });
-
-            // for (let i = 0; i < tiles.length; i++) {
-            //   const tile = tiles[i];
-            //   const { canonical, wrap } = tile;
-            //   const { x, y, z } = canonical;
-            //   if (source.wrapX) {
-            //     wrapTiles.push(
-            //       new TileID(z, x, y, z, wrap, {
-            //         getTileBounds,
-            //       }),
-            //     );
-            //   } else if (tile.wrap === 0) {
-            //     wrapTiles.push(
-            //       new TileID(z, x, y, z, wrap, {
-            //         getTileBounds,
-            //       }),
-            //     );
-            //   }
-            // }
           }
+
           return wrapTiles;
         },
         getExtent: () => {
-          const bounds: any = this.map?.getBounds().toArray();
+          const map = this.map as any;
+          const bounds: any = map?.getBounds().toArray();
           const xmin = bounds[0][0];
           const ymin = bounds[0][1];
           const xmax = bounds[1][0];
           const ymax = bounds[1][1];
 
-          const dx = xmax - xmin;
+          // const dx = xmax - xmin;
+          //
+          // const minLng = dx < 360 ? mod(xmin + 180, 360) - 180 : -180;
+          // let maxLng = 180;
+          // if (dx < 360) {
+          //   maxLng = mod(xmax + 180, 360) - 180;
+          //   if (maxLng < minLng) {
+          //     maxLng += 360;
+          //   }
+          // }
+          // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // // @ts-ignore
+          // const minLat = Math.max(
+          //   ymin,
+          //   map.transform.latRange
+          //     ? map.transform.latRange[0]
+          //     : map.transform.minLat,
+          // );
+          // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // // @ts-ignore
+          // const maxLat = Math.min(
+          //   ymax,
+          //   map.transform.latRange
+          //     ? map.transform.latRange[1]
+          //     : map.transform.maxLat,
+          // );
+          //
+          // const mapBounds = [minLng, minLat, maxLng, maxLat];
+          //
+          // const p0 = mapboxgl.MercatorCoordinate.fromLngLat(
+          //   new mapboxgl.LngLat(mapBounds[0], mapBounds[3]),
+          // );
+          // const p1 = mapboxgl.MercatorCoordinate.fromLngLat(
+          //   new mapboxgl.LngLat(mapBounds[2], mapBounds[1]),
+          // );
+          //
+          // return [p0.x, p0.y, p1.x, p1.y];
 
-          const minLng = dx < 360 ? mod(xmin + 180, 360) - 180 : -180;
-          let maxLng = 180;
-          if (dx < 360) {
-            maxLng = mod(xmax + 180, 360) - 180;
-            if (maxLng < minLng) {
-              maxLng += 360;
-            }
-          }
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          const minLat = Math.max(ymin, this.map.transform.latRange[0]);
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          const maxLat = Math.min(ymax, this.map.transform.latRange[1]);
-
-          const mapBounds = [minLng, minLat, maxLng, maxLat];
-
-          const p0 = mapboxgl.MercatorCoordinate.fromLngLat(
-            new mapboxgl.LngLat(mapBounds[0], mapBounds[3]),
-          );
-          const p1 = mapboxgl.MercatorCoordinate.fromLngLat(
-            new mapboxgl.LngLat(mapBounds[2], mapBounds[1]),
-          );
-
+          const p0 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmin, ymax));
+          const p1 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmax, ymin));
           return [p0.x, p0.y, p1.x, p1.y];
         },
       },
     );
 
-    map.on('movestart', this.moveStart);
-    map.on('move', this.update);
-    map.on('moveend', this.moveEnd);
-    map.on('zoom', this.handleZoom);
-    map.on('zoomend', this.handleZoom);
-    map.on('resize', this.handleResize);
+    this.map.on('movestart', this.moveStart);
+    this.map.on('move', this.update);
+    this.map.on('moveend', this.moveEnd);
+    this.map.on('zoom', this.handleZoom);
+    this.map.on('zoomend', this.handleZoom);
+    this.map.on('resize', this.handleResize);
     this.update();
   }
 

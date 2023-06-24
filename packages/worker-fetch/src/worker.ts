@@ -35,6 +35,8 @@ export default class Worker {
           this.request.arrayBuffer2Image(data, callback);
         } else if (params?.decodeType === 1) {
           this.request.arrayBuffer2float(data, callback);
+        } else if (params?.decodeType === 3) {
+          this.request.parseExif(data, callback);
         }
       }
     });

@@ -1,5 +1,6 @@
+import { parse } from 'exifr';
 import RequestScheduler from './RequestScheduler';
-import { arrayBufferToImageBitmap, getReferrer, isWorker, warnOnce } from './util';
+import { arrayBufferToImageBitmap, isImageBitmap, getReferrer, isWorker, warnOnce } from './util';
 
 export type RequestParameters = {
   url: string;
@@ -293,6 +294,33 @@ export class RequestAdapter {
     } else {
       this.arrayBuffer2float(data, callback);
     }
+  }
+
+  /**
+   * 解析 exif 信息
+   * @param data
+   * @param callback
+   */
+  parseExif(data: ArrayBuffer, callback: any) {
+    parse(data)
+      .then((res) => {
+        this.arrayBuffer2Image(data, (error, image) => {
+          if (error) {
+            callback(error);
+          } else {
+            callback(null, {
+              data: isImageBitmap(image) ? image : image.data,
+              width: image.width,
+              height: image.height,
+              exif: res,
+              withExif: true,
+            });
+          }
+        });
+      })
+      .catch((err) => {
+        callback(err);
+      });
   }
 
   fetch(params, callback) {

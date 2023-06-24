@@ -4,7 +4,7 @@ import vert from '../../../shaders/common.vert.glsl';
 import frag from '../../../shaders/compose.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
 import { RenderFrom, BandType } from '../../../type';
-import { containsXY, littleEndian } from '../../../utils/common';
+import { littleEndian } from '../../../utils/common';
 import TileID from '../../../tile/TileID';
 import { SourceType } from '../../../source';
 
@@ -113,17 +113,17 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     let ymax = -Infinity;
     let zmax = -Infinity;
     // 1. 计算mapbox墨卡托坐标的最大最小值，构建真实瓦片范围
+    // 注意这里不要直接使用图层计算的原始瓦片范围，因为在加载过程中有可能会有失败，我
+    // 们应该取真实加载后的瓦片计算范围
     // mapbox 的坐标原点是左上角
     for (let n = 0; n < coordsDescending.length; n++) {
       const tileId = coordsDescending[n];
-      const bounds = tileId.getTileBounds();
-      if (tileId.wrap === 0) {
-        xmin = Math.min(bounds.left, xmin);
-        xmax = Math.max(bounds.right, xmax);
-        ymin = Math.min(bounds.top, ymin);
-        ymax = Math.max(bounds.bottom, ymax);
-        zmax = Math.max(tileId.z, zmax);
-      }
+      const bounds = tileId.getTileProjBounds();
+      xmin = Math.min(bounds.left, xmin);
+      xmax = Math.max(bounds.right, xmax);
+      ymin = Math.min(bounds.top, ymin);
+      ymax = Math.max(bounds.bottom, ymax);
+      zmax = Math.max(tileId.z, zmax);
     }
 
     const zz = 1 / Math.pow(2, zmax);
@@ -134,6 +134,8 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     // 2. 计算 x 方向和 y 方向的行列数
     const w = dx / zz;
     const h = dy / zz;
+
+    // TODO: 瓦片范围和行列数是否可以提到瓦片计算的时候获取，可以减少几次循环
 
     rendererState.sharedState.u_data_bbox = [xmin, ymin, xmax, ymax];
 
@@ -146,7 +148,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
         this.renderer.state.setDepthMask(true);
       }
 
-      // 3. 计算出 fbo 所需大小
+      // 3. 计算出 fbo 所需大小 (此处有可能计算的宽高超出纹理最大大小，我们需要根据宽高比例进行重采样)
       const width = w * (this.options.source.tileSize ?? defaultSize);
       const height = h * (this.options.source.tileSize ?? defaultSize);
 
@@ -157,73 +159,64 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
 
     const [stencilModes, coords] = stencilConfigForOverlap(coordsDescending);
 
-    // 4. 根据 y 方向递增和 x 方向递增，依次循环找出对应的瓦片
-    for (let j = ymin; j < ymax; j += zz) {
-      const y = j + zz / 2; // 防止越界
-      for (let i = xmin; i < xmax; i += zz) {
-        const x = i + zz / 2;
-        const coord = coords.find((c) => {
-          const tileBBox = c.getTileBounds();
-          if (!tileBBox) return false;
-          return containsXY([tileBBox.left, tileBBox.top, tileBBox.right, tileBBox.bottom], x, y);
-        });
+    // 4. 循环 TileID，从 souceCache 查找对应瓦片渲染（默认是从事业中心向两边渲染）
+    for (let k = 0; k < coords.length; k++) {
+      const coord = coords[k];
+      // 5. 进行渲染
+      if (coord) {
+        const tile = sourceCache.getTile(coord);
+        if (!(tile && tile.hasData())) continue;
 
-        // 5. 进行渲染
-        if (coord) {
-          const tile = sourceCache.getTile(coord);
-          if (!(tile && tile.hasData())) continue;
+        const tileBBox = coord.getTileProjBounds();
+        if (!tileBBox) continue;
 
-          const tileBBox = coord.getTileBounds();
-          if (!tileBBox) continue;
+        const tileMesh = tile.createMesh(this.id, tileBBox, this.renderer, this.#program);
+        const mesh = tileMesh.planeMesh;
 
-          const tileMesh = tile.createMesh(this.id, tileBBox, this.renderer, this.#program);
-          const mesh = tileMesh.planeMesh;
+        mesh.scale.set(1 / w, 1 / h, 1);
+        mesh.position.set((tileBBox.left - xmin) / dx, (tileBBox.top - ymin) / dy, 0);
 
-          mesh.scale.set(1 / w, 1 / h, 1);
-          mesh.position.set((tileBBox.left - xmin) / dx, (tileBBox.top - ymin) / dy, 0);
-
-          const dataRange: number[] = [];
-          for (const [index, texture] of tile.textures) {
-            if (texture.userData?.dataRange && Array.isArray(texture.userData?.dataRange)) {
-              dataRange.push(...texture.userData.dataRange);
-            }
-            mesh.program.setUniform(`u_image${index}`, texture);
+        const dataRange: number[] = [];
+        for (const [index, texture] of tile.textures) {
+          if (texture.userData?.dataRange && Array.isArray(texture.userData?.dataRange)) {
+            dataRange.push(...texture.userData.dataRange);
           }
-
-          if (dataRange.length > 0) {
-            mesh.program.setUniform('dataRange', dataRange);
-          }
-
-          mesh.updateMatrix();
-          mesh.worldMatrixNeedsUpdate = false;
-          mesh.worldMatrix.multiply(camera.worldMatrix, mesh.localMatrix);
-
-          const stencilMode = stencilModes[coord.overscaledZ];
-
-          if (stencilMode) {
-            if (stencilMode.stencil) {
-              this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
-
-              this.renderer.state.setStencilFunc(
-                stencilMode.func?.cmp,
-                stencilMode.func?.ref,
-                stencilMode.func?.mask,
-              );
-              this.renderer.state.setStencilOp(
-                stencilMode.op?.fail,
-                stencilMode.op?.zfail,
-                stencilMode.op?.zpass,
-              );
-            } else {
-              this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
-            }
-          }
-
-          mesh.draw({
-            ...utils.omit(rendererParams, ['target']),
-            camera,
-          });
+          mesh.program.setUniform(`u_image${index}`, texture);
         }
+
+        if (dataRange.length > 0) {
+          mesh.program.setUniform('dataRange', dataRange);
+        }
+
+        mesh.updateMatrix();
+        mesh.worldMatrixNeedsUpdate = false;
+        mesh.worldMatrix.multiply(camera.worldMatrix, mesh.localMatrix);
+
+        const stencilMode = stencilModes[coord.overscaledZ];
+
+        if (stencilMode) {
+          if (stencilMode.stencil) {
+            this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
+
+            this.renderer.state.setStencilFunc(
+              stencilMode.func?.cmp,
+              stencilMode.func?.ref,
+              stencilMode.func?.mask,
+            );
+            this.renderer.state.setStencilOp(
+              stencilMode.op?.fail,
+              stencilMode.op?.zfail,
+              stencilMode.op?.zpass,
+            );
+          } else {
+            this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
+          }
+        }
+
+        mesh.draw({
+          ...utils.omit(rendererParams, ['target']),
+          camera,
+        });
       }
     }
 

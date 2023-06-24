@@ -105,9 +105,9 @@ export default class ComposePass extends Pass<ComposePassOptions> {
         const coord = coords[i];
         const tile = sourceCache.getTile(coord);
         if (!(tile && tile.hasData())) continue;
-        const tileBBox = coord.getTileBounds();
-        if (!tileBBox) continue;
-        const tileMesh = tile.createMesh(this.id, tileBBox, this.renderer, this.#program);
+        const bbox = coord.getTileProjBounds();
+        if (!bbox) continue;
+        const tileMesh = tile.createMesh(this.id, bbox, this.renderer, this.#program);
         const mesh = tileMesh.getMesh();
 
         for (const [index, texture] of tile.textures) {
