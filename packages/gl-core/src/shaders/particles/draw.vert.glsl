@@ -68,8 +68,10 @@ void main() {
     vec2 pos = color.rg;
     vec2 pos1 = color1.rg;
 
-    vec2 vePos = u_bbox.xy + pos * (u_bbox.zw - u_bbox.xy);
-    vec2 vePos1 = u_bbox.xy + pos1 * (u_bbox.zw - u_bbox.xy);
+//    vec2 vePos = u_bbox.xy + pos * (u_bbox.zw - u_bbox.xy);
+    vec2 vePos = pos;
+//    vec2 vePos1 = u_bbox.xy + pos1 * (u_bbox.zw - u_bbox.xy);
+    vec2 vePos1 = pos1;
 
     v_particle_pos = mix(vePos, vePos1, 0.5);
 

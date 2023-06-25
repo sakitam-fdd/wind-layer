@@ -12,10 +12,13 @@ uniform vec2 u_image_res;
 
 uniform vec4 u_bbox; // 当前地图范围
 uniform vec4 u_data_bbox; // 数据范围
-uniform float u_rand_seed;
+uniform float u_rand_seed; // 这是一个传入的随机数
 uniform float u_drop_rate;
 uniform float u_drop_rate_bump;
 uniform float u_speed_factor;
+
+uniform float u_num_particles;
+uniform float u_max_age;
 
 varying vec2 vUv;
 
@@ -44,13 +47,42 @@ vec2 bilinear(const vec2 uv) {
     return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
 }
 
+const vec2 drop_pos = vec2(0.0);
+
+bool containsXY(vec2 pos, vec4 bbox) {
+    return (
+        bbox.x <= pos.x && pos.x <= bbox.z &&
+        bbox.y <= pos.y && pos.y <= bbox.w
+    );
+}
+
+// 根据随机的位置计算在地图视图范围内的位置，我们要根据这些位置从数据纹理取值
+vec2 randomPosToGlobePos(vec2 pos) {
+    vec2 min_bbox = u_bbox.xy;
+    vec2 max_bbox = u_bbox.zw;
+    return mix(min_bbox, max_bbox, pos);
+}
+
 void main() {
     vec2 pos = texture2D(u_particles, vUv).xy;
-    vec2 uv = u_bbox.xy + pos * (u_bbox.zw - u_bbox.xy);
+    vec2 uv = (pos.xy - u_bbox.xy) * (u_bbox.zw - u_bbox.xy); // 0-1
+
+    // 如果原始位置不在数据范围内，那么丢弃此粒子
+    if (!containsXY(pos.xy, u_data_bbox)) {
+//        gl_FragColor = vec4(drop_pos, 0.0, 1.0);
+//        return;
+    }
+
+    // 如果原始位置不在地图范围内，那么丢弃此粒子
+    if (!containsXY(pos.xy, u_bbox)) {
+//        gl_FragColor = vec4(drop_pos, 0.0, 1.0);
+//        return;
+    }
 
     // 如果是无数据，直接赋值为初始值
     if (calcTexture(uv).a == 0.0) {
-        discard;
+//        gl_FragColor = vec4(drop_pos, 0.0, 1.0);
+//        return;
     }
 
     vec2 velocity = bilinear(uv);
@@ -59,18 +91,15 @@ void main() {
 
     vec2 offset = vec2(velocity.x, -velocity.y) * 0.0001 * u_speed_factor;
 
-    // update particle position, wrapping around the date line
+    pos = pos + offset;
 
-    pos = fract(1.0 + pos + offset);
-
-    // a random seed to use for the particle drop
-
-    vec2 seed = (pos + vUv) * u_rand_seed;
+    vec2 seed = pos * u_rand_seed;
 
     float drop_rate = u_drop_rate + speed * u_drop_rate_bump;
     float drop = step(1.0 - drop_rate, rand(seed));
-    vec2 random_pos = vec2(rand(seed + 1.3), rand(seed + 2.1));
 
+    vec2 random_pos = vec2(rand(seed + 1.3), rand(seed + 2.1));
+    random_pos = randomPosToGlobePos(random_pos);
     pos = mix(pos, random_pos, drop);
 
     gl_FragColor = vec4(pos.xy, 0.0, 1.0);
