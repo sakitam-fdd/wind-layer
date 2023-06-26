@@ -189,6 +189,8 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
       this.#mesh.program.setUniform('u_rand_seed', Math.random());
       this.#mesh.program.setUniform('u_particles', this.#current.texture);
       this.#mesh.program.setUniform('u_bbox', rendererState.extent);
+      this.#mesh.program.setUniform('u_max_age', 60);
+      this.#mesh.program.setUniform('u_particlesRes', this.#next.width);
       this.#mesh.program.setUniform('u_data_bbox', rendererState.sharedState.u_data_bbox);
 
       this.#mesh.updateMatrix();

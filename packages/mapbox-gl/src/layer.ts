@@ -2,7 +2,7 @@ import * as mapboxgl from 'mapbox-gl';
 import { OrthographicCamera, Renderer, Scene, utils } from '@sakitam-gis/vis-engine';
 
 import type { LayerOptions, SourceType } from 'wind-gl-core';
-import { Layer as LayerCore, mod, RenderType, TileID } from 'wind-gl-core';
+import { Layer as LayerCore, RenderType, TileID } from 'wind-gl-core';
 
 import CameraSync from './utils/CameraSync';
 import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
