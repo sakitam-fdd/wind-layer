@@ -1,4 +1,6 @@
 // pseudo-random generator
+// https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
+
 //const vec3 rand_constants = vec3(12.9898, 78.233, 4375.85453);
 //float rand(const vec2 co) {
 //  float t = dot(rand_constants.xy, co);

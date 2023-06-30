@@ -16,6 +16,7 @@ uniform float u_rand_seed; // 这是一个传入的随机数
 uniform float u_drop_rate;
 uniform float u_drop_rate_bump;
 uniform float u_speed_factor;
+uniform bool u_initialize;
 
 varying vec2 vUv;
 
@@ -60,14 +61,13 @@ vec2 randomPosToGlobePos(vec2 pos) {
     return mix(min_bbox, max_bbox, pos);
 }
 
-void main() {
-    vec2 pos = texture2D(u_particles, vUv).xy;
+vec2 update(vec2 pos) {
     vec2 uv = (pos.xy - u_data_bbox.xy) / (u_data_bbox.zw - u_data_bbox.xy); // 0-1
 
     // 1. 如果原始位置不在数据范围内，那么丢弃此粒子
     // 2. 如果原始位置不在地图范围内，那么丢弃此粒子
     // 3. 如果是无数据，直接赋值为初始值
-    if (!containsXY(pos.xy, u_data_bbox) || !containsXY(pos.xy, u_bbox) || calcTexture(uv).a == 0.0) {
+    if (!containsXY(pos.xy, u_data_bbox) || calcTexture(uv).a == 0.0) {
         pos = drop_pos;
     } else {
         vec2 velocity = bilinear(uv);
@@ -89,6 +89,19 @@ void main() {
         random_pos = randomPosToGlobePos(random_pos);
 
         pos = mix(pos, random_pos, drop);
+    }
+
+    return pos;
+}
+
+void main() {
+    vec2 pos = texture2D(u_particles, vUv).xy;
+
+    pos = update(pos);
+    if (u_initialize) {
+        for (int i = 0; i < 100; i++) {
+            pos = update(pos);
+        }
     }
 
     gl_FragColor = vec4(pos.xy, 0.0, 1.0);

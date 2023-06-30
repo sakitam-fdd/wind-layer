@@ -506,6 +506,7 @@ export default class Layer {
 
       if (updatePass) {
         // updatePass.initializeRenderTarget();
+        updatePass.setInitialize(true);
       }
 
       this.renderPipeline.passes.forEach((pass) => {
