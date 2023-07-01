@@ -7,7 +7,7 @@ import { Layer as LayerCore, RenderType, TileID } from 'wind-gl-core';
 import CameraSync from './utils/CameraSync';
 import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
 
-import { getBoundsTiles, getTileProjBounds } from './utils/tile';
+import { getBoundsTiles, getTileProjBounds, calcBounds } from './utils/tile';
 
 export interface ILayerOptions extends LayerOptions {
   renderingMode: '2d' | '3d';
@@ -131,6 +131,7 @@ export default class Layer {
           this.map?.triggerRepaint();
         },
         getViewTiles: (source: SourceType, renderType: RenderType) => {
+          const map = this.map as any;
           let { type } = source;
           // @ts-ignore
           type = type !== 'timeline' ? type : source.privateType;
@@ -190,19 +191,26 @@ export default class Layer {
               tileSize: utils.isNumber(this.source.tileSize)
                 ? source.tileSize
                 : source.tileSize?.[0] || 512,
+              // for mapbox
               minzoom: source.minZoom,
               maxzoom: source.maxZoom,
+              // for custom
+              minZoom: source.minZoom,
+              maxZoom: source.maxZoom,
               roundZoom: source.roundZoom,
             };
 
             // 当为瓦片状态下的粒子渲染时需要按照获取的瓦片范围补齐周边缺失的瓦片，构建一个矩形
             // eslint-disable-next-line no-empty
             if (renderType === RenderType.particles) {
-              const ts = getBoundsTiles(
-                (this.map as any)?.getBounds().toArray().flat(),
-                transform.zoom,
-                opts,
-              );
+              const bounds: any = map?.getBounds().toArray();
+
+              const mapBounds = calcBounds(bounds, [
+                map.transform.latRange ? map.transform.latRange[0] : map.transform.minLat,
+                map.transform.latRange ? map.transform.latRange[1] : map.transform.maxLat,
+              ]);
+
+              const ts = getBoundsTiles(mapBounds, transform.zoom, opts);
 
               for (let i = 0; i < ts.length; i++) {
                 const tile = ts[i];
@@ -241,52 +249,24 @@ export default class Layer {
         getExtent: () => {
           const map = this.map as any;
           const bounds: any = map?.getBounds().toArray();
-          const xmin = bounds[0][0];
-          const ymin = bounds[0][1];
-          const xmax = bounds[1][0];
-          const ymax = bounds[1][1];
 
-          // const dx = xmax - xmin;
-          //
-          // const minLng = dx < 360 ? mod(xmin + 180, 360) - 180 : -180;
-          // let maxLng = 180;
-          // if (dx < 360) {
-          //   maxLng = mod(xmax + 180, 360) - 180;
-          //   if (maxLng < minLng) {
-          //     maxLng += 360;
-          //   }
-          // }
-          // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // // @ts-ignore
-          // const minLat = Math.max(
-          //   ymin,
-          //   map.transform.latRange
-          //     ? map.transform.latRange[0]
-          //     : map.transform.minLat,
-          // );
-          // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // // @ts-ignore
-          // const maxLat = Math.min(
-          //   ymax,
-          //   map.transform.latRange
-          //     ? map.transform.latRange[1]
-          //     : map.transform.maxLat,
-          // );
-          //
-          // const mapBounds = [minLng, minLat, maxLng, maxLat];
-          //
-          // const p0 = mapboxgl.MercatorCoordinate.fromLngLat(
-          //   new mapboxgl.LngLat(mapBounds[0], mapBounds[3]),
-          // );
-          // const p1 = mapboxgl.MercatorCoordinate.fromLngLat(
-          //   new mapboxgl.LngLat(mapBounds[2], mapBounds[1]),
-          // );
-          //
-          // return [p0.x, p0.y, p1.x, p1.y];
+          const mapBounds = calcBounds(bounds, [
+            map.transform.latRange ? map.transform.latRange[0] : map.transform.minLat,
+            map.transform.latRange ? map.transform.latRange[1] : map.transform.maxLat,
+          ]);
 
-          const p0 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmin, ymax));
-          const p1 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmax, ymin));
+          const p0 = mapboxgl.MercatorCoordinate.fromLngLat(
+            new mapboxgl.LngLat(mapBounds[0], mapBounds[3]),
+          );
+          const p1 = mapboxgl.MercatorCoordinate.fromLngLat(
+            new mapboxgl.LngLat(mapBounds[2], mapBounds[1]),
+          );
+
           return [p0.x, p0.y, p1.x, p1.y];
+
+          // const p0 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmin, ymax));
+          // const p1 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmax, ymin));
+          // return [p0.x, p0.y, p1.x, p1.y];
         },
       },
     );

@@ -1,6 +1,6 @@
-import {TileBounds, TileID} from 'wind-gl-core';
-import {utils} from '@sakitam-gis/vis-engine';
-import {mercatorXfromLng, mercatorYfromLat} from './mercatorCoordinate';
+import { TileBounds, TileID, mod, Bounds } from 'wind-gl-core';
+import { utils } from '@sakitam-gis/vis-engine';
+import { mercatorXfromLng, mercatorYfromLat } from './mercatorCoordinate';
 
 export function zoomScale(z) {
   return Math.pow(2, z);
@@ -137,4 +137,31 @@ export function getBoundsTiles(
   }
 
   return ts;
+}
+
+function wrap(x, minx, min, max) {
+  let wrappedX = mod(x + max, max - min) + min;
+  if (minx !== undefined && minx !== null && wrappedX < minx) {
+    wrappedX += max - min;
+  }
+  return wrappedX;
+}
+
+export function calcBounds(bounds: number[][], yRange: [number, number]): Bounds {
+  const xmin = bounds[0][0];
+  const ymin = bounds[0][1];
+  const xmax = bounds[1][0];
+  const ymax = bounds[1][1];
+
+  const min = -180;
+  const max = 180;
+
+  const dx = xmax - xmin;
+  const minX = dx < max - min ? wrap(xmin, undefined, min, max) : min;
+  const maxX = dx < max - min ? wrap(xmax, minX, min, max) : max;
+
+  const minY = Math.max(ymin, yRange[0]);
+  const maxY = Math.min(ymax, yRange[1]);
+
+  return [minX, minY, maxX, maxY];
 }

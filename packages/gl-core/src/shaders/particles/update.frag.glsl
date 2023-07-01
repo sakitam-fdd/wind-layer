@@ -47,18 +47,32 @@ vec2 bilinear(const vec2 uv) {
 
 const vec2 drop_pos = vec2(0.0);
 
-bool containsXY(vec2 pos, vec4 bbox) {
-    return (
-        bbox.x <= pos.x && pos.x <= bbox.z &&
-        bbox.y <= pos.y && pos.y <= bbox.w
-    );
-}
-
 // 根据随机的位置计算在地图视图范围内的位置，我们要根据这些位置从数据纹理取值
 vec2 randomPosToGlobePos(vec2 pos) {
     vec2 min_bbox = u_bbox.xy;
     vec2 max_bbox = u_bbox.zw;
     return mix(min_bbox, max_bbox, pos);
+}
+
+float wrapx(float x) {
+    return mod(x + 180.0, 360.0) - 180.0;
+}
+
+float wrapx(float x, float min) {
+    float wrappedX = wrapx(x);
+    if (wrappedX < min) {
+        wrappedX += 360.0;
+    }
+    return wrappedX;
+}
+
+bool containsXY(vec2 pos, vec4 bbox) {
+//    float x = wrapx(pos.x, bbox.x);
+    float x = pos.x;
+    return (
+    bbox.x <= x && x <= bbox.z &&
+    bbox.y <= pos.y && pos.y <= bbox.w
+    );
 }
 
 vec2 update(vec2 pos) {
@@ -67,7 +81,7 @@ vec2 update(vec2 pos) {
     // 1. 如果原始位置不在数据范围内，那么丢弃此粒子
     // 2. 如果原始位置不在地图范围内，那么丢弃此粒子
     // 3. 如果是无数据，直接赋值为初始值
-    if (!containsXY(pos.xy, u_data_bbox) || calcTexture(uv).a == 0.0) {
+    if (!containsXY(pos.xy, u_data_bbox) || !containsXY(pos.xy, u_bbox) || calcTexture(uv).a == 0.0) {
         pos = drop_pos;
     } else {
         vec2 velocity = bilinear(uv);
@@ -89,6 +103,7 @@ vec2 update(vec2 pos) {
         random_pos = randomPosToGlobePos(random_pos);
 
         pos = mix(pos, random_pos, drop);
+//        pos.x = wrapx(pos.x);
     }
 
     return pos;
