@@ -3,7 +3,6 @@ attribute vec2 reference;
 attribute float a_index;
 
 uniform vec2 resolution;
-uniform vec4 u_bbox;
 uniform mat4 modelViewMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 modelMatrix;
@@ -24,7 +23,7 @@ void main() {
     vec4 color = texture2D(u_particles, uv);
     vec4 color1 = texture2D(u_particles_next, uv);
 
-    v_particle_pos = mix(color.rg, color1.rg, 0.5);
+    v_particle_pos = mix(color.rg, color1.rg, 0.0);
 
     gl_PointSize = u_particleSize;
 

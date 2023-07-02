@@ -31,6 +31,7 @@
 <div id='map'></div>
 <!--<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/mapbox-wind@1.0.0-alpha.10/dist/mapbox-wind.js"></script>-->
 <script src="../packages/mapbox-gl/dist/mapbox-wind.js"></script>
+<script src="https://unpkg.com/dat.gui/build/dat.gui.min.js"></script>
 <script>
   mapboxgl.accessToken = 'pk.eyJ1IjoidTEwaW50IiwiYSI6InQtMnZvTkEifQ.c8mhXquPE7_xoB3P4Ag8cA';
   const map = new mapboxgl.Map({
@@ -125,14 +126,40 @@
       // maxZoom: 0,
       // roundZoom: false,
       decodeType: 3,
-      coordinates: [
-        [-180, 85.051129],
-        [180, 85.051129],
-        [180, -85.051129],
-        [-180, -85.051129],
-      ],
       wrapX: false,
-      url: 'http://localhost:5000/2023111700/2023111703/0/0/0/wind-surface.jpeg',
+      // coordinates: [
+      //   [-180, 85.051129],
+      //   [180, 85.051129],
+      //   [180, -85.051129],
+      //   [-180, -85.051129],
+      // ],
+      // url: 'http://localhost:5000/2023111700/2023111703/0/0/0/wind-surface.jpeg',
+      coordinates: [
+        [-78.120282611, 68.846393966],
+        [132.453327310, 68.846393966],
+        [132.453327310, -75.191804486],
+        [-78.120282611, -75.191804486],
+      ],
+      url: 'http://localhost:5000/2023111700/2023111703/0/0/0/area.jpeg',
+      // coordinates: [
+      //   [
+      //     0,
+      //     85.051129
+      //   ],
+      //   [
+      //     180,
+      //     85.051129
+      //   ],
+      //   [
+      //     180,
+      //     -85.051129
+      //   ],
+      //   [
+      //     0,
+      //     -85.051129
+      //   ],
+      // ],
+      // url: 'http://localhost:5000/2023111700/2023111703/0/0/0/7.jpeg',
       // dataRange: [-34.37186050415039, 46.51813888549805, -42.12305450439453, 49.66694259643555],
     });
 
@@ -168,7 +195,15 @@
       hasMask: false,
       renderType: 1,
     });
-    const wind = new mapboxWind.Layer('wind', imageSource, {
+
+    const particlesConfig = {
+      speedFactor: 1,
+      fadeOpacity: 0.93,
+      dropRate: 0.003,
+      dropRateBump: 0.002,
+    }
+
+    const wind = new mapboxWind.Layer('wind', tileSource, {
       wireframe: true,
       styleSpec: {
         'fill-color': [
@@ -187,11 +222,16 @@
           2,
           1
         ],
-        numParticles: 65535 / 4,
-        speedFactor: 1,
-        fadeOpacity: 0.93,
-        dropRate: 0.003,
-        dropRateBump: 0.002,
+        numParticles: [
+          'interpolate',
+          ['exponential', 0.5],
+          ['zoom'],
+          0, // zoom
+          65535 / 8, // numParticles
+          8, // zoom
+          65535 / 8 // numParticles
+        ],
+        ...particlesConfig,
       },
       renderFrom: 'rg',
       widthSegments: 1,
@@ -203,6 +243,32 @@
 
     // map.addLayer(fill);
     map.addLayer(wind);
+
+    const gui = new dat.GUI();
+
+    gui.add(particlesConfig, 'speedFactor', 0, 2).onChange(function () {
+      wind.updateOptions({
+        styleSpec: particlesConfig
+      });
+    });
+
+    gui.add(particlesConfig, 'fadeOpacity', 0, 1).onChange(function () {
+      wind.updateOptions({
+        styleSpec: particlesConfig
+      });
+    });
+
+    gui.add(particlesConfig, 'dropRate', 0, 0.1).onChange(function () {
+      wind.updateOptions({
+        styleSpec: particlesConfig
+      });
+    });
+
+    gui.add(particlesConfig, 'dropRateBump', 0, 0.1).onChange(function () {
+      wind.updateOptions({
+        styleSpec: particlesConfig
+      });
+    });
   });
 </script>
 </body>

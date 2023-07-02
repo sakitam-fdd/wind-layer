@@ -12,7 +12,7 @@ uniform vec2 u_image_res;
 
 uniform vec4 u_bbox; // 当前地图范围
 uniform vec4 u_data_bbox; // 数据范围
-uniform float u_rand_seed; // 这是一个传入的随机数
+uniform float u_rand_seed;
 uniform float u_drop_rate;
 uniform float u_drop_rate_bump;
 uniform float u_speed_factor;
@@ -45,8 +45,6 @@ vec2 bilinear(const vec2 uv) {
     return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
 }
 
-const vec2 drop_pos = vec2(0.0);
-
 // 根据随机的位置计算在地图视图范围内的位置，我们要根据这些位置从数据纹理取值
 vec2 randomPosToGlobePos(vec2 pos) {
     vec2 min_bbox = u_bbox.xy;
@@ -55,20 +53,19 @@ vec2 randomPosToGlobePos(vec2 pos) {
 }
 
 float wrapx(float x) {
-    return mod(x + 180.0, 360.0) - 180.0;
+    return mod(x + 1.0, 1.0);
 }
 
 float wrapx(float x, float min) {
     float wrappedX = wrapx(x);
     if (wrappedX < min) {
-        wrappedX += 360.0;
+        wrappedX += 1.0;
     }
     return wrappedX;
 }
 
 bool containsXY(vec2 pos, vec4 bbox) {
-//    float x = wrapx(pos.x, bbox.x);
-    float x = pos.x;
+    float x = wrapx(pos.x, bbox.x);
     return (
     bbox.x <= x && x <= bbox.z &&
     bbox.y <= pos.y && pos.y <= bbox.w
@@ -76,35 +73,34 @@ bool containsXY(vec2 pos, vec4 bbox) {
 }
 
 vec2 update(vec2 pos) {
+    // 1. xy 必定在 bbox 内
     vec2 uv = (pos.xy - u_data_bbox.xy) / (u_data_bbox.zw - u_data_bbox.xy); // 0-1
 
-    // 1. 如果原始位置不在数据范围内，那么丢弃此粒子
-    // 2. 如果原始位置不在地图范围内，那么丢弃此粒子
-    // 3. 如果是无数据，直接赋值为初始值
+    vec2 velocity = bilinear(uv);
+
+    float speed = length(velocity);
+
+    vec2 offset = vec2(velocity.x, -velocity.y) * 0.0001 * u_speed_factor;
+
+    pos = pos + offset;
+
+    // a random seed to use for the particle drop
+
+    // a random seed to use for the particle drop
+    vec2 seed = (pos.xy + vUv) * u_rand_seed;
+
+    float drop_rate = u_drop_rate + speed * u_drop_rate_bump;
+    float drop = step(1.0 - drop_rate, rand(seed));
+    vec2 random_pos = vec2(rand(seed + 1.3), rand(seed + 2.1));
+
+    random_pos = randomPosToGlobePos(random_pos);
+
     if (!containsXY(pos.xy, u_data_bbox) || !containsXY(pos.xy, u_bbox) || calcTexture(uv).a == 0.0) {
-        pos = drop_pos;
-    } else {
-        vec2 velocity = bilinear(uv);
-
-        float speed = length(velocity);
-
-        vec2 offset = vec2(velocity.x, -velocity.y) * 0.0001 * u_speed_factor;
-
-        pos = pos + offset;
-
-        // a random seed to use for the particle drop
-
-        vec2 seed = (pos.xy + vUv) * u_rand_seed;
-
-        float drop_rate = u_drop_rate + speed * u_drop_rate_bump;
-        float drop = step(1.0 - drop_rate, rand(seed));
-        vec2 random_pos = vec2(rand(seed + 1.3), rand(seed + 2.1));
-
-        random_pos = randomPosToGlobePos(random_pos);
-
-        pos = mix(pos, random_pos, drop);
-//        pos.x = wrapx(pos.x);
+        drop = 1.0;
     }
+
+    pos = mix(pos, random_pos, drop);
+    pos.x = wrapx(pos.x);
 
     return pos;
 }
@@ -113,11 +109,12 @@ void main() {
     vec2 pos = texture2D(u_particles, vUv).xy;
 
     pos = update(pos);
-    if (u_initialize) {
-        for (int i = 0; i < 100; i++) {
-            pos = update(pos);
-        }
-    }
+    // 初始化时为避免粒子随机位置接近，先执行 25 次迭代
+//    if (u_initialize) {
+//        for (int i = 0; i < 25; i++) {
+//            pos = update(pos);
+//        }
+//    }
 
     gl_FragColor = vec4(pos.xy, 0.0, 1.0);
 }

@@ -202,7 +202,7 @@ export default class Layer {
 
             // 当为瓦片状态下的粒子渲染时需要按照获取的瓦片范围补齐周边缺失的瓦片，构建一个矩形
             // eslint-disable-next-line no-empty
-            if (renderType === RenderType.particles) {
+            if (renderType !== RenderType.particles) {
               const bounds: any = map?.getBounds().toArray();
 
               const mapBounds = calcBounds(bounds, [

@@ -36,6 +36,8 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
 
   #initialize = true;
 
+  #particleRes: number;
+
   constructor(
     id: string,
     renderer: Renderer,
@@ -93,8 +95,12 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
     });
   }
 
+  #getParticleRes() {
+    return Math.ceil(Math.sqrt(this.options.getParticleNumber()));
+  }
+
   resize() {
-    const particleRes = Math.ceil(Math.sqrt(this.options.getParticleNumber()));
+    const particleRes = this.#getParticleRes();
 
     this.#current.resize(particleRes, particleRes);
     this.#next.resize(particleRes, particleRes);
@@ -115,7 +121,7 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
    * 创建 RenderTarget
    */
   initializeRenderTarget() {
-    const particleRes = Math.ceil(Math.sqrt(this.options.getParticleNumber()));
+    const particleRes = this.#getParticleRes();
 
     const particleState = new Float32Array(particleRes ** 2 * 4);
     for (let i = 0; i < particleState.length; i++) {
@@ -162,6 +168,12 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
   render(rendererParams, rendererState) {
     const attr = this.renderer.attributes;
     const camera = rendererParams.cameras.planeCamera;
+    const particleRes = this.#getParticleRes();
+    if (!this.#particleRes || this.#particleRes !== particleRes) {
+      this.#particleRes = particleRes;
+      this.initializeRenderTarget();
+    }
+
     if (this.#next) {
       this.#next.bind();
       if (attr.depth && this.#next.depth) {

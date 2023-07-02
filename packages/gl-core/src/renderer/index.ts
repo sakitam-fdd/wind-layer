@@ -301,6 +301,10 @@ export default class Layer {
     this.options = {
       ...this.options,
       ...options,
+      styleSpec: {
+        ...this.options.styleSpec,
+        ...options?.styleSpec,
+      },
     };
 
     this.buildColorRamp();
