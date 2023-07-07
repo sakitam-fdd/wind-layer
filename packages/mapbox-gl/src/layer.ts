@@ -202,7 +202,7 @@ export default class Layer {
 
             // 当为瓦片状态下的粒子渲染时需要按照获取的瓦片范围补齐周边缺失的瓦片，构建一个矩形
             // eslint-disable-next-line no-empty
-            if (renderType !== RenderType.particles) {
+            if (renderType === RenderType.particles) {
               const bounds: any = map?.getBounds().toArray();
 
               const mapBounds = calcBounds(bounds, [
@@ -264,6 +264,10 @@ export default class Layer {
 
           return [p0.x, p0.y, p1.x, p1.y];
 
+          // const xmin = bounds[0][0];
+          // const ymin = bounds[0][1];
+          // const xmax = bounds[1][0];
+          // const ymax = bounds[1][1];
           // const p0 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmin, ymax));
           // const p1 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmax, ymin));
           // return [p0.x, p0.y, p1.x, p1.y];

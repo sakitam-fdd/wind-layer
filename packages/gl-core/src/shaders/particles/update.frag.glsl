@@ -66,6 +66,7 @@ float wrapx(float x, float min) {
 
 bool containsXY(vec2 pos, vec4 bbox) {
     float x = wrapx(pos.x, bbox.x);
+//    float x = pos.x;
     return (
     bbox.x <= x && x <= bbox.z &&
     bbox.y <= pos.y && pos.y <= bbox.w
@@ -83,8 +84,6 @@ vec2 update(vec2 pos) {
     vec2 offset = vec2(velocity.x, -velocity.y) * 0.0001 * u_speed_factor;
 
     pos = pos + offset;
-
-    // a random seed to use for the particle drop
 
     // a random seed to use for the particle drop
     vec2 seed = (pos.xy + vUv) * u_rand_seed;
@@ -110,11 +109,11 @@ void main() {
 
     pos = update(pos);
     // 初始化时为避免粒子随机位置接近，先执行 25 次迭代
-//    if (u_initialize) {
-//        for (int i = 0; i < 25; i++) {
-//            pos = update(pos);
-//        }
-//    }
+    if (u_initialize) {
+        for (int i = 0; i < 25; i++) {
+            pos = update(pos);
+        }
+    }
 
     gl_FragColor = vec4(pos.xy, 0.0, 1.0);
 }

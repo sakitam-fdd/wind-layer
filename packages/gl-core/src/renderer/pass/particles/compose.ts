@@ -111,6 +111,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     let ymin = Infinity;
     let xmax = -Infinity;
     let ymax = -Infinity;
+    let zmin = Infinity;
     let zmax = -Infinity;
     // 1. 计算mapbox墨卡托坐标的最大最小值，构建真实瓦片范围
     // 注意这里不要直接使用图层计算的原始瓦片范围，因为在加载过程中有可能会有失败，我
@@ -123,6 +124,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
       xmax = Math.max(bounds.right, xmax);
       ymin = Math.min(bounds.top, ymin);
       ymax = Math.max(bounds.bottom, ymax);
+      zmin = Math.min(tileId.z, zmin);
       zmax = Math.max(tileId.z, zmax);
     }
 
@@ -173,7 +175,8 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
         const tileMesh = tile.createMesh(this.id, tileBBox, this.renderer, this.#program);
         const mesh = tileMesh.planeMesh;
 
-        mesh.scale.set(1 / w, 1 / h, 1);
+        const scale = Math.pow(2, zmax - coord.z);
+        mesh.scale.set((1 / w) * scale, (1 / h) * scale, 1);
         mesh.position.set((tileBBox.left - xmin) / dx, (tileBBox.top - ymin) / dy, 0);
 
         const dataRange: number[] = [];
