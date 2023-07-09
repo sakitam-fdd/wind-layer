@@ -1,4 +1,5 @@
 attribute float a_index;
+attribute vec2 a_reference;
 
 uniform sampler2D u_particles;
 uniform sampler2D u_particles_next;
@@ -8,8 +9,7 @@ uniform vec2 u_resolution;
 uniform float u_aspectRatio;
 uniform float u_dateline_offset;
 
-uniform vec4 u_bbox;
-uniform vec4 u_data_bbox;
+uniform float u_offset;
 
 varying vec2 v_particle_pos;
 varying vec2 v_normal;
@@ -49,7 +49,7 @@ vec4 getPosWithProject(vec2 current_pos, vec2 next_pos, float v_index) {
 
     // 超过最大速度和小于最小速度的可以考虑移除
     if(d > 20.0 || d < 0.01) {
-        pos.xy += u_resolution * pow(2.0, 0.5 + 1.0);
+//        pos.xy += u_resolution * pow(2.0, 0.5 + 1.0);
     }
 
     return pos;
@@ -57,6 +57,7 @@ vec4 getPosWithProject(vec2 current_pos, vec2 next_pos, float v_index) {
 
 void main() {
     float v_index = floor(a_index / 6.0);
+//    vec2 uv = a_reference;
     vec2 uv = vec2(fract(v_index / u_particles_res), floor(v_index / u_particles_res) / u_particles_res);
     vec4 color = texture2D(u_particles, uv);
     vec4 color1 = texture2D(u_particles_next, uv);
@@ -64,16 +65,11 @@ void main() {
     vec2 pos = color.rg;
     vec2 pos1 = color1.rg;
 
-    vec2 vePos = pos;
-    vec2 vePos1 = pos1;
+    v_particle_pos = mix(pos, pos1, 0.0);
 
-    // decode current particle position from the pixel's RGBA value
-    v_particle_pos = pos;
-
-    v_normal = vec2(normalize(pos.xy));
+    v_normal = vec2(normalize(v_particle_pos.xy));
 
     gl_PointSize = 1.0;
 
-//    gl_Position = u_matrix * vec4(vePos + vec2(u_dateline_offset, 0), 0, 1);
-    gl_Position = getPosWithProject(vePos, vePos1, v_index);
+    gl_Position = getPosWithProject(pos + vec2(u_offset, 0.0), pos1 + vec2(u_offset, 0.0), v_index);
 }
