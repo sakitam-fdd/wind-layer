@@ -199,7 +199,7 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       const attr = this.renderer.attributes;
       this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
     }
-    const { camera, worlds = [0] } = rendererParams.cameras;
+    const { camera } = rendererParams.cameras;
     if (rendererState) {
       this.#mesh.program.setUniform(
         'u_image_res',
@@ -225,13 +225,10 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       this.#mesh.worldMatrixNeedsUpdate = false;
       this.#mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, this.#mesh.localMatrix);
 
-      for (let i = 0; i < worlds.length; i++) {
-        this.#mesh.program.setUniform('u_offset', worlds[i]);
-        this.#mesh.draw({
-          ...rendererParams,
-          camera,
-        });
-      }
+      this.#mesh.draw({
+        ...rendererParams,
+        camera,
+      });
     }
 
     if (this.renderTarget) {

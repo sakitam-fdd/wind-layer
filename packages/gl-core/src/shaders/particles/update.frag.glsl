@@ -52,21 +52,8 @@ vec2 randomPosToGlobePos(vec2 pos) {
     return mix(min_bbox, max_bbox, pos);
 }
 
-float wrapx(float x) {
-    return mod(x + 1.0, 1.0);
-}
-
-float wrapx(float x, float min) {
-    float wrappedX = wrapx(x);
-    if (wrappedX < min) {
-        wrappedX += 1.0;
-    }
-    return wrappedX;
-}
-
 bool containsXY(vec2 pos, vec4 bbox) {
-    float x = wrapx(pos.x, bbox.x);
-//    float x = pos.x;
+    float x = pos.x;
     return (
     bbox.x <= x && x <= bbox.z &&
     bbox.y <= pos.y && pos.y <= bbox.w
@@ -99,7 +86,6 @@ vec2 update(vec2 pos) {
     }
 
     pos = mix(pos, random_pos, drop);
-    pos.x = wrapx(pos.x);
 
     return pos;
 }

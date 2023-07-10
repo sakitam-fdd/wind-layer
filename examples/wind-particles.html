@@ -39,6 +39,7 @@
     // style: 'mapbox://styles/mapbox/satellite-streets-v12',
     style: {
       version: 8,
+      glyphs: "https://api.mapbox.com/fonts/v1/mapbox/{fontstack}/{range}.pbf?access_token=pk.eyJ1IjoidTEwaW50IiwiYSI6InQtMnZvTkEifQ.c8mhXquPE7_xoB3P4Ag8cA",
       sources: {
         carto: {
           type: 'raster',
@@ -119,6 +120,48 @@
   map.on('load', function () {
     const interpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);
 
+    map.addSource('tile-bbox', {
+      type: 'geojson',
+      data: {
+        'type': 'FeatureCollection',
+        'features': [],
+      },
+    });
+
+    map.addLayer({
+      type: 'line',
+      source: 'tile-bbox',
+      id: 'tile-bbox',
+      paint: {
+        'line-color': 'red',
+        'line-width': 1,
+      },
+      layout: {
+        'line-cap': 'round',
+        'line-join': 'round',
+      },
+    });
+
+    map.addLayer({
+      type: 'symbol',
+      source: 'tile-bbox',
+      id: 'tile-bbox-label',
+      'layout': {
+        // get the title name from the source's "title" property
+        'text-field': ['get', 'tile'],
+        // 'text-font': [
+        //     'Open Sans Semibold',
+        //     'Arial Unicode MS Bold',
+        // ],
+        // 'text-offset': [0, 1.25],
+        // 'text-anchor': 'top',
+      },
+      paint: {
+        'text-color': 'red'
+      },
+      'filter': ['==', '$type', 'Point'],
+    });
+
     const imageSource = new mapboxWind.ImageSource('wind1', {
       type: 'image',
       // tileSize: 256,
@@ -126,7 +169,7 @@
       // maxZoom: 0,
       // roundZoom: false,
       decodeType: 3,
-      wrapX: false,
+      wrapX: true,
       // coordinates: [
       //   [-180, 85.051129],
       //   [180, 85.051129],
@@ -170,7 +213,7 @@
       maxZoom: 4,
       roundZoom: false,
       decodeType: 3,
-      wrapX: true,
+      wrapX: false,
       url: 'http://localhost:5000/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
     });
 
@@ -203,7 +246,7 @@
       dropRateBump: 0.002,
     }
 
-    const wind = new mapboxWind.Layer('wind', tileSource, {
+    const wind = new mapboxWind.Layer('wind', imageSource, {
       wireframe: true,
       styleSpec: {
         'fill-color': [

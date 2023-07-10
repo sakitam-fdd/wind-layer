@@ -7,7 +7,7 @@ import { Layer as LayerCore, RenderType, TileID } from 'wind-gl-core';
 import CameraSync from './utils/CameraSync';
 import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
 
-import { getBoundsTiles, getTileProjBounds, calcBounds } from './utils/tile';
+import { getTileProjBounds } from './utils/tile';
 
 export interface ILayerOptions extends LayerOptions {
   renderingMode: '2d' | '3d';
@@ -131,7 +131,6 @@ export default class Layer {
           this.map?.triggerRepaint();
         },
         getViewTiles: (source: SourceType, renderType: RenderType) => {
-          const map = this.map as any;
           let { type } = source;
           // @ts-ignore
           type = type !== 'timeline' ? type : source.privateType;
@@ -194,55 +193,77 @@ export default class Layer {
               // for mapbox
               minzoom: source.minZoom,
               maxzoom: source.maxZoom,
-              // for custom
-              minZoom: source.minZoom,
-              maxZoom: source.maxZoom,
               roundZoom: source.roundZoom,
             };
 
-            // 当为瓦片状态下的粒子渲染时需要按照获取的瓦片范围补齐周边缺失的瓦片，构建一个矩形
             // eslint-disable-next-line no-empty
-            if (renderType === RenderType.particles) {
-              const bounds: any = map?.getBounds().toArray();
+            const tiles = transform.coveringTiles(opts);
 
-              const mapBounds = calcBounds(bounds, [
-                map.transform.latRange ? map.transform.latRange[0] : map.transform.minLat,
-                map.transform.latRange ? map.transform.latRange[1] : map.transform.maxLat,
-              ]);
-
-              const ts = getBoundsTiles(mapBounds, transform.zoom, opts);
-
-              for (let i = 0; i < ts.length; i++) {
-                const tile = ts[i];
-                if (source.wrapX) {
-                  wrapTiles.push(tile);
-                } else if (tile.wrap === 0) {
-                  wrapTiles.push(tile);
-                }
-              }
-            } else {
-              const tiles = transform.coveringTiles(opts);
-
-              for (let i = 0; i < tiles.length; i++) {
-                const tile = tiles[i];
-                const { canonical, wrap } = tile;
-                const { x, y, z } = canonical;
-                if (source.wrapX) {
-                  wrapTiles.push(
-                    new TileID(z, wrap, z, x, y, {
-                      getTileProjBounds,
-                    }),
-                  );
-                } else if (tile.wrap === 0) {
-                  wrapTiles.push(
-                    new TileID(z, wrap, z, x, y, {
-                      getTileProjBounds,
-                    }),
-                  );
-                }
+            for (let i = 0; i < tiles.length; i++) {
+              const tile = tiles[i];
+              const { canonical, wrap } = tile;
+              const { x, y, z } = canonical;
+              if (source.wrapX) {
+                wrapTiles.push(
+                  new TileID(z, wrap, z, x, y, {
+                    getTileProjBounds,
+                  }),
+                );
+              } else if (tile.wrap === 0) {
+                wrapTiles.push(
+                  new TileID(z, wrap, z, x, y, {
+                    getTileProjBounds,
+                  }),
+                );
               }
             }
           }
+
+          // const features: any = {
+          //   type: 'FeatureCollection',
+          //   features: [],
+          // };
+          //
+          // for (let k = 0; k < wrapTiles.length; k++) {
+          //   const tile = wrapTiles[k];
+          //   const [leftLng, bottomLat, rightLng, topLat] = tile.tileBounds;
+          //
+          //   features.features.push(
+          //     {
+          //       type: 'Feature',
+          //       properties: {
+          //         tile: tile.tileKey,
+          //       },
+          //       geometry: {
+          //         coordinates: [
+          //           [
+          //             [leftLng, bottomLat],
+          //             [leftLng, topLat],
+          //             [rightLng, topLat],
+          //             [rightLng, bottomLat],
+          //             [leftLng, bottomLat],
+          //           ],
+          //         ],
+          //         type: 'Polygon',
+          //       },
+          //     },
+          //     {
+          //       type: 'Feature',
+          //       properties: {
+          //         tile: tile.tileKey,
+          //       },
+          //       geometry: {
+          //         coordinates: [
+          //           leftLng + (rightLng - leftLng) / 2,
+          //           topLat - (topLat - bottomLat) / 2,
+          //         ],
+          //         type: 'Point',
+          //       },
+          //     },
+          //   );
+          // }
+          //
+          // map.getSource('tile-bbox').setData(features);
 
           return wrapTiles;
         },
@@ -250,27 +271,21 @@ export default class Layer {
           const map = this.map as any;
           const bounds: any = map?.getBounds().toArray();
 
-          const mapBounds = calcBounds(bounds, [
+          const xmin = bounds[0][0];
+          const ymin = bounds[0][1];
+          const xmax = bounds[1][0];
+          const ymax = bounds[1][1];
+          const minY = Math.max(
+            ymin,
             map.transform.latRange ? map.transform.latRange[0] : map.transform.minLat,
+          );
+          const maxY = Math.min(
+            ymax,
             map.transform.latRange ? map.transform.latRange[1] : map.transform.maxLat,
-          ]);
-
-          const p0 = mapboxgl.MercatorCoordinate.fromLngLat(
-            new mapboxgl.LngLat(mapBounds[0], mapBounds[3]),
           );
-          const p1 = mapboxgl.MercatorCoordinate.fromLngLat(
-            new mapboxgl.LngLat(mapBounds[2], mapBounds[1]),
-          );
-
+          const p0 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmin, maxY));
+          const p1 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmax, minY));
           return [p0.x, p0.y, p1.x, p1.y];
-
-          // const xmin = bounds[0][0];
-          // const ymin = bounds[0][1];
-          // const xmax = bounds[1][0];
-          // const ymax = bounds[1][1];
-          // const p0 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmin, ymax));
-          // const p1 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmax, ymin));
-          // return [p0.x, p0.y, p1.x, p1.y];
         },
       },
     );
