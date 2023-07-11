@@ -1,5 +1,6 @@
-import { utils } from '@sakitam-gis/vis-engine';
-import { Bounds } from '../type';
+import {utils} from '@sakitam-gis/vis-engine';
+import {Bounds} from '../type';
+import TileID from "../tile/TileID";
 
 export function calcMinMax(array: number[]): [number, number] {
   let min = Infinity;
@@ -189,4 +190,25 @@ export function inRange(value: number, start: number, end: number) {
 
 export function mod(x, y) {
   return ((x % y) + y) % y;
+}
+
+export function mercatorXfromLng(lng: number) {
+  return (180 + lng) / 360;
+}
+
+export function mercatorYfromLat(lat: number) {
+  return (180 - (180 / Math.PI) * Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360))) / 360;
+}
+
+export function contains(tileBounds: Bounds, coord: TileID): boolean {
+  const worldSize = Math.pow(2, coord.z);
+  const level = {
+    minX: Math.floor(mercatorXfromLng(tileBounds[0]) * worldSize),
+    minY: Math.floor(mercatorYfromLat(tileBounds[3]) * worldSize),
+    maxX: Math.ceil(mercatorXfromLng(tileBounds[2]) * worldSize),
+    maxY: Math.ceil(mercatorYfromLat(tileBounds[1]) * worldSize),
+  };
+  return (
+    coord.x >= level.minX && coord.x < level.maxX && coord.y >= level.minY && coord.y < level.maxY
+  );
 }

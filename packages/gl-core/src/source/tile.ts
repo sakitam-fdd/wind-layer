@@ -1,7 +1,7 @@
 import { Renderer, utils } from '@sakitam-gis/vis-engine';
 import SourceCache from './cahce';
 import { DecodeType, LayerDataType, ParseOptionsType, TileSourceOptions, TileState } from '../type';
-import { containsExtent, resolveURL } from '../utils/common';
+import { contains, resolveURL } from '../utils/common';
 import TileID from '../tile/TileID';
 import Tile from '../tile/Tile';
 import Layer from '../renderer';
@@ -155,7 +155,7 @@ export default class TileSource {
   }
 
   hasTile(coord: TileID) {
-    return !this.tileBounds || containsExtent(this.tileBounds, coord.tileBounds);
+    return !this.tileBounds || contains(this.tileBounds, coord);
   }
 
   getFadeTime() {
