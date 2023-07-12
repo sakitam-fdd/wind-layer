@@ -9,9 +9,11 @@ import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
 
 import { getTileProjBounds } from './utils/tile';
 
-export interface ILayerOptions extends LayerOptions {
+export interface TLayerOptions extends LayerOptions {
   renderingMode: '2d' | '3d';
 }
+
+export type ILayerOptions = Omit<TLayerOptions, 'getViewTiles'>;
 
 export default class Layer {
   public gl: WebGLRenderingContext | WebGL2RenderingContext | null;
@@ -83,7 +85,7 @@ export default class Layer {
     }
   }
 
-  updateOptions(options: ILayerOptions) {
+  updateOptions(options: Partial<ILayerOptions>) {
     this.options = {
       ...this.options,
       ...(options || {}),
