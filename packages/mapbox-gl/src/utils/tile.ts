@@ -1,6 +1,11 @@
 import { TileBounds, TileID, mod, Bounds } from 'wind-gl-core';
 import { utils } from '@sakitam-gis/vis-engine';
-import { mercatorXfromLng, mercatorYfromLat } from './mercatorCoordinate';
+import {
+  mercatorXfromLng,
+  mercatorYfromLat,
+  latFromMercatorY,
+  lngFromMercatorX,
+} from './mercatorCoordinate';
 
 export function zoomScale(z) {
   return Math.pow(2, z);
@@ -139,7 +144,7 @@ export function getBoundsTiles(
   return ts;
 }
 
-function wrap(x, minx, min, max) {
+function wrapX(x, minx, min, max) {
   let wrappedX = mod(x + max, max - min) + min;
   if (minx !== undefined && minx !== null && wrappedX < minx) {
     wrappedX += max - min;
@@ -157,11 +162,23 @@ export function calcBounds(bounds: number[][], yRange: [number, number]): Bounds
   const max = 180;
 
   const dx = xmax - xmin;
-  const minX = dx < max - min ? wrap(xmin, undefined, min, max) : min;
-  const maxX = dx < max - min ? wrap(xmax, minX, min, max) : max;
+  const minX = dx < max - min ? wrapX(xmin, undefined, min, max) : min;
+  const maxX = dx < max - min ? wrapX(xmax, minX, min, max) : max;
 
   const minY = Math.max(ymin, yRange[0]);
   const maxY = Math.min(ymax, yRange[1]);
 
   return [minX, minY, maxX, maxY];
+}
+
+export function getTileBounds(tileID: TileID): TileBounds {
+  const { z, x, y } = tileID;
+  const wrap = tileID.wrap;
+  const numTiles = 1 << z;
+  const leftLng = lngFromMercatorX(x / numTiles, wrap);
+  const rightLng = lngFromMercatorX((x + 1) / numTiles, wrap);
+  const topLat = latFromMercatorY(y / numTiles);
+  const bottomLat = latFromMercatorY((y + 1) / numTiles);
+
+  return [leftLng, bottomLat, rightLng, topLat];
 }

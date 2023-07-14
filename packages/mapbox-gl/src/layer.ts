@@ -7,7 +7,7 @@ import { Layer as LayerCore, RenderType, TileID } from 'wind-gl-core';
 import CameraSync from './utils/CameraSync';
 import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
 
-import { getTileProjBounds } from './utils/tile';
+import { getTileProjBounds, getTileBounds } from './utils/tile';
 
 export interface TLayerOptions extends LayerOptions {
   renderingMode: '2d' | '3d';
@@ -208,12 +208,14 @@ export default class Layer {
               if (source.wrapX) {
                 wrapTiles.push(
                   new TileID(z, wrap, z, x, y, {
+                    getTileBounds,
                     getTileProjBounds,
                   }),
                 );
               } else if (tile.wrap === 0) {
                 wrapTiles.push(
                   new TileID(z, wrap, z, x, y, {
+                    getTileBounds,
                     getTileProjBounds,
                   }),
                 );

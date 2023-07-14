@@ -1,5 +1,4 @@
 import { TileBounds, ProjTileBounds } from '../type';
-import { getBoundFromTileID } from './utils';
 import { isFunction } from '../utils/common';
 
 export interface TileIDOptions {
@@ -101,7 +100,7 @@ export default class TileID {
     if (isFunction(this.options.getTileBounds)) {
       this.tileBounds = this.options.getTileBounds(tileID);
     } else {
-      this.tileBounds = getBoundFromTileID(tileID);
+      console.error('[TileID]: projection function must be provided');
     }
     return this.tileBounds;
   }

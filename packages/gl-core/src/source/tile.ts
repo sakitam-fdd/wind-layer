@@ -1,7 +1,7 @@
 import { Renderer, utils } from '@sakitam-gis/vis-engine';
 import SourceCache from './cahce';
 import { DecodeType, LayerDataType, ParseOptionsType, TileSourceOptions, TileState } from '../type';
-import { contains, resolveURL } from '../utils/common';
+import { containTile, resolveURL } from '../utils/common';
 import TileID from '../tile/TileID';
 import Tile from '../tile/Tile';
 import Layer from '../renderer';
@@ -155,7 +155,7 @@ export default class TileSource {
   }
 
   hasTile(coord: TileID) {
-    return !this.tileBounds || contains(this.tileBounds, coord);
+    return !this.tileBounds || containTile(this.tileBounds, coord.getTileBounds());
   }
 
   getFadeTime() {
@@ -244,23 +244,28 @@ export default class TileSource {
           p.push(this.asyncActor(tile, urls[i]));
         }
 
-        Promise.all(p).then((data) => {
-          tile.request.clear();
+        Promise.all(p)
+          .then((data) => {
+            tile.request.clear();
 
-          if (tile.aborted) {
-            tile.state = TileState.unloaded;
-            return callback(null);
-          }
+            if (tile.aborted) {
+              tile.state = TileState.unloaded;
+              return callback(null);
+            }
 
-          if (!data) return callback(null);
+            if (!data) return callback(null);
 
-          data.forEach((d, index) => {
-            tile.setTextures(this.renderer, index, d, this.parseOptions, this.options);
+            data.forEach((d, index) => {
+              tile.setTextures(this.renderer, index, d, this.parseOptions, this.options);
+            });
+
+            tile.state = TileState.loaded;
+            callback(null);
+          })
+          .catch((e) => {
+            tile.state = TileState.errored;
+            console.log(e);
           });
-
-          tile.state = TileState.loaded;
-          callback(null);
-        });
       } else if (tile.state === TileState.loading) {
         // schedule tile reloading after it has been loaded
         tile.reloadCallback = callback;

@@ -194,23 +194,28 @@ export default class ImageSource {
           p.push(this.asyncActor(tile, urls[i]));
         }
 
-        Promise.all(p).then((data) => {
-          tile.request.clear();
+        Promise.all(p)
+          .then((data) => {
+            tile.request.clear();
 
-          if (tile.aborted) {
-            tile.state = TileState.unloaded;
-            return callback(null);
-          }
+            if (tile.aborted) {
+              tile.state = TileState.unloaded;
+              return callback(null);
+            }
 
-          if (!data) return callback(null);
+            if (!data) return callback(null);
 
-          data.forEach((d, index) => {
-            tile.setTextures(this.renderer, index, d, this.parseOptions, this.options);
+            data.forEach((d, index) => {
+              tile.setTextures(this.renderer, index, d, this.parseOptions, this.options);
+            });
+
+            tile.state = TileState.loaded;
+            callback(null);
+          })
+          .catch((e) => {
+            tile.state = TileState.errored;
+            console.log(e);
           });
-
-          tile.state = TileState.loaded;
-          callback(null);
-        });
       } else if (tile.state === TileState.loading) {
         // schedule tile reloading after it has been loaded
         tile.reloadCallback = callback;

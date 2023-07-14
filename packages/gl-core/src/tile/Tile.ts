@@ -1,6 +1,6 @@
 import { Geometry, Plane, Program, Renderer, Texture } from '@sakitam-gis/vis-engine';
 import TileMesh from './TileMesh';
-import {ParseOptionsType, ProjTileBounds, RenderFrom, TileBounds, TileState} from '../type';
+import { ParseOptionsType, ProjTileBounds, RenderFrom, TileBounds, TileState } from '../type';
 import { isImageBitmap, parseRange } from '../utils/common';
 import TileID from './TileID';
 
@@ -292,6 +292,11 @@ export default class Tile {
     for (const [, value] of this.#textures) {
       if (value) {
         value?.destroy();
+      }
+    }
+    for (const [, value] of this.#textures) {
+      if (value) {
+        value?.delete();
       }
     }
     this.#textures.clear();

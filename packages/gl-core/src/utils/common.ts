@@ -1,6 +1,5 @@
-import {utils} from '@sakitam-gis/vis-engine';
-import {Bounds} from '../type';
-import TileID from "../tile/TileID";
+import { utils } from '@sakitam-gis/vis-engine';
+import { Bounds } from '../type';
 
 export function calcMinMax(array: number[]): [number, number] {
   let min = Infinity;
@@ -192,23 +191,42 @@ export function mod(x, y) {
   return ((x % y) + y) % y;
 }
 
-export function mercatorXfromLng(lng: number) {
-  return (180 + lng) / 360;
+export function containTile(a: Bounds, b: Bounds) {
+  return containsExtent(a, b) || intersects(a, b);
 }
 
-export function mercatorYfromLat(lat: number) {
-  return (180 - (180 / Math.PI) * Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360))) / 360;
-}
+/**
+ * 将多面转换为单面
+ * @returns {*}
+ */
+export function flattenForPolygons(features) {
+  if (!features || features.length === 0) return [];
 
-export function contains(tileBounds: Bounds, coord: TileID): boolean {
-  const worldSize = Math.pow(2, coord.z);
-  const level = {
-    minX: Math.floor(mercatorXfromLng(tileBounds[0]) * worldSize),
-    minY: Math.floor(mercatorYfromLat(tileBounds[3]) * worldSize),
-    maxX: Math.ceil(mercatorXfromLng(tileBounds[2]) * worldSize),
-    maxY: Math.ceil(mercatorYfromLat(tileBounds[1]) * worldSize),
-  };
-  return (
-    coord.x >= level.minX && coord.x < level.maxX && coord.y >= level.minY && coord.y < level.maxY
-  );
+  const len = features.length;
+  let i = 0;
+  const data: any[] = [];
+
+  for (; i < len; i++) {
+    const feature = features[i];
+
+    const coordinates = feature.geometry.coordinates;
+    const type = feature.geometry.type;
+
+    if (type === 'Polygon') {
+      data.push(feature);
+    } else if (type === 'MultiPolygon') {
+      for (let k = 0; k < coordinates.length; k++) {
+        const coordinate = coordinates[k];
+        data.push({
+          ...feature,
+          geometry: {
+            type: 'Polygon',
+            coordinates: coordinate,
+          },
+        });
+      }
+    }
+  }
+
+  return data;
 }

@@ -73,12 +73,12 @@ export type DataRange = [number, number];
 export type Coordinates = [[number, number], [number, number], [number, number], [number, number]];
 
 export interface ImageSourceOptions {
-  type: LayerDataType.image;
   url: string | [string, string];
   /**
    * top left, top right, bottom right, bottom left
    */
   coordinates: Coordinates;
+  type?: LayerDataType.image;
   dataRange?: DataRange | [DataRange, DataRange];
   /**
    * 指定数据解析类型
@@ -113,8 +113,8 @@ interface JsonArrayData {
 export type Bounds = [number, number, number, number];
 
 export interface TileSourceOptions {
-  type: LayerDataType.tile;
   url: string | [string, string];
+  type?: LayerDataType.tile;
   minZoom?: number;
   maxZoom?: number;
   tileSize?: TileSize;

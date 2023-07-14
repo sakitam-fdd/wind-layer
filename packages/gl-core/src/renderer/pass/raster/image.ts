@@ -18,9 +18,9 @@ export interface RasterPassOptions {
  * raster 渲染
  */
 export default class RasterPass extends Pass<RasterPassOptions> {
-  readonly #program: Program;
-  readonly #mesh: Mesh;
-  readonly #geometry: Geometry;
+  #program: WithNull<Program>;
+  #mesh: WithNull<Mesh>;
+  #geometry: WithNull<Geometry>;
   readonly prerender = false;
 
   constructor(
@@ -81,7 +81,7 @@ export default class RasterPass extends Pass<RasterPassOptions> {
     const attr = this.renderer.attributes;
     this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
     const camera = rendererParams.cameras.planeCamera;
-    if (rendererState) {
+    if (rendererState && this.#mesh) {
       let stencil;
       if (this.options.hasMask) {
         stencil = this.renderer.gl.getParameter(this.renderer.gl.STENCIL_TEST);
@@ -106,7 +106,7 @@ export default class RasterPass extends Pass<RasterPassOptions> {
 
       Object.keys(uniforms).forEach((key) => {
         if (uniforms[key] !== undefined) {
-          this.#mesh.program.setUniform(key, uniforms[key]);
+          this.#mesh?.program.setUniform(key, uniforms[key]);
         }
       });
 
@@ -123,6 +123,22 @@ export default class RasterPass extends Pass<RasterPassOptions> {
       if (this.options.hasMask && !stencil) {
         this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
       }
+    }
+  }
+
+  destroy() {
+    if (this.#mesh) {
+      this.#mesh.destroy();
+      this.#mesh = null;
+    }
+    if (this.#program) {
+      this.#program.destroy();
+      this.#program = null;
+    }
+
+    if (this.#geometry) {
+      this.#geometry.destroy();
+      this.#geometry = null;
     }
   }
 }

@@ -28,8 +28,8 @@ export function mercatorZfromAltitude(altitude, lat) {
   return altitude / circumferenceAtLatitude(lat);
 }
 
-export function lngFromMercatorX(x) {
-  return x * 360 - 180;
+export function lngFromMercatorX(x: number, wrap = 0) {
+  return x * 360 - 180 + wrap * 360;
 }
 
 export function latFromMercatorY(y) {
