@@ -1,6 +1,6 @@
 import { Program, Renderer, Mesh, Geometry, Texture, RenderTarget } from '@sakitam-gis/vis-engine';
 import Pass from './base';
-import vert from '../../shaders/common.vert.glsl';
+import vert from '../../shaders/picker.vert.glsl';
 import frag from '../../shaders/picker.frag.glsl';
 import * as shaderLib from '../../shaders/shaderLib';
 import { SourceType } from '../../source';
@@ -16,7 +16,7 @@ export interface PickerPassOptions {
  * picking
  */
 export default class PickerPass extends Pass<PickerPassOptions> {
-  readonly prerender = true;
+  readonly prerender = false;
 
   #program: WithNull<Program>;
   #mesh: WithNull<Mesh>;

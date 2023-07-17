@@ -39,7 +39,7 @@
   window.map = map;
 
   const source = new mtkWind.TimelineSource('temp', {
-    sourceType: 'TileSource',
+    sourceType: mtkWind.LayerSourceType.tile,
     tileSize: 256,
     minZoom: 0,
     maxZoom: 22,

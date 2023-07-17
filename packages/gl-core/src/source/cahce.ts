@@ -540,6 +540,32 @@ export default class SourceCache extends EventEmitter {
     this.#cache.reset();
   }
 
+  /**
+   * 查找覆盖 queryGeometry 的瓦片
+   * @param {QueryGeometry} queryGeometry
+   * @param {boolean} [visualizeQueryGeometry=false]
+   * @param {boolean} use3DQuery
+   * @returns
+   * @private
+   */
+  tilesIn(queryGeometry: any): any[] {
+    const tileResults: any[] = [];
+
+    for (const tileID in this.cacheTiles) {
+      const tile = this.cacheTiles[tileID];
+
+      const tilesToCheck = [0];
+
+      for (const wrap of tilesToCheck) {
+        const tileResult = queryGeometry.containsTile(this.source, tile, wrap);
+        if (tileResult) {
+          tileResults.push(tileResult);
+        }
+      }
+    }
+    return tileResults;
+  }
+
   destroy() {
     for (const id in this.cacheTiles) {
       this._removeTile(id);

@@ -12,12 +12,12 @@ import ParticlesPass from './pass/particles/particles';
 import PickerPass from './pass/picker';
 import { isFunction } from '../utils/common';
 import { createLinearGradient, createZoom } from '../utils/style-parser';
-import { getBandType, RenderFrom, RenderType } from '../type';
+import { getBandType, RenderFrom, RenderType, MaskType } from '../type';
 import { SourceType } from '../source';
 import Tile from '../tile/Tile';
 import TileID from '../tile/TileID';
 
-export interface LayerOptions {
+export interface BaseLayerOptions {
   /**
    * 获取当前视野内的瓦片
    */
@@ -59,13 +59,16 @@ export interface LayerOptions {
   /**
    * 可以为任意 GeoJSON 数据
    */
-  mask?: any;
+  mask?: {
+    data: any;
+    type: MaskType;
+  };
   onInit?: (error, data) => void;
 }
 
-export const defaultOptions: LayerOptions = {
+export const defaultOptions: BaseLayerOptions = {
   getViewTiles: () => [],
-  renderType: 1,
+  renderType: RenderType.colorize,
   renderFrom: RenderFrom.r,
   styleSpec: {
     'fill-color': [
@@ -103,8 +106,8 @@ export const defaultOptions: LayerOptions = {
   onInit: () => undefined,
 };
 
-export default class Layer {
-  private options: LayerOptions;
+export default class BaseLayer {
+  private options: BaseLayerOptions;
   private readonly uid: string;
   private renderPipeline: WithNull<Pipelines>;
   private readonly scene: Scene;
@@ -131,7 +134,7 @@ export default class Layer {
   constructor(
     source: SourceType,
     rs: { renderer: Renderer; scene: Scene },
-    options?: Partial<LayerOptions>,
+    options?: Partial<BaseLayerOptions>,
   ) {
     this.renderer = rs.renderer;
     this.scene = rs.scene;
@@ -145,7 +148,7 @@ export default class Layer {
 
     if (!options) {
       // eslint-disable-next-line no-param-reassign
-      options = {} as LayerOptions;
+      options = {} as BaseLayerOptions;
     }
 
     this.options = {
@@ -193,6 +196,8 @@ export default class Layer {
         bandType,
         source: this.source,
         renderFrom: this.options.renderFrom ?? RenderFrom.r,
+        // maskData: this.options.mask?.data,
+        // maskType: this.options.mask?.type,
         stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
       });
       const rasterPass = new RasterPass('RasterPass', this.renderer, {
@@ -297,7 +302,7 @@ export default class Layer {
     }
   }
 
-  updateOptions(options: Partial<LayerOptions>) {
+  updateOptions(options: Partial<BaseLayerOptions>) {
     this.options = {
       ...this.options,
       ...options,
@@ -311,10 +316,9 @@ export default class Layer {
     this.parseStyleSpec(true);
   }
 
-  resize() {
+  resize(width: number, height: number) {
     if (this.renderPipeline) {
-      const attr = this.renderer.attributes;
-      this.renderPipeline.resize(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
+      this.renderPipeline.resize(width, height);
     }
   }
 
@@ -543,6 +547,22 @@ export default class Layer {
   onTileLoaded() {
     if (this.options.triggerRepaint && isFunction(this.options.triggerRepaint)) {
       this.options.triggerRepaint();
+    }
+  }
+
+  setMask(mask) {
+    this.options.mask = mask;
+
+    if (mask && this.renderPipeline) {
+      const pass = this.renderPipeline.getPass('ColorizeComposePass');
+
+      if (pass) {
+        pass.options.maskData = mask.data;
+        pass.options.maskType = mask.type;
+        pass.processMaskData();
+
+        this.options?.triggerRepaint?.();
+      }
     }
   }
 

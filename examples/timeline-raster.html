@@ -55,7 +55,7 @@
 
   map.on('load', function () {
     const source = new mapboxWind.TimelineSource('temp', {
-      sourceType: 'ImageSource',
+      sourceType: mapboxWind.LayerSourceType.image,
       // tileSize: 256,
       // minZoom: 0,
       // maxZoom: 22,

@@ -20,12 +20,11 @@ export interface ComposePassOptions {
  * 在下一步再进行完整的着色
  */
 export default class ComposePass extends Pass<ComposePassOptions> {
-  readonly #program: Program;
-
   readonly prerender = true;
 
-  #current: RenderTarget;
-  #next: RenderTarget;
+  #program: WithNull<Program>;
+  #current: WithNull<RenderTarget>;
+  #next: WithNull<RenderTarget>;
 
   constructor(
     id: string,
@@ -75,14 +74,21 @@ export default class ComposePass extends Pass<ComposePassOptions> {
   }
 
   resize(width: number, height: number) {
-    this.#current.resize(width, height);
-    this.#next.resize(width, height);
+    this.#current?.resize(width, height);
+    this.#next?.resize(width, height);
+  }
+
+  get renderTarget() {
+    return {
+      current: this.#current,
+      next: this.#next,
+    };
   }
 
   get textures() {
     return {
-      current: this.#current.texture,
-      next: this.#next.texture,
+      current: this.#current?.texture,
+      next: this.#next?.texture,
     };
   }
 
@@ -187,6 +193,23 @@ export default class ComposePass extends Pass<ComposePassOptions> {
     } else {
       this.renderTexture(this.#current, rendererParams, sourceCache);
       this.renderTexture(this.#next, rendererParams, sourceCache);
+    }
+  }
+
+  destroy() {
+    if (this.#program) {
+      this.#program.destroy();
+      this.#program = null;
+    }
+
+    if (this.#current) {
+      this.#current.destroy();
+      this.#current = null;
+    }
+
+    if (this.#next) {
+      this.#next.destroy();
+      this.#next = null;
     }
   }
 }

@@ -92,7 +92,7 @@
   map.on('load', function () {
     const interpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);
     const source = new mapboxWind.TimelineSource('wind', {
-      sourceType: 'TileSource',
+      sourceType: mapboxWind.LayerSourceType.tile,
       tileSize: 256,
       minZoom: 0,
       maxZoom: 2,

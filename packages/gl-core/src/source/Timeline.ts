@@ -1,7 +1,9 @@
+import { EventEmitter } from '@sakitam-gis/vis-engine';
 import { Renderer, utils } from '@sakitam-gis/vis-engine';
 import SourceCache from './cahce';
 import Layer from '../renderer';
-import { ImageSource, TileSource } from './';
+import ImageSource, { ImageSourceInterval } from './image';
+import TileSource, { TileSourceInterval } from './tile';
 import {
   Bounds,
   Coordinates,
@@ -11,13 +13,14 @@ import {
   TileSize,
   TileSourceOptions,
   TileState,
+  LayerSourceType,
 } from '../type';
 import Tile from '../tile/Tile';
 import Track, { defaultTrackOptions, TrackOptions } from '../utils/Track';
 
 const sourceImpl = {
-  TileSource,
-  ImageSource,
+  tile: TileSource,
+  image: ImageSource,
 };
 
 function generateKey(url: string | string[]) {
@@ -30,12 +33,18 @@ function generateKey(url: string | string[]) {
 }
 
 interface TimelineSourceOptions extends TrackOptions {
-  sourceType: 'TileSource' | 'ImageSource';
-  intervals: {
-    url: string;
-  }[];
+  sourceType: LayerSourceType;
+  intervals: (ImageSourceInterval | TileSourceInterval)[];
   type?: 'timeline';
+
+  /**
+   * image source 配置
+   */
   coordinates?: Coordinates;
+
+  /**
+   * tile source 配置
+   */
   subdomains?: (string | number)[];
   minZoom?: number;
   maxZoom?: number;
@@ -57,7 +66,7 @@ interface TimelineSourceOptions extends TrackOptions {
   tileBounds?: Bounds;
 }
 
-class TimelineSource {
+class TimelineSource extends EventEmitter {
   /**
    * 数据源 id
    */
@@ -129,6 +138,7 @@ class TimelineSource {
   #cache: Map<string, any> = new Map();
 
   constructor(id: string, options: TimelineSourceOptions) {
+    super();
     this.id = id;
     this.type = 'timeline';
 
@@ -139,7 +149,7 @@ class TimelineSource {
     this.tileSize = options.tileSize || 512;
     this.tileBounds = options.tileBounds;
     this.wrapX = Boolean(options.wrapX);
-    if (options.sourceType === 'ImageSource' && !options.coordinates) {
+    if (options.sourceType === LayerSourceType.image && !options.coordinates) {
       throw new Error('ImageSource must provide `coordinates`');
     }
     this.coordinates = options.coordinates;
@@ -163,35 +173,43 @@ class TimelineSource {
     this.animate = this.animate.bind(this);
     this.tilesLoadEnd = this.tilesLoadEnd.bind(this);
 
-    this.#current = new (sourceImpl[options.sourceType] as any)(`${this.id}_current`, {
-      url: current.url,
-      subdomains: this.options.subdomains,
-      minZoom: this.minZoom,
-      maxZoom: this.minZoom,
-      tileSize: this.tileSize,
-      roundZoom: this.roundZoom,
-      tileBounds: this.tileBounds,
-      decodeType,
-      scheme,
-    });
-    this.#next = new (sourceImpl[options.sourceType] as any)(`${this.id}_next`, {
-      url: current.url,
-      subdomains: this.options.subdomains,
-      minZoom: this.minZoom,
-      maxZoom: this.minZoom,
-      tileSize: this.tileSize,
-      roundZoom: this.roundZoom,
-      tileBounds: this.tileBounds,
-      decodeType,
-      scheme,
-    });
+    const config = {};
+
+    if (options.sourceType === LayerSourceType.image) {
+      Object.assign(config, {
+        url: (current as ImageSourceInterval).url,
+        coordinates: this.coordinates,
+        maxTileCacheSize: this.options.maxTileCacheSize,
+        minZoom: this.minZoom,
+        maxZoom: this.maxZoom,
+        decodeType,
+      });
+    } else if (options.sourceType === LayerSourceType.tile) {
+      Object.assign(config, {
+        url: (current as TileSourceInterval).url,
+        subdomains: this.options.subdomains,
+        minZoom: this.minZoom,
+        maxZoom: this.maxZoom,
+        tileSize: this.tileSize,
+        roundZoom: this.roundZoom,
+        tileBounds: this.tileBounds,
+        maxTileCacheSize: this.options.maxTileCacheSize,
+        scheme,
+        decodeType,
+      });
+    } else {
+      throw new Error('不支持的数据源类型！');
+    }
+
+    this.#current = new (sourceImpl[options.sourceType] as any)(`${this.id}_current`, config);
+    this.#next = new (sourceImpl[options.sourceType] as any)(`${this.id}_next`, config);
     const currentLoadTile = this.#current.loadTile;
     const nextLoadTile = this.#next.loadTile;
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const that = this;
     function wrapCurrentLoadTile(tile: Tile, callback) {
-      const key = `${tile.tileID.tileKey}-${generateKey(this.options.url)}`;
+      const key = `${tile.tileID.tileKey}-${generateKey(this.url)}`;
       const cacheTile = that.#cache.get(key);
       if (cacheTile) {
         tile.copy(cacheTile);
@@ -206,7 +224,7 @@ class TimelineSource {
       }
     }
     function wrapNextLoadTile(tile: Tile, callback) {
-      const key = `${tile.tileID.tileKey}-${generateKey(this.options.url)}`;
+      const key = `${tile.tileID.tileKey}-${generateKey(this.url)}`;
       const cacheTile = that.#cache.get(key);
       if (cacheTile) {
         tile.copy(cacheTile);
@@ -227,8 +245,12 @@ class TimelineSource {
     this.#next.sourceCache.on('tilesLoadEnd', this.tilesLoadEnd);
   }
 
-  get privateType() {
-    return this.options.sourceType === 'TileSource' ? 'tile' : 'image';
+  get track() {
+    return this.#track;
+  }
+
+  get privateType(): LayerSourceType {
+    return this.options.sourceType;
   }
 
   get cache() {
@@ -246,12 +268,18 @@ class TimelineSource {
   onAdd(layer) {
     this.layer = layer;
     if (this.#current) {
-      this.#current.onAdd(this.layer);
+      this.#current.onAdd(this.layer, (error) => {
+        if (!error) {
+          if (this.#next) {
+            this.#next.onAdd(this.layer, (err) => {
+              if (!err) {
+                this.load();
+              }
+            });
+          }
+        }
+      });
     }
-    if (this.#next) {
-      this.#next.onAdd(this.layer);
-    }
-    this.load();
   }
 
   prepare(renderer: Renderer, dispatcher, parseOptions: ParseOptionsType) {
@@ -290,10 +318,8 @@ class TimelineSource {
         // swap source
         [this.#current, this.#next] = [this.#next, this.#current];
         this.pause();
-        this.#next.setUrl(
-          this.intervals[utils.clamp(Math.floor(this.#index), 0, len - 1)].url,
-          true,
-        );
+        const item = this.intervals[utils.clamp(Math.floor(this.#index), 0, len - 1)];
+        this.#next.update(item, true);
       }
     } else {
       this.#fadeTime = this.#index % 1;
@@ -302,26 +328,37 @@ class TimelineSource {
     if (this.layer) {
       this.layer.onTileLoaded();
     }
+
+    this.emit('update', {
+      position,
+      index: this.#index,
+      clampIndex: utils.clamp(Math.floor(this.#index), 0, len - 1),
+    });
   }
 
   play() {
     this.#track.play();
+    this.emit('play', { position: this.#track.position });
   }
 
   pause() {
     this.#track.pause();
+    this.emit('pause', { position: this.#track.position });
   }
 
   resume() {
     this.#track.resume();
+    this.emit('resume', { position: this.#track.position });
   }
 
   stop() {
     this.#track.stop();
+    this.emit('stop', { position: this.#track.position });
   }
 
   restart() {
     this.#track.restart();
+    this.emit('restart', { position: this.#track.position });
   }
 
   load(cb?: any) {
@@ -334,9 +371,14 @@ class TimelineSource {
       autoplay: this.options.autoplay,
     });
     this.#track.on('track', this.animate);
+
+    this.layer?.update();
+
     if (cb) {
       cb(null);
     }
+
+    this.emit('loaded', { position: this.#track.position });
   }
 
   loaded() {
@@ -352,6 +394,8 @@ class TimelineSource {
         s.clear();
       });
     }
+
+    this.emit('destroy');
   }
 }
 

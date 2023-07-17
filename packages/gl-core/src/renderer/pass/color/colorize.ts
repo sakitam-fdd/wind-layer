@@ -20,16 +20,15 @@ export interface ColorizePassOptions {
   texture: Texture;
   textureNext: Texture;
   bandType: BandType;
-  hasMask?: boolean;
 }
 
 /**
  * 着色
  */
 export default class ColorizePass extends Pass<ColorizePassOptions> {
-  readonly #program: Program;
-  readonly #mesh: Mesh;
-  readonly #geometry: Geometry;
+  #program: WithNull<Program>;
+  #mesh: WithNull<Mesh>;
+  #geometry: WithNull<Geometry>;
   readonly prerender = false;
 
   constructor(
@@ -97,26 +96,7 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
     const attr = this.renderer.attributes;
     this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
     const camera = rendererParams.cameras.planeCamera;
-    if (rendererState) {
-      let stencil;
-      if (this.options.hasMask) {
-        stencil = this.renderer.gl.getParameter(this.renderer.gl.STENCIL_TEST);
-        if (!stencil) {
-          this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
-          this.renderer.state.setStencilMask(0xff);
-          this.renderer.state.setStencilFunc(
-            this.renderer.gl.EQUAL, // the test
-            1, // reference value
-            0xff,
-          );
-
-          this.renderer.state.setStencilOp(
-            this.renderer.gl.KEEP,
-            this.renderer.gl.KEEP,
-            this.renderer.gl.KEEP,
-          );
-        }
-      }
+    if (rendererState && this.#mesh) {
       const uniforms = utils.pick(rendererState, [
         'opacity',
         'colorRange',
@@ -128,7 +108,7 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
 
       Object.keys(uniforms).forEach((key) => {
         if (uniforms[key] !== undefined) {
-          this.#mesh.program.setUniform(key, uniforms[key]);
+          this.#mesh!.program.setUniform(key, uniforms[key]);
         }
       });
 
@@ -146,10 +126,23 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
         ...rendererParams,
         camera,
       });
+    }
+  }
 
-      if (this.options.hasMask && !stencil) {
-        this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
-      }
+  destroy() {
+    if (this.#mesh) {
+      this.#mesh.destroy();
+      this.#mesh = null;
+    }
+
+    if (this.#program) {
+      this.#program.destroy();
+      this.#program = null;
+    }
+
+    if (this.#geometry) {
+      this.#geometry.destroy();
+      this.#geometry = null;
     }
   }
 }

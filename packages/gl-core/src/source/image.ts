@@ -1,9 +1,9 @@
-import { Renderer, utils } from '@sakitam-gis/vis-engine';
+import { EventEmitter, Renderer, utils } from '@sakitam-gis/vis-engine';
 import SourceCache from './cahce';
 import {
   DecodeType,
   ImageSourceOptions,
-  LayerDataType,
+  LayerSourceType,
   ParseOptionsType,
   TileState,
 } from '../type';
@@ -11,7 +11,11 @@ import { resolveURL } from '../utils/common';
 import Tile from '../tile/Tile';
 import Layer from '../renderer';
 
-export default class ImageSource {
+export interface ImageSourceInterval {
+  url: ImageSourceOptions['url'];
+}
+
+export default class ImageSource extends EventEmitter {
   /**
    * 数据源 id
    */
@@ -20,7 +24,7 @@ export default class ImageSource {
   /**
    * 数据源类型
    */
-  public type: LayerDataType.image;
+  public type: LayerSourceType.image;
 
   /**
    * 支持的最小层级
@@ -47,6 +51,8 @@ export default class ImageSource {
    */
   public options: ImageSourceOptions;
 
+  public url: ImageSourceOptions['url'];
+
   public renderer: Renderer;
 
   public dispatcher: any;
@@ -70,15 +76,17 @@ export default class ImageSource {
   #tileWorkers: Map<string, any> = new Map();
 
   constructor(id, options: ImageSourceOptions) {
+    super();
     this.id = id;
 
-    this.type = LayerDataType.image;
+    this.type = LayerSourceType.image;
     this.minZoom = 0;
     this.maxZoom = 22;
     this.roundZoom = false;
     this.tileSize = 512;
     this.coordinates = options.coordinates;
     this.wrapX = Boolean(options.wrapX);
+    this.url = options.url;
 
     const decodeType = options.decodeType || DecodeType.image;
 
@@ -95,9 +103,9 @@ export default class ImageSource {
     return this.#sourceCache;
   }
 
-  onAdd(layer) {
+  onAdd(layer, cb?: any) {
     this.layer = layer;
-    this.load();
+    this.load(cb);
   }
 
   prepare(renderer: Renderer, dispatcher, parseOptions: ParseOptionsType) {
@@ -106,8 +114,8 @@ export default class ImageSource {
     this.parseOptions = parseOptions;
   }
 
-  setUrl(url, clear = true) {
-    this.options.url = url;
+  update(data: ImageSourceInterval, clear = true) {
+    this.options.url = data.url;
     this.reload(clear);
   }
 
@@ -152,6 +160,7 @@ export default class ImageSource {
    */
   load(cb?: any) {
     this.#loaded = true;
+    this.url = this.options.url;
     if (cb) {
       cb(null);
     }
@@ -162,6 +171,7 @@ export default class ImageSource {
   }
 
   reload(clear) {
+    this.#loaded = false;
     this.load(() => {
       if (clear) {
         this.#sourceCache.clearTiles();
@@ -173,9 +183,9 @@ export default class ImageSource {
   }
 
   getTileUrl(tileID) {
-    let urls: string[] = this.options.url as string[];
-    if (utils.isString(this.options.url)) {
-      urls = [this.options.url];
+    let urls: string[] = this.url as string[];
+    if (utils.isString(this.url)) {
+      urls = [this.url];
     }
     return urls;
   }

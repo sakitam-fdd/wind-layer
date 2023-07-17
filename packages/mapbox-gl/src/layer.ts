@@ -1,19 +1,20 @@
 import * as mapboxgl from 'mapbox-gl';
+import rewind from '@mapbox/geojson-rewind';
 import { OrthographicCamera, Renderer, Scene, utils } from '@sakitam-gis/vis-engine';
 
-import type { LayerOptions, SourceType } from 'wind-gl-core';
-import { Layer as LayerCore, RenderType, TileID } from 'wind-gl-core';
+import type { BaseLayerOptions, SourceType } from 'wind-gl-core';
+import { BaseLayer, RenderType, TileID } from 'wind-gl-core';
 
 import CameraSync from './utils/CameraSync';
 import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
 
 import { getTileProjBounds, getTileBounds } from './utils/tile';
 
-export interface TLayerOptions extends LayerOptions {
+export interface LayerOptions extends BaseLayerOptions {
   renderingMode: '2d' | '3d';
 }
 
-export type ILayerOptions = Omit<TLayerOptions, 'getViewTiles'>;
+export type ILayerOptions = Omit<LayerOptions, 'getViewTiles'>;
 
 export default class Layer {
   public gl: WebGLRenderingContext | WebGL2RenderingContext | null;
@@ -27,7 +28,7 @@ export default class Layer {
   public renderer: Renderer;
   private options: any;
   private source: SourceType;
-  private layer: WithNull<LayerCore>;
+  private layer: WithNull<BaseLayer>;
 
   constructor(id: string, source: SourceType, options?: ILayerOptions) {
     this.id = id;
@@ -71,12 +72,14 @@ export default class Layer {
 
   handleResize() {
     if (this.renderer && this.gl) {
-      this.renderer.setSize(this.gl?.canvas?.width, this.gl?.canvas?.height);
+      const { width, height } = (this.map as any).painter;
+      this.renderer.setSize(width, height);
+
+      if (this.layer) {
+        this.layer.resize(width, height);
+      }
+      this.update();
     }
-    if (this.layer) {
-      this.layer.resize();
-    }
-    this.update();
   }
 
   handleZoom() {
@@ -92,6 +95,32 @@ export default class Layer {
     };
     if (this.layer) {
       this.layer.updateOptions(options);
+    }
+  }
+
+  public getMask() {
+    return this.options.mask;
+  }
+
+  private processMask() {
+    if (this.options.mask) {
+      const mask = this.options.mask;
+      const data = mask.data;
+      // @link https://github.com/mapbox/geojson-rewind
+      rewind(data, true);
+
+      return {
+        data,
+        type: mask.type,
+      };
+    }
+  }
+
+  public setMask(mask) {
+    this.options.mask = Object.assign({}, this.options.mask, mask);
+
+    if (this.layer) {
+      this.layer.setMask(this.processMask());
     }
   }
 
@@ -112,7 +141,7 @@ export default class Layer {
     this.scene = new Scene();
     this.sync = new CameraSync(this.map, 'perspective', this.scene);
     this.planeCamera = new OrthographicCamera(0, 1, 1, 0, 0, 1);
-    this.layer = new LayerCore(
+    this.layer = new BaseLayer(
       this.source,
       {
         renderer: this.renderer,
@@ -128,6 +157,7 @@ export default class Layer {
         heightSegments: this.options.heightSegments,
         wireframe: this.options.wireframe,
         picking: this.options.picking,
+        mask: {} as any,
         getZoom: () => this.map?.getZoom() as number,
         triggerRepaint: () => {
           this.map?.triggerRepaint();
@@ -300,6 +330,7 @@ export default class Layer {
     this.map.on('zoom', this.handleZoom);
     this.map.on('zoomend', this.handleZoom);
     this.map.on('resize', this.handleResize);
+    this.handleResize();
     this.update();
   }
 
