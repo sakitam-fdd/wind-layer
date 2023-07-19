@@ -83,6 +83,7 @@ export enum DecodeType {
 export enum LayerSourceType {
   image = 'image',
   tile = 'tile',
+  timeline = 'timeline',
   jsonArray = 'jsonArray',
 }
 

@@ -166,7 +166,9 @@ export default class Layer {
           let { type } = source;
           // @ts-ignore
           type = type !== 'timeline' ? type : source.privateType;
-          const { transform } = this.map as any;
+          const map = this.map as any;
+          if (!map) return [];
+          const { transform } = map;
           const wrapTiles: TileID[] = [];
           if (type === 'image') {
             // @ts-ignore
@@ -365,6 +367,7 @@ export default class Layer {
 
   onRemove() {
     if (this.layer) {
+      this.layer.destroy();
       this.layer = null;
     }
     this.map?.off('zoom', this.handleZoom);

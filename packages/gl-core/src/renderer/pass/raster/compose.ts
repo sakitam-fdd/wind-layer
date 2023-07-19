@@ -24,13 +24,15 @@ export default class ComposePass extends Pass<ComposePassOptions> {
   #program: WithNull<Program>;
   #current: WithNull<RenderTarget>;
   #next: WithNull<RenderTarget>;
-
+  #uid: string;
   constructor(
     id: string,
     renderer: Renderer,
     options: ComposePassOptions = {} as ComposePassOptions,
   ) {
     super(id, renderer, options);
+
+    this.#uid = utils.uid('ComposePass');
 
     this.#program = new Program(renderer, {
       vertexShader: vert,
@@ -106,7 +108,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
         if (!(tile && tile.hasData())) continue;
         const bbox = coord.getTileProjBounds();
         if (!bbox) continue;
-        const tileMesh = tile.createMesh(this.id, bbox, this.renderer, this.#program);
+        const tileMesh = tile.createMesh(this.#uid, bbox, this.renderer, this.#program);
         const mesh = tileMesh.getMesh();
 
         for (const [index, texture] of tile.textures) {

@@ -1,5 +1,4 @@
-import { EventEmitter } from '@sakitam-gis/vis-engine';
-import { Renderer, utils } from '@sakitam-gis/vis-engine';
+import { EventEmitter, Renderer, utils } from '@sakitam-gis/vis-engine';
 import SourceCache from './cahce';
 import Layer from '../renderer';
 import ImageSource, { ImageSourceInterval } from './image';
@@ -9,11 +8,11 @@ import {
   Coordinates,
   DataRange,
   DecodeType,
+  LayerSourceType,
   ParseOptionsType,
   TileSize,
   TileSourceOptions,
   TileState,
-  LayerSourceType,
 } from '../type';
 import Tile from '../tile/Tile';
 import Track, { defaultTrackOptions, TrackOptions } from '../utils/Track';
@@ -35,7 +34,7 @@ function generateKey(url: string | string[]) {
 interface TimelineSourceOptions extends TrackOptions {
   sourceType: LayerSourceType;
   intervals: (ImageSourceInterval | TileSourceInterval)[];
-  type?: 'timeline';
+  type?: LayerSourceType.timeline;
 
   /**
    * image source 配置
@@ -75,7 +74,7 @@ class TimelineSource extends EventEmitter {
   /**
    * 数据源类型
    */
-  public type: 'timeline';
+  public type: LayerSourceType.timeline;
 
   /**
    * 支持的最小层级
@@ -140,7 +139,7 @@ class TimelineSource extends EventEmitter {
   constructor(id: string, options: TimelineSourceOptions) {
     super();
     this.id = id;
-    this.type = 'timeline';
+    this.type = LayerSourceType.timeline;
 
     this.minZoom = options.minZoom ?? 0;
     this.maxZoom = options.maxZoom ?? 22;

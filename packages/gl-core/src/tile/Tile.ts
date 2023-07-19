@@ -188,10 +188,21 @@ export default class Tile {
    * @param program
    * @param force
    */
-  createMesh(passId: string, bbox: ProjTileBounds, renderer: Renderer, program: Program, force?: boolean) {
+  createMesh(
+    passId: string,
+    bbox: ProjTileBounds,
+    renderer: Renderer,
+    program: Program,
+    force?: boolean,
+  ) {
     this.updateGeometry(bbox, renderer, force);
     if (!this.tileMeshs.get(passId) || force) {
-      const tileMesh = new TileMesh(this.tileID.tileKey, renderer, program, this.geometry);
+      const tileMesh = new TileMesh(
+        passId + '_' + this.tileID.tileKey,
+        renderer,
+        program,
+        this.geometry,
+      );
       tileMesh.setCenter(this.tileCenter);
       this.tileMeshs.set(passId, tileMesh);
     }
@@ -292,11 +303,6 @@ export default class Tile {
     for (const [, value] of this.#textures) {
       if (value) {
         value?.destroy();
-      }
-    }
-    for (const [, value] of this.#textures) {
-      if (value) {
-        value?.delete();
       }
     }
     this.#textures.clear();

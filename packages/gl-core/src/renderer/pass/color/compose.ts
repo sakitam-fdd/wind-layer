@@ -25,6 +25,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
   #program: WithNull<Program>;
   #current: WithNull<RenderTarget>;
   #next: WithNull<RenderTarget>;
+  #uid: string;
 
   constructor(
     id: string,
@@ -32,6 +33,8 @@ export default class ComposePass extends Pass<ComposePassOptions> {
     options: ComposePassOptions = {} as ComposePassOptions,
   ) {
     super(id, renderer, options);
+
+    this.#uid = utils.uid('ColorComposePass');
 
     this.#program = new Program(renderer, {
       vertexShader: vert,
@@ -122,7 +125,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
         const bbox = coord.getTileProjBounds();
         if (!bbox) continue;
 
-        const tileMesh = tile.createMesh(this.id, bbox, this.renderer, this.#program);
+        const tileMesh = tile.createMesh(this.#uid, bbox, this.renderer, this.#program);
         const mesh = tileMesh.getMesh();
 
         const dataRange: number[] = [];

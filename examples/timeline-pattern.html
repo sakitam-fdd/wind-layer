@@ -7,8 +7,8 @@
   <meta name="renderer" content="webkit"/>
   <meta name="force-rendering" content="webkit"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-  <script src="https://unpkg.com/mapbox-gl/dist/mapbox-gl.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/mapbox-gl/dist/mapbox-gl.css">
+  <script src="https://registry.npmmirror.com/mapbox-gl/^3/files/dist/mapbox-gl.js"></script>
+  <link rel="stylesheet" href="https://registry.npmmirror.com/mapbox-gl/^3/files/dist/mapbox-gl.css">
   <style>
     body {
       margin: 0;
@@ -119,7 +119,34 @@
 
     window.source = source;
 
-    const layer = new mapboxWind.Layer('temp', source, {
+    const layer = new mapboxWind.Layer('wind', source, {
+      wireframe: true,
+      styleSpec: {
+        'fill-color': [
+          'interpolate',
+          ['step', 1],
+          ['get', 'value'],
+          ...interpolateColor
+        ],
+        'opacity': [
+          'interpolate',
+          ['exponential', 0.5],
+          ['zoom'],
+          1,
+          1,
+          2,
+          1
+        ],
+      },
+      renderFrom: 'rg',
+      widthSegments: 1,
+      heightSegments: 1,
+      displayRange: [0, 104],
+      hasMask: false,
+      renderType: 1,
+      picking: true,
+    });
+    const layer1 = new mapboxWind.Layer('wind1', source, {
       wireframe: true,
       styleSpec: {
         'fill-color': [
@@ -147,12 +174,18 @@
       picking: true,
     });
 
-    map.addLayer(layer);
-
     map.on('click', e => {
-      layer.picker(e.lngLat).then((v) => {
-        console.log(v)
-      })
+      // layer.picker(e.lngLat).then((v) => {
+      //   console.log(v)
+      // })
+
+      if (!map.getLayer('wind')) {
+        map.addLayer(layer);
+        map.addLayer(layer1);
+      } else {
+        map.removeLayer('wind');
+        map.removeLayer('wind1');
+      }
     });
   });
 </script>

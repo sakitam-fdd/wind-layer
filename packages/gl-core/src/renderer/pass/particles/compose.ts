@@ -28,6 +28,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
 
   #current: RenderTarget;
   #next: RenderTarget;
+  #uid: string;
 
   #width = defaultSize;
   #height = defaultSize;
@@ -38,6 +39,8 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     options: ParticlesComposePassOptions = {} as ParticlesComposePassOptions,
   ) {
     super(id, renderer, options);
+
+    this.#uid = utils.uid('ParticlesComposePass');
 
     this.#program = new Program(renderer, {
       vertexShader: vert,
@@ -172,7 +175,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
         const tileBBox = coord.getTileProjBounds();
         if (!tileBBox) continue;
 
-        const tileMesh = tile.createMesh(this.id, tileBBox, this.renderer, this.#program);
+        const tileMesh = tile.createMesh(this.#uid, tileBBox, this.renderer, this.#program);
         const mesh = tileMesh.planeMesh;
 
         const scale = Math.pow(2, zmax - coord.z);
