@@ -18,16 +18,14 @@ export interface ParticlesComposePassOptions {
 const defaultSize = 256;
 
 /**
- * 在这里我们实现将所有瓦片绘制在 fbo 上以提升多世界渲染的边界接边效果
- * 在下一步再进行完整的着色
+ * 按区域加载视图范围内的瓦片，然后合并单张纹理
  */
 export default class ParticlesComposePass extends Pass<ParticlesComposePassOptions> {
-  readonly #program: Program;
-
   readonly prerender = true;
 
-  #current: RenderTarget;
-  #next: RenderTarget;
+  #program: WithNull<Program>;
+  #current: WithNull<RenderTarget>;
+  #next: WithNull<RenderTarget>;
   #uid: string;
 
   #width = defaultSize;
@@ -84,8 +82,8 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
 
   resize(width: number, height: number) {
     if (width !== this.#width || height !== this.#height) {
-      this.#current.resize(width, height);
-      this.#next.resize(width, height);
+      this.#current?.resize(width, height);
+      this.#next?.resize(width, height);
       this.#width = width;
       this.#height = height;
     }
@@ -93,8 +91,8 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
 
   get textures() {
     return {
-      current: this.#current.texture,
-      next: this.#next.texture,
+      current: this.#current?.texture,
+      next: this.#next?.texture,
     };
   }
 
@@ -164,7 +162,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
 
     const [stencilModes, coords] = stencilConfigForOverlap(coordsDescending);
 
-    // 4. 循环 TileID，从 souceCache 查找对应瓦片渲染（默认是从事业中心向两边渲染）
+    // 4. 循环 TileID，从 sourceCache 查找对应瓦片渲染（默认是从视野中心向两边渲染）
     for (let k = 0; k < coords.length; k++) {
       const coord = coords[k];
       // 5. 进行渲染
@@ -250,6 +248,23 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     } else {
       this.renderTexture(this.#current, rendererParams, rendererState, sourceCache);
       this.renderTexture(this.#next, rendererParams, rendererState, sourceCache);
+    }
+  }
+
+  destroy() {
+    if (this.#program) {
+      this.#program.destroy();
+      this.#program = null;
+    }
+
+    if (this.#current) {
+      this.#current.destroy();
+      this.#current = null;
+    }
+
+    if (this.#next) {
+      this.#next.destroy();
+      this.#next = null;
     }
   }
 }

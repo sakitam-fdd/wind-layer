@@ -9,3 +9,5 @@ coverage
 *.log
 .cache
 .DS_Store
+
+cache/

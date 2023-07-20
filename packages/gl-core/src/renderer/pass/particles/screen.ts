@@ -1,11 +1,11 @@
-import {BlendType, Geometry, Mesh, Program, Renderer} from '@sakitam-gis/vis-engine';
+import { BlendType, Geometry, Mesh, Program, Renderer } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
-import {littleEndian} from '../../../utils/common';
+import { littleEndian } from '../../../utils/common';
 import vert from '../../../shaders/common.vert.glsl';
 import frag from '../../../shaders/particles/screen.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import {BandType} from '../../../type';
-import {SourceType} from '../../../source';
+import { BandType } from '../../../type';
+import { SourceType } from '../../../source';
 import ParticlesPass from './particles';
 
 export interface ScreenPassOptions {
@@ -18,10 +18,11 @@ export interface ScreenPassOptions {
 }
 
 export default class ScreenPass extends Pass<ScreenPassOptions> {
-  readonly #program: Program;
-  readonly #mesh: Mesh;
-  readonly #geometry: Geometry;
   public prerender: boolean;
+
+  #program: WithNull<Program>;
+  #mesh: WithNull<Mesh>;
+  #geometry: WithNull<Geometry>;
 
   constructor(
     id: string,
@@ -99,7 +100,7 @@ export default class ScreenPass extends Pass<ScreenPassOptions> {
       const attr = this.renderer.attributes;
       this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
     }
-    if (rendererState) {
+    if (rendererState && this.#mesh) {
       const camera = rendererParams.cameras.planeCamera;
       this.#mesh.program.setUniform('u_fade', 1);
       this.#mesh.program.setUniform(
@@ -128,6 +129,23 @@ export default class ScreenPass extends Pass<ScreenPassOptions> {
 
     if (this.options.particlesPass && !this.prerender) {
       this.options.particlesPass?.swapRenderTarget();
+    }
+  }
+
+  destroy() {
+    if (this.#mesh) {
+      this.#mesh.destroy();
+      this.#mesh = null;
+    }
+
+    if (this.#program) {
+      this.#program.destroy();
+      this.#program = null;
+    }
+
+    if (this.#geometry) {
+      this.#geometry.destroy();
+      this.#geometry = null;
     }
   }
 }

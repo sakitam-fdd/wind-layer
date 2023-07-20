@@ -7,11 +7,8 @@
   <meta name="renderer" content="webkit"/>
   <meta name="force-rendering" content="webkit"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-  <script src="https://unpkg.com/mapbox-gl@2.15.0/dist/mapbox-gl.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/mapbox-gl@2.15.0/dist/mapbox-gl.css">
-
-<!--  <script src="https://unpkg.com/mapbox-gl@1.13.3/dist/mapbox-gl.js"></script>-->
-<!--  <link rel="stylesheet" href="https://unpkg.com/mapbox-gl@1.13.3/dist/mapbox-gl.css">-->
+  <script src="https://registry.npmmirror.com/mapbox-gl/^2/files/dist/mapbox-gl.js"></script>
+  <link rel="stylesheet" href="https://registry.npmmirror.com/mapbox-gl/^2/files/dist/mapbox-gl.css">
   <style>
     body {
       margin: 0;
@@ -211,10 +208,10 @@
       tileSize: 256,
       minZoom: 0,
       maxZoom: 4,
-      roundZoom: false,
+      roundZoom: true,
       decodeType: 3,
       wrapX: true,
-      tileBounds: [-78.120282611, -75.191804486, 132.453327310, 68.846393966],
+      // tileBounds: [-78.120282611, -75.191804486, 132.453327310, 68.846393966],
       url: 'http://localhost:5000/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
     });
 
@@ -285,7 +282,7 @@
       renderType: 2,
     });
 
-    map.addLayer(fill);
+    // map.addLayer(fill);
     map.addLayer(wind);
 
     const gui = new dat.GUI();

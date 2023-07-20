@@ -27,12 +27,13 @@ export interface UpdatePassOptions {
 }
 
 export default class UpdatePass extends Pass<UpdatePassOptions> {
-  readonly #program: Program;
-  readonly #mesh: Mesh;
-  readonly #geometry: Geometry;
   readonly prerender = true;
-  #current: RenderTarget;
-  #next: RenderTarget;
+
+  #program: WithNull<Program>;
+  #mesh: WithNull<Mesh>;
+  #geometry: WithNull<Geometry>;
+  #current: WithNull<RenderTarget>;
+  #next: WithNull<RenderTarget>;
 
   #initialize = true;
 
@@ -102,14 +103,14 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
   resize() {
     const particleRes = this.#getParticleRes();
 
-    this.#current.resize(particleRes, particleRes);
-    this.#next.resize(particleRes, particleRes);
+    this.#current?.resize(particleRes, particleRes);
+    this.#next?.resize(particleRes, particleRes);
   }
 
   get textures() {
     return {
-      currentParticles: this.#current.texture,
-      nextParticles: this.#next.texture,
+      currentParticles: this.#current?.texture,
+      nextParticles: this.#next?.texture,
     };
   }
 
@@ -182,7 +183,7 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
       }
       this.renderer.setViewport(this.#next.width, this.#next.height);
     }
-    if (rendererState) {
+    if (rendererState && this.#mesh) {
       const uniforms = utils.pick(rendererState, [
         'dataRange',
         'useDisplayRange',
@@ -194,7 +195,7 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
 
       Object.keys(uniforms).forEach((key) => {
         if (uniforms[key] !== undefined) {
-          this.#mesh.program.setUniform(key, uniforms[key]);
+          this.#mesh?.program.setUniform(key, uniforms[key]);
         }
       });
 
@@ -205,7 +206,7 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
       );
       this.#mesh.program.setUniform('u_fade_t', fade);
       this.#mesh.program.setUniform('u_rand_seed', Math.random());
-      this.#mesh.program.setUniform('u_particles', this.#current.texture);
+      this.#mesh.program.setUniform('u_particles', this.#current?.texture);
       this.#mesh.program.setUniform('u_bbox', rendererState.extent);
       this.#mesh.program.setUniform('u_initialize', this.#initialize);
       this.#mesh.program.setUniform('u_data_bbox', rendererState.sharedState.u_data_bbox);
@@ -225,5 +226,32 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
     this.#initialize = false;
 
     this.swapRenderTarget();
+  }
+
+  destroy() {
+    if (this.#mesh) {
+      this.#mesh.destroy();
+      this.#mesh = null;
+    }
+
+    if (this.#program) {
+      this.#program.destroy();
+      this.#program = null;
+    }
+
+    if (this.#geometry) {
+      this.#geometry.destroy();
+      this.#geometry = null;
+    }
+
+    if (this.#current) {
+      this.#current.destroy();
+      this.#current = null;
+    }
+
+    if (this.#next) {
+      this.#next.destroy();
+      this.#next = null;
+    }
   }
 }

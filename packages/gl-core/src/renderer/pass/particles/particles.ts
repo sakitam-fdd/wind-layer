@@ -33,16 +33,16 @@ export interface ParticlesPassOptions {
  * 着色
  */
 export default class Particles extends Pass<ParticlesPassOptions> {
-  readonly #program: Program;
-  readonly #mesh: Mesh;
-  readonly #geometry: Geometry;
   #prerender = true;
 
   public particleStateResolution: number;
 
   #privateNumParticles: number;
-  #screenTexture: RenderTarget;
-  #backgroundTexture: RenderTarget;
+  #program: WithNull<Program>;
+  #mesh: WithNull<Mesh>;
+  #geometry: WithNull<Geometry>;
+  #screenTexture: WithNull<RenderTarget>;
+  #backgroundTexture: WithNull<RenderTarget>;
 
   constructor(
     id: string,
@@ -122,8 +122,8 @@ export default class Particles extends Pass<ParticlesPassOptions> {
 
   get textures() {
     return {
-      screenTexture: this.#screenTexture.texture,
-      backgroundTexture: this.#backgroundTexture.texture,
+      screenTexture: this.#screenTexture?.texture,
+      backgroundTexture: this.#backgroundTexture?.texture,
     };
   }
 
@@ -132,8 +132,8 @@ export default class Particles extends Pass<ParticlesPassOptions> {
   }
 
   resetParticles() {
-    this.#screenTexture.clear();
-    this.#backgroundTexture.clear();
+    this.#screenTexture?.clear();
+    this.#backgroundTexture?.clear();
   }
 
   getParticleBuffer() {
@@ -200,7 +200,7 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
     }
     const { camera } = rendererParams.cameras;
-    if (rendererState) {
+    if (rendererState && this.#mesh) {
       this.#mesh.program.setUniform(
         'u_image_res',
         new Vector2(this.options.texture.width, this.options.texture.height),
@@ -233,6 +233,33 @@ export default class Particles extends Pass<ParticlesPassOptions> {
 
     if (this.renderTarget) {
       this.renderTarget.unbind();
+    }
+  }
+
+  destroy() {
+    if (this.#mesh) {
+      this.#mesh.destroy();
+      this.#mesh = null;
+    }
+
+    if (this.#program) {
+      this.#program.destroy();
+      this.#program = null;
+    }
+
+    if (this.#geometry) {
+      this.#geometry.destroy();
+      this.#geometry = null;
+    }
+
+    if (this.#screenTexture) {
+      this.#screenTexture.destroy();
+      this.#screenTexture = null;
+    }
+
+    if (this.#backgroundTexture) {
+      this.#backgroundTexture.destroy();
+      this.#backgroundTexture = null;
     }
   }
 }

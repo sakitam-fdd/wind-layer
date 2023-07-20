@@ -1,14 +1,14 @@
 import * as mapboxgl from 'mapbox-gl';
 import rewind from '@mapbox/geojson-rewind';
-import { OrthographicCamera, Renderer, Scene, utils } from '@sakitam-gis/vis-engine';
+import {OrthographicCamera, Renderer, Scene, utils} from '@sakitam-gis/vis-engine';
 
-import type { BaseLayerOptions, SourceType } from 'wind-gl-core';
-import { BaseLayer, RenderType, TileID } from 'wind-gl-core';
+import type {BaseLayerOptions, SourceType} from 'wind-gl-core';
+import {BaseLayer, LayerSourceType, RenderType, TileID} from 'wind-gl-core';
 
 import CameraSync from './utils/CameraSync';
-import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
+import {getCoordinatesCenterTileID} from './utils/mercatorCoordinate';
 
-import { getTileProjBounds, getTileBounds } from './utils/tile';
+import {getTileBounds, getTileProjBounds} from './utils/tile';
 
 export interface LayerOptions extends BaseLayerOptions {
   renderingMode: '2d' | '3d';
@@ -165,12 +165,12 @@ export default class Layer {
         getViewTiles: (source: SourceType, renderType: RenderType) => {
           let { type } = source;
           // @ts-ignore
-          type = type !== 'timeline' ? type : source.privateType;
+          type = type !== LayerSourceType.timeline ? type : source.privateType;
           const map = this.map as any;
           if (!map) return [];
           const { transform } = map;
           const wrapTiles: TileID[] = [];
-          if (type === 'image') {
+          if (type === LayerSourceType.image) {
             // @ts-ignore
             const cornerCoords = source.coordinates.map((c: any) =>
               mapboxgl.MercatorCoordinate.fromLngLat(c),
@@ -219,7 +219,7 @@ export default class Layer {
                 }),
               );
             }
-          } else if (type === 'tile') {
+          } else if (type === LayerSourceType.tile) {
             const opts = {
               tileSize: utils.isNumber(this.source.tileSize)
                 ? source.tileSize
@@ -254,52 +254,6 @@ export default class Layer {
               }
             }
           }
-
-          // const features: any = {
-          //   type: 'FeatureCollection',
-          //   features: [],
-          // };
-          //
-          // for (let k = 0; k < wrapTiles.length; k++) {
-          //   const tile = wrapTiles[k];
-          //   const [leftLng, bottomLat, rightLng, topLat] = tile.tileBounds;
-          //
-          //   features.features.push(
-          //     {
-          //       type: 'Feature',
-          //       properties: {
-          //         tile: tile.tileKey,
-          //       },
-          //       geometry: {
-          //         coordinates: [
-          //           [
-          //             [leftLng, bottomLat],
-          //             [leftLng, topLat],
-          //             [rightLng, topLat],
-          //             [rightLng, bottomLat],
-          //             [leftLng, bottomLat],
-          //           ],
-          //         ],
-          //         type: 'Polygon',
-          //       },
-          //     },
-          //     {
-          //       type: 'Feature',
-          //       properties: {
-          //         tile: tile.tileKey,
-          //       },
-          //       geometry: {
-          //         coordinates: [
-          //           leftLng + (rightLng - leftLng) / 2,
-          //           topLat - (topLat - bottomLat) / 2,
-          //         ],
-          //         type: 'Point',
-          //       },
-          //     },
-          //   );
-          // }
-          //
-          // map.getSource('tile-bbox').setData(features);
 
           return wrapTiles;
         },
