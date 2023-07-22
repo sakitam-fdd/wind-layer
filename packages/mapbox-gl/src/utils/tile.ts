@@ -182,3 +182,129 @@ export function getTileBounds(tileID: TileID): TileBounds {
 
   return [leftLng, bottomLat, rightLng, topLat];
 }
+
+export function expandTiles(tiles: TileID[]) {
+  // 1. 按照从左上角到右下角排序
+  // 2. 计算包裹瓦片的包围盒 (经纬度)
+  let xmin = Infinity;
+  let xmax = -Infinity;
+  let ymin = Infinity;
+  let ymax = -Infinity;
+  let zmin = Infinity;
+  let zmax = -Infinity;
+
+  const cacheMap = new Map();
+  const tree = new RBush(9);
+
+  for (let i = 0; i < tiles.length; i++) {
+    const tileID = tiles[i];
+
+    const { z } = tileID;
+    const wrap = tileID.wrap;
+
+    const [leftLng, bottomLat, rightLng, topLat] = tileID.tileBounds;
+    xmin = Math.min(leftLng, xmin);
+    xmax = Math.max(rightLng, xmax);
+    ymin = Math.min(bottomLat, ymin);
+    ymax = Math.max(topLat, ymax);
+    zmin = Math.min(z, zmin);
+    zmax = Math.max(z, zmax);
+
+    // 对跨世界瓦片进行分组
+    const cache = cacheMap.get(wrap);
+    if (!cache) {
+      //
+      cacheMap.set(wrap, [tileID]);
+    } else {
+      cacheMap.set(wrap, [...cache, tileID]);
+    }
+  }
+  for (const [_, value] of cacheMap) {
+    // 对每个世界进行层级分组
+    const level = new Map();
+    let xmin = Infinity;
+    let ymin = Infinity;
+    let xmax = -Infinity;
+    let ymax = -Infinity;
+    for (let i = 0; i < value.length; i++) {
+      const item = value[i];
+      const cache = level.get(item.canonical.z);
+      // 计算每个世界的瓦片包围盒
+      if (!cache) {
+        level.set(item.canonical.z, [item]);
+      } else {
+        level.set(item.canonical.z, [...cache, item]);
+      }
+      xmin = Math.min(item.bbox[0], xmin);
+      xmax = Math.max(item.bbox[2], xmax);
+      ymin = Math.min(item.bbox[1], ymin);
+      ymax = Math.max(item.bbox[3], ymax);
+    }
+
+    // 计算出的每个世界的瓦片包围盒
+    const wrapBBox = [xmin, ymin, xmax, ymax];
+
+    const object = {};
+
+    // 计算每层级的最大最小行列号
+    for (const [lk, lv] of level) {
+      let xmin = Infinity;
+      let ymin = Infinity;
+      let xmax = -Infinity;
+      let ymax = -Infinity;
+      for (let j = 0; j < lv.length; j++) {
+        const litem = lv[j];
+        const item = {
+          minX: litem.bbox[0],
+          minY: litem.bbox[1],
+          maxX: litem.bbox[2],
+          maxY: litem.bbox[3],
+          tileKey: litem.key,
+        };
+        tree.insert(item);
+        xmin = Math.min(litem.canonical.x, xmin);
+        xmax = Math.max(litem.canonical.x, xmax);
+        ymin = Math.min(litem.canonical.y, ymin);
+        ymax = Math.max(litem.canonical.y, ymax);
+      }
+      object[lk] = {
+        baseTileID: lv.find(
+          (t) => t.canonical.x === xmin && t.canonical.y === ymin && t.canonical.z === lk,
+        ),
+        config: [xmin, ymin, xmax, ymax],
+      };
+    }
+
+    const keys = Object.keys(object).sort().reverse().map(Number); // 按层级排序
+    // 查找相邻瓦片进行补齐， 补齐的过程中不同层级瓦片不可重叠：优先补齐高层级瓦片
+
+    const addTiles: TileID[] = [];
+    for (let k = 0; k < keys.length; k++) {
+      // @fixme: 有可能在某个世界下 x 方向或者 y 方向都缺失，需要全世界计算最大最小参考
+      const { config, baseTileID } = object[keys[k]];
+
+      const xd = config[2] - config[0] + 1;
+      const yd = config[3] - config[1] + 1;
+
+      for (let x = 0; x < xd; x++) {
+        for (let y = 0; y < yd; y++) {
+          const tile = (baseTileID as TileID).neighbor(x, y);
+          if (!tiles.find(t => t.key === tile.key)) {
+            const result = tree.collides({
+              minX: tile.bbox[0],
+              minY: tile.bbox[1],
+              maxX: tile.bbox[2],
+              maxY: tile.bbox[3],
+            }, { intersects });
+
+            if (!result) {
+              addTiles.push(tile);
+            }
+            console.log(tile, result);
+          }
+        }
+      }
+    }
+    console.log(wrapBBox, object, addTiles)
+  }
+}

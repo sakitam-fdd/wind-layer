@@ -108,7 +108,7 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
 
       Object.keys(uniforms).forEach((key) => {
         if (uniforms[key] !== undefined) {
-          this.#mesh!.program.setUniform(key, uniforms[key]);
+          this.#mesh?.program.setUniform(key, uniforms[key]);
         }
       });
 
