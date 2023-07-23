@@ -1,22 +1,22 @@
 {
-  "name": "@sakitam-gis/mapbox-wind",
-  "version": "2.0.0-alpha.0",
-  "description": "mapbox wind",
+  "name": "@sakitam-gis/rbush",
+  "version": "3.0.1",
+  "description": "High-performance 2D spatial index for rectangles (based on R*-tree with bulk loading and bulk insertion algorithms)",
   "keywords": [
-    "mapbox",
-    "3d",
-    "webgl",
-    "map",
-    "vis",
-    "gis"
+    "spatial",
+    "tree",
+    "search",
+    "rectangle",
+    "index",
+    "math"
   ],
-  "author": "sakitam-fdd <smilefdd@gmail.com>",
+  "author": "Vladimir Agafonkin",
   "license": "MIT",
-  "main": "dist/mapbox-wind.js",
-  "module": "dist/mapbox-wind.esm.js",
-  "unpkg": "dist/mapbox-wind.js",
-  "commonjs": "dist/mapbox-wind.cjs.js",
-  "namespace": "mapboxWind",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "unpkg": "dist/index.js",
+  "commonjs": "dist/index.cjs.js",
+  "namespace": "RBush",
   "types": "dist/index.d.ts",
   "files": [
     "dist",
@@ -29,18 +29,18 @@
       "types": "./dist/index.d.ts",
       "node": {
         "import": {
-          "production": "./dist/mapbox-wind.esm.js",
-          "development": "./dist/mapbox-wind.esm.js",
-          "default": "./dist/mapbox-wind.esm.js"
+          "production": "./dist/index.esm.js",
+          "development": "./dist/index.esm.js",
+          "default": "./dist/index.esm.js"
         },
         "require": {
-          "production": "./dist/mapbox-wind.cjs.js",
-          "development": "./dist/mapbox-wind.cjs.js",
-          "default": "./dist/mapbox-wind.cjs.js"
+          "production": "./dist/index.cjs.js",
+          "development": "./dist/index.cjs.js",
+          "default": "./dist/index.cjs.js"
         }
       },
-      "import": "./dist/mapbox-wind.esm.js",
-      "require": "./dist/mapbox-wind.cjs.js"
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
     },
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"
@@ -50,7 +50,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sakitam-fdd/wind-layer.git",
-    "directory": "packages/mapbox-gl"
+    "directory": "packages/rbush"
   },
   "scripts": {
     "clean": "rimraf dist",
@@ -68,19 +68,7 @@
   },
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
   "dependencies": {
-    "@sakitam-gis/vis-engine": "^1.5.1",
-    "@sakitam-gis/rbush": "workspace:*",
-    "@mapbox/geojson-rewind": "^0.5.2",
-    "wind-core": "workspace:*",
-    "wind-gl-core": "workspace:*",
-    "gl-matrix": "^3.4.3"
-  },
-  "peerDependencies": {
-    "mapbox-gl": ">=0.50.0"
-  },
-  "devDependencies": {
-    "@types/mapbox-gl": "^1.9.1",
-    "mapbox-gl": "^1.8.0"
+    "quickselect": "^2.0.0"
   },
   "publishConfig": {
     "access": "public"

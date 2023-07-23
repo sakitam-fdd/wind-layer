@@ -224,6 +224,9 @@ importers:
       '@mapbox/geojson-rewind':
         specifier: ^0.5.2
         version: 0.5.2
+      '@sakitam-gis/rbush':
+        specifier: workspace:*
+        version: link:../rbush
       '@sakitam-gis/vis-engine':
         specifier: ^1.5.1
         version: 1.5.1
@@ -307,6 +310,12 @@ importers:
       regl:
         specifier: ^2.1.0
         version: 2.1.0
+
+  packages/rbush:
+    dependencies:
+      quickselect:
+        specifier: ^2.0.0
+        version: 2.0.0
 
   packages/worker-fetch:
     dependencies:

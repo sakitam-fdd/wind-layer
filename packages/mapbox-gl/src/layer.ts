@@ -8,7 +8,7 @@ import {BaseLayer, LayerSourceType, RenderType, TileID} from 'wind-gl-core';
 import CameraSync from './utils/CameraSync';
 import {getCoordinatesCenterTileID} from './utils/mercatorCoordinate';
 
-import {getTileBounds, getTileProjBounds} from './utils/tile';
+import {expandTiles, getTileBounds, getTileProjBounds} from './utils/tile';
 
 export interface LayerOptions extends BaseLayerOptions {
   renderingMode: '2d' | '3d';
@@ -252,6 +252,10 @@ export default class Layer {
                   }),
                 );
               }
+            }
+
+            if (renderType === RenderType.particles) {
+              expandTiles(wrapTiles);
             }
           }
 
