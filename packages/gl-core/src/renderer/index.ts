@@ -1,4 +1,12 @@
-import { DataTexture, Raf, Renderer, Scene, utils, Vector2 } from '@sakitam-gis/vis-engine';
+import {
+  Attributes,
+  DataTexture,
+  Raf,
+  Renderer,
+  Scene,
+  utils,
+  Vector2,
+} from '@sakitam-gis/vis-engine';
 import wgw from 'wind-gl-worker';
 import Pipelines from './Pipelines';
 import ColorizeComposePass from './pass/color/compose';
@@ -16,6 +24,7 @@ import { getBandType, RenderFrom, RenderType, MaskType } from '../type';
 import { SourceType } from '../source';
 import Tile from '../tile/Tile';
 import TileID from '../tile/TileID';
+import MaskPass from "./pass/mask";
 
 export interface BaseLayerOptions {
   /**
@@ -60,7 +69,7 @@ export interface BaseLayerOptions {
    * 可以为任意 GeoJSON 数据
    */
   mask?: {
-    data: any;
+    data: Attributes[];
     type: MaskType;
   };
   onInit?: (error, data) => void;
@@ -130,6 +139,7 @@ export default class BaseLayer {
   #colorRange: Vector2;
   #colorRampTexture: DataTexture;
   #nextStencilID: number;
+  #maskPass: MaskPass;
 
   constructor(
     source: SourceType,
@@ -157,6 +167,8 @@ export default class BaseLayer {
     };
 
     this.#opacity = this.options.opacity || 1;
+
+    this.#nextStencilID = 1;
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -191,13 +203,19 @@ export default class BaseLayer {
     };
     this.renderPipeline = new Pipelines(this.renderer);
     const bandType = getBandType(this.options.renderFrom ?? RenderFrom.r);
+
+    if (this.options.mask) {
+      this.#maskPass = new MaskPass('MaskPass', this.renderer, {
+        mask: this.options.mask,
+      });
+    }
+
     if (this.options.renderType === RenderType.image) {
       const composePass = new RasterComposePass('RasterComposePass', this.renderer, {
         bandType,
         source: this.source,
         renderFrom: this.options.renderFrom ?? RenderFrom.r,
-        // maskData: this.options.mask?.data,
-        // maskType: this.options.mask?.type,
+        maskPass: this.#maskPass,
         stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
       });
       const rasterPass = new RasterPass('RasterPass', this.renderer, {
@@ -222,6 +240,7 @@ export default class BaseLayer {
         bandType,
         source: this.source,
         renderFrom: this.options.renderFrom ?? RenderFrom.r,
+        maskPass: this.#maskPass,
         stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
       });
       const colorizePass = new ColorizePass('ColorizePass', this.renderer, {
@@ -471,6 +490,7 @@ export default class BaseLayer {
     return [
       {
         [minTileZ]: {
+          // 禁止写入
           stencil: false,
           mask: 0,
           func: {
@@ -550,19 +570,19 @@ export default class BaseLayer {
     }
   }
 
-  setMask(mask) {
+  setMask(mask: BaseLayerOptions['mask']) {
     this.options.mask = mask;
 
-    if (mask && this.renderPipeline) {
-      const pass = this.renderPipeline.getPass('ColorizeComposePass');
-
-      if (pass) {
-        pass.options.maskData = mask.data;
-        pass.options.maskType = mask.type;
-        pass.processMaskData();
-
-        this.options?.triggerRepaint?.();
+    if (this.options.mask) {
+      if (!this.#maskPass) {
+        this.#maskPass = new MaskPass('MaskPass', this.renderer, {
+          mask: this.options.mask,
+        });
       }
+
+      this.#maskPass.updateGeometry();
+
+      this.options?.triggerRepaint?.();
     }
   }
 

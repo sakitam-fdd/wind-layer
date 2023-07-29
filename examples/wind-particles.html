@@ -114,7 +114,8 @@
       [104,[128,128,128,255]]]
   };
 
-  map.on('load', function () {
+  map.on('load', async function () {
+    const clip = await fetch('./data/china.geojson').then(res => res.json());
     const interpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);
 
     map.addSource('tile-bbox', {
@@ -235,10 +236,24 @@
       displayRange: [0, 104],
       hasMask: false,
       renderType: 1,
+      picking: true,
+      mask: {
+        data: clip,
+        type: mapboxWind.MaskType.outside,
+        // type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+      }
     });
 
     const particlesConfig = {
-      speedFactor: 1,
+      speedFactor: [
+        'interpolate',
+        ['exponential', 0.5],
+        ['zoom'],
+        0,
+        1,
+        15,
+        0.01
+      ],
       fadeOpacity: 0.93,
       dropRate: 0.003,
       dropRateBump: 0.002,
@@ -270,7 +285,7 @@
           0, // zoom
           65535 / 8, // numParticles
           8, // zoom
-          65535 / 8 // numParticles
+          65535 / 16 // numParticles
         ],
         ...particlesConfig,
       },
@@ -282,16 +297,22 @@
       renderType: 2,
     });
 
-    // map.addLayer(fill);
-    map.addLayer(wind);
+    map.on('click', e => {
+      fill.picker(e.lngLat).then((v) => {
+        console.log(v)
+      })
+    })
+
+    map.addLayer(fill);
+    // map.addLayer(wind);
 
     const gui = new dat.GUI();
 
-    gui.add(particlesConfig, 'speedFactor', 0, 2).onChange(function () {
-      wind.updateOptions({
-        styleSpec: particlesConfig
-      });
-    });
+    // gui.add(particlesConfig, 'speedFactor', 0, 2).onChange(function () {
+    //   wind.updateOptions({
+    //     styleSpec: particlesConfig
+    //   });
+    // });
 
     gui.add(particlesConfig, 'fadeOpacity', 0, 1).onChange(function () {
       wind.updateOptions({

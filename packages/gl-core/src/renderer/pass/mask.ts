@@ -1,13 +1,15 @@
-import { Program, Renderer, Mesh, Geometry } from '@sakitam-gis/vis-engine';
+import { Program, Renderer, Mesh, Geometry, Attributes } from '@sakitam-gis/vis-engine';
 import Pass from './base';
-import { littleEndian } from '../../utils/common';
-import composeVert from '../../shaders/compose.vert.glsl';
+import maskVert from '../../shaders/mask.vert.glsl';
 import maskFrag from '../../shaders/mask.frag.glsl';
 import * as shaderLib from '../../shaders/shaderLib';
-import { BandType } from '../../type';
+import { MaskType } from '../../type';
 
 export interface MaskPassOptions {
-  renderType: BandType;
+  mask?: {
+    data: Attributes[];
+    type: MaskType;
+  };
 }
 
 /**
@@ -15,82 +17,110 @@ export interface MaskPassOptions {
  */
 export default class MaskPass extends Pass<MaskPassOptions> {
   readonly #program: Program;
-  readonly #mesh: Mesh;
-  readonly #geometry: Geometry;
   readonly prerender = false;
+
+  #meshes: Mesh[];
 
   constructor(id: string, renderer: Renderer, options: MaskPassOptions = {} as MaskPassOptions) {
     super(id, renderer, options);
 
     this.#program = new Program(renderer, {
-      vertexShader: composeVert,
+      vertexShader: maskVert,
       fragmentShader: maskFrag,
-      defines: [`RENDER_TYPE ${this.options.bandType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
       transparent: true,
     });
 
-    this.#geometry = new Geometry(renderer, {
-      position: {
-        size: 2,
-        data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1].map(ii => ii / 2)),
-      },
-      uv: {
-        size: 2,
-        data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
-      },
-      index: {
-        size: 1,
-        data: new Uint16Array([0, 1, 2, 2, 1, 3]),
-      },
-    });
+    this.#meshes = [];
 
-    this.#mesh = new Mesh(renderer, {
-      mode: renderer.gl.TRIANGLES,
-      program: this.#program,
-      geometry: this.#geometry,
-    });
+    this.updateGeometry();
+  }
 
-    // this.#mesh.position.set(0.5, 0.5, 0);
+  updateGeometry() {
+    const { mask } = this.options;
+
+    if (!mask || mask.data.length === 0) return;
+
+    const len = mask.data.length;
+    let i = 0;
+
+    for (let k = 0; k < this.#meshes.length; k++) {
+      const mesh = this.#meshes[k];
+
+      if (mesh) {
+        mesh.destroy();
+      }
+    }
+
+    this.#meshes = [];
+    for (; i < len; i++) {
+      const attributes = mask.data[i];
+
+      this.#meshes.push(
+        new Mesh(this.renderer, {
+          mode: this.renderer.gl.TRIANGLES,
+          program: this.#program,
+          geometry: new Geometry(this.renderer, attributes),
+        }),
+      );
+    }
   }
 
   /**
    * @param rendererParams
-   * @param rendererState
    */
-  render(rendererParams, rendererState) {
+  render(rendererParams) {
     const attr = this.renderer.attributes;
     this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
-    if (rendererState) {
-      const stencil = this.renderer.gl.getParameter(this.renderer.gl.STENCIL_TEST);
-      if (!stencil) {
-        this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
-      }
+    const { worlds = [0] } = rendererParams;
+    const stencil = this.renderer.gl.getParameter(this.renderer.gl.STENCIL_TEST);
+    if (!stencil) {
+      this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
+    }
 
-      this.renderer.state.setMask(false);
+    this.renderer.gl.stencilFunc(this.renderer.gl.ALWAYS, 255, 0xff);
+    this.renderer.gl.stencilOp(
+      this.renderer.gl.REPLACE,
+      this.renderer.gl.REPLACE,
+      this.renderer.gl.REPLACE,
+    );
+    this.renderer.gl.stencilMask(0xff); // 模板允许写入
 
-      this.renderer.state.setStencilMask(0xff);
-      this.renderer.state.setStencilFunc(this.renderer.gl.ALWAYS, 1, 0xff);
+    this.renderer.gl.clearStencil(0); // 置为 0
+    this.renderer.gl.clear(this.renderer.gl.STENCIL_BUFFER_BIT);
+    // 0 0 0 0 0
+    // 0 0 0 0 0
+    // 0 0 0 0 0
+    // 0 0 0 0 0
+    // 0 0 0 0 0
 
-      this.renderer.state.setStencilOp(
-        this.renderer.gl.KEEP,
-        this.renderer.gl.REPLACE,
-        this.renderer.gl.REPLACE,
-      );
+    for (let k = 0; k < this.#meshes.length; k++) {
+      const mesh = this.#meshes[k];
 
-      this.#mesh.updateMatrix();
-      this.#mesh.worldMatrixNeedsUpdate = false;
-      this.#mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, this.#mesh.localMatrix);
-      this.#mesh.draw({
-        ...rendererParams,
-        camera: rendererParams.cameras.camera,
-      });
+      for (let j = 0; j < worlds.length; j++) {
+        mesh.program.setUniform('u_offset', worlds[j]);
 
-      this.renderer.state.setMask(true);
-
-      if (!stencil) {
-        this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
+        mesh.updateMatrix();
+        mesh.worldMatrixNeedsUpdate = false;
+        mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, mesh.localMatrix);
+        mesh.draw({
+          ...rendererParams,
+          camera: rendererParams.cameras.camera,
+        });
       }
     }
+    // 0 0 0 0 0
+    // 0 1 1 1 0
+    // 0 1 1 1 0
+    // 0 1 1 1 0
+    // 0 0 0 0 0
+
+    const ref = this.options.mask?.type === MaskType.outside ? 0 : 255;
+
+    // ref 为 0 / 1 的通过测试 @fixme 会与瓦片模板测试冲突
+    this.renderer.gl.stencilFunc(this.renderer.gl.GEQUAL, ref, 0xff);
+    this.renderer.gl.stencilOp(this.renderer.gl.KEEP, this.renderer.gl.KEEP, this.renderer.gl.KEEP);
+
+    return stencil;
   }
 }

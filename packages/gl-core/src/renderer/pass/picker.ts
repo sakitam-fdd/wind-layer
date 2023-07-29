@@ -143,7 +143,11 @@ export default class PickerPass extends Pass<PickerPassOptions> {
             a,
           );
           resolve(a);
+        } else {
+          resolve(null);
         }
+      } else {
+        resolve(null);
       }
       this.#picker.unbind();
     });

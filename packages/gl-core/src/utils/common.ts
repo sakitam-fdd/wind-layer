@@ -1,4 +1,5 @@
-import { utils } from '@sakitam-gis/vis-engine';
+import earcut from 'earcut';
+import { utils, type Attributes } from '@sakitam-gis/vis-engine';
 import { Bounds } from '../type';
 
 export function calcMinMax(array: number[]): [number, number] {
@@ -229,4 +230,53 @@ export function flattenForPolygons(features) {
   }
 
   return data;
+}
+
+export function polygon2buffer(features: any[]) {
+  const len = features.length;
+  let i = 0;
+  const geometries: Attributes[] = [];
+  for (; i < len; i++) {
+    const feature = features[i];
+
+    const coordinates = feature.geometry.coordinates;
+    const type = feature.geometry.type;
+
+    if (type === 'Polygon') {
+      const polygon = earcut.flatten(feature.geometry.coordinates);
+
+      const positions = new Float32Array(polygon.vertices);
+      const indexData = earcut(polygon.vertices, polygon.holes, polygon.dimensions);
+
+      geometries.push({
+        index: {
+          data: indexData.length < 65536 ? new Uint16Array(indexData) : new Uint32Array(indexData),
+        },
+        position: {
+          data: positions,
+          size: 2,
+        },
+      });
+    } else if (type === 'MultiPolygon') {
+      for (let k = 0; k < coordinates.length; k++) {
+        const coordinate = coordinates[k];
+        const polygon = earcut.flatten(coordinate);
+
+        const positions = new Float32Array(polygon.vertices);
+        const indexData = earcut(polygon.vertices, polygon.holes, polygon.dimensions);
+        geometries.push({
+          index: {
+            data:
+              indexData.length < 65536 ? new Uint16Array(indexData) : new Uint32Array(indexData),
+          },
+          position: {
+            data: positions,
+            size: 2,
+          },
+        });
+      }
+    }
+  }
+
+  return geometries;
 }

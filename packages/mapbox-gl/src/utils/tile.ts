@@ -189,6 +189,7 @@ function intersects(a: NodeItem, b: NodeItem) {
 }
 
 export function expandTiles(tiles: TileID[]) {
+  if (!tiles || tiles.length === 0) return [];
   // 1. 按照从左上角到右下角排序
   // 2. 计算包裹瓦片的包围盒 (经纬度)
   let xmin = Infinity;
@@ -198,14 +199,14 @@ export function expandTiles(tiles: TileID[]) {
   let zmin = Infinity;
   let zmax = -Infinity;
 
-  const cacheMap = new Map();
+  // 层级分组
+  const level = new Map();
   const tree = new RBush(9);
 
   for (let i = 0; i < tiles.length; i++) {
     const tileID = tiles[i];
 
     const { z, wrapedX, wrapedY } = tileID;
-    const wrap = tileID.wrap;
 
     const [left, top, right, bottom] = [wrapedX, wrapedY, wrapedX + 1, wrapedY + 1];
     xmin = Math.min(left, xmin);
@@ -214,103 +215,86 @@ export function expandTiles(tiles: TileID[]) {
     ymax = Math.max(bottom, ymax);
     zmin = Math.min(z, zmin);
     zmax = Math.max(z, zmax);
-
-    // 对跨世界瓦片进行分组
-    const cache = cacheMap.get(wrap);
+    const cache = level.get(z);
     if (!cache) {
-      //
-      cacheMap.set(wrap, [tileID]);
+      level.set(z, [tileID]);
     } else {
-      cacheMap.set(wrap, [...cache, tileID]);
+      level.set(z, [...cache, tileID]);
     }
   }
   /* eslint-disable @typescript-eslint/no-shadow */
-  for (const [, value] of cacheMap) {
-    // 对每个世界进行层级分组
-    const level = new Map();
+  const object = {};
+
+  // 计算每层级的最大最小行列号
+  for (const [lk, lv] of level) {
     let xmin = Infinity;
     let ymin = Infinity;
     let xmax = -Infinity;
     let ymax = -Infinity;
-    for (let i = 0; i < value.length; i++) {
-      const item = value[i];
-      const cache = level.get(item.z);
-      // 计算每个世界的瓦片包围盒
-      if (!cache) {
-        level.set(item.z, [item]);
-      } else {
-        level.set(item.z, [...cache, item]);
-      }
-
-      xmin = Math.min(item.wrapedX, xmin);
-      xmax = Math.max(item.wrapedX + 1, xmax);
-      ymin = Math.min(item.wrapedY - 1, ymin);
-      ymax = Math.max(item.wrapedY, ymax);
-    }
-
-    const object = {};
-
-    // 计算每层级的最大最小行列号
-    for (const [lk, lv] of level) {
-      let xmin = Infinity;
-      let ymin = Infinity;
-      let xmax = -Infinity;
-      let ymax = -Infinity;
-      for (let j = 0; j < lv.length; j++) {
-        const litem = lv[j];
-        const item = {
-          minX: litem.wrapedX,
-          minY: litem.wrapedY - 1,
-          maxX: litem.wrapedX + 1,
-          maxY: litem.wrapedY,
-          tileKey: litem.tileKey,
-        };
-        tree.insert(item as any);
-        xmin = Math.min(item.minX, xmin);
-        xmax = Math.max(item.maxX, xmax);
-        ymin = Math.min(item.minY, ymin);
-        ymax = Math.max(item.maxY, ymax);
-      }
-      object[lk] = {
-        baseTileID: lv.find((t) => t.wrapedX === xmin && t.wrapedY === ymin && t.z === lk),
-        config: [xmin, ymin, xmax, ymax],
+    let wrapMin = Infinity;
+    for (let j = 0; j < lv.length; j++) {
+      const litem = lv[j];
+      const item = {
+        minX: litem.wrapedX,
+        minY: litem.wrapedY,
+        maxX: litem.wrapedX + 1,
+        maxY: litem.wrapedY + 1,
+        tileKey: litem.tileKey,
       };
+      tree.insert(item as any);
+      xmin = Math.min(item.minX, xmin);
+      xmax = Math.max(item.maxX, xmax);
+      ymin = Math.min(item.minY, ymin);
+      ymax = Math.max(item.maxY, ymax);
+      wrapMin = Math.min(litem.wrap, wrapMin);
     }
 
-    /* eslint-enable @typescript-eslint/no-shadow */
-    const keys = Object.keys(object).sort().reverse().map(Number); // 按层级排序
-    // 查找相邻瓦片进行补齐， 补齐的过程中不同层级瓦片不可重叠：优先补齐高层级瓦片
+    let baseTileID = lv.find((t) => t.wrapedX === xmin && t.wrapedY === ymin && t.z === lk);
+    // 此处需要注意：baseTileID 有可能不存在，需要我们主动创建
+    if (!baseTileID) {
+      const max = Math.pow(2, lk);
+      baseTileID = new TileID(lk, wrapMin, lk, xmin - max * wrapMin, ymin, lv[0].options);
+    }
 
-    const addTiles: TileID[] = [];
-    for (let k = 0; k < keys.length; k++) {
-      // @fixme: 有可能在某个世界下 x 方向或者 y 方向都缺失，需要全世界计算最大最小参考
-      const { config, baseTileID } = object[keys[k]];
+    object[lk] = {
+      baseTileID,
+      config: [xmin, ymin, xmax, ymax],
+    };
+  }
 
-      const xd = config[2] - config[0] + 1;
-      const yd = config[3] - config[1] + 1;
+  /* eslint-enable @typescript-eslint/no-shadow */
+  const keys = Object.keys(object).sort().reverse().map(Number); // 按层级排序
+  // 查找相邻瓦片进行补齐， 补齐的过程中不同层级瓦片不可重叠：优先补齐高层级瓦片
 
-      for (let x = 0; x < xd; x++) {
-        for (let y = 0; y < yd; y++) {
-          const tile = (baseTileID as TileID).neighbor(x, y);
-          if (!tiles.find((t) => t.tileKey === tile.tileKey)) {
-            const result = tree.collides(
-              {
-                minX: tile.wrapedX,
-                minY: tile.wrapedY - 1,
-                maxX: tile.wrapedX + 1,
-                maxY: tile.wrapedY,
-              },
-              { intersects },
-            );
+  const addTiles: TileID[] = [];
+  for (let k = 0; k < keys.length; k++) {
+    // @fixme: 有可能在某个世界下 x 方向或者 y 方向都缺失，需要全世界计算最大最小参考
+    const { config, baseTileID } = object[keys[k]];
 
-            if (!result) {
-              addTiles.push(tile);
-            }
-            console.log(tile, result);
+    const xd = config[2] - config[0];
+    const yd = config[3] - config[1];
+
+    for (let x = 0; x < xd; x++) {
+      for (let y = 0; y < yd; y++) {
+        const tile = (baseTileID as TileID).neighbor(x, y);
+        if (!tiles.find((t) => t.tileKey === tile.tileKey)) {
+          const result = tree.collides(
+            {
+              minX: tile.wrapedX,
+              minY: tile.wrapedY,
+              maxX: tile.wrapedX + 1,
+              maxY: tile.wrapedY + 1,
+            },
+            { intersects },
+          );
+
+          if (!result) {
+            addTiles.push(tile);
           }
         }
       }
     }
-    console.log(object, addTiles);
   }
+
+  return addTiles;
 }

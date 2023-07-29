@@ -70,7 +70,11 @@
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
   "dependencies": {
     "@sakitam-gis/vis-engine": "^1.5.1",
+    "earcut": "^2.2.4",
     "wind-gl-worker": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/earcut": "^2.1.4"
   },
   "publishConfig": {
     "access": "public"

@@ -6,12 +6,14 @@ import * as shaderLib from '../../../shaders/shaderLib';
 import { RenderFrom, BandType } from '../../../type';
 import TileID from '../../../tile/TileID';
 import { SourceType } from '../../../source';
+import MaskPass from '../mask';
 
 export interface ComposePassOptions {
   source: SourceType;
   bandType: BandType;
   renderFrom: RenderFrom;
   stencilConfigForOverlap: (tiles: any[]) => [{ [_: number]: any }, TileID[]];
+  maskPass?: MaskPass;
 }
 
 /**
@@ -100,6 +102,12 @@ export default class ComposePass extends Pass<ComposePassOptions> {
 
       if (!coordsDescending.length) return;
 
+      let stencil;
+
+      if (this.options.maskPass) {
+        stencil = this.options.maskPass.render(rendererParams);
+      }
+
       const [stencilModes, coords] = stencilConfigForOverlap(coordsDescending);
 
       for (let i = 0; i < coords.length; i++) {
@@ -123,14 +131,17 @@ export default class ComposePass extends Pass<ComposePassOptions> {
 
         if (stencilMode) {
           if (stencilMode.stencil) {
-            this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
+            const s = this.renderer.gl.getParameter(this.renderer.gl.STENCIL_TEST);
+            if (!s) {
+              this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
+            }
 
-            this.renderer.state.setStencilFunc(
+            this.renderer.gl.stencilFunc(
               stencilMode.func?.cmp,
               stencilMode.func?.ref,
               stencilMode.func?.mask,
             );
-            this.renderer.state.setStencilOp(
+            this.renderer.gl.stencilOp(
               stencilMode.op?.fail,
               stencilMode.op?.zfail,
               stencilMode.op?.zpass,
@@ -144,6 +155,12 @@ export default class ComposePass extends Pass<ComposePassOptions> {
           ...utils.omit(rendererParams, ['target']),
           camera,
         });
+      }
+
+      this.renderer.clear(false, false, true);
+
+      if (!stencil) {
+        this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
       }
     }
 

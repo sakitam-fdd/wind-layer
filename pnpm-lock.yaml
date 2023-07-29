@@ -199,9 +199,16 @@ importers:
       '@sakitam-gis/vis-engine':
         specifier: ^1.5.1
         version: 1.5.1
+      earcut:
+        specifier: ^2.2.4
+        version: 2.2.4
       wind-gl-worker:
         specifier: workspace:*
         version: link:../worker-fetch
+    devDependencies:
+      '@types/earcut':
+        specifier: ^2.1.4
+        version: 2.1.4
 
   packages/leaflet:
     dependencies:
@@ -2471,6 +2478,10 @@ packages:
 
   /@types/chai@4.3.3:
     resolution: {integrity: sha512-hC7OMnszpxhZPduX+m+nrx+uFoLkWOMiR4oa/AZF3MuSETYTZmFfJAHqZEM8MVlvfG7BEUcgvtwoCTxBp6hm3g==}
+    dev: true
+
+  /@types/earcut@2.1.4:
+    resolution: {integrity: sha512-qp3m9PPz4gULB9MhjGID7wpo3gJ4bTGXm7ltNDsmOvsPduTeHp8wSW9YckBj3mljeOh4F0m2z/0JKAALRKbmLQ==}
     dev: true
 
   /@types/estree@0.0.39:

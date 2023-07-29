@@ -54,7 +54,7 @@
     antialias: true,
   });
 
-  map.on('load', function () {
+  map.on('load', async function () {
     const source = new mapboxWind.TileSource('temp', {
       type: 'tile',
       tileSize: 256,
@@ -71,12 +71,14 @@
     map.on('click', () => {
       if (flag === 0) {
         flag = 1;
-        source.setUrl('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', false);
+        source.update({ url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png' }, false);
       } else {
         flag = 0;
-        source.setUrl('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', false);
+        source.update({ url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png' }, false);
       }
     });
+
+    const clip = await fetch('./data/china.geojson').then(res => res.json());
 
     const layer = new mapboxWind.Layer('temp', source, {
       wireframe: true,
@@ -102,6 +104,11 @@
       },
       renderType: 0,
       picking: true,
+      mask: {
+        data: clip,
+        // type: mapboxWind.MaskType.outside,
+        type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+      }
     });
 
     map.addLayer(layer);

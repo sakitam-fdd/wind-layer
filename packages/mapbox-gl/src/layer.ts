@@ -1,14 +1,14 @@
 import * as mapboxgl from 'mapbox-gl';
 import rewind from '@mapbox/geojson-rewind';
-import {OrthographicCamera, Renderer, Scene, utils} from '@sakitam-gis/vis-engine';
+import { OrthographicCamera, Renderer, Scene, utils } from '@sakitam-gis/vis-engine';
 
-import type {BaseLayerOptions, SourceType} from 'wind-gl-core';
-import {BaseLayer, LayerSourceType, RenderType, TileID} from 'wind-gl-core';
+import type { BaseLayerOptions, SourceType } from 'wind-gl-core';
+import { BaseLayer, LayerSourceType, RenderType, TileID, polygon2buffer } from 'wind-gl-core';
 
 import CameraSync from './utils/CameraSync';
-import {getCoordinatesCenterTileID} from './utils/mercatorCoordinate';
+import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
 
-import {expandTiles, getTileBounds, getTileProjBounds} from './utils/tile';
+import { expandTiles, getTileBounds, getTileProjBounds } from './utils/tile';
 
 export interface LayerOptions extends BaseLayerOptions {
   renderingMode: '2d' | '3d';
@@ -109,8 +109,61 @@ export default class Layer {
       // @link https://github.com/mapbox/geojson-rewind
       rewind(data, true);
 
+      const tr = (coords) => {
+        const mercatorCoordinates: any[] = [];
+        for (let i = 0; i < coords.length; i++) {
+          const coord = coords[i];
+          const p = mapboxgl.MercatorCoordinate.fromLngLat(coord);
+          mercatorCoordinates.push([p.x, p.y]);
+        }
+
+        return mercatorCoordinates;
+      };
+
+      const features = data.features;
+      const len = features.length;
+      let i = 0;
+      const fs: any[] = [];
+      for (; i < len; i++) {
+        const feature = features[i];
+
+        const coordinates = feature.geometry.coordinates;
+        const type = feature.geometry.type;
+
+        if (type === 'Polygon') {
+          fs.push({
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'Polygon',
+              coordinates: feature.geometry.coordinates.map((c) => tr(c)),
+            },
+          });
+        } else if (type === 'MultiPolygon') {
+          const css: any[] = [];
+          for (let k = 0; k < coordinates.length; k++) {
+            const coordinate = coordinates[k];
+            const cs: any[] = [];
+            for (let n = 0; n < coordinate.length; n++) {
+              cs.push(tr(coordinates[k][n]));
+            }
+
+            css.push(cs);
+          }
+
+          fs.push({
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'MultiPolygon',
+              coordinates: css,
+            },
+          });
+        }
+      }
+
       return {
-        data,
+        data: polygon2buffer(fs),
         type: mask.type,
       };
     }
@@ -157,7 +210,7 @@ export default class Layer {
         heightSegments: this.options.heightSegments,
         wireframe: this.options.wireframe,
         picking: this.options.picking,
-        mask: {} as any,
+        mask: this.processMask(),
         getZoom: () => this.map?.getZoom() as number,
         triggerRepaint: () => {
           this.map?.triggerRepaint();
@@ -254,8 +307,9 @@ export default class Layer {
               }
             }
 
+            // 针对粒子图层，需要补齐所需瓦片，避免采样出现问题
             if (renderType === RenderType.particles) {
-              expandTiles(wrapTiles);
+              wrapTiles.push(...expandTiles(wrapTiles));
             }
           }
 

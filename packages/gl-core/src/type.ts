@@ -214,10 +214,10 @@ export type ParseOptionsType = {
 
 /**
  * 图层掩膜类型
+ * 0. 不包含：区域外显示
  * 1. 包含：区域内显示
- * 2. 不包含：区域外显示
  */
 export enum MaskType {
-  exclude,
-  include,
+  outside,
+  inside,
 }
