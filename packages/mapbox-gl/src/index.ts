@@ -1,4 +1,5 @@
 import {
+  configDeps,
   TileID,
   ImageSource,
   TileSource,
@@ -10,6 +11,7 @@ import {
 } from 'wind-gl-core';
 export { default as Layer } from './layer';
 export {
+  configDeps,
   TileID,
   ImageSource,
   TileSource,

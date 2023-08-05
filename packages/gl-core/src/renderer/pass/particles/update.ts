@@ -23,7 +23,6 @@ export interface UpdatePassOptions {
   textureNext: Texture;
   bandType: BandType;
   getParticleNumber: () => number;
-  hasMask?: boolean;
 }
 
 export default class UpdatePass extends Pass<UpdatePassOptions> {

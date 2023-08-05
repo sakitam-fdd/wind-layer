@@ -97,7 +97,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
     };
   }
 
-  renderTexture(renderTarget, rendererParams, sourceCache) {
+  renderTexture(renderTarget, rendererParams, rendererState, sourceCache) {
     if (renderTarget) {
       renderTarget.clear();
       renderTarget.bind();
@@ -120,7 +120,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
       let stencil;
 
       if (this.options.maskPass) {
-        stencil = this.options.maskPass.render(rendererParams);
+        stencil = this.options.maskPass.render(rendererParams, rendererState);
       }
 
       const [stencilModes, coords] = stencilConfigForOverlap(coordsDescending);
@@ -155,25 +155,25 @@ export default class ComposePass extends Pass<ComposePassOptions> {
         const stencilMode = stencilModes[coord.overscaledZ];
 
         if (stencilMode) {
-          if (stencilMode.stencil) {
-            const s = this.renderer.gl.getParameter(this.renderer.gl.STENCIL_TEST);
-            if (!s) {
-              this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
-            }
-
-            this.renderer.gl.stencilFunc(
-              stencilMode.func?.cmp,
-              stencilMode.func?.ref,
-              stencilMode.func?.mask,
-            );
-            this.renderer.gl.stencilOp(
-              stencilMode.op?.fail,
-              stencilMode.op?.zfail,
-              stencilMode.op?.zpass,
-            );
-          } else {
-            // this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
-          }
+          // if (stencilMode.stencil) {
+          //   const s = this.renderer.gl.getParameter(this.renderer.gl.STENCIL_TEST);
+          //   if (!s) {
+          //     this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
+          //   }
+          //
+          //   this.renderer.gl.stencilFunc(
+          //     stencilMode.func?.cmp,
+          //     stencilMode.func?.ref,
+          //     stencilMode.func?.mask,
+          //   );
+          //   this.renderer.gl.stencilOp(
+          //     stencilMode.op?.fail,
+          //     stencilMode.op?.zfail,
+          //     stencilMode.op?.zpass,
+          //   );
+          // } else {
+          //   this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
+          // }
         }
 
         mesh.draw({
@@ -204,15 +204,15 @@ export default class ComposePass extends Pass<ComposePassOptions> {
     const sourceCache = source.sourceCache;
     if (Array.isArray(sourceCache)) {
       if (sourceCache.length === 2) {
-        this.renderTexture(this.#current, rendererParams, sourceCache[0]);
-        this.renderTexture(this.#next, rendererParams, sourceCache[1]);
+        this.renderTexture(this.#current, rendererParams, rendererState, sourceCache[0]);
+        this.renderTexture(this.#next, rendererParams, rendererState, sourceCache[1]);
       } else {
-        this.renderTexture(this.#current, rendererParams, sourceCache[0]);
-        this.renderTexture(this.#next, rendererParams, sourceCache[0]);
+        this.renderTexture(this.#current, rendererParams, rendererState, sourceCache[0]);
+        this.renderTexture(this.#next, rendererParams, rendererState, sourceCache[0]);
       }
     } else {
-      this.renderTexture(this.#current, rendererParams, sourceCache);
-      this.renderTexture(this.#next, rendererParams, sourceCache);
+      this.renderTexture(this.#current, rendererParams, rendererState, sourceCache);
+      this.renderTexture(this.#next, rendererParams, rendererState, sourceCache);
     }
   }
 

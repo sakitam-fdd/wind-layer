@@ -68,17 +68,19 @@ export default class MaskPass extends Pass<MaskPassOptions> {
 
   /**
    * @param rendererParams
+   * @param rendererState
    */
-  render(rendererParams) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  render(rendererParams, rendererState) {
     const attr = this.renderer.attributes;
     this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
-    const { worlds = [0] } = rendererParams;
+    const { worlds = [0] } = rendererParams.cameras;
     const stencil = this.renderer.gl.getParameter(this.renderer.gl.STENCIL_TEST);
     if (!stencil) {
       this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
     }
 
-    this.renderer.gl.stencilFunc(this.renderer.gl.ALWAYS, 255, 0xff);
+    this.renderer.gl.stencilFunc(this.renderer.gl.ALWAYS, 1, 0xff);
     this.renderer.gl.stencilOp(
       this.renderer.gl.REPLACE,
       this.renderer.gl.REPLACE,
@@ -115,10 +117,10 @@ export default class MaskPass extends Pass<MaskPassOptions> {
     // 0 1 1 1 0
     // 0 0 0 0 0
 
-    const ref = this.options.mask?.type === MaskType.outside ? 0 : 255;
+    const ref = this.options.mask?.type === MaskType.outside ? 0 : 1;
 
     // ref 为 0 / 1 的通过测试 @fixme 会与瓦片模板测试冲突
-    this.renderer.gl.stencilFunc(this.renderer.gl.GEQUAL, ref, 0xff);
+    this.renderer.gl.stencilFunc(this.renderer.gl.EQUAL, ref, 0xff);
     this.renderer.gl.stencilOp(this.renderer.gl.KEEP, this.renderer.gl.KEEP, this.renderer.gl.KEEP);
 
     return stencil;

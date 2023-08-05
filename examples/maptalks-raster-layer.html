@@ -27,7 +27,7 @@
 <script>
   const map = new maptalks.Map('map', {
     center: [113.53450137499999, 34.44104525],
-    zoom: 1,
+    zoom: 0,
     // baseLayer: new maptalks.TileLayer('base', {
     //   urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
     //   // urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
@@ -38,8 +38,7 @@
 
   window.map = map;
 
-  const source = new mtkWind.TimelineSource('temp', {
-    sourceType: mtkWind.LayerSourceType.tile,
+  const source = new mtkWind.TileSource('carto', {
     tileSize: 256,
     minZoom: 0,
     maxZoom: 22,
@@ -51,52 +50,14 @@
     //   [180, -85.051129],
     //   [-180, -85.051129],
     // ],
-    duration: 0.3,
-    endDelay: 0.2,
-    repeat: true,
-    autoplay: true,
-    intervals: [
-      {
-        url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-      },
-      // {
-      //   url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-      // },
-      // {
-      //   url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-      // },
-      // {
-      //   url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-      // },
-    ],
-    // intervals: [
-    //   {
-    //     url: './data/num/1.png',
-    //   },
-    //   {
-    //     url: './data/num/2.png',
-    //   },
-    //   {
-    //     url: './data/num/3.png',
-    //   },
-    //   {
-    //     url: './data/num/4.png',
-    //   },
-    //   {
-    //     url: './data/num/5.png',
-    //   },
-    //   // 补齐一帧优化 loop 播放效果
-    //   {
-    //     url: './data/num/1.png',
-    //   },
-    // ],
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
     wrapX: true,
   });
 
   window.source = source;
 
-  const layer = new mtkWind.Layer('temp', source, {
-    wireframe: true,
+  const layer = new mtkWind.Layer('carto', source, {
+    wireframe: false,
     widthSegments: 1,
     heightSegments: 1,
     styleSpec: {

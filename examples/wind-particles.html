@@ -234,13 +234,12 @@
       widthSegments: 1,
       heightSegments: 1,
       displayRange: [0, 104],
-      hasMask: false,
       renderType: 1,
       picking: true,
       mask: {
         data: clip,
-        type: mapboxWind.MaskType.outside,
-        // type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+        // type: mapboxWind.MaskType.outside,
+        type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
       }
     });
 
@@ -293,8 +292,12 @@
       widthSegments: 1,
       heightSegments: 1,
       displayRange: [0, 104],
-      hasMask: false,
       renderType: 2,
+      mask: {
+        data: clip,
+        // type: mapboxWind.MaskType.outside,
+        type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+      }
     });
 
     map.on('click', e => {
@@ -303,8 +306,8 @@
       })
     })
 
-    map.addLayer(fill);
-    // map.addLayer(wind);
+    // map.addLayer(fill);
+    map.addLayer(wind);
 
     const gui = new dat.GUI();
 

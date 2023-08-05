@@ -1,16 +1,16 @@
 import * as maptalks from 'maptalks';
 import {
-  Scene,
-  Vector3,
+  highPrecision,
+  OrthographicCamera,
+  PerspectiveCamera,
   Renderer,
   RenderTarget,
-  PerspectiveCamera,
-  OrthographicCamera,
+  Scene,
   utils,
-  highPrecision,
+  Vector3,
 } from '@sakitam-gis/vis-engine';
 
-import { ImageSource, Layer as LayerCore, SourceType, TileID } from 'wind-gl-core';
+import { BaseLayer, ImageSource, LayerSourceType, SourceType, TileID } from 'wind-gl-core';
 
 highPrecision(true);
 
@@ -305,7 +305,7 @@ class Layer extends maptalks.TileLayer {
   type: string;
   _needsUpdate = true;
   _coordCache = {};
-  public layer: WithNull<LayerCore>;
+  public layer: WithNull<BaseLayer>;
   private source: SourceType;
 
   constructor(id: string, source: SourceType, opts: BaseLayerOptionType) {
@@ -313,7 +313,7 @@ class Layer extends maptalks.TileLayer {
       ...opts,
       urlTemplate: 'custom',
       tileSize: source.tileSize,
-      repeatWorld: false,
+      repeatWorld: source.wrapX ? 'x' : false,
     });
     this.source = source;
     this.type = 'VeLayer';
@@ -369,7 +369,7 @@ class Layer extends maptalks.TileLayer {
     if (!map || !renderer) {
       return false;
     }
-    this.layer = new LayerCore(
+    this.layer = new BaseLayer(
       this.source,
       {
         renderer: renderer.context,
@@ -391,10 +391,10 @@ class Layer extends maptalks.TileLayer {
         getViewTiles: (source: SourceType) => {
           let { type } = source;
           // @ts-ignore
-          type = type !== 'timeline' ? type : source.privateType;
+          type = type !== LayerSourceType.timeline ? type : source.privateType;
           const wrapTiles: TileID[] = [];
-          if (type === 'image') {
-            const res = getGLRes(map);
+          const r = getGLRes(map);
+          if (type === LayerSourceType.image) {
             const { coordinates } = source as ImageSource;
             const [min, max] = [
               [coordinates[0][0], coordinates[2][1]],
@@ -402,16 +402,17 @@ class Layer extends maptalks.TileLayer {
             ];
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             // @ts-ignore
-            const p1 = coordinateToPoint(map, new maptalks.Coordinate([min[0], max[1]]), res); // 左上
+            const p1 = coordinateToPoint(map, new maptalks.Coordinate([min[0], max[1]]), r); // 左上
             // @ts-ignore
-            const p2 = coordinateToPoint(map, new maptalks.Coordinate([max[0], min[1]]), res); // 右下
+            const p2 = coordinateToPoint(map, new maptalks.Coordinate([max[0], min[1]]), r); // 右下
             const x = 0;
             const y = 0;
             const z = 0;
             const wrap = 0;
             wrapTiles.push(
-              new TileID(z, x, y, z, wrap, {
-                getTileBounds: () => ({
+              new TileID(z, wrap, z, x, y, {
+                getTileBounds: () => [0, 0, 0, 0],
+                getTileProjBounds: () => ({
                   left: p1.x + wrap,
                   top: p1.y,
                   right: p2.x + wrap,
@@ -420,19 +421,45 @@ class Layer extends maptalks.TileLayer {
                 }),
               }),
             );
-          } else {
+          } else if (type === LayerSourceType.tile) {
             const { tileGrids } = this.getTiles();
             const { tiles } = tileGrids[0];
             for (let i = 0; i < tiles.length; i++) {
               const tile = tiles[i];
 
-              // const res = map._getResolution(tile.z);
-              // const tileConfig = this._getTileConfig();
-              // const tileExtent = tileConfig.getTilePrjExtent(tile.x, tile.y, res);
+              const res = map._getResolution(tile.z);
+              const tileConfig = this._getTileConfig();
+              const tileExtent = tileConfig.getTilePrjExtent(tile.x, tile.y, res);
+
+              let max = tileExtent.getMax();
+              let min = tileExtent.getMin();
+              const projection = map.getProjection();
+              min = projection.unproject(min);
+              max = projection.unproject(max);
 
               wrapTiles.push(
-                new TileID(tile.z, tile.x, tile.y, tile.z, 0, {
-                  getTileBounds: getTileBounds.bind(this, map),
+                new TileID(tile.z, 0, tile.z, tile.x, tile.y, {
+                  getTileBounds: () => [min.x, min.y, max.x, max.y],
+                  getTileProjBounds: () => {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    // @ts-ignore
+                    const p1 = map._prjToPointAtRes(
+                      new maptalks.Coordinate([tileExtent.xmin, tileExtent.ymax]),
+                      r,
+                    ); // 左上
+                    // @ts-ignore
+                    const p2 = map._prjToPointAtRes(
+                      new maptalks.Coordinate([tileExtent.xmax, tileExtent.ymin]),
+                      r,
+                    ); // 右下
+
+                    return {
+                      left: p1.x,
+                      top: p1.y,
+                      right: p2.x,
+                      bottom: p2.y,
+                    };
+                  },
                 }),
               );
             }

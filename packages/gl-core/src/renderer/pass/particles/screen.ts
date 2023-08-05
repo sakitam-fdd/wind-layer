@@ -14,7 +14,6 @@ export interface ScreenPassOptions {
   prerender: boolean;
   enableBlend: boolean;
   particlesPass?: ParticlesPass;
-  hasMask?: boolean;
 }
 
 export default class ScreenPass extends Pass<ScreenPassOptions> {

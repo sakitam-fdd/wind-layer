@@ -15,6 +15,7 @@ import frag from '../../../shaders/particles/draw.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
 import { BandType } from '../../../type';
 import { SourceType } from '../../../source';
+import MaskPass from '../mask';
 
 export interface ParticlesPassOptions {
   source: SourceType;
@@ -26,7 +27,7 @@ export interface ParticlesPassOptions {
   };
   bandType: BandType;
   getParticleNumber: () => number;
-  hasMask?: boolean;
+  maskPass?: MaskPass;
 }
 
 /**
@@ -166,7 +167,7 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       magFilter: this.renderer.gl.LINEAR,
       type: this.renderer.gl.UNSIGNED_BYTE,
       format: this.renderer.gl.RGBA,
-      stencil: false,
+      stencil: true,
       premultipliedAlpha: false,
     };
 
@@ -200,6 +201,13 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
     }
     const { camera } = rendererParams.cameras;
+
+    let stencil;
+
+    if (this.options.maskPass) {
+      stencil = this.options.maskPass.render(rendererParams, rendererState);
+    }
+
     if (rendererState && this.#mesh) {
       this.#mesh.program.setUniform(
         'u_image_res',
@@ -229,6 +237,10 @@ export default class Particles extends Pass<ParticlesPassOptions> {
         ...rendererParams,
         camera,
       });
+    }
+
+    if (!stencil) {
+      this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
     }
 
     if (this.renderTarget) {

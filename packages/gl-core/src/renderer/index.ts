@@ -287,6 +287,7 @@ export default class BaseLayer {
         textureNext: composePass.textures.next,
         getParticles: () => updatePass.textures,
         getParticleNumber: () => this.#numParticles,
+        maskPass: this.#maskPass,
       });
 
       const particlesTexturePass = new ScreenPass('ParticlesTexturePass', this.renderer, {
