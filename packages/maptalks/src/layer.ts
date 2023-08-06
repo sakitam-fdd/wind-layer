@@ -18,6 +18,10 @@ function getGLRes(map) {
   return map.getGLRes ? map.getGLRes() : map.getGLZoom();
 }
 
+function inRange(value: number, start: number, end: number) {
+  return value >= start && value < end;
+}
+
 function coordinateToPoint(map, coordinate, res, out?: any) {
   if (map.coordToPointAtRes) {
     return map.coordToPointAtRes(coordinate, res, out);
@@ -27,67 +31,7 @@ function coordinateToPoint(map, coordinate, res, out?: any) {
 
 const TEMP_COORD = new maptalks.Coordinate(0, 0);
 const TEMP_POINT = new maptalks.Point(0, 0);
-
-function getCoords(x, y, z) {
-  const zz = Math.pow(2, z);
-
-  const lng = (x / zz) * 360 - 180;
-  // const lng = x / zz;
-  let lat = (y / zz) * 360 - 180;
-  lat = (180 / Math.PI) * (2 * Math.atan(Math.exp((lat * Math.PI) / 180)) - Math.PI / 2);
-
-  return [lng, lat];
-}
-
-function getTileBounds(map, x, y, z, wrap = 0) {
-  // for Google/OSM tile scheme we need to alter the y
-  // eslint-disable-next-line no-param-reassign
-  y = 2 ** z - y - 1;
-
-  const min = getCoords(x, y, z);
-  const max = getCoords(x + 1, y + 1, z);
-
-  const res = getGLRes(map);
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // @ts-ignore
-  const p1 = coordinateToPoint(map, new maptalks.Coordinate([min[0], max[1]]), res); // 左上
-  // @ts-ignore
-  const p2 = coordinateToPoint(map, new maptalks.Coordinate([max[0], min[1]]), res); // 右下
-
-  // const projObject = map.getProjection().fullExtent;
-  // const projectionExtent = [
-  //   projObject.left,
-  //   projObject.bottom,
-  //   projObject.right,
-  //   projObject.top,
-  // ] as Extent;
-  //
-  // const projWorldWidth = Math.abs(
-  //   coordinateToPoint(
-  //     map,
-  //     map
-  //       .getProjection()
-  //       .unprojectCoords(new maptalks.Coordinate([projectionExtent[0], projectionExtent[1]])),
-  //     getGLRes(map),
-  //   ).x -
-  //     coordinateToPoint(
-  //       map,
-  //       map
-  //         .getProjection()
-  //         .unprojectCoords(new maptalks.Coordinate([projectionExtent[2], projectionExtent[3]])),
-  //       getGLRes(map),
-  //     ).x,
-  // );
-
-  return {
-    left: p1.x + wrap,
-    top: p1.y,
-    right: p2.x + wrap,
-    bottom: p2.y,
-    lngLatBounds: [min[0], min[1], max[0], max[1]],
-  };
-}
+const TILE_POINT = new maptalks.Point(0, 0);
 
 // from https://github.com/maptalks/maptalks.three/blob/master/src/index.ts
 class VeRenderer extends maptalks.renderer.CanvasLayerRenderer {
@@ -362,6 +306,56 @@ class Layer extends maptalks.TileLayer {
     }
   }
 
+  calcWitchWorld(center) {
+    const map = this.getMap();
+    const projObject = map.getProjection().fullExtent;
+    const projectionExtent = [projObject.left, projObject.bottom, projObject.right, projObject.top];
+    const projExtent = map.getProjExtent();
+    const extent = [projExtent.xmin, projExtent.ymin, projExtent.xmax, projExtent.ymax];
+    const worldWidth = projectionExtent[2] - projectionExtent[0];
+    const res = getGLRes(map);
+    const p1 = map._prjToPointAtRes(
+      new maptalks.Coordinate([projectionExtent[0], projectionExtent[3]]),
+      res,
+    );
+
+    const p2 = map._prjToPointAtRes(
+      new maptalks.Coordinate([projectionExtent[2], projectionExtent[1]]),
+      res,
+    );
+    const projWorldWidth = Math.abs(p1.x - p2.x);
+
+    let startX = extent[0];
+    let world = 0;
+    const result: { world: number; offset: number }[] = [{ world: 0, offset: 0 }];
+    while (startX < projectionExtent[0]) {
+      --world;
+      result.push({
+        world,
+        offset: world * projWorldWidth,
+      });
+      startX += worldWidth;
+    }
+    world = 0;
+    startX = extent[2];
+    while (startX > projectionExtent[2]) {
+      ++world;
+      result.push({
+        world,
+        offset: world * projWorldWidth,
+      });
+      startX -= worldWidth;
+    }
+
+    const r = result.sort((a, b) => a.world - b.world);
+
+    for (let i = 0; i < r.length - 1; i++) {
+      if (inRange(center[0], r[i].offset, r[i + 1].offset)) {
+        return r[i].world;
+      }
+    }
+  }
+
   prepareToDraw(gl, scene) {
     const opt = this.options;
     const map = this.getMap();
@@ -437,29 +431,31 @@ class Layer extends maptalks.TileLayer {
               min = projection.unproject(min);
               max = projection.unproject(max);
 
-              wrapTiles.push(
-                new TileID(tile.z, 0, tile.z, tile.x, tile.y, {
-                  getTileBounds: () => [min.x, min.y, max.x, max.y],
-                  getTileProjBounds: () => {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    // @ts-ignore
-                    const p1 = map._prjToPointAtRes(
-                      new maptalks.Coordinate([tileExtent.xmin, tileExtent.ymax]),
-                      r,
-                    ); // 左上
-                    // @ts-ignore
-                    const p2 = map._prjToPointAtRes(
-                      new maptalks.Coordinate([tileExtent.xmax, tileExtent.ymin]),
-                      r,
-                    ); // 右下
+              const { extent2d, offset } = tile;
 
-                    return {
-                      left: p1.x,
-                      top: p1.y,
-                      right: p2.x,
-                      bottom: p2.y,
-                    };
-                  },
+              const scale = tile._glScale = tile._glScale || tile.res / map.getGLRes();
+
+              const point1 = TILE_POINT.set(extent2d.xmin - offset[0], extent2d.ymax - offset[1]);
+              const x1 = point1.x * scale;
+              const y1 = point1.y * scale;
+
+              const point2 = TILE_POINT.set(extent2d.xmax - offset[0], extent2d.ymin - offset[1]);
+              const x2 = point2.x * scale;
+              const y2 = point2.y * scale;
+
+              const wrap = this.calcWitchWorld([(x2 - x1) / 2, (y2 - y1) / 2]);
+
+              console.log(wrap)
+
+              wrapTiles.push(
+                new TileID(tile.z, wrap, tile.z, tile.x, tile.y, {
+                  getTileBounds: () => [min.x, min.y, max.x, max.y],
+                  getTileProjBounds: () => ({
+                    left: x1,
+                    top: y1,
+                    right: x2,
+                    bottom: y2,
+                  }),
                 }),
               );
             }
