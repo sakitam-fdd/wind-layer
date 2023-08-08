@@ -101,7 +101,7 @@
       endDelay: 0,
       repeat: true,
       autoplay: true,
-      decodeType: 3,
+      decodeType: mapboxWind.DecodeType.imageWithExif,
       intervals: [
         '03',
         '06',
@@ -138,11 +138,11 @@
           1
         ],
       },
-      renderFrom: 'rg',
+      renderFrom: mapboxWind.RenderFrom.rg,
       widthSegments: 1,
       heightSegments: 1,
       displayRange: [0, 104],
-      renderType: 1,
+      renderType: mapboxWind.RenderType.colorize,
       picking: true,
     });
     const layer1 = new mapboxWind.Layer('wind1', source, {
@@ -164,11 +164,11 @@
           1
         ],
       },
-      renderFrom: 'rg',
+      renderFrom: mapboxWind.RenderFrom.rg,
       widthSegments: 1,
       heightSegments: 1,
       displayRange: [0, 104],
-      renderType: 1,
+      renderType: mapboxWind.RenderType.colorize,
       picking: true,
     });
 

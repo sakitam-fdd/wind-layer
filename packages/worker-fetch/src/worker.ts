@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-import { isWorker } from './util';
+import { asyncAll, isWorker } from './util';
 import Actor from './Actor';
 import getRequest, { RequestAdapter } from './Request';
 
@@ -24,6 +24,45 @@ export default class Worker {
     this.referrer = referrer;
   }
 
+  configDeps(dispatcherId: string, deps: string[], callback: any) {
+    if (deps && Array.isArray(deps) && deps.length > 0) {
+      try {
+        self.importScripts(...deps);
+        callback(null, true);
+      } catch (e) {
+        asyncAll(
+          deps,
+          (d, done) => {
+            this.request.fetch(
+              {
+                url: d,
+                type: 'arrayBuffer',
+              },
+              (err, data) => {
+                if (err) {
+                  done(err, false);
+                  return console.error(err);
+                }
+                const url = URL.createObjectURL(
+                  new Blob([data], { type: 'application/javascript' }),
+                );
+                self.importScripts(url);
+                // Mobile Safari
+                setTimeout(() => {
+                  URL.revokeObjectURL(url);
+                });
+                done(null, true);
+              },
+            );
+          },
+          callback,
+        );
+      }
+    } else {
+      callback(null, true);
+    }
+  }
+
   loadData(dispatcherId: string, params: any, callback: any) {
     const cancelId = params?.cancelId;
     const { cancel } = this.request.fetch(params, (err, data) => {
@@ -34,7 +73,9 @@ export default class Worker {
         if (params?.decodeType === 0) {
           this.request.arrayBuffer2Image(data, callback);
         } else if (params?.decodeType === 1) {
-          this.request.arrayBuffer2float(data, callback);
+          this.request.arrayBuffer2unit8(data, callback);
+        } else if (params?.decodeType === 2) {
+          this.request.arrayBuffer2tiff(data, callback);
         } else if (params?.decodeType === 3) {
           this.request.parseExif(data, callback);
         }

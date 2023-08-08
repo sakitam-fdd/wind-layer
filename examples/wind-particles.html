@@ -161,12 +161,11 @@
     });
 
     const imageSource = new mapboxWind.ImageSource('wind1', {
-      type: 'image',
       // tileSize: 256,
       // minZoom: 0,
       // maxZoom: 0,
       // roundZoom: false,
-      decodeType: 3,
+      decodeType: mapboxWind.decodeType.imageWithExif,
       wrapX: true,
       // coordinates: [
       //   [-180, 85.051129],
@@ -205,12 +204,11 @@
     });
 
     const tileSource = new mapboxWind.TileSource('wind', {
-      type: 'tile',
       tileSize: 256,
       minZoom: 0,
       maxZoom: 4,
       roundZoom: true,
-      decodeType: 3,
+      decodeType: mapboxWind.decodeType.imageWithExif,
       wrapX: true,
       // tileBounds: [-78.120282611, -75.191804486, 132.453327310, 68.846393966],
       url: 'http://localhost:5000/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
@@ -230,11 +228,11 @@
         ],
         'opacity': 1,
       },
-      renderFrom: 'rg',
+      renderFrom: mapboxWind.RenderFrom.rg,
       widthSegments: 1,
       heightSegments: 1,
       displayRange: [0, 104],
-      renderType: 1,
+      renderType: mapboxWind.RenderType.colorize,
       picking: true,
       mask: {
         data: clip,
@@ -259,7 +257,7 @@
     }
 
     const wind = new mapboxWind.Layer('wind', tileSource, {
-      wireframe: true,
+      wireframe: false,
       styleSpec: {
         'fill-color': [
           'interpolate',
@@ -288,11 +286,11 @@
         ],
         ...particlesConfig,
       },
-      renderFrom: 'rg',
+      renderFrom: mapboxWind.RenderFrom.rg,
       widthSegments: 1,
       heightSegments: 1,
       displayRange: [0, 104],
-      renderType: 2,
+      renderType: mapboxWind.RenderType.particles,
       mask: {
         data: clip,
         // type: mapboxWind.MaskType.outside,

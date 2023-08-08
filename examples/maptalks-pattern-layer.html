@@ -39,50 +39,55 @@
 
   window.map = map;
 
-  mtkWind.configDeps(['https://unpkg.com/geotiff/dist-browser/geotiff.js', 'https://unpkg.com/exifr/dist/full.umd.js']);
-
-  const source = new mtkWind.TimelineSource('temp', {
-    sourceType: mtkWind.LayerSourceType.tile,
+  const imageSource = new mtkWind.ImageSource('wind', {
+    decodeType: mtkWind.DecodeType.imageWithExif,
+    wrapX: true,
     // coordinates: [
     //   [-180, 85.051129],
     //   [180, 85.051129],
     //   [180, -85.051129],
     //   [-180, -85.051129],
     // ],
-    // sourceType: mtkWind.LayerSourceType.tile,
+    // url: 'http://localhost:5000/2023111700/2023111703/0/0/0/wind-surface.jpeg',
+    coordinates: [
+      [-78.120282611, 68.846393966],
+      [132.453327310, 68.846393966],
+      [132.453327310, -75.191804486],
+      [-78.120282611, -75.191804486],
+    ],
+    url: 'http://localhost:5000/2023111700/2023111703/0/0/0/area.jpeg',
+    // coordinates: [
+    //   [
+    //     0,
+    //     85.051129
+    //   ],
+    //   [
+    //     180,
+    //     85.051129
+    //   ],
+    //   [
+    //     180,
+    //     -85.051129
+    //   ],
+    //   [
+    //     0,
+    //     -85.051129
+    //   ],
+    // ],
+    // url: 'http://localhost:5000/2023111700/2023111703/0/0/0/7.jpeg',
+    // dataRange: [-34.37186050415039, 46.51813888549805, -42.12305450439453, 49.66694259643555],
+  });
+
+  const tileSource = new mtkWind.TileSource('wind', {
     tileSize: 256,
     minZoom: 0,
-    maxZoom: 2,
+    maxZoom: 4,
     roundZoom: true,
-    duration: 0.1,
-    endDelay: 0,
-    repeat: true,
-    autoplay: true,
-    decodeType: 3,
-    intervals: Array.from({ length: 23 }).map((i, index) => ({
-      url: `http://localhost:5000/processed/2023041700/20230417${index < 10 ? '0' + index.toString() : index.toString()}/{z}/{x}/{y}/wind-surface.jpeg`
-    })),
+    decodeType: mtkWind.DecodeType.imageWithExif,
     wrapX: true,
+    // tileBounds: [-78.120282611, -75.191804486, 132.453327310, 68.846393966],
+    url: 'http://localhost:5000/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
   });
-
-  const imageSource = new mtkWind.ImageSource('rain', {
-    type: 'image',
-    url: './data/2.png',
-    coordinates: [
-      // [109.4, 25.7],
-      // [118, 25.7],
-      // [118, 20],
-      // [109.4, 20],
-        [-180, 85.051129],
-        [180, 85.051129],
-        [180, -85.051129],
-        [-180, -85.051129],
-    ],
-    decodeType: 0,
-    dataRange: [-60, 60]
-  });
-
-  window.source = source;
 
   const color = {
     temp: [[203,[115,70,105,255]],
@@ -120,32 +125,30 @@
       [104,[128,128,128,255]]]
   };
 
-  const interpolateColor = color.temp.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);
+  const interpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);
 
-  const layer = new mtkWind.Layer('temp', imageSource, {
+  const layer = new mtkWind.Layer('wind', imageSource, {
     wireframe: true,
     styleSpec: {
       'fill-color': [
         'interpolate',
-        ['linear'],
+        ['step', 1],
         ['get', 'value'],
         ...interpolateColor
       ],
-      'opacity': [
-        'interpolate',
-        ['exponential', 0.5],
-        ['zoom'],
-        1,
-        1,
-        2,
-        1
-      ],
+      'opacity': 1,
     },
-    renderFrom: 'r',
+    renderFrom: mtkWind.RenderFrom.rg,
     widthSegments: 1,
     heightSegments: 1,
-    displayRange: [-60, 60],
-    renderType: 1,
+    displayRange: [0, 104],
+    renderType: mtkWind.RenderType.colorize,
+    picking: true,
+    // mask: {
+    //   data: clip,
+    //   // type: mapboxWind.MaskType.outside,
+    //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+    // }
   });
 
   map.addLayer(layer);

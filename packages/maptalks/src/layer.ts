@@ -306,7 +306,7 @@ class Layer extends maptalks.TileLayer {
     }
   }
 
-  calcWitchWorld(center) {
+  getWorlds() {
     const map = this.getMap();
     const projObject = map.getProjection().fullExtent;
     const projectionExtent = [projObject.left, projObject.bottom, projObject.right, projObject.top];
@@ -327,12 +327,26 @@ class Layer extends maptalks.TileLayer {
 
     let startX = extent[0];
     let world = 0;
-    const result: { world: number; offset: number }[] = [{ world: 0, offset: 0 }];
+    const result: {
+      world: number;
+      offset: number;
+      xmin: number;
+      xmax: number;
+    }[] = [
+      {
+        world: 0,
+        offset: 0,
+        xmin: p1.x,
+        xmax: p2.x,
+      },
+    ];
     while (startX < projectionExtent[0]) {
       --world;
       result.push({
         world,
         offset: world * projWorldWidth,
+        xmin: p1.x + world * projWorldWidth,
+        xmax: p2.x + world * projWorldWidth,
       });
       startX += worldWidth;
     }
@@ -343,17 +357,31 @@ class Layer extends maptalks.TileLayer {
       result.push({
         world,
         offset: world * projWorldWidth,
+        xmin: p1.x + world * projWorldWidth,
+        xmax: p2.x + world * projWorldWidth,
       });
       startX -= worldWidth;
     }
 
-    const r = result.sort((a, b) => a.world - b.world);
+    return result.sort((a, b) => a.world - b.world);
+  }
 
-    for (let i = 0; i < r.length - 1; i++) {
-      if (inRange(center[0], r[i].offset, r[i + 1].offset)) {
-        return r[i].world;
+  calcWitchWorld(
+    center: number[],
+    worlds: {
+      world: number;
+      offset: number;
+      xmin: number;
+      xmax: number;
+    }[],
+  ) {
+    for (let i = 0; i < worlds.length; i++) {
+      if (inRange(center[0], worlds[i].xmin, worlds[i].xmax)) {
+        return worlds[i].world;
       }
     }
+
+    return worlds.find((w) => w.world === 0)?.world;
   }
 
   prepareToDraw(gl, scene) {
@@ -388,6 +416,7 @@ class Layer extends maptalks.TileLayer {
           type = type !== LayerSourceType.timeline ? type : source.privateType;
           const wrapTiles: TileID[] = [];
           const r = getGLRes(map);
+          const worlds = this.getWorlds();
           if (type === LayerSourceType.image) {
             const { coordinates } = source as ImageSource;
             const [min, max] = [
@@ -402,19 +431,35 @@ class Layer extends maptalks.TileLayer {
             const x = 0;
             const y = 0;
             const z = 0;
-            const wrap = 0;
-            wrapTiles.push(
-              new TileID(z, wrap, z, x, y, {
-                getTileBounds: () => [0, 0, 0, 0],
-                getTileProjBounds: () => ({
-                  left: p1.x + wrap,
-                  top: p1.y,
-                  right: p2.x + wrap,
-                  bottom: p2.y,
-                  lngLatBounds: [min[0], min[1], max[0], max[1]],
+            if (this.source.wrapX) {
+              for (let i = 0; i < worlds.length; i++) {
+                const { world, offset } = worlds[i];
+                wrapTiles.push(
+                  new TileID(z, world, z, x, y, {
+                    getTileBounds: () => [min[0], min[1], max[0], max[1]],
+                    getTileProjBounds: () => ({
+                      left: p1.x + offset,
+                      top: p1.y,
+                      right: p2.x + offset,
+                      bottom: p2.y,
+                    }),
+                  }),
+                );
+              }
+            } else {
+              const wrap = 0;
+              wrapTiles.push(
+                new TileID(z, wrap, z, x, y, {
+                  getTileBounds: () => [min[0], min[1], max[0], max[1]],
+                  getTileProjBounds: () => ({
+                    left: p1.x,
+                    top: p1.y,
+                    right: p2.x,
+                    bottom: p2.y,
+                  }),
                 }),
-              }),
-            );
+              );
+            }
           } else if (type === LayerSourceType.tile) {
             const { tileGrids } = this.getTiles();
             const { tiles } = tileGrids[0];
@@ -433,7 +478,7 @@ class Layer extends maptalks.TileLayer {
 
               const { extent2d, offset } = tile;
 
-              const scale = tile._glScale = tile._glScale || tile.res / map.getGLRes();
+              const scale = (tile._glScale = tile._glScale || tile.res / map.getGLRes());
 
               const point1 = TILE_POINT.set(extent2d.xmin - offset[0], extent2d.ymax - offset[1]);
               const x1 = point1.x * scale;
@@ -443,9 +488,7 @@ class Layer extends maptalks.TileLayer {
               const x2 = point2.x * scale;
               const y2 = point2.y * scale;
 
-              const wrap = this.calcWitchWorld([(x2 - x1) / 2, (y2 - y1) / 2]);
-
-              console.log(wrap)
+              const wrap = this.calcWitchWorld([(x2 - x1) / 2 + x1, (y2 - y1) / 2 + y1], worlds);
 
               wrapTiles.push(
                 new TileID(tile.z, wrap, tile.z, tile.x, tile.y, {

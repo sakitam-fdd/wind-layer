@@ -7,6 +7,7 @@ import {
   RenderType,
   MaskType,
   RenderFrom,
+  DecodeType,
   LayerSourceType,
 } from 'wind-gl-core';
 export { default as Layer } from './layer';
@@ -19,5 +20,6 @@ export {
   RenderFrom,
   RenderType,
   MaskType,
+  DecodeType,
   LayerSourceType,
 };

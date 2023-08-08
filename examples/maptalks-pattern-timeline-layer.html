@@ -20,6 +20,7 @@
 
 <div id="map" class="container"></div>
 <script src="https://unpkg.com/maptalks/dist/maptalks.js"></script>
+<script src="https://unpkg.com/@maptalks/gl/dist/maptalksgl.js"></script>
 <script src="https://unpkg.com/axios/dist/axios.js"></script>
 <script src="https://unpkg.com/dat.gui@0.7.6/build/dat.gui.js"></script>
 <script src="../packages/maptalks/dist/maptalks-wind.js"></script>
@@ -39,22 +40,56 @@
 
   window.map = map;
 
-  mtkWind.configDeps(['https://unpkg.com/geotiff/dist-browser/geotiff.js']);
+  // mtkWind.configDeps(['https://unpkg.com/geotiff/dist-browser/geotiff.js']);
 
-  const source = new mtkWind.ImageSource('temp', {
+  const source = new mtkWind.TimelineSource('wind', {
+    sourceType: mtkWind.LayerSourceType.tile,
+    // coordinates: [
+    //   [-180, 85.051129],
+    //   [180, 85.051129],
+    //   [180, -85.051129],
+    //   [-180, -85.051129],
+    // ],
+    // sourceType: mtkWind.LayerSourceType.tile,
     tileSize: 256,
-    // minZoom: 0,
-    // maxZoom: 0,
-    // roundZoom: false,
+    minZoom: 0,
+    maxZoom: 3.9,
+    roundZoom: true,
+    duration: 0.1,
+    endDelay: 0,
+    repeat: true,
+    autoplay: true,
     decodeType: mtkWind.DecodeType.imageWithExif,
+    intervals: [
+      '03',
+      '06',
+      '09',
+      '12',
+      '15',
+      '18',
+      '21',
+    ].map((id, index) => ({
+      // url: `http://localhost:5000/processed/2023041700/20230417${index < 10 ? '0' + index.toString() : index.toString()}/{z}/{x}/{y}/wind-surface.jpeg`,
+      url: `http://localhost:5000/2023111700/20231117${id}/{z}/{x}/{y}/wind-surface.jpeg`
+    })),
+    wrapX: true,
+  });
+
+  const imageSource = new mtkWind.ImageSource('rain', {
+    type: 'image',
+    url: './data/2.png',
     coordinates: [
+      // [109.4, 25.7],
+      // [118, 25.7],
+      // [118, 20],
+      // [109.4, 20],
       [-180, 85.051129],
       [180, 85.051129],
       [180, -85.051129],
       [-180, -85.051129],
     ],
-    wrapX: true,
-    url: 'http://localhost:5000/2023111700/2023111703/0/0/0/wind-surface.jpeg',
+    decodeType: 0,
+    dataRange: [-60, 60]
   });
 
   window.source = source;
@@ -97,54 +132,14 @@
 
   const interpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);
 
-  const fill = new mtkWind.Layer('fill', source, {
-    wireframe: true,
-    styleSpec: {
-      'fill-color': [
-        'interpolate',
-        ['step', 1],
-        ['get', 'value'],
-        ...interpolateColor
-      ],
-      'opacity': 1,
-    },
-    renderFrom: mtkWind.RenderFrom.rg,
-    widthSegments: 64,
-    heightSegments: 64,
-    displayRange: [0, 104],
-    renderType: mtkWind.RenderType.colorize,
-    picking: true,
-    // mask: {
-    //   data: clip,
-    //   // type: mapboxWind.MaskType.outside,
-    //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
-    // }
-  });
-
-  const particlesConfig = {
-    speedFactor: [
-      'interpolate',
-      ['exponential', 0.5],
-      ['zoom'],
-      0,
-      1,
-      15,
-      0.01
-    ],
-    fadeOpacity: 0.93,
-    dropRate: 0.003,
-    dropRateBump: 0.002,
-  }
-
   const layer = new mtkWind.Layer('wind', source, {
     wireframe: false,
     styleSpec: {
       'fill-color': [
         'interpolate',
-        ['step', 1],
+        ['linear'],
         ['get', 'value'],
-        0, '#fff',
-        104, '#fff',
+        ...interpolateColor
       ],
       'opacity': [
         'interpolate',
@@ -155,26 +150,23 @@
         2,
         1
       ],
-      numParticles: [
-        'interpolate',
-        ['exponential', 0.5],
-        ['zoom'],
-        0, // zoom
-        65535 / 8, // numParticles
-        8, // zoom
-        65535 / 16 // numParticles
-      ],
-      ...particlesConfig,
     },
     renderFrom: mtkWind.RenderFrom.rg,
     widthSegments: 1,
     heightSegments: 1,
     displayRange: [0, 104],
-    renderType: mtkWind.RenderType.particles,
-    picking: true
+    renderType: mtkWind.RenderType.colorize,
   });
 
-  // map.addLayer(fill);
+  const sceneConfig = {
+    postProcess: {
+      enable: true,
+      antialias: { enable: true },
+    },
+  };
+  // const groupLayer = new maptalksgl.GroupGLLayer('group', [layer], { sceneConfig });
+  // groupLayer.addTo(map);
+
   map.addLayer(layer);
 </script>
 </body>

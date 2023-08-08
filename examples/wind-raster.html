@@ -56,7 +56,6 @@
 
   map.on('load', async function () {
     const source = new mapboxWind.TileSource('temp', {
-      type: 'tile',
       tileSize: 256,
       url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
       minZoom: 0,
@@ -81,7 +80,7 @@
     const clip = await fetch('./data/china.geojson').then(res => res.json());
 
     const layer = new mapboxWind.Layer('temp', source, {
-      wireframe: true,
+      wireframe: false,
       widthSegments: 1,
       heightSegments: 1,
       styleSpec: {
@@ -102,7 +101,7 @@
           1
         ],
       },
-      renderType: 0,
+      renderType: mapboxWind.RenderType.image,
       picking: true,
       mask: {
         data: clip,

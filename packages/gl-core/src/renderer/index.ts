@@ -18,13 +18,13 @@ import UpdatePass from './pass/particles/update';
 import ScreenPass from './pass/particles/screen';
 import ParticlesPass from './pass/particles/particles';
 import PickerPass from './pass/picker';
-import { isFunction } from '../utils/common';
+import { isFunction, resolveURL } from '../utils/common';
 import { createLinearGradient, createZoom } from '../utils/style-parser';
 import { getBandType, RenderFrom, RenderType, MaskType } from '../type';
 import { SourceType } from '../source';
 import Tile from '../tile/Tile';
 import TileID from '../tile/TileID';
-import MaskPass from "./pass/mask";
+import MaskPass from './pass/mask';
 
 export interface BaseLayerOptions {
   /**
@@ -115,6 +115,11 @@ export const defaultOptions: BaseLayerOptions = {
   onInit: () => undefined,
 };
 
+/**
+ * 因为使用的是共享 worker 所以外部依赖仅需要注册一次
+ */
+let registerDeps = false;
+
 export default class BaseLayer {
   private options: BaseLayerOptions;
   private readonly uid: string;
@@ -173,6 +178,18 @@ export default class BaseLayer {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.dispatcher = new wgw.Dispatcher(wgw.getGlobalWorkerPool(), this, this.uid);
+
+    if (!registerDeps) {
+      const deps = wgw.getConfigDeps();
+      this.dispatcher.broadcast(
+        'configDeps',
+        deps.map((d) => resolveURL(d)),
+        (err, data) => {
+          this.options.onInit?.(err, data);
+        },
+      );
+      registerDeps = true;
+    }
 
     this.update = this.update.bind(this);
     this.onTileLoaded = this.onTileLoaded.bind(this);

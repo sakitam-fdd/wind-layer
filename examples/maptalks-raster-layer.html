@@ -38,6 +38,17 @@
 
   window.map = map;
 
+  const imageSource = new mtkWind.ImageSource('wind1', {
+    wrapX: true,
+    coordinates: [
+      [-180, 85.051129],
+      [180, 85.051129],
+      [180, -85.051129],
+      [-180, -85.051129],
+    ].map(([x, y]) => [x / 1, y / 1]),
+    url: 'https://a.basemaps.cartocdn.com/dark_all/0/0/0.png'
+  });
+
   const source = new mtkWind.TileSource('carto', {
     tileSize: 256,
     minZoom: 0,
@@ -56,7 +67,7 @@
 
   window.source = source;
 
-  const layer = new mtkWind.Layer('carto', source, {
+  const layer = new mtkWind.Layer('carto', imageSource, {
     wireframe: false,
     widthSegments: 1,
     heightSegments: 1,
