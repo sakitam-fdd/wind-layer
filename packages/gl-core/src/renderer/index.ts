@@ -33,6 +33,12 @@ export interface BaseLayerOptions {
   getViewTiles: (data: any, renderType: RenderType) => TileID[];
 
   /**
+   * 获取某层级下瓦片的投影宽高
+   * @param z
+   */
+  getTileProjSize: (z: number, tiles: TileID[]) => [number, number];
+
+  /**
    * 渲染类型
    * 目前支持三种类型：
    * 0：普通 raster 瓦片渲染
@@ -77,6 +83,7 @@ export interface BaseLayerOptions {
 
 export const defaultOptions: BaseLayerOptions = {
   getViewTiles: () => [],
+  getTileProjSize: (z) => [256, 256],
   renderType: RenderType.colorize,
   renderFrom: RenderFrom.r,
   styleSpec: {
@@ -285,6 +292,7 @@ export default class BaseLayer {
         source: this.source,
         renderFrom: this.options.renderFrom ?? RenderFrom.r,
         stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
+        getTileProjSize: this.options.getTileProjSize,
       });
       this.renderPipeline?.addPass(composePass);
 

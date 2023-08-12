@@ -410,6 +410,12 @@ class Layer extends maptalks.TileLayer {
         triggerRepaint: () => {
           renderer.setToRedraw();
         },
+        getTileProjSize: (z: number, tiles: TileID[]) => {
+          const t = tiles.find((tile: TileID) => tile.z === z);
+          if (t) {
+            return [];
+          }
+        },
         getViewTiles: (source: SourceType) => {
           let { type } = source;
           // @ts-ignore

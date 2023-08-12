@@ -13,6 +13,7 @@ export interface ParticlesComposePassOptions {
   bandType: BandType;
   renderFrom: RenderFrom;
   stencilConfigForOverlap: (tiles: any[]) => [{ [_: number]: any }, TileID[]];
+  getTileProjSize: (z: number, tiles: TileID[]) => [number, number];
 }
 
 const defaultSize = 256;
@@ -129,14 +130,14 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
       zmax = Math.max(tileId.z, zmax);
     }
 
-    const zz = 1 / Math.pow(2, zmax);
+    const zz = this.options.getTileProjSize(zmax, coordsDescending);
 
     const dx = xmax - xmin;
     const dy = ymax - ymin;
 
     // 2. 计算 x 方向和 y 方向的行列数
-    const w = dx / zz;
-    const h = dy / zz;
+    const w = dx / zz[0];
+    const h = dy / zz[1];
 
     // TODO: 瓦片范围和行列数是否可以提到瓦片计算的时候获取，可以减少几次循环
 

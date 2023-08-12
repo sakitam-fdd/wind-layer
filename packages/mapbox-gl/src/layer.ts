@@ -215,6 +215,10 @@ export default class Layer {
         triggerRepaint: () => {
           this.map?.triggerRepaint();
         },
+        getTileProjSize: (z: number) => {
+          const w = 1 / Math.pow(2, z);
+          return [w, w];
+        },
         getViewTiles: (source: SourceType, renderType: RenderType) => {
           let { type } = source;
           // @ts-ignore
