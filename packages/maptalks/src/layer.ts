@@ -251,6 +251,7 @@ class Layer extends maptalks.TileLayer {
   _coordCache = {};
   public layer: WithNull<BaseLayer>;
   private source: SourceType;
+  private projWorldWidth: number;
 
   constructor(id: string, source: SourceType, opts: BaseLayerOptionType) {
     super(id, {
@@ -363,6 +364,8 @@ class Layer extends maptalks.TileLayer {
       startX -= worldWidth;
     }
 
+    this.projWorldWidth = projWorldWidth;
+
     return result.sort((a, b) => a.world - b.world);
   }
 
@@ -391,6 +394,9 @@ class Layer extends maptalks.TileLayer {
     if (!map || !renderer) {
       return false;
     }
+
+    const worlds = this.getWorlds();
+
     this.layer = new BaseLayer(
       this.source,
       {
@@ -410,11 +416,18 @@ class Layer extends maptalks.TileLayer {
         triggerRepaint: () => {
           renderer.setToRedraw();
         },
+        flipY: true,
+        glScale: this.projWorldWidth,
         getTileProjSize: (z: number, tiles: TileID[]) => {
           const t = tiles.find((tile: TileID) => tile.z === z);
           if (t) {
-            return [];
+            return [
+              t.projTileBounds.right - t.projTileBounds.left,
+              t.projTileBounds.bottom - t.projTileBounds.top,
+            ];
           }
+
+          return [this.projWorldWidth, -this.projWorldWidth];
         },
         getViewTiles: (source: SourceType) => {
           let { type } = source;
@@ -422,7 +435,6 @@ class Layer extends maptalks.TileLayer {
           type = type !== LayerSourceType.timeline ? type : source.privateType;
           const wrapTiles: TileID[] = [];
           const r = getGLRes(map);
-          const worlds = this.getWorlds();
           if (type === LayerSourceType.image) {
             const { coordinates } = source as ImageSource;
             const [min, max] = [

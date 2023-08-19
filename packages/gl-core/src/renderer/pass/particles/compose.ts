@@ -122,6 +122,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     for (let n = 0; n < coordsDescending.length; n++) {
       const tileId = coordsDescending[n];
       const bounds = tileId.getTileProjBounds();
+      // @todo 不同引擎的top 和 bottom 方向可能不一样
       xmin = Math.min(bounds.left, xmin);
       xmax = Math.max(bounds.right, xmax);
       ymin = Math.min(bounds.top, ymin);
@@ -141,7 +142,12 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
 
     // TODO: 瓦片范围和行列数是否可以提到瓦片计算的时候获取，可以减少几次循环
 
-    rendererState.sharedState.u_data_bbox = [xmin, ymin, xmax, ymax];
+    rendererState.sharedState.u_data_bbox = [
+      xmin,
+      Math.min(ymin, ymax),
+      xmax,
+      Math.max(ymin, ymax),
+    ];
 
     if (renderTarget) {
       renderTarget.clear();

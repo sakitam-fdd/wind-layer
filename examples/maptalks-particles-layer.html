@@ -106,7 +106,15 @@
         ['get', 'value'],
         ...interpolateColor
       ],
-      'opacity': 1,
+      'opacity': [
+        'interpolate',
+        ['exponential', 1],
+        ['zoom'],
+        1,
+        1,
+        10,
+        0
+      ]
     },
     renderFrom: mtkWind.RenderFrom.rg,
     widthSegments: 64,
@@ -122,15 +130,7 @@
   });
 
   const particlesConfig = {
-    speedFactor: [
-      'interpolate',
-      ['exponential', 0.5],
-      ['zoom'],
-      0,
-      1,
-      15,
-      0.01
-    ],
+    speedFactor: 0.1,
     fadeOpacity: 0.93,
     dropRate: 0.003,
     dropRateBump: 0.002,
@@ -171,7 +171,7 @@
     heightSegments: 1,
     displayRange: [0, 104],
     renderType: mtkWind.RenderType.particles,
-    picking: true
+    // picking: true
   });
 
   // map.addLayer(fill);

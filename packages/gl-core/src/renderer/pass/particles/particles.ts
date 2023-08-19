@@ -229,6 +229,9 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       this.#mesh.program.setUniform('u_bbox', rendererState.extent);
       this.#mesh.program.setUniform('u_data_bbox', sharedState.u_data_bbox);
 
+      this.#mesh.program.setUniform('u_flip_y', rendererState.u_flip_y);
+      this.#mesh.program.setUniform('u_gl_scale', rendererState.u_gl_scale);
+
       this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;
       this.#mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, this.#mesh.localMatrix);

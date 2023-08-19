@@ -165,22 +165,22 @@
       // minZoom: 0,
       // maxZoom: 0,
       // roundZoom: false,
-      decodeType: mapboxWind.decodeType.imageWithExif,
+      decodeType: mapboxWind.DecodeType.imageWithExif,
       wrapX: true,
-      // coordinates: [
-      //   [-180, 85.051129],
-      //   [180, 85.051129],
-      //   [180, -85.051129],
-      //   [-180, -85.051129],
-      // ],
-      // url: 'http://localhost:5000/2023111700/2023111703/0/0/0/wind-surface.jpeg',
       coordinates: [
-        [-78.120282611, 68.846393966],
-        [132.453327310, 68.846393966],
-        [132.453327310, -75.191804486],
-        [-78.120282611, -75.191804486],
+        [-180, 85.051129],
+        [180, 85.051129],
+        [180, -85.051129],
+        [-180, -85.051129],
       ],
-      url: 'http://localhost:5000/2023111700/2023111703/0/0/0/area.jpeg',
+      url: 'http://localhost:5000/2023111700/2023111703/0/0/0/wind-surface.jpeg',
+      // coordinates: [
+      //   [-78.120282611, 68.846393966],
+      //   [132.453327310, 68.846393966],
+      //   [132.453327310, -75.191804486],
+      //   [-78.120282611, -75.191804486],
+      // ],
+      // url: 'http://localhost:5000/2023111700/2023111703/0/0/0/area.jpeg',
       // coordinates: [
       //   [
       //     0,
@@ -208,7 +208,7 @@
       minZoom: 0,
       maxZoom: 4,
       roundZoom: true,
-      decodeType: mapboxWind.decodeType.imageWithExif,
+      decodeType: mapboxWind.DecodeType.imageWithExif,
       wrapX: true,
       // tileBounds: [-78.120282611, -75.191804486, 132.453327310, 68.846393966],
       url: 'http://localhost:5000/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
@@ -217,7 +217,7 @@
     window.imageSource = imageSource;
     window.tileSource = tileSource;
 
-    const fill = new mapboxWind.Layer('fill', tileSource, {
+    const fill = new mapboxWind.Layer('fill', imageSource, {
       wireframe: true,
       styleSpec: {
         'fill-color': [
@@ -304,7 +304,7 @@
       })
     })
 
-    // map.addLayer(fill);
+    map.addLayer(fill);
     map.addLayer(wind);
 
     const gui = new dat.GUI();

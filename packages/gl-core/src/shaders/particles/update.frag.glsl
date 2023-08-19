@@ -17,6 +17,8 @@ uniform float u_drop_rate;
 uniform float u_drop_rate_bump;
 uniform float u_speed_factor;
 uniform bool u_initialize;
+uniform bool u_flip_y;
+uniform float u_gl_scale;
 
 varying vec2 vUv;
 
@@ -49,7 +51,7 @@ vec2 bilinear(const vec2 uv) {
 vec2 randomPosToGlobePos(vec2 pos) {
     vec2 min_bbox = u_bbox.xy;
     vec2 max_bbox = u_bbox.zw;
-    return mix(min_bbox, max_bbox, pos);
+    return mix(min_bbox, max_bbox, pos / u_gl_scale);
 }
 
 bool containsXY(vec2 pos, vec4 bbox) {
@@ -68,15 +70,16 @@ vec2 update(vec2 pos) {
 
     float speed = length(velocity);
 
-    vec2 offset = vec2(velocity.x, -velocity.y) * 0.0001 * u_speed_factor;
+    vec2 offset = vec2(velocity.x, -velocity.y) * 0.0001 * u_speed_factor * u_gl_scale;
 
     pos = pos + offset;
 
     // a random seed to use for the particle drop
-    vec2 seed = (pos.xy + vUv) * u_rand_seed;
+    vec2 seed = (pos.xy + vUv) * u_rand_seed * u_gl_scale;
 
     float drop_rate = u_drop_rate + speed * u_drop_rate_bump;
     float drop = step(1.0 - drop_rate, rand(seed));
+
     vec2 random_pos = vec2(rand(seed + 1.3), rand(seed + 2.1));
 
     random_pos = randomPosToGlobePos(random_pos);
@@ -96,6 +99,7 @@ void main() {
     pos = update(pos);
     // 初始化时为避免粒子随机位置接近，先执行 25 次迭代
     if (u_initialize) {
+        pos = pos * u_gl_scale - u_gl_scale / 2.0;
         for (int i = 0; i < 25; i++) {
             pos = update(pos);
         }

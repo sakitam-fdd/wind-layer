@@ -125,7 +125,7 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
 
     const particleState = new Float32Array(particleRes ** 2 * 4);
     for (let i = 0; i < particleState.length; i++) {
-      // randomize the initial particle positions
+      // 不同地图初始化的实际投影位置是不同的，但是这里只能归一化到 0-1（gl），需要在着色器中反算
       particleState[i] = Math.floor(Math.random() * 256);
     }
 
@@ -190,6 +190,8 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
         'u_drop_rate',
         'u_drop_rate_bump',
         'u_speed_factor',
+        'u_flip_y',
+        'u_gl_scale',
       ]);
 
       Object.keys(uniforms).forEach((key) => {

@@ -11,6 +11,8 @@ uniform vec4 u_bbox;
 uniform vec4 u_data_bbox;
 uniform float u_fade_t;
 uniform vec2 u_image_res;
+uniform bool u_flip_y;
+uniform float u_gl_scale;
 
 varying vec2 v_particle_pos;
 
