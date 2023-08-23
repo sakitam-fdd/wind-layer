@@ -69,7 +69,7 @@ export interface BaseLayerOptions {
   wireframe?: boolean;
 
   flipY?: boolean;
-  glScale?: number;
+  glScale?: () => number;
 
   /**
    * 是否开启拾取
@@ -124,7 +124,7 @@ export const defaultOptions: BaseLayerOptions = {
   heightSegments: 1,
   wireframe: false,
   flipY: false,
-  glScale: 1,
+  glScale: () => 1,
   onInit: () => undefined,
 };
 
@@ -645,7 +645,7 @@ export default class BaseLayer {
           u_drop_rate_bump: this.#dropRateBump,
           u_speed_factor: this.#speedFactor,
           u_flip_y: this.options.flipY,
-          u_gl_scale: this.options.glScale,
+          u_gl_scale: this.options.glScale?.(),
         },
       );
     }
@@ -668,7 +668,7 @@ export default class BaseLayer {
         u_drop_rate_bump: this.#dropRateBump,
         u_speed_factor: this.#speedFactor,
         u_flip_y: this.options.flipY,
-        u_gl_scale: this.options.glScale,
+        u_gl_scale: this.options.glScale?.(),
       };
 
       this.renderPipeline.render(

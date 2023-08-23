@@ -395,7 +395,7 @@ class Layer extends maptalks.TileLayer {
       return false;
     }
 
-    const worlds = this.getWorlds();
+    this.getWorlds();
 
     this.layer = new BaseLayer(
       this.source,
@@ -417,20 +417,22 @@ class Layer extends maptalks.TileLayer {
           renderer.setToRedraw();
         },
         flipY: true,
-        glScale: this.projWorldWidth,
+        glScale: () => this.projWorldWidth,
+        // 由于核心库中计算瓦片坐标是从上到下是递增的，但是 maptalk 是从上到下是递减的
         getTileProjSize: (z: number, tiles: TileID[]) => {
           const t = tiles.find((tile: TileID) => tile.z === z);
           if (t) {
             return [
               t.projTileBounds.right - t.projTileBounds.left,
-              t.projTileBounds.bottom - t.projTileBounds.top,
+              t.projTileBounds.top - t.projTileBounds.bottom,
             ];
           }
 
-          return [this.projWorldWidth, -this.projWorldWidth];
+          return [this.projWorldWidth, this.projWorldWidth];
         },
         getViewTiles: (source: SourceType) => {
           let { type } = source;
+          const worlds = this.getWorlds();
           // @ts-ignore
           type = type !== LayerSourceType.timeline ? type : source.privateType;
           const wrapTiles: TileID[] = [];
@@ -524,8 +526,16 @@ class Layer extends maptalks.TileLayer {
           return wrapTiles;
         },
         getExtent: () => {
-          const projExtent = map.getProjExtent();
-          return [projExtent.xmin, projExtent.ymin, projExtent.xmax, projExtent.ymax];
+          const projExtent = map.getProjExtent()._scale(1 / getGLRes(map));
+          const r = getGLRes(map);
+          const p1 = coordinateToPoint(map, new maptalks.Coordinate([0, -90]), r);
+          const p2 = coordinateToPoint(map, new maptalks.Coordinate([0, 90]), r);
+          return [
+            projExtent.xmin,
+            projExtent.ymin < p1.y ? p1.y : projExtent.ymin,
+            projExtent.xmax,
+            projExtent.ymax > p2.y ? p2.y : projExtent.ymax,
+          ];
         },
       },
     );

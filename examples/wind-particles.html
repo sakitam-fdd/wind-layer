@@ -209,7 +209,7 @@
       maxZoom: 4,
       roundZoom: true,
       decodeType: mapboxWind.DecodeType.imageWithExif,
-      wrapX: true,
+      wrapX: false,
       // tileBounds: [-78.120282611, -75.191804486, 132.453327310, 68.846393966],
       url: 'http://localhost:5000/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
     });
@@ -291,11 +291,11 @@
       heightSegments: 1,
       displayRange: [0, 104],
       renderType: mapboxWind.RenderType.particles,
-      mask: {
-        data: clip,
-        // type: mapboxWind.MaskType.outside,
-        type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
-      }
+      // mask: {
+      //   data: clip,
+      //   // type: mapboxWind.MaskType.outside,
+      //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+      // }
     });
 
     map.on('click', e => {

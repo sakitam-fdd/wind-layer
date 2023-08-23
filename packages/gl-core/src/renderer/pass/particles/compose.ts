@@ -125,10 +125,16 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
       // @todo 不同引擎的top 和 bottom 方向可能不一样
       xmin = Math.min(bounds.left, xmin);
       xmax = Math.max(bounds.right, xmax);
-      ymin = Math.min(bounds.top, ymin);
-      ymax = Math.max(bounds.bottom, ymax);
       zmin = Math.min(tileId.z, zmin);
       zmax = Math.max(tileId.z, zmax);
+
+      if (!rendererState.u_flip_y) {
+        ymin = Math.min(bounds.top, ymin);
+        ymax = Math.max(bounds.bottom, ymax);
+      } else {
+        ymin = Math.min(bounds.bottom, ymin);
+        ymax = Math.max(bounds.top, ymax);
+      }
     }
 
     const zz = this.options.getTileProjSize(zmax, coordsDescending);
@@ -142,12 +148,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
 
     // TODO: 瓦片范围和行列数是否可以提到瓦片计算的时候获取，可以减少几次循环
 
-    rendererState.sharedState.u_data_bbox = [
-      xmin,
-      Math.min(ymin, ymax),
-      xmax,
-      Math.max(ymin, ymax),
-    ];
+    rendererState.sharedState.u_data_bbox = [xmin, ymin, xmax, ymax];
 
     if (renderTarget) {
       renderTarget.clear();
@@ -185,7 +186,11 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
 
         const scale = Math.pow(2, zmax - coord.z);
         mesh.scale.set((1 / w) * scale, (1 / h) * scale, 1);
-        mesh.position.set((tileBBox.left - xmin) / dx, (tileBBox.top - ymin) / dy, 0);
+        if (!rendererState.u_flip_y) {
+          mesh.position.set((tileBBox.left - xmin) / dx, (tileBBox.top - ymin) / dy, 0);
+        } else {
+          mesh.position.set((tileBBox.left - xmin) / dx, (tileBBox.bottom - ymin) / dy, 0);
+        }
 
         const dataRange: number[] = [];
         for (const [index, texture] of tile.textures) {

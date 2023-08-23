@@ -41,7 +41,16 @@
 
   mtkWind.configDeps(['https://unpkg.com/geotiff/dist-browser/geotiff.js']);
 
-  const source = new mtkWind.ImageSource('temp', {
+  const source = new mtkWind.TileSource('temp', {
+    tileSize: 256,
+    // minZoom: 0,
+    // maxZoom: 0,
+    // roundZoom: false,
+    decodeType: mtkWind.DecodeType.imageWithExif,
+    wrapX: false,
+    url: 'http://localhost:5000/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
+  });
+  const source1 = new mtkWind.ImageSource('temp', {
     tileSize: 256,
     // minZoom: 0,
     // maxZoom: 0,
@@ -53,7 +62,7 @@
       [180, -85.051129],
       [-180, -85.051129],
     ],
-    wrapX: true,
+    wrapX: false,
     url: 'http://localhost:5000/2023111700/2023111703/0/0/0/wind-surface.jpeg',
   });
 
@@ -130,13 +139,13 @@
   });
 
   const particlesConfig = {
-    speedFactor: 0.1,
+    speedFactor: 0.5,
     fadeOpacity: 0.93,
     dropRate: 0.003,
     dropRateBump: 0.002,
   }
 
-  const layer = new mtkWind.Layer('wind', source, {
+  const layer = new mtkWind.Layer('wind', source1, {
     wireframe: false,
     styleSpec: {
       'fill-color': [
