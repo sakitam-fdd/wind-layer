@@ -183,8 +183,16 @@
     // picking: true
   });
 
-  // map.addLayer(fill);
-  map.addLayer(layer);
+  fetch('./data/china.geojson').then(res => res.json()).then(clip => {
+    fill.setClipMask({
+      data: clip,
+      // type: mtkWind.MaskType.outside,
+      type: mtkWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+    })
+  });
+
+  map.addLayer(fill);
+  // map.addLayer(layer);
 </script>
 </body>
 </html>

@@ -610,6 +610,19 @@ export default class BaseLayer {
         this.#maskPass = new MaskPass('MaskPass', this.renderer, {
           mask: this.options.mask,
         });
+
+        const raster = this.renderPipeline?.getPass('RasterComposePass');
+        if (raster) {
+          raster.setMaskPass(this.#maskPass);
+        }
+        const colorize = this.renderPipeline?.getPass('ColorizeComposePass');
+        if (colorize) {
+          colorize.setMaskPass(this.#maskPass);
+        }
+        const particles = this.renderPipeline?.getPass('ParticlesPass');
+        if (particles) {
+          particles.setMaskPass(this.#maskPass);
+        }
       }
 
       this.#maskPass.updateGeometry();

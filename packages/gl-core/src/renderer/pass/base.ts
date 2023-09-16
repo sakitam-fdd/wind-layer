@@ -9,12 +9,16 @@ export default class Pass<T> {
 
   public options: T;
 
+  public maskPass: any;
+
   #enabled = true;
 
   constructor(id: string, renderer: Renderer, options: T = {} as T) {
     this.id = id;
     this.renderer = renderer;
     this.options = options;
+
+    this.setMaskPass((this.options as any).maskPass);
   }
 
   get enabled() {
@@ -23,6 +27,10 @@ export default class Pass<T> {
 
   set enabled(state) {
     this.#enabled = state;
+  }
+
+  setMaskPass(pass) {
+    this.maskPass = pass;
   }
 
   render(rendererParams, rendererState, cb) {

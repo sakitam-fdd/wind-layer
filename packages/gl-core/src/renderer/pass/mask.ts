@@ -47,8 +47,9 @@ export default class MaskPass extends Pass<MaskPassOptions> {
     for (let k = 0; k < this.#meshes.length; k++) {
       const mesh = this.#meshes[k];
 
-      if (mesh) {
-        mesh.destroy();
+      // 只销毁 Geometry
+      if (mesh.geometry) {
+        mesh.geometry.destroy();
       }
     }
 

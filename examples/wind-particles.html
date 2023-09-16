@@ -291,11 +291,11 @@
       heightSegments: 1,
       displayRange: [0, 104],
       renderType: mapboxWind.RenderType.particles,
-      // mask: {
-      //   data: clip,
-      //   // type: mapboxWind.MaskType.outside,
-      //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
-      // }
+      mask: {
+        data: clip,
+        // type: mapboxWind.MaskType.outside,
+        type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+      }
     });
 
     map.on('click', e => {

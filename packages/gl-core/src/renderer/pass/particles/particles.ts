@@ -204,8 +204,8 @@ export default class Particles extends Pass<ParticlesPassOptions> {
 
     let stencil;
 
-    if (this.options.maskPass) {
-      stencil = this.options.maskPass.render(rendererParams, rendererState);
+    if (this.maskPass) {
+      stencil = this.maskPass.render(rendererParams, rendererState);
     }
 
     if (rendererState && this.#mesh) {

@@ -1,4 +1,5 @@
 import * as maptalks from 'maptalks';
+import rewind from '@mapbox/geojson-rewind';
 import {
   highPrecision,
   OrthographicCamera,
@@ -9,7 +10,14 @@ import {
   utils,
 } from '@sakitam-gis/vis-engine';
 
-import { BaseLayer, ImageSource, LayerSourceType, SourceType, TileID } from 'wind-gl-core';
+import {
+  BaseLayer,
+  ImageSource,
+  LayerSourceType,
+  polygon2buffer,
+  SourceType,
+  TileID,
+} from 'wind-gl-core';
 
 highPrecision(true);
 
@@ -396,6 +404,87 @@ class Layer extends maptalks.TileLayer {
     return worlds.find((w) => w.world === 0)?.world;
   }
 
+  public getClipMask() {
+    return this.options.mask;
+  }
+
+  private processMask() {
+    const map = this.getMap();
+    if (map && this.options.mask) {
+      const r = getGLRes(map);
+      const mask = this.options.mask;
+      const data = mask.data;
+      // @link https://github.com/mapbox/geojson-rewind
+      rewind(data, true);
+
+      const tr = (coords) => {
+        const mercatorCoordinates: any[] = [];
+        for (let i = 0; i < coords.length; i++) {
+          const coord = coords[i];
+          const p = coordinateToPoint(map, new maptalks.Coordinate(coord), r);
+          mercatorCoordinates.push([p.x, p.y]);
+        }
+
+        return mercatorCoordinates;
+      };
+
+      const features = data.features;
+      const len = features.length;
+      let i = 0;
+      const fs: any[] = [];
+      for (; i < len; i++) {
+        const feature = features[i];
+
+        const coordinates = feature.geometry.coordinates;
+        const type = feature.geometry.type;
+
+        if (type === 'Polygon') {
+          fs.push({
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'Polygon',
+              coordinates: feature.geometry.coordinates.map((c) => tr(c)),
+            },
+          });
+        } else if (type === 'MultiPolygon') {
+          const css: any[] = [];
+          for (let k = 0; k < coordinates.length; k++) {
+            const coordinate = coordinates[k];
+            const cs: any[] = [];
+            for (let n = 0; n < coordinate.length; n++) {
+              cs.push(tr(coordinates[k][n]));
+            }
+
+            css.push(cs);
+          }
+
+          fs.push({
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'MultiPolygon',
+              coordinates: css,
+            },
+          });
+        }
+      }
+
+      return {
+        data: polygon2buffer(fs),
+        type: mask.type,
+      };
+    }
+  }
+
+  public setClipMask(mask) {
+    this.options.mask = Object.assign({}, this.options.mask, mask);
+
+    if (this.layer) {
+      this.layer.setMask(this.processMask());
+    }
+  }
+
   prepareToDraw(gl, scene) {
     const opt = this.options;
     const map = this.getMap();
@@ -421,6 +510,7 @@ class Layer extends maptalks.TileLayer {
         widthSegments: opt.widthSegments,
         heightSegments: opt.heightSegments,
         wireframe: opt.wireframe,
+        mask: this.processMask(),
         getZoom: () => map.getZoom(),
         triggerRepaint: () => {
           renderer.setToRedraw();

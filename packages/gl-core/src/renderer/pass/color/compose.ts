@@ -119,8 +119,8 @@ export default class ComposePass extends Pass<ComposePassOptions> {
 
       let stencil;
 
-      if (this.options.maskPass) {
-        stencil = this.options.maskPass.render(rendererParams, rendererState);
+      if (this.maskPass) {
+        stencil = this.maskPass.render(rendererParams, rendererState);
       }
 
       const [stencilModes, coords] = stencilConfigForOverlap(coordsDescending);
