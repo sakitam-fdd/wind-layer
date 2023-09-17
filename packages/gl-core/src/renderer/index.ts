@@ -1,12 +1,4 @@
-import {
-  Attributes,
-  DataTexture,
-  Raf,
-  Renderer,
-  Scene,
-  utils,
-  Vector2,
-} from '@sakitam-gis/vis-engine';
+import {Attributes, DataTexture, Raf, Renderer, Scene, utils, Vector2,} from '@sakitam-gis/vis-engine';
 import wgw from 'wind-gl-worker';
 import Pipelines from './Pipelines';
 import ColorizeComposePass from './pass/color/compose';
@@ -18,13 +10,15 @@ import UpdatePass from './pass/particles/update';
 import ScreenPass from './pass/particles/screen';
 import ParticlesPass from './pass/particles/particles';
 import PickerPass from './pass/picker';
-import { isFunction, resolveURL } from '../utils/common';
-import { createLinearGradient, createZoom } from '../utils/style-parser';
-import { getBandType, RenderFrom, RenderType, MaskType } from '../type';
-import { SourceType } from '../source';
+import {isFunction, resolveURL} from '../utils/common';
+import {createLinearGradient, createZoom} from '../utils/style-parser';
+import {getBandType, MaskType, RenderFrom, RenderType} from '../type';
+import {SourceType} from '../source';
 import Tile from '../tile/Tile';
 import TileID from '../tile/TileID';
 import MaskPass from './pass/mask';
+import ArrowComposePass from "./pass/arrow/compose";
+import ArrowPass from "./pass/arrow/arrow";
 
 export interface BaseLayerOptions {
   /**
@@ -350,6 +344,22 @@ export default class BaseLayer {
         },
         { autoStart: true },
       );
+    } else if (this.options.renderType === RenderType.arrow) {
+      const composePass = new ArrowComposePass('ArrowComposePass', this.renderer, {
+        bandType,
+        source: this.source,
+        renderFrom: this.options.renderFrom ?? RenderFrom.r,
+        maskPass: this.#maskPass,
+        stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
+      });
+      const arrowPass = new ArrowPass('ArrowPass', this.renderer, {
+        bandType,
+        source: this.source,
+        texture: composePass.textures.current,
+        textureNext: composePass.textures.next,
+      });
+      this.renderPipeline?.addPass(composePass);
+      this.renderPipeline?.addPass(arrowPass);
     }
   }
 
