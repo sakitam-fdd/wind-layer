@@ -219,6 +219,7 @@ export default class Layer {
           const w = 1 / Math.pow(2, z);
           return [w, w];
         },
+        getPixelsToUnits: (): [number, number] => (this.map as any)?.transform.pixelsToGLUnits,
         getViewTiles: (source: SourceType, renderType: RenderType) => {
           let { type } = source;
           // @ts-ignore

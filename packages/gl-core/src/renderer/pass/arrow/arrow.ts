@@ -15,27 +15,28 @@ import * as shaderLib from '../../../shaders/shaderLib';
 import { BandType } from '../../../type';
 import { SourceType } from '../../../source';
 
-export interface ColorizePassOptions {
+export interface ArrowPassOptions {
   source: SourceType;
   texture: Texture;
   textureNext: Texture;
   bandType: BandType;
+  getPixelsToUnits: () => [number, number];
 }
 
 /**
  * arrow
  */
-export default class ArrowPass extends Pass<ColorizePassOptions> {
+export default class ArrowPass extends Pass<ArrowPassOptions> {
   #program: WithNull<Program>;
   #mesh: WithNull<Mesh>;
   #geometry: WithNull<Geometry>;
+
+  private lastDataBounds: number[];
+  private lastPixelsToUnits: [number, number];
+
   readonly prerender = false;
 
-  constructor(
-    id: string,
-    renderer: Renderer,
-    options: ColorizePassOptions = {} as ColorizePassOptions,
-  ) {
+  constructor(id: string, renderer: Renderer, options: ArrowPassOptions = {} as ArrowPassOptions) {
     super(id, renderer, options);
 
     this.#program = new Program(renderer, {
@@ -95,7 +96,7 @@ export default class ArrowPass extends Pass<ColorizePassOptions> {
   render(rendererParams, rendererState) {
     const attr = this.renderer.attributes;
     this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
-    const camera = rendererParams.cameras.planeCamera;
+    const camera = rendererParams.cameras.camera;
     if (rendererState && this.#mesh) {
       const uniforms = utils.pick(rendererState, [
         'opacity',
@@ -105,6 +106,44 @@ export default class ArrowPass extends Pass<ColorizePassOptions> {
         'useDisplayRange',
         'displayRange',
       ]);
+
+      const dataBounds = rendererState.sharedState.u_data_bbox;
+      const pixelsToUnits = this.options.getPixelsToUnits();
+
+      if (
+        dataBounds &&
+        pixelsToUnits &&
+        (JSON.stringify(dataBounds) !== JSON.stringify(this.lastDataBounds) ||
+          JSON.stringify(pixelsToUnits) !== JSON.stringify(this.lastPixelsToUnits))
+      ) {
+        const { symbolSize, symbolSpace } = rendererState;
+        const symbolSizeX = pixelsToUnits[0] * symbolSize;
+        const symbolSizeY = pixelsToUnits[1] * symbolSize;
+
+        const symbolSpaceX = pixelsToUnits[0] * symbolSpace;
+        const symbolSpaceY = pixelsToUnits[1] * symbolSpace;
+        // 需要考虑图形大小，图形间隔，计算当前视图下所分布的格网数据
+        const cols = Math.floor((dataBounds[2] - dataBounds[0]) / (symbolSpaceX + symbolSizeX)); // 列
+        const rows = Math.floor((dataBounds[1] - dataBounds[3]) / (symbolSpaceY + symbolSizeY)); // 行
+        const points = new Float32Array(cols * rows * 2);
+        let k = 0;
+        for (let j = 0; j < rows; j++) {
+          for (let i = 0; i < cols; i++) {
+            // points[k] = dataBounds[0] + (symbolSpaceX + symbolSizeX) * i;
+            points.set(
+              [
+                dataBounds[0] + (symbolSpaceX + symbolSizeX) * i,
+                dataBounds[3] + (symbolSpaceY + symbolSizeY) * j,
+              ],
+              2 * k,
+            );
+            k++;
+          }
+        }
+
+        console.log(points);
+        this.#geometry?.setAttributeData('position', points);
+      }
 
       Object.keys(uniforms).forEach((key) => {
         if (uniforms[key] !== undefined) {

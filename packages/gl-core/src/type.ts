@@ -21,7 +21,7 @@ export enum RenderType {
   arrow = 3,
 
   /**
-   * 风雨图
+   * 风羽图
    */
   barb = 4,
 

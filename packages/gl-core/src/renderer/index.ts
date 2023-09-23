@@ -17,8 +17,8 @@ import {SourceType} from '../source';
 import Tile from '../tile/Tile';
 import TileID from '../tile/TileID';
 import MaskPass from './pass/mask';
-import ArrowComposePass from "./pass/arrow/compose";
-import ArrowPass from "./pass/arrow/arrow";
+import ArrowComposePass from './pass/arrow/compose';
+import ArrowPass from './pass/arrow/arrow';
 
 export interface BaseLayerOptions {
   /**
@@ -31,6 +31,11 @@ export interface BaseLayerOptions {
    * @param z
    */
   getTileProjSize: (z: number, tiles: TileID[]) => [number, number];
+
+  /**
+   * 获取当前视图下像素和投影的转换关系
+   */
+  getPixelsToUnits: () => [number, number];
 
   /**
    * 渲染类型
@@ -52,6 +57,16 @@ export interface BaseLayerOptions {
     fadeOpacity?: number | any[];
     dropRate?: number | any[];
     dropRateBump?: number | any[];
+
+    /**
+     * arrow space
+     */
+    space?: number | any[];
+
+    /**
+     * arrow size
+     */
+    size?: number | any[];
   };
   getZoom?: () => number;
   getExtent?: () => number[];
@@ -63,6 +78,7 @@ export interface BaseLayerOptions {
   wireframe?: boolean;
 
   flipY?: boolean;
+
   glScale?: () => number;
 
   /**
@@ -82,6 +98,7 @@ export interface BaseLayerOptions {
 export const defaultOptions: BaseLayerOptions = {
   getViewTiles: () => [],
   getTileProjSize: (z) => [256, 256],
+  getPixelsToUnits: () => [1, 1],
   renderType: RenderType.colorize,
   renderFrom: RenderFrom.r,
   styleSpec: {
@@ -112,6 +129,8 @@ export const defaultOptions: BaseLayerOptions = {
     fadeOpacity: 0.93,
     dropRate: 0.003,
     dropRateBump: 0.002,
+    space: 20,
+    size: 16,
   },
   displayRange: [Infinity, Infinity],
   widthSegments: 1,
@@ -148,6 +167,8 @@ export default class BaseLayer {
   #fadeOpacity: number;
   #dropRate: number;
   #dropRateBump: number;
+  #space: number;
+  #size: number;
   #colorRange: Vector2;
   #colorRampTexture: DataTexture;
   #nextStencilID: number;
@@ -349,14 +370,15 @@ export default class BaseLayer {
         bandType,
         source: this.source,
         renderFrom: this.options.renderFrom ?? RenderFrom.r,
-        maskPass: this.#maskPass,
         stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
+        getTileProjSize: this.options.getTileProjSize,
       });
       const arrowPass = new ArrowPass('ArrowPass', this.renderer, {
         bandType,
         source: this.source,
         texture: composePass.textures.current,
         textureNext: composePass.textures.next,
+        getPixelsToUnits: this.options.getPixelsToUnits,
       });
       this.renderPipeline?.addPass(composePass);
       this.renderPipeline?.addPass(arrowPass);
@@ -439,6 +461,22 @@ export default class BaseLayer {
   }
 
   /**
+   * 设置 symbol 的间距
+   * @param space
+   */
+  setSymbolSpace(space) {
+    this.#space = space;
+  }
+
+  /**
+   * 设置 symbol 的大小
+   * @param size
+   */
+  setSymbolSize(size) {
+    this.#size = size;
+  }
+
+  /**
    * 解析样式配置
    * @param clear
    */
@@ -460,6 +498,11 @@ export default class BaseLayer {
         this.setDropRateBump(
           createZoom(this.uid, zoom, 'dropRateBump', this.options.styleSpec, clear),
         );
+      }
+
+      if (this.options.renderType === RenderType.arrow) {
+        this.setSymbolSize(createZoom(this.uid, zoom, 'size', this.options.styleSpec, clear));
+        this.setSymbolSpace(createZoom(this.uid, zoom, 'space', this.options.styleSpec, clear));
       }
     }
   }
@@ -669,6 +712,8 @@ export default class BaseLayer {
           u_speed_factor: this.#speedFactor,
           u_flip_y: this.options.flipY,
           u_gl_scale: this.options.glScale?.(),
+          symbolSize: this.#size,
+          symbolSpace: this.#space,
         },
       );
     }
@@ -692,6 +737,8 @@ export default class BaseLayer {
         u_speed_factor: this.#speedFactor,
         u_flip_y: this.options.flipY,
         u_gl_scale: this.options.glScale?.(),
+        symbolSize: this.#size,
+        symbolSpace: this.#space,
       };
 
       this.renderPipeline.render(
