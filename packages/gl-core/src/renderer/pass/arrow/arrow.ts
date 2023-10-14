@@ -141,7 +141,8 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
           }
         }
 
-        console.log(points);
+        // console.log(points);
+
         this.#geometry?.setAttributeData('position', points);
       }
 

@@ -197,6 +197,10 @@ export default class BaseLayer {
     this.options = {
       ...defaultOptions,
       ...options,
+      styleSpec: {
+        ...defaultOptions.styleSpec,
+        ...options.styleSpec,
+      },
     };
 
     this.#opacity = this.options.opacity || 1;
