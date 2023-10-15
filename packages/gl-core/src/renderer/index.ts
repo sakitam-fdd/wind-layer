@@ -70,6 +70,14 @@ export interface BaseLayerOptions {
   };
   getZoom?: () => number;
   getExtent?: () => number[];
+
+  /**
+   * 获取当前视图的稳态范围
+   * 稳态是指我们在一定范围内的拖动和缩放保证所获取的范围不变
+   * 一般我们可以考虑使用可视区瓦片来构造 extent，但是需要注意在旋转和倾斜时
+   * 可能有大面积的瓦片是不可见的，可能会造成构造出来大量的无效顶点数据
+   */
+  getSteadyStateExtent?: () => number[];
   opacity?: number;
   triggerRepaint?: () => void;
   displayRange?: [number, number];

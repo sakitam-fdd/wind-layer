@@ -219,7 +219,14 @@ export default class Layer {
           const w = 1 / Math.pow(2, z);
           return [w, w];
         },
-        getPixelsToUnits: (): [number, number] => (this.map as any)?.transform.pixelsToGLUnits,
+        getPixelsToUnits: (): [number, number] => [
+          (this.map as any)?.transform.pixelsToGLUnits[0],
+          -(this.map as any)?.transform.pixelsToGLUnits[1],
+        ],
+        // getPixelsToUnits: (): [number, number] => [
+        //   (this.map as any)?.transform.pixelsPerMeter,
+        //   (this.map as any)?.transform.pixelsPerMeter,
+        // ],
         getViewTiles: (source: SourceType, renderType: RenderType) => {
           let { type } = source;
           // @ts-ignore
@@ -340,6 +347,7 @@ export default class Layer {
           const p1 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmax, minY));
           return [p0.x, p0.y, p1.x, p1.y];
         },
+        getSteadyStateExtent: () => {}
       },
     );
 

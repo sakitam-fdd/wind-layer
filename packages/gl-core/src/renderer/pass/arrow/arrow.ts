@@ -9,7 +9,7 @@ import {
 } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
-import vert from '../../../shaders/common.vert.glsl';
+import vert from '../../../shaders/arrow.vert.glsl';
 import frag from '../../../shaders/arraw.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
 import { BandType } from '../../../type';
@@ -30,9 +30,8 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
   #program: WithNull<Program>;
   #mesh: WithNull<Mesh>;
   #geometry: WithNull<Geometry>;
-
+  private lastZoom = Infinity;
   private lastDataBounds: number[];
-  private lastPixelsToUnits: [number, number];
 
   readonly prerender = false;
 
@@ -76,10 +75,10 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
         size: 2,
         data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
       },
-      index: {
-        size: 1,
-        data: new Uint16Array([0, 1, 2, 2, 1, 3]),
-      },
+      // index: {
+      //   size: 1,
+      //   data: new Uint16Array([0, 1, 2, 2, 1, 3]),
+      // },
     });
 
     this.#mesh = new Mesh(renderer, {
@@ -107,14 +106,15 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
         'displayRange',
       ]);
 
+      const zoom = rendererState.sharedState.zoom;
       const dataBounds = rendererState.sharedState.u_data_bbox;
       const pixelsToUnits = this.options.getPixelsToUnits();
 
       if (
         dataBounds &&
         pixelsToUnits &&
-        (JSON.stringify(dataBounds) !== JSON.stringify(this.lastDataBounds) ||
-          JSON.stringify(pixelsToUnits) !== JSON.stringify(this.lastPixelsToUnits))
+        JSON.stringify(dataBounds) !== JSON.stringify(this.lastDataBounds) &&
+        zoom !== this.lastZoom
       ) {
         const { symbolSize, symbolSpace } = rendererState;
         const symbolSizeX = pixelsToUnits[0] * symbolSize;
@@ -124,16 +124,15 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
         const symbolSpaceY = pixelsToUnits[1] * symbolSpace;
         // 需要考虑图形大小，图形间隔，计算当前视图下所分布的格网数据
         const cols = Math.floor((dataBounds[2] - dataBounds[0]) / (symbolSpaceX + symbolSizeX)); // 列
-        const rows = Math.floor((dataBounds[1] - dataBounds[3]) / (symbolSpaceY + symbolSizeY)); // 行
+        const rows = Math.floor((dataBounds[3] - dataBounds[1]) / (symbolSpaceY + symbolSizeY)); // 行
         const points = new Float32Array(cols * rows * 2);
         let k = 0;
         for (let j = 0; j < rows; j++) {
           for (let i = 0; i < cols; i++) {
-            // points[k] = dataBounds[0] + (symbolSpaceX + symbolSizeX) * i;
             points.set(
               [
                 dataBounds[0] + (symbolSpaceX + symbolSizeX) * i,
-                dataBounds[3] + (symbolSpaceY + symbolSizeY) * j,
+                dataBounds[1] + (symbolSpaceY + symbolSizeY) * j,
               ],
               2 * k,
             );
@@ -141,9 +140,45 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
           }
         }
 
-        // console.log(points);
-
-        this.#geometry?.setAttributeData('position', points);
+        this.lastZoom = zoom;
+        this.#mesh.updateGeometry(
+          new Geometry(this.renderer, {
+            index: {
+              size: 1,
+              data: new Uint16Array([0, 1, 2, 0, 2, 3])
+            },
+            position: {
+              size: 2,
+              data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1])
+            },
+            uv: {
+              size: 2,
+              data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1])
+            },
+            coords: {
+              divisor: 1,
+              data: points,
+              // offset: 0,
+              size: 2,
+              // stride: 8
+            },
+            // size: {
+            //   divisor: 1,
+            //   data: [],
+            //   offset: 0,
+            //   size: 2,
+            //   stride: 16
+            // },
+            // offset: {
+            //   divisor: 1,
+            //   data: [],
+            //   offset: 8,
+            //   size: 2,
+            //   stride: 16
+            // },
+          }),
+          true,
+        );
       }
 
       Object.keys(uniforms).forEach((key) => {
@@ -161,7 +196,7 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
 
       this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;
-      this.#mesh.worldMatrix.multiply(camera.worldMatrix, this.#mesh.localMatrix);
+      this.#mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, this.#mesh.localMatrix);
       this.#mesh.draw({
         ...rendererParams,
         camera,

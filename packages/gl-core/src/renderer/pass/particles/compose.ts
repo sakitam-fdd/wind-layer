@@ -160,8 +160,19 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
       }
 
       // 3. 计算出 fbo 所需大小 (此处有可能计算的宽高超出纹理最大大小，我们需要根据宽高比例进行重采样)
-      const width = w * (this.options.source.tileSize ?? defaultSize);
-      const height = h * (this.options.source.tileSize ?? defaultSize);
+      let width = w * (this.options.source.tileSize ?? defaultSize);
+      let height = h * (this.options.source.tileSize ?? defaultSize);
+      const maxTextureSize = this.renderer.gl.getParameter(this.renderer.gl.MAX_TEXTURE_SIZE) * 0.5;
+      const maxRenderBufferSize =
+        this.renderer.gl.getParameter(this.renderer.gl.MAX_RENDERBUFFER_SIZE) * 0.5;
+      const maxSize = Math.max(width, height);
+      if (maxSize > maxTextureSize) {
+        width = (maxTextureSize / maxSize) * width;
+        height = (maxTextureSize / maxSize) * height;
+      } else if (maxSize > maxRenderBufferSize) {
+        width = (maxRenderBufferSize / maxSize) * width;
+        height = (maxRenderBufferSize / maxSize) * height;
+      }
 
       this.resize(width, height);
 
