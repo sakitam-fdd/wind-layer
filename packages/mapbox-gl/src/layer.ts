@@ -347,7 +347,38 @@ export default class Layer {
           const p1 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmax, minY));
           return [p0.x, p0.y, p1.x, p1.y];
         },
-        getSteadyStateExtent: () => {}
+        getSteadyStateExtent: () => {
+          return [0, 0, 0, 0];
+        },
+        getGridTiles: () => {
+          const map = this.map as any;
+          if (!map) return [];
+          const { transform } = map;
+
+          const opts = {
+            tileSize: 512,
+            minzoom: map.getMinZoom(),
+            maxzoom: map.getMaxZoom(),
+            roundZoom: false,
+          };
+
+          const tiles = transform.coveringTiles(opts);
+          const wrapTiles: TileID[] = [];
+
+          for (let i = 0; i < tiles.length; i++) {
+            const tile = tiles[i];
+            const { canonical, wrap } = tile;
+            const { x, y, z } = canonical;
+            wrapTiles.push(
+              new TileID(z, wrap, z, x, y, {
+                getTileBounds,
+                getTileProjBounds,
+              }),
+            );
+          }
+
+          return wrapTiles;
+        },
       },
     );
 

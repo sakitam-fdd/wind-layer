@@ -52,18 +52,41 @@ float getAngle(vec2 rg) {
     return angle;
 }
 
-// 2D vector field visualization by Matthias Reitinger, @mreitinger
-// Based on "2D vector field visualization by Morgan McGuire, http://casual-effects.com", https://www.shadertoy.com/view/4s23DG
+// https://www.shadertoy.com/view/NdlBRM
+// https://www.shadertoy.com/view/dssyzf
+// https://www.shadertoy.com/view/dtcXDM
+// https://www.shadertoy.com/view/ldlSWj
+// https://github.com/vispy/vispy/blob/main/vispy/glsl/antialias/filled.glsl
 
-float ARROW_TILE_SIZE = 1.0 / 20.0;
+vec4 filled(float distance, float linewidth, float antialias, vec4 fill) {
+    vec4 frag_color = vec4(0.0);
+    float t = linewidth / 2.0 - antialias;
+    float signed_distance = distance;
+    float border_distance = abs(signed_distance) - t;
+    float alpha = border_distance / antialias;
+    alpha = exp(-alpha * alpha);
 
-// Computes the center pixel of the tile containing pixel pos
-vec2 arrowTileCenterCoord(vec2 pos) {
-    return (floor(pos / ARROW_TILE_SIZE) + 0.5) * ARROW_TILE_SIZE;
+    if(border_distance < 0.0) {
+        // Within linestroke
+        frag_color = fill;
+    } else if(signed_distance < 0.0) {
+        // Within shape
+        frag_color = fill;
+    }
+    return frag_color;
+}
+
+// Computes the signed distance from a line
+float line_distance(vec2 p, vec2 p1, vec2 p2) {
+    vec2 center = (p1 + p2) * 0.5;
+    float len = length(p2 - p1);
+    vec2 dir = (p2 - p1) / len;
+    vec2 rel_p = p - center;
+    return dot(rel_p, vec2(dir.y, -dir.x));
 }
 
 // Computes the signed distance from a line segment
-float line(vec2 p, vec2 p1, vec2 p2) {
+float segment_distance(vec2 p, vec2 p1, vec2 p2) {
     vec2 center = (p1 + p2) * 0.5;
     float len = length(p2 - p1);
     vec2 dir = (p2 - p1) / len;
@@ -73,38 +96,50 @@ float line(vec2 p, vec2 p1, vec2 p2) {
     return max(dist1, dist2);
 }
 
-// v = field sampled at arrowTileCenterCoord(p), scaled by the length
-// desired in pixels for arrows
-// Returns a signed distance from the arrow
-float arrow(vec2 p, vec2 v) {
-    // Make everything relative to the center, which may be fractional
-    p -= arrowTileCenterCoord(p);
+float arrow_triangle(vec2 texcoord, float body, float head, float height, float linewidth, float antialias, float denom) {
+    float w = linewidth / 2.0 + antialias;
+    float r = denom;
+    vec2 start = vec2(0.0, 0.0);//-vec2(body/r, 0.0);
+    vec2 end   = +vec2(body*r, 0.0);
+    head = head*r;
+    // Head : 3 lines
+    float d1 = line_distance(texcoord, end, end - head*vec2(+1.0,-height));
+    float d2 = line_distance(texcoord, end - head*vec2(+1.0,+height), end);
+    float d3 = texcoord.x - end.x + head;
 
-    float mag_v = length(v), mag_p = length(p);
+    // Body : 1 segment
+    float d4 = segment_distance(texcoord, start, end - vec2(linewidth,0.0));
 
-    if (mag_v > 0.0) {
-        // Non-zero velocity case
-        vec2 dir_v = v / mag_v;
-
-        // We can't draw arrows larger than the tile radius, so clamp magnitude.
-        // Enforce a minimum length to help see direction
-        mag_v = clamp(mag_v, 5.0, ARROW_TILE_SIZE * 0.5);
-
-        // Arrow tip location
-        v = dir_v * mag_v;
-
-        // Signed distance from shaft
-        float shaft = line(p, v, -v);
-        // Signed distance from head
-        float head = min(line(p, v, 0.4*v + 0.2*vec2(-v.y, v.x)),
-        line(p, v, 0.4*v + 0.2*vec2(v.y, -v.x)));
-
-        return min(shaft, head);
-    } else {
-        // Signed distance from the center point
-        return mag_p;
-    }
+    float d = min(max(max(d1, d2), -d3), d4);
+    return d;
 }
+
+float arrow_triangle_60(vec2 texcoord, float body, float head, float linewidth, float antialias, float denom) {
+    return arrow_triangle(texcoord, body, head, 0.5, linewidth, antialias, denom);
+}
+
+float arrow_stealth(vec2 texcoord, float body, float head, float linewidth, float antialias) {
+    float w = linewidth / 2.0 + antialias;
+    vec2 start = -vec2(body / 2.0, 0.0);
+    vec2 end   = +vec2(body / 2.0, 0.0);
+    float height = 0.5;
+
+    // Head : 4 lines
+    float d1 = line_distance(texcoord, end - head*vec2(+1.0, -height), end);
+    float d2 = line_distance(texcoord, end - head*vec2(+1.0, -height), end - vec2(3.0 * head / 4.0, 0.0));
+    float d3 = line_distance(texcoord, end - head*vec2(+1.0, +height), end);
+    float d4 = line_distance(texcoord, end - head*vec2(+1.0, +0.5), end - vec2(3.0 * head / 4.0, 0.0));
+
+    // Body : 1 segment
+    float d5 = segment_distance(texcoord, start, end - vec2(linewidth,0.0));
+
+    return min(d5, max( max(-d1, d3), - max(-d2,d4)));
+}
+
+const float linewidth = 2.5;
+const float antialias =  .1;
+float headSize = 0.1;
+float bodySize = 1.0;
 
 void main() {
     vec2 uv = vUv;
@@ -114,6 +149,9 @@ void main() {
     if(calcTexture(uv).a == 0.0) {
         discard;
     }
+
+    vec2 pos = vUv - vec2(0.0, 0.5);
+
     vec2 rg = bilinear(uv);
     float value = getValue(rg);
     float value_t = (value - colorRange.x) / (colorRange.y - colorRange.x);
@@ -121,12 +159,10 @@ void main() {
 
     vec4 color = texture2D(colorRampTexture, ramp_pos);
 
-    float arrow_dist = arrow(uv, bilinear(arrowTileCenterCoord(uv)) * ARROW_TILE_SIZE * 0.4);
-    vec4 arrow_col = vec4(0.0, 0.0, 0.0, clamp(arrow_dist, 0.0, 1.0));
-    vec4 field_col = vec4(bilinear(uv) * 0.5 + 0.5, 0.5, 1.0);
+    float d = arrow_stealth(pos.xy, bodySize, headSize, linewidth, antialias);
+//    float d = arrow_triangle_60(texcoord, body, 0.4*body, linewidth, antialias, denom);
 
-    gl_FragColor = mix(arrow_col, field_col, arrow_col.a);
+    gl_FragColor = filled(d, linewidth, antialias, vec4(1.0, 1.0, 1.0, 1.0));
 
-//    gl_FragColor = color;
 //    gl_FragColor = vec4(1.0, 0.0, 0.5, 1.0);
 }
