@@ -180,6 +180,7 @@ export default class Layer {
   onAdd(m: mapboxgl.Map, gl: WebGLRenderingContext) {
     this.gl = gl;
     this.map = m;
+    const canvas = m.getCanvas();
 
     this.renderer = new Renderer(gl, {
       autoClear: false,
@@ -219,14 +220,19 @@ export default class Layer {
           const w = 1 / Math.pow(2, z);
           return [w, w];
         },
-        getPixelsToUnits: (): [number, number] => [
-          (this.map as any)?.transform.pixelsToGLUnits[0],
-          -(this.map as any)?.transform.pixelsToGLUnits[1],
+        getPixelsToUnits: (): [number, number] => {
+          const pixel = 1;
+          const y = canvas.clientHeight / 2 - pixel / 2;
+          const x = canvas.clientWidth / 2 - pixel / 2;
+          const left = mapboxgl.MercatorCoordinate.fromLngLat(m.unproject([x, y]));
+          const right = mapboxgl.MercatorCoordinate.fromLngLat(m.unproject([x + pixel, y + pixel]));
+
+          return [Math.abs(right.x - left.x), Math.abs(left.y - right.y)];
+        },
+        getPixelsToProjUnit: () => [
+          (this.map as any)?.transform.pixelsPerMeter,
+          (this.map as any)?.transform.pixelsPerMeter,
         ],
-        // getPixelsToUnits: (): [number, number] => [
-        //   (this.map as any)?.transform.pixelsPerMeter,
-        //   (this.map as any)?.transform.pixelsPerMeter,
-        // ],
         getViewTiles: (source: SourceType, renderType: RenderType) => {
           let { type } = source;
           // @ts-ignore

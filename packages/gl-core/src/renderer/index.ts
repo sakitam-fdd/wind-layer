@@ -44,6 +44,11 @@ export interface BaseLayerOptions {
   getPixelsToUnits: () => [number, number];
 
   /**
+   * 像素到投影坐标的转换关系
+   */
+  getPixelsToProjUnit: () => [number, number];
+
+  /**
    * 渲染类型
    * 目前支持三种类型：
    * 0：普通 raster 瓦片渲染
@@ -67,12 +72,12 @@ export interface BaseLayerOptions {
     /**
      * arrow space
      */
-    space?: number | any[];
+    space?: [number, number];
 
     /**
      * arrow size
      */
-    size?: number | any[];
+    size?: [number, number];
   };
   getZoom?: () => number;
   getExtent?: () => number[];
@@ -114,6 +119,7 @@ export const defaultOptions: BaseLayerOptions = {
   getGridTiles: () => [],
   getTileProjSize: (z) => [256, 256],
   getPixelsToUnits: () => [1, 1],
+  getPixelsToProjUnit: () => [1, 1],
   renderType: RenderType.colorize,
   renderFrom: RenderFrom.r,
   styleSpec: {
@@ -144,8 +150,8 @@ export const defaultOptions: BaseLayerOptions = {
     fadeOpacity: 0.93,
     dropRate: 0.003,
     dropRateBump: 0.002,
-    space: 20,
-    size: 16,
+    space: [20, 20],
+    size: [16, 16],
   },
   displayRange: [Infinity, Infinity],
   widthSegments: 1,
@@ -182,8 +188,8 @@ export default class BaseLayer {
   #fadeOpacity: number;
   #dropRate: number;
   #dropRateBump: number;
-  #space: number;
-  #size: number;
+  #space: [number, number];
+  #size: [number, number];
   #colorRange: Vector2;
   #colorRampTexture: DataTexture;
   #nextStencilID: number;
@@ -520,8 +526,8 @@ export default class BaseLayer {
       }
 
       if (this.options.renderType === RenderType.arrow) {
-        this.setSymbolSize(createZoom(this.uid, zoom, 'size', this.options.styleSpec, clear));
-        this.setSymbolSpace(createZoom(this.uid, zoom, 'space', this.options.styleSpec, clear));
+        this.setSymbolSize(this.options.styleSpec?.size);
+        this.setSymbolSpace(this.options.styleSpec?.space);
       }
     }
   }
@@ -733,6 +739,7 @@ export default class BaseLayer {
           u_gl_scale: this.options.glScale?.(),
           symbolSize: this.#size,
           symbolSpace: this.#space,
+          pixelsToProjUnit: this.options.getPixelsToProjUnit(),
         },
       );
     }
@@ -758,6 +765,7 @@ export default class BaseLayer {
         u_gl_scale: this.options.glScale?.(),
         symbolSize: this.#size,
         symbolSpace: this.#space,
+        pixelsToProjUnit: this.options.getPixelsToProjUnit(),
       };
 
       this.renderPipeline.render(

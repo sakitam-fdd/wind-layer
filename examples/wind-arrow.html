@@ -74,7 +74,7 @@
       ],
     },
     center: { lng: 105.70150033978689, lat: 22.76021405309811 }, // starting position [lng, lat]
-    zoom: 0, // starting zoom
+    zoom: 4, // starting zoom
     antialias: true,
   });
 
@@ -227,6 +227,8 @@
           ...interpolateColor
         ],
         'opacity': 1,
+        space: [10, 10],
+        size: [16, 16],
       },
       renderFrom: mapboxWind.RenderFrom.rg,
       displayRange: [0, 104],

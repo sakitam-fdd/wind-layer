@@ -106,7 +106,7 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
         'displayRange',
       ]);
 
-      const zoom = rendererState.sharedState.zoom;
+      const zoom = rendererState.zoom;
       const dataBounds = rendererState.sharedState.u_data_bbox;
       const pixelsToUnits = this.options.getPixelsToUnits();
 
@@ -117,11 +117,11 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
         zoom !== this.lastZoom
       ) {
         const { symbolSize, symbolSpace } = rendererState;
-        const symbolSizeX = pixelsToUnits[0] * symbolSize;
-        const symbolSizeY = pixelsToUnits[1] * symbolSize;
+        const symbolSizeX = pixelsToUnits[0] * symbolSize[0];
+        const symbolSizeY = pixelsToUnits[1] * symbolSize[1];
 
-        const symbolSpaceX = pixelsToUnits[0] * symbolSpace;
-        const symbolSpaceY = pixelsToUnits[1] * symbolSpace;
+        const symbolSpaceX = pixelsToUnits[0] * symbolSpace[0];
+        const symbolSpaceY = pixelsToUnits[1] * symbolSpace[1];
         // 需要考虑图形大小，图形间隔，计算当前视图下所分布的格网数据
         const cols = Math.floor((dataBounds[2] - dataBounds[0]) / (symbolSpaceX + symbolSizeX)); // 列
         const rows = Math.floor((dataBounds[3] - dataBounds[1]) / (symbolSpaceY + symbolSizeY)); // 行
@@ -145,37 +145,23 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
           new Geometry(this.renderer, {
             index: {
               size: 1,
-              data: new Uint16Array([0, 1, 2, 0, 2, 3])
+              data: new Uint16Array([0, 1, 2, 0, 2, 3]),
             },
             position: {
               size: 2,
-              data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1])
+              data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]),
             },
             uv: {
               size: 2,
-              data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1])
+              data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]),
             },
             coords: {
               divisor: 1,
               data: points,
-              // offset: 0,
+              offset: 0,
               size: 2,
-              // stride: 8
+              stride: 8,
             },
-            // size: {
-            //   divisor: 1,
-            //   data: [],
-            //   offset: 0,
-            //   size: 2,
-            //   stride: 16
-            // },
-            // offset: {
-            //   divisor: 1,
-            //   data: [],
-            //   offset: 8,
-            //   size: 2,
-            //   stride: 16
-            // },
           }),
           true,
         );
@@ -193,6 +179,15 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
         new Vector2(this.options.texture.width, this.options.texture.height),
       );
       this.#mesh.program.setUniform('u_fade_t', fade);
+      this.#mesh.program.setUniform('arrowSize', rendererState.symbolSize);
+      this.#mesh.program.setUniform(
+        'pixelsToProjUnit',
+        new Vector2(rendererState.pixelsToProjUnit[0], rendererState.pixelsToProjUnit[1]),
+      );
+      this.#mesh.program.setUniform('u_bbox', rendererState.extent);
+      this.#mesh.program.setUniform('u_data_bbox', dataBounds);
+      this.#mesh.program.setUniform('u_head', 0.1);
+      this.#mesh.program.setUniform('u_antialias', 0.1);
 
       this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;
