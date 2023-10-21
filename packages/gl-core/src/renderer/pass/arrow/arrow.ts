@@ -145,10 +145,12 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
           new Geometry(this.renderer, {
             index: {
               size: 1,
+              // data: new Uint16Array([0, 1, 2, 2, 1, 3]),
               data: new Uint16Array([0, 1, 2, 0, 2, 3]),
             },
             position: {
               size: 2,
+              // data: new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1]),
               data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]),
             },
             uv: {
@@ -187,7 +189,6 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
       this.#mesh.program.setUniform('u_bbox', rendererState.extent);
       this.#mesh.program.setUniform('u_data_bbox', dataBounds);
       this.#mesh.program.setUniform('u_head', 0.1);
-      this.#mesh.program.setUniform('u_antialias', 0.1);
 
       this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;
