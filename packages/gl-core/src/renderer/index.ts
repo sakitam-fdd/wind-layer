@@ -404,6 +404,7 @@ export default class BaseLayer {
         texture: composePass.textures.current,
         textureNext: composePass.textures.next,
         getPixelsToUnits: this.options.getPixelsToUnits,
+        getGridTiles: this.options.getGridTiles,
       });
       this.renderPipeline?.addPass(composePass);
       this.renderPipeline?.addPass(arrowPass);

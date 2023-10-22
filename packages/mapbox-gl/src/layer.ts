@@ -362,7 +362,7 @@ export default class Layer {
           const { transform } = map;
 
           const opts = {
-            tileSize: 512,
+            tileSize: 256,
             minzoom: map.getMinZoom(),
             maxzoom: map.getMaxZoom(),
             roundZoom: false,

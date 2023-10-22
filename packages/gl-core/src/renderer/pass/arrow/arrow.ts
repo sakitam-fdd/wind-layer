@@ -14,6 +14,7 @@ import frag from '../../../shaders/arraw.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
 import { BandType } from '../../../type';
 import { SourceType } from '../../../source';
+import TileID from '../../../tile/TileID';
 
 export interface ArrowPassOptions {
   source: SourceType;
@@ -21,7 +22,10 @@ export interface ArrowPassOptions {
   textureNext: Texture;
   bandType: BandType;
   getPixelsToUnits: () => [number, number];
+  getGridTiles: () => TileID[];
 }
+
+const TILE_EXTENT = 4096.0;
 
 /**
  * arrow
@@ -88,6 +92,39 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
     });
   }
 
+  createTileVertexArray(t) {
+    const space = 20;
+    const tileSize = 512;
+    const column = Math.round(tileSize / space);
+
+    const columnUnit = 1 / column;
+
+    const halfUnit = columnUnit / 2;
+    const points: any[] = [];
+
+    for (let j = 0; j < column; j++) {
+      for (let i = 0; i < column; i++) {
+        points.push({
+          x: TILE_EXTENT * (halfUnit + i * columnUnit),
+          y: TILE_EXTENT * (halfUnit + j * columnUnit),
+        });
+      }
+    }
+
+    const positions = new Float32Array(points.length * 2);
+
+    for (let i = 0; i < points.length; i++) {
+      const point = points[i];
+      const pos = {
+        x: Math.round(point.x),
+        y: Math.round(point.y),
+      };
+      if (pos.x < 0 || pos.x >= TILE_EXTENT || pos.y < 0 || pos.y >= TILE_EXTENT) continue;
+      positions[2 * i] = pos.x / TILE_EXTENT;
+      positions[2 * i + 1] = pos.y * TILE_EXTENT;
+    }
+  }
+
   /**
    * @param rendererParams
    * @param rendererState
@@ -96,7 +133,24 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
     const attr = this.renderer.attributes;
     this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
     const camera = rendererParams.cameras.camera;
-    if (rendererState && this.#mesh) {
+
+    console.log(this.options.getGridTiles());
+
+    const tiles = this.options.getGridTiles();
+
+    // export default function(tile: interface {tileID: OverscaledTileID, tileSize: number}, pixelValue: number, z: number): number {
+    //   return pixelValue * (EXTENT / (tile.tileSize * Math.pow(2, z - tile.tileID.overscaledZ)));
+    // }
+    //
+    // scaleFactor
+    //
+    // function getPixelsToTileUnitsMatrix(tile: interface {tileID: OverscaledTileID, tileSize: number, +tileTransform: TileTransform}, transform: Transform): Float32Array {
+    //   const {scale} = tile.tileTransform;
+    //   const s = scale * EXTENT / (tile.tileSize * Math.pow(2, transform.zoom - tile.tileID.overscaledZ + tile.tileID.canonical.z));
+    //   return mat2.scale(new Float32Array(4), transform.inverseAdjustmentMatrix, [s, s]);
+    // }
+
+    if (rendererState && this.#mesh && tiles && tiles.length > 0) {
       const uniforms = utils.pick(rendererState, [
         'opacity',
         'colorRange',
@@ -109,6 +163,13 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
       const zoom = rendererState.zoom;
       const dataBounds = rendererState.sharedState.u_data_bbox;
       const pixelsToUnits = this.options.getPixelsToUnits();
+
+      for (let i = 0; i < tiles.length; i++) {
+        const tile = tiles[i];
+        const scaleFactor = Math.pow(2, zoom - tile.overscaledZ);
+
+        const pixelToUnit = 1 / (512 * scaleFactor);
+      }
 
       if (
         dataBounds &&
