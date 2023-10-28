@@ -149,7 +149,7 @@ void main () {
     v_linewidth = mix(0.18, 0.12, v_speed_t);
     v_head = u_head;
     v_antialias = 1.0 / min(arrowSize.x, arrowSize.y);
-    v_body = mix(0.25, 4.0, v_speed_t) * 3.0;
+    v_body = mix(0.25, 4.0, v_speed_t) * 2.0;
 
     gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(worldPosition, 0.0, 1.0);
 }

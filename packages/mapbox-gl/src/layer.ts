@@ -356,13 +356,13 @@ export default class Layer {
         getSteadyStateExtent: () => {
           return [0, 0, 0, 0];
         },
-        getGridTiles: () => {
+        getGridTiles: (tileSize) => {
           const map = this.map as any;
           if (!map) return [];
           const { transform } = map;
 
           const opts = {
-            tileSize: 256,
+            tileSize: tileSize ?? 256,
             minzoom: map.getMinZoom(),
             maxzoom: map.getMaxZoom(),
             roundZoom: false,

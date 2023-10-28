@@ -149,6 +149,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     // TODO: 瓦片范围和行列数是否可以提到瓦片计算的时候获取，可以减少几次循环
 
     rendererState.sharedState.u_data_bbox = [xmin, ymin, xmax, ymax];
+    rendererState.sharedState.u_data_zooms = [zmin, zmax];
 
     if (renderTarget) {
       renderTarget.clear();
@@ -162,6 +163,9 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
       // 3. 计算出 fbo 所需大小 (此处有可能计算的宽高超出纹理最大大小，我们需要根据宽高比例进行重采样)
       let width = w * (this.options.source.tileSize ?? defaultSize);
       let height = h * (this.options.source.tileSize ?? defaultSize);
+
+      rendererState.sharedState.u_tiles_size = [width, height];
+
       const maxTextureSize = this.renderer.gl.getParameter(this.renderer.gl.MAX_TEXTURE_SIZE) * 0.5;
       const maxRenderBufferSize =
         this.renderer.gl.getParameter(this.renderer.gl.MAX_RENDERBUFFER_SIZE) * 0.5;

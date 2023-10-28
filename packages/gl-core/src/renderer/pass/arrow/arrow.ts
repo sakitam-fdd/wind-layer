@@ -22,7 +22,7 @@ export interface ArrowPassOptions {
   textureNext: Texture;
   bandType: BandType;
   getPixelsToUnits: () => [number, number];
-  getGridTiles: () => TileID[];
+  getGridTiles: (tileSize: number) => TileID[];
 }
 
 const TILE_EXTENT = 4096.0;
@@ -32,10 +32,7 @@ const TILE_EXTENT = 4096.0;
  */
 export default class ArrowPass extends Pass<ArrowPassOptions> {
   #program: WithNull<Program>;
-  #mesh: WithNull<Mesh>;
   #geometry: WithNull<Geometry>;
-  private lastZoom = Infinity;
-  private lastDataBounds: number[];
 
   readonly prerender = false;
 
@@ -69,30 +66,9 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
       includes: shaderLib,
       transparent: true,
     });
-
-    this.#geometry = new Geometry(renderer, {
-      position: {
-        size: 2,
-        data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
-      },
-      uv: {
-        size: 2,
-        data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
-      },
-      // index: {
-      //   size: 1,
-      //   data: new Uint16Array([0, 1, 2, 2, 1, 3]),
-      // },
-    });
-
-    this.#mesh = new Mesh(renderer, {
-      mode: renderer.gl.TRIANGLES,
-      program: this.#program,
-      geometry: this.#geometry,
-    });
   }
 
-  createTileVertexArray(t) {
+  createTileVertexArray() {
     const space = 20;
     const tileSize = 512;
     const column = Math.round(tileSize / space);
@@ -121,8 +97,10 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
       };
       if (pos.x < 0 || pos.x >= TILE_EXTENT || pos.y < 0 || pos.y >= TILE_EXTENT) continue;
       positions[2 * i] = pos.x / TILE_EXTENT;
-      positions[2 * i + 1] = pos.y * TILE_EXTENT;
+      positions[2 * i + 1] = pos.y / TILE_EXTENT;
     }
+
+    return positions;
   }
 
   /**
@@ -133,10 +111,8 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
     const attr = this.renderer.attributes;
     this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
     const camera = rendererParams.cameras.camera;
-
-    console.log(this.options.getGridTiles());
-
-    const tiles = this.options.getGridTiles();
+    const tileSize = this.options.source.tileSize ?? 256;
+    const tiles = this.options.getGridTiles(tileSize);
 
     // export default function(tile: interface {tileID: OverscaledTileID, tileSize: number}, pixelValue: number, z: number): number {
     //   return pixelValue * (EXTENT / (tile.tileSize * Math.pow(2, z - tile.tileID.overscaledZ)));
@@ -150,7 +126,7 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
     //   return mat2.scale(new Float32Array(4), transform.inverseAdjustmentMatrix, [s, s]);
     // }
 
-    if (rendererState && this.#mesh && tiles && tiles.length > 0) {
+    if (rendererState && this.#program && tiles && tiles.length > 0) {
       const uniforms = utils.pick(rendererState, [
         'opacity',
         'colorRange',
@@ -162,111 +138,79 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
 
       const zoom = rendererState.zoom;
       const dataBounds = rendererState.sharedState.u_data_bbox;
-      const pixelsToUnits = this.options.getPixelsToUnits();
+      // const pixelsToUnits = this.options.getPixelsToUnits();
+
+      if (!this.#geometry) {
+        this.#geometry = new Geometry(this.renderer, {
+          index: {
+            size: 1,
+            // data: new Uint16Array([0, 1, 2, 2, 1, 3]),
+            data: new Uint16Array([0, 1, 2, 0, 2, 3]),
+          },
+          position: {
+            size: 2,
+            // data: new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1]),
+            data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]),
+          },
+          uv: {
+            size: 2,
+            data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]),
+          },
+          coords: {
+            divisor: 1,
+            data: this.createTileVertexArray(),
+            offset: 0,
+            size: 2,
+            stride: 8,
+          },
+        });
+      }
 
       for (let i = 0; i < tiles.length; i++) {
         const tile = tiles[i];
         const scaleFactor = Math.pow(2, zoom - tile.overscaledZ);
 
-        const pixelToUnit = 1 / (512 * scaleFactor);
-      }
+        const pixelToUnits = 1 / (tileSize * scaleFactor);
 
-      if (
-        dataBounds &&
-        pixelsToUnits &&
-        JSON.stringify(dataBounds) !== JSON.stringify(this.lastDataBounds) &&
-        zoom !== this.lastZoom
-      ) {
-        const { symbolSize, symbolSpace } = rendererState;
-        const symbolSizeX = pixelsToUnits[0] * symbolSize[0];
-        const symbolSizeY = pixelsToUnits[1] * symbolSize[1];
+        const mesh = new Mesh(this.renderer, {
+          mode: this.renderer.gl.TRIANGLES,
+          program: this.#program!,
+          geometry: this.#geometry!,
+        });
 
-        const symbolSpaceX = pixelsToUnits[0] * symbolSpace[0];
-        const symbolSpaceY = pixelsToUnits[1] * symbolSpace[1];
-        // 需要考虑图形大小，图形间隔，计算当前视图下所分布的格网数据
-        const cols = Math.floor((dataBounds[2] - dataBounds[0]) / (symbolSpaceX + symbolSizeX)); // 列
-        const rows = Math.floor((dataBounds[3] - dataBounds[1]) / (symbolSpaceY + symbolSizeY)); // 行
-        const points = new Float32Array(cols * rows * 2);
-        let k = 0;
-        for (let j = 0; j < rows; j++) {
-          for (let i = 0; i < cols; i++) {
-            points.set(
-              [
-                dataBounds[0] + (symbolSpaceX + symbolSizeX) * i,
-                dataBounds[1] + (symbolSpaceY + symbolSizeY) * j,
-              ],
-              2 * k,
-            );
-            k++;
+        mesh.scale.set(1, 1, 1);
+        mesh.position.set(0, 0, 0);
+
+        Object.keys(uniforms).forEach((key) => {
+          if (uniforms[key] !== undefined) {
+            mesh?.program.setUniform(key, uniforms[key]);
           }
-        }
+        });
 
-        this.lastZoom = zoom;
-        this.#mesh.updateGeometry(
-          new Geometry(this.renderer, {
-            index: {
-              size: 1,
-              // data: new Uint16Array([0, 1, 2, 2, 1, 3]),
-              data: new Uint16Array([0, 1, 2, 0, 2, 3]),
-            },
-            position: {
-              size: 2,
-              // data: new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1]),
-              data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]),
-            },
-            uv: {
-              size: 2,
-              data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]),
-            },
-            coords: {
-              divisor: 1,
-              data: points,
-              offset: 0,
-              size: 2,
-              stride: 8,
-            },
-          }),
-          true,
+        const fade = this.options.source?.getFadeTime?.() || 0;
+        mesh.program.setUniform(
+          'u_image_res',
+          new Vector2(this.options.texture.width, this.options.texture.height),
         );
+        mesh.program.setUniform('u_fade_t', fade);
+        mesh.program.setUniform('arrowSize', rendererState.symbolSize);
+        mesh.program.setUniform('pixelsToProjUnit', new Vector2(pixelToUnits, pixelToUnits));
+        mesh.program.setUniform('u_bbox', rendererState.extent);
+        mesh.program.setUniform('u_data_bbox', dataBounds);
+        mesh.program.setUniform('u_head', 0.1);
+
+        mesh.updateMatrix();
+        mesh.worldMatrixNeedsUpdate = false;
+        mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, mesh.localMatrix);
+        mesh.draw({
+          ...rendererParams,
+          camera,
+        });
       }
-
-      Object.keys(uniforms).forEach((key) => {
-        if (uniforms[key] !== undefined) {
-          this.#mesh?.program.setUniform(key, uniforms[key]);
-        }
-      });
-
-      const fade = this.options.source?.getFadeTime?.() || 0;
-      this.#mesh.program.setUniform(
-        'u_image_res',
-        new Vector2(this.options.texture.width, this.options.texture.height),
-      );
-      this.#mesh.program.setUniform('u_fade_t', fade);
-      this.#mesh.program.setUniform('arrowSize', rendererState.symbolSize);
-      this.#mesh.program.setUniform(
-        'pixelsToProjUnit',
-        new Vector2(rendererState.pixelsToProjUnit[0], rendererState.pixelsToProjUnit[1]),
-      );
-      this.#mesh.program.setUniform('u_bbox', rendererState.extent);
-      this.#mesh.program.setUniform('u_data_bbox', dataBounds);
-      this.#mesh.program.setUniform('u_head', 0.1);
-
-      this.#mesh.updateMatrix();
-      this.#mesh.worldMatrixNeedsUpdate = false;
-      this.#mesh.worldMatrix.multiply(rendererParams.scene.worldMatrix, this.#mesh.localMatrix);
-      this.#mesh.draw({
-        ...rendererParams,
-        camera,
-      });
     }
   }
 
   destroy() {
-    if (this.#mesh) {
-      this.#mesh.destroy();
-      this.#mesh = null;
-    }
-
     if (this.#program) {
       this.#program.destroy();
       this.#program = null;
