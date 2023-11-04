@@ -61,6 +61,11 @@ export default class TileID {
   public options: TileIDOptions;
 
   /**
+   * 挂载的其他数据
+   */
+  public dep: any;
+
+  /**
    * @param overscaledZ 扩大的 z 值
    * @param wrap 所处世界
    * @param z 层级

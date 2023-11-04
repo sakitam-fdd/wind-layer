@@ -353,9 +353,6 @@ export default class Layer {
           const p1 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmax, minY));
           return [p0.x, p0.y, p1.x, p1.y];
         },
-        getSteadyStateExtent: () => {
-          return [0, 0, 0, 0];
-        },
         getGridTiles: (tileSize) => {
           const map = this.map as any;
           if (!map) return [];
