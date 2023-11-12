@@ -118,15 +118,13 @@ void main() {
     }
 
     if (display) {
-        float d = arrow_stealth(pos.xy, v_body, v_head, v_linewidth, v_antialias);
-        gl_FragColor = filled(d, 0.15, 0.01, color);
-//        if (v_speed > 1.0) {
-//            float d = arrow_stealth(pos.xy, v_body, v_head, v_linewidth, v_antialias);
-//            gl_FragColor = filled(d, 0.15, 0.01, color);
-//        } else {
-//            float d = disc(pos, 0.15);
-//            gl_FragColor = filled(d, 0.01, 0.01, color);
-//        }
+        if (v_speed > 0.2) {
+            float d = arrow_stealth(pos.xy, v_body, v_head, v_linewidth, v_antialias);
+            gl_FragColor = filled(d, 0.15, 0.01, color);
+        } else {
+            float d = disc(pos, 0.15);
+            gl_FragColor = filled(d, 0.01, 0.01, color);
+        }
     } else {
         gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
     }

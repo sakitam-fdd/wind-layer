@@ -9,6 +9,7 @@ import TileID from '../../../tile/TileID';
 import { SourceType } from '../../../source';
 
 export interface ParticlesComposePassOptions {
+  id: string;
   source: SourceType;
   bandType: BandType;
   renderFrom: RenderFrom;
@@ -39,7 +40,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
   ) {
     super(id, renderer, options);
 
-    this.#uid = utils.uid('ParticlesComposePass');
+    this.#uid = options.id;
 
     this.#program = new Program(renderer, {
       vertexShader: vert,

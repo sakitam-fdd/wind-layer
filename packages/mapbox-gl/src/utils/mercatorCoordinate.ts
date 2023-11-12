@@ -60,6 +60,10 @@ export function meterInMercatorCoordinateUnits(y) {
   return (1 / earthCircumference) * mercatorScale(latFromMercatorY(y));
 }
 
+export function pixelsInMercatorCoordinateUnits(lat, pixelsPerMeter) {
+  return (1 / earthCircumference) * mercatorScale(lat) * pixelsPerMeter;
+}
+
 export const MAX_MERCATOR_LATITUDE = 85.051129;
 
 /**

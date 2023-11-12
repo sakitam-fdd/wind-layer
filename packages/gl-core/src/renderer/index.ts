@@ -326,6 +326,7 @@ export default class BaseLayer {
       this.renderPipeline?.addPass(colorizePass);
     } else if (this.options.renderType === RenderType.particles) {
       const composePass = new ParticlesComposePass('ParticlesComposePass', this.renderer, {
+        id: utils.uid('ParticlesComposePass'),
         bandType,
         source: this.source,
         renderFrom: this.options.renderFrom ?? RenderFrom.r,
@@ -384,6 +385,7 @@ export default class BaseLayer {
       );
     } else if (this.options.renderType === RenderType.arrow) {
       const composePass = new ArrowComposePass('ArrowComposePass', this.renderer, {
+        id: utils.uid('ArrowComposePass'),
         bandType,
         source: this.source,
         renderFrom: this.options.renderFrom ?? RenderFrom.r,
@@ -397,6 +399,7 @@ export default class BaseLayer {
         textureNext: composePass.textures.next,
         getPixelsToUnits: this.options.getPixelsToUnits,
         getGridTiles: this.options.getGridTiles,
+        maskPass: this.#maskPass,
       });
       this.renderPipeline?.addPass(composePass);
       this.renderPipeline?.addPass(arrowPass);
@@ -693,6 +696,11 @@ export default class BaseLayer {
         const particles = this.renderPipeline?.getPass('ParticlesPass');
         if (particles) {
           particles.setMaskPass(this.#maskPass);
+        }
+
+        const arrow = this.renderPipeline?.getPass('ArrowPass');
+        if (arrow) {
+          arrow.setMaskPass(this.#maskPass);
         }
       }
 

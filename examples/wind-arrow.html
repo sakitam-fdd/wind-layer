@@ -217,6 +217,85 @@
     window.imageSource = imageSource;
     window.tileSource = tileSource;
 
+    const fill = new mapboxWind.Layer('fill', imageSource, {
+      wireframe: true,
+      styleSpec: {
+        'fill-color': [
+          'interpolate',
+          ['linear'],
+          ['get', 'value'],
+          ...interpolateColor
+        ],
+        'opacity': 1,
+      },
+      renderFrom: mapboxWind.RenderFrom.rg,
+      widthSegments: 1,
+      heightSegments: 1,
+      displayRange: [0, 104],
+      renderType: mapboxWind.RenderType.colorize,
+      picking: true,
+      // mask: {
+      //   data: clip,
+      //   // type: mapboxWind.MaskType.outside,
+      //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+      // }
+    });
+
+    const particlesConfig = {
+      speedFactor: [
+        'interpolate',
+        ['exponential', 0.5],
+        ['zoom'],
+        0,
+        1,
+        15,
+        0.01
+      ],
+      fadeOpacity: 0.93,
+      dropRate: 0.003,
+      dropRateBump: 0.002,
+    }
+
+    const wind = new mapboxWind.Layer('wind', imageSource, {
+      wireframe: false,
+      styleSpec: {
+        'fill-color': [
+          'interpolate',
+          ['step', 1],
+          ['get', 'value'],
+          0, '#fff',
+          104, '#fff',
+        ],
+        'opacity': [
+          'interpolate',
+          ['exponential', 0.5],
+          ['zoom'],
+          1,
+          1,
+          2,
+          1
+        ],
+        numParticles: [
+          'interpolate',
+          ['exponential', 0.5],
+          ['zoom'],
+          0, // zoom
+          65535 / 8, // numParticles
+          8, // zoom
+          65535 / 16 // numParticles
+        ],
+        ...particlesConfig,
+      },
+      renderFrom: mapboxWind.RenderFrom.rg,
+      displayRange: [0, 104],
+      renderType: mapboxWind.RenderType.particles,
+      // mask: {
+      //   data: clip,
+      //   // type: mapboxWind.MaskType.outside,
+      //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+      // }
+    });
+
     const arrow = new mapboxWind.Layer('arrow', imageSource, {
       wireframe: false,
       styleSpec: {
@@ -225,6 +304,8 @@
           ['step', 1],
           ['get', 'value'],
           ...interpolateColor
+          // 0, '#fff',
+          // 104, '#fff',
         ],
         'opacity': 1,
         space: 20,
@@ -247,6 +328,8 @@
       })
     })
 
+    map.addLayer(fill);
+    // map.addLayer(wind);
     map.addLayer(arrow);
   });
 </script>

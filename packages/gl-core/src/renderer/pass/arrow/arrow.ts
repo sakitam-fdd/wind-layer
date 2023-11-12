@@ -16,6 +16,7 @@ import * as shaderLib from '../../../shaders/shaderLib';
 import { BandType } from '../../../type';
 import { SourceType } from '../../../source';
 import TileID from '../../../tile/TileID';
+import MaskPass from '../mask';
 
 export interface ArrowPassOptions {
   source: SourceType;
@@ -24,6 +25,7 @@ export interface ArrowPassOptions {
   bandType: BandType;
   getPixelsToUnits: () => [number, number];
   getGridTiles: (tileSize: number) => TileID[];
+  maskPass?: MaskPass;
 }
 
 const TILE_EXTENT = 4096.0;
@@ -170,6 +172,12 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
     //   return mat2.scale(new Float32Array(4), transform.inverseAdjustmentMatrix, [s, s]);
     // }
 
+    let stencil;
+
+    if (this.maskPass) {
+      stencil = this.maskPass.render(rendererParams, rendererState);
+    }
+
     if (rendererState && this.#mesh && tiles && tiles.length > 0) {
       const uniforms = utils.pick(rendererState, [
         'opacity',
@@ -287,6 +295,7 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
         this.#mesh.program.setUniform('u_bbox', rendererState.extent);
         this.#mesh.program.setUniform('u_data_bbox', dataBounds);
         this.#mesh.program.setUniform('u_head', 0.1);
+        this.#mesh.program.setUniform('u_devicePixelRatio', attr.dpr);
 
         this.#mesh.updateMatrix();
         this.#mesh.worldMatrixNeedsUpdate = false;
@@ -296,6 +305,10 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
           camera,
         });
       }
+    }
+
+    if (!stencil) {
+      this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
     }
   }
 

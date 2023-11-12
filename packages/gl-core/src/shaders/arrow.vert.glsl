@@ -8,6 +8,7 @@ uniform vec2 arrowSize;
 uniform float u_head;
 
 uniform vec2 resolution;
+uniform float u_devicePixelRatio;
 uniform vec2 pixelsToProjUnit;
 uniform vec3 cameraPosition;
 uniform mat4 viewMatrix;
@@ -92,7 +93,7 @@ void rotate2d(inout vec2 v, float a){
 
 void main () {
     vUv = uv;
-    vec2 size = arrowSize * pixelsToProjUnit;
+    vec2 size = arrowSize * pixelsToProjUnit * u_devicePixelRatio;
     vec2 halfSize = size / 2.0;
 //    vec4 worldPosition = vec4(coords, 0.0, 1.0) * modelMatrix;
 //
@@ -130,12 +131,9 @@ void main () {
     // 这里需要实现 anchor
     worldPosition += halfSize * vec2(1.0, 0);
 
-    vUv = vec2(uv.x, 1.0 - uv.y);
+    vUv = vec2(uv.x, uv.y);
 
     vec2 textureCoord = (coords.xy - u_data_bbox.xy) / (u_data_bbox.zw - u_data_bbox.xy);
-    #ifdef USE_WGS84
-    textureCoord = mercatorToWGS84(textureCoord);
-    #endif
 
     vec2 rg = bilinear(textureCoord);
     float value = getValue(rg);
