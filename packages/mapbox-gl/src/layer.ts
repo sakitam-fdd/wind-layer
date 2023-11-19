@@ -6,10 +6,7 @@ import type { BaseLayerOptions, SourceType } from 'wind-gl-core';
 import { BaseLayer, LayerSourceType, RenderType, TileID, polygon2buffer } from 'wind-gl-core';
 
 import CameraSync from './utils/CameraSync';
-import {
-  getCoordinatesCenterTileID,
-  pixelsInMercatorCoordinateUnits,
-} from './utils/mercatorCoordinate';
+import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
 
 import { expandTiles, getTileBounds, getTileProjBounds } from './utils/tile';
 
@@ -199,10 +196,6 @@ export default class Layer {
     this.sync = new CameraSync(this.map, 'perspective', this.scene);
     this.planeCamera = new OrthographicCamera(0, 1, 1, 0, 0, 1);
 
-    Math.abs(
-      (512 * (1 / Math.cos((latitude * Math.PI) / 180))) / ThreeboxConstants.EARTH_CIRCUMFERENCE,
-    );
-
     this.layer = new BaseLayer(
       this.source,
       {
@@ -235,14 +228,7 @@ export default class Layer {
           const left = mapboxgl.MercatorCoordinate.fromLngLat(m.unproject([x, y]));
           const right = mapboxgl.MercatorCoordinate.fromLngLat(m.unproject([x + pixel, y + pixel]));
 
-          const v = [Math.abs(right.x - left.x), Math.abs(left.y - right.y)];
-
-          const pixelsPerMeter = (this.map as any)?.transform.pixelsPerMeter;
-
-          const m = pixelsInMercatorCoordinateUnits((this.map as any).getCenter().lat, pixelsPerMeter);
-
-          console.log(v, m);
-          return [m, m];
+          return [Math.abs(right.x - left.x), Math.abs(left.y - right.y)];
         },
         getPixelsToProjUnit: () => [
           (this.map as any)?.transform.pixelsPerMeter,

@@ -188,17 +188,15 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
         'displayRange',
       ]);
 
-      // const zoom = rendererState.zoom;
+      const zoom = rendererState.zoom;
       const dataBounds = rendererState.sharedState.u_data_bbox;
-      const pixelsToUnits = this.options.getPixelsToUnits();
       const position = this.createTileVertexArray(tileSize, rendererState.symbolSpace);
       const pos = new Float32Array(position.length);
       for (let i = 0; i < tiles.length; i++) {
         const tile = tiles[i];
+        const bounds = tile.getTileProjBounds();
 
         if (!this.#cache.has(tile.tileKey)) {
-          const bounds = tile.getTileProjBounds();
-
           for (let j = 0; j < position.length; j += 2) {
             pos[j] = bounds.left + position[j] * (bounds.right - bounds.left);
             pos[j + 1] = bounds.top + position[j + 1] * (bounds.bottom - bounds.top);
@@ -271,9 +269,12 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
         //
         // this.#mesh.updateGeometry(geometry);
 
-        // const scaleFactor = Math.pow(2, zoom - tile.overscaledZ);
+        const scaleFactor = Math.pow(2, zoom - tile.overscaledZ);
 
-        // const pixelToUnits = 1 / (tileSize * scaleFactor);
+        const max = Math.max(bounds.right - bounds.right, bounds.bottom - bounds.top);
+        const scale = 1 / max;
+
+        const pixelToUnits = 1 / (tileSize * scaleFactor) / scale;
 
         Object.keys(uniforms).forEach((key) => {
           if (uniforms[key] !== undefined) {
@@ -288,10 +289,7 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
         );
         this.#mesh.program.setUniform('u_fade_t', fade);
         this.#mesh.program.setUniform('arrowSize', rendererState.symbolSize);
-        this.#mesh.program.setUniform(
-          'pixelsToProjUnit',
-          new Vector2(pixelsToUnits[0], pixelsToUnits[1]),
-        );
+        this.#mesh.program.setUniform('pixelsToProjUnit', new Vector2(pixelToUnits, pixelToUnits));
         this.#mesh.program.setUniform('u_bbox', rendererState.extent);
         this.#mesh.program.setUniform('u_data_bbox', dataBounds);
         this.#mesh.program.setUniform('u_head', 0.1);

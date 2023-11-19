@@ -53,17 +53,17 @@
         },
       },
       layers: [
-        // {
-        //   id: 'carto',
-        //   type: 'raster',
-        //   source: 'carto',
-        //   // minzoom: 1,
-        //   // maxzoom: 22,
-        //   paint: {
-        //     // 'raster-resampling': 'nearest',
-        //     // 'raster-fade-duration': 0,
-        //   },
-        // },
+        {
+          id: 'carto',
+          type: 'raster',
+          source: 'carto',
+          // minzoom: 1,
+          // maxzoom: 22,
+          paint: {
+            // 'raster-resampling': 'nearest',
+            // 'raster-fade-duration': 0,
+          },
+        },
         {
           id: 'background',
           type: 'background',
@@ -117,48 +117,6 @@
   map.on('load', async function () {
     const clip = await fetch('./data/china.geojson').then(res => res.json());
     const interpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);
-    //
-    // map.addSource('tile-bbox', {
-    //   type: 'geojson',
-    //   data: {
-    //     'type': 'FeatureCollection',
-    //     'features': [],
-    //   },
-    // });
-    //
-    // map.addLayer({
-    //   type: 'line',
-    //   source: 'tile-bbox',
-    //   id: 'tile-bbox',
-    //   paint: {
-    //     'line-color': 'red',
-    //     'line-width': 1,
-    //   },
-    //   layout: {
-    //     'line-cap': 'round',
-    //     'line-join': 'round',
-    //   },
-    // });
-    //
-    // map.addLayer({
-    //   type: 'symbol',
-    //   source: 'tile-bbox',
-    //   id: 'tile-bbox-label',
-    //   'layout': {
-    //     // get the title name from the source's "title" property
-    //     'text-field': ['get', 'tile'],
-    //     // 'text-font': [
-    //     //     'Open Sans Semibold',
-    //     //     'Arial Unicode MS Bold',
-    //     // ],
-    //     // 'text-offset': [0, 1.25],
-    //     // 'text-anchor': 'top',
-    //   },
-    //   paint: {
-    //     'text-color': 'red'
-    //   },
-    //   'filter': ['==', '$type', 'Point'],
-    // });
 
     const imageSource = new mapboxWind.ImageSource('wind1', {
       // tileSize: 256,
@@ -174,50 +132,38 @@
         [-180, -85.051129],
       ],
       url: 'http://localhost:5000/2023111700/2023111703/0/0/0/wind-surface.jpeg',
-      // coordinates: [
-      //   [-78.120282611, 68.846393966],
-      //   [132.453327310, 68.846393966],
-      //   [132.453327310, -75.191804486],
-      //   [-78.120282611, -75.191804486],
-      // ],
-      // url: 'http://localhost:5000/2023111700/2023111703/0/0/0/area.jpeg',
-      // coordinates: [
-      //   [
-      //     0,
-      //     85.051129
-      //   ],
-      //   [
-      //     180,
-      //     85.051129
-      //   ],
-      //   [
-      //     180,
-      //     -85.051129
-      //   ],
-      //   [
-      //     0,
-      //     -85.051129
-      //   ],
-      // ],
-      // url: 'http://localhost:5000/2023111700/2023111703/0/0/0/7.jpeg',
-      // dataRange: [-34.37186050415039, 46.51813888549805, -42.12305450439453, 49.66694259643555],
     });
 
-    const tileSource = new mapboxWind.TileSource('wind', {
+    const source = new mapboxWind.TimelineSource('wind', {
+      sourceType: mapboxWind.LayerSourceType.tile,
       tileSize: 256,
       minZoom: 0,
-      maxZoom: 4,
+      maxZoom: 2,
       roundZoom: true,
+      duration: 1,
+      endDelay: 0,
+      repeat: true,
+      autoplay: true,
       decodeType: mapboxWind.DecodeType.imageWithExif,
-      wrapX: false,
-      // tileBounds: [-78.120282611, -75.191804486, 132.453327310, 68.846393966],
-      url: 'http://localhost:5000/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
+      intervals: [
+        '03',
+        '06',
+        '09',
+        '12',
+        '15',
+        '18',
+        '21',
+      ].map((id, index) => ({
+        // url: `http://localhost:5000/processed/2023041700/20230417${index < 10 ? '0' + index.toString() : index.toString()}/{z}/{x}/{y}/wind-surface.jpeg`,
+        url: `http://localhost:5000/2023111700/20231117${id}/{z}/{x}/{y}/wind-surface.jpeg`
+      })),
+      wrapX: true,
     });
 
     window.imageSource = imageSource;
-    window.tileSource = tileSource;
+    window.tileSource = source;
 
-    const fill = new mapboxWind.Layer('fill', imageSource, {
+    const fill = new mapboxWind.Layer('fill', source, {
       wireframe: true,
       styleSpec: {
         'fill-color': [
@@ -256,7 +202,7 @@
       dropRateBump: 0.002,
     }
 
-    const wind = new mapboxWind.Layer('wind', imageSource, {
+    const wind = new mapboxWind.Layer('wind', source, {
       wireframe: false,
       styleSpec: {
         'fill-color': [
@@ -296,20 +242,20 @@
       // }
     });
 
-    const arrow = new mapboxWind.Layer('arrow', imageSource, {
+    const arrow = new mapboxWind.Layer('arrow', source, {
       wireframe: false,
       styleSpec: {
         'fill-color': [
           'interpolate',
           ['step', 1],
           ['get', 'value'],
-          ...interpolateColor
-          // 0, '#fff',
-          // 104, '#fff',
+          // ...interpolateColor
+          0, '#fff',
+          104, '#fff',
         ],
         'opacity': 1,
         space: 20,
-        size: [30, 20],
+        size: [12, 10],
       },
       renderFrom: mapboxWind.RenderFrom.rg,
       displayRange: [0, 104],

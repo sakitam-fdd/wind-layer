@@ -71,9 +71,7 @@ float getValue(vec2 rg) {
 }
 
 float getAngle(vec2 rg) {
-    float angle = atan(rg.x, rg.y);
-    angle -= PI / 2.0;
-
+    float angle = atan(rg.y, rg.x);
     return angle;
 }
 
@@ -82,43 +80,10 @@ void rotate2d(inout vec2 v, float a){
     v = m * v;
 }
 
-//vec2 calc_offset(vec2 extrusion, float radius,  float view_scale) {
-//    return extrusion * radius * u_extrude_scale * view_scale;
-//}
-
-//vec4 project_vertex(vec2 extrusion, vec4 world_center, float radius,  float view_scale) {
-//    vec2 sample_offset = calc_offset(extrusion, radius, view_scale);
-//    return u_matrix * ( world_center + vec4(sample_offset, 0, 0) );
-//}
-
 void main () {
     vUv = uv;
     vec2 size = arrowSize * pixelsToProjUnit * u_devicePixelRatio;
     vec2 halfSize = size / 2.0;
-//    vec4 worldPosition = vec4(coords, 0.0, 1.0) * modelMatrix;
-//
-//    // unencode the extrusion vector that we snuck into the a_pos vector
-//    vec2 extrude = vec2(mod(a_pos, 2.0) * 2.0 - 1.0);
-//
-//    // multiply a_pos by 0.5, since we had it * 2 in order to sneak
-//    // in extrusion data
-//    vec2 circle_center = floor(coords * 0.5);
-//
-//    world_center = vec4(circle_center, 0.0, 1);
-//
-//    vec4 projected_center = u_matrix * world_center;
-//
-//    view_scale = projected_center.w / u_camera_to_center_distance;
-//
-//    gl_Position = project_vertex(extrude, world_center, radius, view_scale);
-//
-//    // This is a minimum blur distance that serves as a faux-antialiasing for
-//    // the circle. since blur is a ratio of the circle's size and the intent is
-//    // to keep the blur at roughly 1px, the two are inversely related.
-//    lowp float antialiasblur = 1.0 / u_device_pixel_ratio / radius;
-//
-//    v_data = vec3(extrude.x, extrude.y, antialiasblur);
-
     vec2 worldPosition = vec2(-halfSize.x, -halfSize.y);
     if(position.x == 1.0) {
         worldPosition.x = halfSize.x;
