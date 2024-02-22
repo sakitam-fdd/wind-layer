@@ -47,7 +47,7 @@ class AMapWind {
   private field: Field | undefined;
   private map: any;
 
-  constructor(data: any, options: Partial<IWindOptions> = {}) {
+  constructor (data: any, options: Partial<IWindOptions> = {}) {
     this.options = assign({}, _options, options);
 
     /**
@@ -81,7 +81,7 @@ class AMapWind {
    * append layer to map
    * @param map
    */
-  appendTo(map: any) {
+  appendTo (map: any) {
     if (map) {
       this.init(map)
     } else {
@@ -93,7 +93,7 @@ class AMapWind {
    * init windy layer
    * @param map
    */
-  init(map: any) {
+  init (map: any) {
     if (map) {
       this.map = map;
       this.context = this.options.context || '2d';
@@ -104,7 +104,7 @@ class AMapWind {
     }
   }
 
-  handleResize() {
+  handleResize () {
     if (this.canvas) {
       this.canvasFunction()
     }
@@ -115,7 +115,7 @@ class AMapWind {
    * @param canvas
    * @returns {*}
    */
-  render(canvas: HTMLCanvasElement) {
+  render (canvas: HTMLCanvasElement) {
     if (!this.getData()) return this;
     const opt = this.getWindOptions();
     if (canvas && !this.wind) {
@@ -146,7 +146,7 @@ class AMapWind {
   /**
    * get canvas layer
    */
-  getCanvasLayer() {
+  getCanvasLayer () {
     if (!this.canvas) {
       const canvas = this.canvasFunction();
 
@@ -194,7 +194,7 @@ class AMapWind {
    * canvas constructor
    * @returns {*}
    */
-  canvasFunction() {
+  canvasFunction () {
     const retina = AMap.Browser.retina ? 2 : 1;
     const [width, height]: [number, number] = [this.map.getSize().width, this.map.getSize().height];
     if (!this.canvas) {
@@ -223,7 +223,7 @@ class AMapWind {
    * fixed viewMode
    * @private
    */
-  _getBounds() {
+  _getBounds () {
     const type = this.map.getViewMode_();
     let [southWest, northEast] = [undefined, undefined];
     const bounds = this.map.getBounds();
@@ -236,7 +236,7 @@ class AMapWind {
   /**
    * remove layer
    */
-  public removeLayer() {
+  public removeLayer () {
     if (!this.map) return;
     if (this.wind) {
       this.wind.stop();
@@ -287,7 +287,7 @@ class AMapWind {
    * get canvas context
    * @returns {*}
    */
-  private getContext() {
+  private getContext () {
     if (this.canvas === null) return;
     return this.canvas.getContext(this.context);
   }
@@ -307,7 +307,7 @@ class AMapWind {
   /**
    * get wind layer data
    */
-  public getData() {
+  public getData () {
     return this.field;
   }
 
@@ -317,7 +317,7 @@ class AMapWind {
    * @param options
    * @returns {WindLayer}
    */
-  public setData(data: any, options: Partial<IField> = {}) {
+  public setData (data: any, options: Partial<IField> = {}) {
     if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
@@ -334,7 +334,7 @@ class AMapWind {
     return this;
   }
 
-  public updateParams(options: Partial<IOptions> = {}) {
+  public updateParams(options : Partial<IOptions> = {}) {
     warnLog('will move to setWindOptions');
     this.setWindOptions(options);
     return this;
