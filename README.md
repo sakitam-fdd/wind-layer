@@ -6,7 +6,7 @@ extension to show wind field。
 ## 介绍
 
 [wind-layer](./) 是一个专注于气象格点数据可视的插件，设计之处是参考了 [earth](http://earth.nullschool.net) [cambecc](https://github.com/cambecc/earth) 的一个气象数据的展示，他使用了流体场的方式去展示了全球的风速和风向，富有很强的
-表现力, 这个插件的早期的很多核心代码也是来源于此。当然现在塔不仅仅是做风场的展示，常规的气象数据都可以依赖此插件进行可视化。
+表现力, 这个插件的早期的很多核心代码也是来源于此。当然现在它不仅仅是做风场的展示，常规的气象数据都可以依赖此插件进行可视化。
 
 ## 特性 (相对于原始 [windy.js](https://github.com/Esri/wind-js))
 

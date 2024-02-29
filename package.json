@@ -3,25 +3,26 @@
   "workspaces": [
     "packages/*"
   ],
-  "packageManager": "pnpm@7.13.0",
+  "packageManager": "pnpm@8.6.5",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "dev": "pnpm run -r dev",
-    "build": "pnpm run -r build",
-    "build:minify": "pnpm run -r build:minify",
+    "dev": "turbo run dev --filter='./packages/*'",
+    "build": "turbo run build --filter='./packages/*'",
+    "build:minify": "turbo run build:minify --filter='./packages/*'",
+    "playground": "turbo run dev --filter=playground",
     "docs": "vitepress dev docs",
     "docs:api": "pnpm run -r api --filter docs",
     "docs:build": "vitepress build docs",
     "docs:serve": "vitepress serve docs",
     "version": "changeset version",
     "changeset": "changeset",
-    "clear": "pnpm run -r clear",
+    "clear": "turbo run clear --filter='./packages/*'",
     "release": "pnpm build && pnpm build:minify && pnpm test-only && pnpm changeset publish",
-    "lint": "eslint packages/*/src/**/* --ext .js,.ts,.tsx",
+    "lint": "turbo run lint --filter='./packages/*'",
     "prettier": "prettier --parser=typescript --write **/*.{js,ts,md}",
-    "test": "pnpm run -r test",
-    "test-only": "pnpm run -r test-only",
-    "coverage": "pnpm run -r coverage"
+    "test": "turbo run test --filter='./packages/*'",
+    "test-only": "turbo run test-only --filter='./packages/*'",
+    "coverage": "turbo run coverage --filter='./packages/*'"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",

@@ -1,13 +1,42 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
 .idea/
 .vscode/
-node_modules/
 
+# dependencies
 node_modules
-dist
-coverage
 
-*.log
+# vuepress build output
+.vuepress/dist
+/docs/.vitepress/cache/
+
 .cache
+cache/
+.turbo/
+
+# log
+*.log
+npm-debug.log*
+yarn-error.log*
+yarn.lock
+package-lock.json
+pnpm-lock
+# production
+dist
+
+# misc
 .DS_Store
 
-cache/
+# idea
+.idea
+.vscode
+.labe
+
+# Coverage directory used by tools like istanbul
+coverage
+*.lcov
+.turbo
+
+# others
+.env
+.env.local

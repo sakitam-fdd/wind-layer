@@ -12,6 +12,7 @@ import alias from '@rollup/plugin-alias';
 import dts from 'rollup-plugin-dts';
 import { terser } from 'rollup-plugin-terser';
 import worker from 'rollup-plugin-web-worker-loader';
+import sourcemaps from 'rollup-plugin-sourcemaps';
 
 const rq = createRequire(import.meta.url);
 const pkg = rq('./package.json');
@@ -48,6 +49,7 @@ const plugins = [
   commonjs(),
   nodeResolve({ preferBuiltins: false }),
   esbuild({ target: 'esnext', sourceMap: true }),
+  sourcemaps(),
 ];
 
 const esmBuild: RollupOptions = {

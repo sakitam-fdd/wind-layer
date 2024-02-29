@@ -197,8 +197,8 @@ importers:
   packages/gl-core:
     dependencies:
       '@sakitam-gis/vis-engine':
-        specifier: ^1.5.1
-        version: 1.5.1
+        specifier: ^1.5.2
+        version: 1.5.2
       earcut:
         specifier: ^2.2.4
         version: 2.2.4
@@ -235,8 +235,8 @@ importers:
         specifier: workspace:*
         version: link:../rbush
       '@sakitam-gis/vis-engine':
-        specifier: ^1.5.1
-        version: 1.5.1
+        specifier: ^1.5.2
+        version: 1.5.2
       gl-matrix:
         specifier: ^3.4.3
         version: 3.4.3
@@ -260,8 +260,8 @@ importers:
         specifier: ^0.5.2
         version: 0.5.2
       '@sakitam-gis/vis-engine':
-        specifier: ^1.5.1
-        version: 1.5.1
+        specifier: ^1.5.2
+        version: 1.5.2
       wind-core:
         specifier: workspace:*
         version: link:../core
@@ -2456,8 +2456,8 @@ packages:
       rollup: 3.2.3
     dev: true
 
-  /@sakitam-gis/vis-engine@1.5.1:
-    resolution: {integrity: sha512-OVrsrYDGJi/xQtJ+43h/RSS94t/n9pp43xIDaRMaQh12ozazdisb4XKbGvMUtGLk+bhB112dq93VmqZPLjbMqQ==}
+  /@sakitam-gis/vis-engine@1.5.2:
+    resolution: {integrity: sha512-lUHq63TNO/t8cloiDBRRl0I81mcEdNGH1f7Np3PmDha02PAHcMiTr8iBGPKKQK7Xtp6pPXmUdW+eWSU8p0PIsA==}
     engines: {node: '>= 14.18.1', npm: '>= 6.14.15'}
     dependencies:
       colord: 2.9.3

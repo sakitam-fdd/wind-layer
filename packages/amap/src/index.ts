@@ -224,7 +224,7 @@ class AMapWind {
    * @private
    */
   _getBounds () {
-    const type = this.map.getViewMode_();
+    // const type = this.map.getViewMode_();
     let [southWest, northEast] = [undefined, undefined];
     const bounds = this.map.getBounds();
     // FIX: 高德地图3D模式和2D模式，map.getBounds接口已统一
