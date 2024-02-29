@@ -7,6 +7,7 @@ import {
   assign,
   createCanvas,
   removeDomNode,
+  compareVersion,
   defaultOptions,
 } from 'wind-core';
 import type { IField, IOptions } from 'wind-core';
@@ -26,7 +27,9 @@ const G = typeof window === 'undefined' ? global : window;
 const AMap = G?.AMap;
 
 if (!AMap) {
-  throw new Error('Before using this plugin, you must first introduce the amap JS API <https://lbs.amap.com/api/javascript-api/summary>');
+  throw new Error(
+    'Before using this plugin, you must first introduce the amap JS API <https://lbs.amap.com/api/javascript-api/summary>',
+  );
 }
 
 const _options = {
@@ -47,7 +50,7 @@ class AMapWind {
   private field: Field | undefined;
   private map: any;
 
-  constructor (data: any, options: Partial<IWindOptions> = {}) {
+  constructor(data: any, options: Partial<IWindOptions> = {}) {
     this.options = assign({}, _options, options);
 
     /**
@@ -81,9 +84,9 @@ class AMapWind {
    * append layer to map
    * @param map
    */
-  appendTo (map: any) {
+  appendTo(map: any) {
     if (map) {
-      this.init(map)
+      this.init(map);
     } else {
       throw new Error('not map object');
     }
@@ -93,20 +96,20 @@ class AMapWind {
    * init windy layer
    * @param map
    */
-  init (map: any) {
+  init(map: any) {
     if (map) {
       this.map = map;
       this.context = this.options.context || '2d';
       this.getCanvasLayer();
-      this.map.on('resize', this.handleResize, this)
+      this.map.on('resize', this.handleResize, this);
     } else {
-      throw new Error('not map object')
+      throw new Error('not map object');
     }
   }
 
-  handleResize () {
+  handleResize() {
     if (this.canvas) {
-      this.canvasFunction()
+      this.canvasFunction();
     }
   }
 
@@ -115,7 +118,7 @@ class AMapWind {
    * @param canvas
    * @returns {*}
    */
-  render (canvas: HTMLCanvasElement) {
+  render(canvas: HTMLCanvasElement) {
     if (!this.getData()) return this;
     const opt = this.getWindOptions();
     if (canvas && !this.wind) {
@@ -146,12 +149,12 @@ class AMapWind {
   /**
    * get canvas layer
    */
-  getCanvasLayer () {
+  getCanvasLayer() {
     if (!this.canvas) {
       const canvas = this.canvasFunction();
 
       const ops: {
-        canvas: HTMLCanvasElement | null,
+        canvas: HTMLCanvasElement | null;
         bounds?: any;
         zooms?: [number, number];
         zIndex?: number;
@@ -184,7 +187,6 @@ class AMapWind {
         layerContainer.appendChild(canvas);
       }
 
-
       this.map.on('mapmove', this.canvasFunction, this);
       this.map.on('zoomchange', this.canvasFunction, this);
     }
@@ -194,7 +196,7 @@ class AMapWind {
    * canvas constructor
    * @returns {*}
    */
-  canvasFunction () {
+  canvasFunction() {
     const retina = AMap.Browser.retina ? 2 : 1;
     const [width, height]: [number, number] = [this.map.getSize().width, this.map.getSize().height];
     if (!this.canvas) {
@@ -223,20 +225,32 @@ class AMapWind {
    * fixed viewMode
    * @private
    */
-  _getBounds () {
-    // const type = this.map.getViewMode_();
+  _getBounds() {
     let [southWest, northEast] = [undefined, undefined];
     const bounds = this.map.getBounds();
-    // FIX: 高德地图3D模式和2D模式，map.getBounds接口已统一
-    northEast = bounds.getNorthEast(); // xmax ymax
-    southWest = bounds.getSouthWest(); // xmin ymin
+    if (compareVersion(AMap.version, '2.0') >= 0) {
+      // FIX: 高德地图3D模式和2D模式，map.getBounds接口已统一
+      northEast = bounds.getNorthEast(); // xmax ymax
+      southWest = bounds.getSouthWest(); // xmin ymin
+    } else {
+      const type = this.map.getViewMode_();
+      if (type.toLowerCase() === '2d') {
+        northEast = bounds.getNorthEast(); // xmax ymax
+        southWest = bounds.getSouthWest(); // xmin ymin
+      } else {
+        // TODO: 高德地图3D模式下目前返回的bounds顺序为左上-右上-右下-左下-左上
+        const arrays = bounds.bounds.map((item: any) => [item.getLng(), item.getLat()]);
+        southWest = new AMap.LngLat(arrays[3][0], arrays[3][1]);
+        northEast = new AMap.LngLat(arrays[1][0], arrays[1][1]);
+      }
+    }
     return new AMap.Bounds(southWest, northEast);
   }
 
   /**
    * remove layer
    */
-  public removeLayer () {
+  public removeLayer() {
     if (!this.map) return;
     if (this.wind) {
       this.wind.stop();
@@ -259,19 +273,13 @@ class AMapWind {
   public project(coordinate: [number, number]): [number, number] {
     const retina = AMap.Browser.retina ? 2 : 1;
     const pixel = this.map.lngLatToContainer(new AMap.LngLat(coordinate[0], coordinate[1], true));
-    return [
-      pixel.x * retina,
-      pixel.y * retina,
-    ];
+    return [pixel.x * retina, pixel.y * retina];
   }
 
   public unproject(pixel: [number, number]): [number, number] | null {
     const coordinate = this.map.containerToLngLat(new AMap.Pixel(pixel[0], pixel[1]));
     if (coordinate) {
-      return [
-        coordinate.lng,
-        coordinate.lat,
-      ];
+      return [coordinate.lng, coordinate.lat];
     }
 
     return null;
@@ -287,7 +295,7 @@ class AMapWind {
    * get canvas context
    * @returns {*}
    */
-  private getContext () {
+  private getContext() {
     if (this.canvas === null) return;
     return this.canvas.getContext(this.context);
   }
@@ -307,7 +315,7 @@ class AMapWind {
   /**
    * get wind layer data
    */
-  public getData () {
+  public getData() {
     return this.field;
   }
 
@@ -317,7 +325,7 @@ class AMapWind {
    * @param options
    * @returns {WindLayer}
    */
-  public setData (data: any, options: Partial<IField> = {}) {
+  public setData(data: any, options: Partial<IField> = {}) {
     if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
@@ -334,7 +342,7 @@ class AMapWind {
     return this;
   }
 
-  public updateParams(options : Partial<IOptions> = {}) {
+  public updateParams(options: Partial<IOptions> = {}) {
     warnLog('will move to setWindOptions');
     this.setWindOptions(options);
     return this;
@@ -364,9 +372,6 @@ class AMapWind {
 
 const WindLayer = AMapWind;
 
-export {
-  Field,
-  WindLayer,
-};
+export { Field, WindLayer };
 
 export default AMapWind;
