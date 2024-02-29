@@ -17,7 +17,7 @@
     "version": "changeset version",
     "changeset": "changeset",
     "clear": "turbo run clear --filter='./packages/*'",
-    "release": "pnpm build && pnpm build:minify && pnpm testOnly && pnpm changeset publish",
+    "release": "pnpm build && pnpm build:minify && pnpm test-only && pnpm changeset publish",
     "lint": "turbo run lint --filter='./packages/*'",
     "prettier": "prettier --parser=typescript --write **/*.{js,ts,md}",
     "test": "turbo run test --filter='./packages/*'",
