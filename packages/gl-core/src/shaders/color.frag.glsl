@@ -89,7 +89,7 @@ void main () {
     bool display = true;
 
     if (useDisplayRange) {
-        display = value < displayRange.y && value > displayRange.x;
+        display = value <= displayRange.y && value >= displayRange.x;
     }
 
     if (display) {

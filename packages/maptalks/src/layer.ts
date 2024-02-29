@@ -1,21 +1,32 @@
 import * as maptalks from 'maptalks';
+import rewind from '@mapbox/geojson-rewind';
 import {
-  Scene,
-  Vector3,
+  highPrecision,
+  OrthographicCamera,
+  PerspectiveCamera,
   Renderer,
   RenderTarget,
-  PerspectiveCamera,
-  OrthographicCamera,
+  Scene,
   utils,
-  highPrecision,
 } from '@sakitam-gis/vis-engine';
 
-import { Layer as LayerCore, SourceType, TileID } from 'wind-gl-core';
+import {
+  BaseLayer,
+  ImageSource,
+  LayerSourceType,
+  polygon2buffer,
+  SourceType,
+  TileID,
+} from 'wind-gl-core';
 
 highPrecision(true);
 
 function getGLRes(map) {
   return map.getGLRes ? map.getGLRes() : map.getGLZoom();
+}
+
+function inRange(value: number, start: number, end: number) {
+  return value >= start && value < end;
 }
 
 function coordinateToPoint(map, coordinate, res, out?: any) {
@@ -25,69 +36,7 @@ function coordinateToPoint(map, coordinate, res, out?: any) {
   return map.coordinateToPoint(coordinate, res, out);
 }
 
-const TEMP_COORD = new maptalks.Coordinate(0, 0);
-const TEMP_POINT = new maptalks.Point(0, 0);
-
-function getCoords(x, y, z) {
-  const zz = Math.pow(2, z);
-
-  const lng = (x / zz) * 360 - 180;
-  // const lng = x / zz;
-  let lat = (y / zz) * 360 - 180;
-  lat = (180 / Math.PI) * (2 * Math.atan(Math.exp((lat * Math.PI) / 180)) - Math.PI / 2);
-
-  return [lng, lat];
-}
-
-function getTileBounds(map, x, y, z, wrap = 0) {
-  // for Google/OSM tile scheme we need to alter the y
-  // eslint-disable-next-line no-param-reassign
-  y = 2 ** z - y - 1;
-
-  const min = getCoords(x, y, z);
-  const max = getCoords(x + 1, y + 1, z);
-
-  const res = getGLRes(map);
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // @ts-ignore
-  const p1 = coordinateToPoint(map, new maptalks.Coordinate([min[0], max[1]]), res); // 左上
-  // @ts-ignore
-  const p2 = coordinateToPoint(map, new maptalks.Coordinate([max[0], min[1]]), res); // 右下
-
-  // const projObject = map.getProjection().fullExtent;
-  // const projectionExtent = [
-  //   projObject.left,
-  //   projObject.bottom,
-  //   projObject.right,
-  //   projObject.top,
-  // ] as Extent;
-  //
-  // const projWorldWidth = Math.abs(
-  //   coordinateToPoint(
-  //     map,
-  //     map
-  //       .getProjection()
-  //       .unprojectCoords(new maptalks.Coordinate([projectionExtent[0], projectionExtent[1]])),
-  //     getGLRes(map),
-  //   ).x -
-  //     coordinateToPoint(
-  //       map,
-  //       map
-  //         .getProjection()
-  //         .unprojectCoords(new maptalks.Coordinate([projectionExtent[2], projectionExtent[3]])),
-  //       getGLRes(map),
-  //     ).x,
-  // );
-
-  return {
-    left: 0 + wrap,
-    top: 0,
-    right: 1 + wrap,
-    bottom: 1,
-    lngLatBounds: [min[0], min[1], max[0], max[1]],
-  };
-}
+const TILE_POINT = new maptalks.Point(0, 0);
 
 // from https://github.com/maptalks/maptalks.three/blob/master/src/index.ts
 class VeRenderer extends maptalks.renderer.CanvasLayerRenderer {
@@ -305,15 +254,16 @@ class Layer extends maptalks.TileLayer {
   type: string;
   _needsUpdate = true;
   _coordCache = {};
-  public layer: WithNull<LayerCore>;
+  public layer: WithNull<BaseLayer>;
   private source: SourceType;
+  private projWorldWidth: number;
 
   constructor(id: string, source: SourceType, opts: BaseLayerOptionType) {
     super(id, {
       ...opts,
       urlTemplate: 'custom',
       tileSize: source.tileSize,
-      repeatWorld: false,
+      repeatWorld: source.wrapX ? 'x' : false,
     });
     this.source = source;
     this.type = 'VeLayer';
@@ -333,6 +283,18 @@ class Layer extends maptalks.TileLayer {
   onMoveEnd() {
     if (this.layer) {
       this.layer.update();
+      this.layer.moveEnd();
+    }
+  }
+
+  onDragRotateStart() {
+    if (this.layer) {
+      this.layer.moveStart();
+    }
+  }
+
+  onDragRotateEnd() {
+    if (this.layer) {
       this.layer.moveEnd();
     }
   }
@@ -362,6 +324,167 @@ class Layer extends maptalks.TileLayer {
     }
   }
 
+  getWorlds() {
+    const map = this.getMap();
+    const projObject = map.getProjection().fullExtent;
+    const projectionExtent = [projObject.left, projObject.bottom, projObject.right, projObject.top];
+    const projExtent = map.getProjExtent();
+    const extent = [projExtent.xmin, projExtent.ymin, projExtent.xmax, projExtent.ymax];
+    const worldWidth = projectionExtent[2] - projectionExtent[0];
+    const res = getGLRes(map);
+    const p1 = map._prjToPointAtRes(
+      new maptalks.Coordinate([projectionExtent[0], projectionExtent[3]]),
+      res,
+    );
+
+    const p2 = map._prjToPointAtRes(
+      new maptalks.Coordinate([projectionExtent[2], projectionExtent[1]]),
+      res,
+    );
+    const projWorldWidth = Math.abs(p1.x - p2.x);
+
+    let startX = extent[0];
+    let world = 0;
+    const result: {
+      world: number;
+      offset: number;
+      xmin: number;
+      xmax: number;
+    }[] = [
+      {
+        world: 0,
+        offset: 0,
+        xmin: p1.x,
+        xmax: p2.x,
+      },
+    ];
+    while (startX < projectionExtent[0]) {
+      --world;
+      result.push({
+        world,
+        offset: world * projWorldWidth,
+        xmin: p1.x + world * projWorldWidth,
+        xmax: p2.x + world * projWorldWidth,
+      });
+      startX += worldWidth;
+    }
+    world = 0;
+    startX = extent[2];
+    while (startX > projectionExtent[2]) {
+      ++world;
+      result.push({
+        world,
+        offset: world * projWorldWidth,
+        xmin: p1.x + world * projWorldWidth,
+        xmax: p2.x + world * projWorldWidth,
+      });
+      startX -= worldWidth;
+    }
+
+    this.projWorldWidth = projWorldWidth;
+
+    return result.sort((a, b) => a.world - b.world);
+  }
+
+  calcWitchWorld(
+    center: number[],
+    worlds: {
+      world: number;
+      offset: number;
+      xmin: number;
+      xmax: number;
+    }[],
+  ) {
+    for (let i = 0; i < worlds.length; i++) {
+      if (inRange(center[0], worlds[i].xmin, worlds[i].xmax)) {
+        return worlds[i].world;
+      }
+    }
+
+    return worlds.find((w) => w.world === 0)?.world;
+  }
+
+  public getClipMask() {
+    return this.options.mask;
+  }
+
+  private processMask() {
+    const map = this.getMap();
+    if (map && this.options.mask) {
+      const r = getGLRes(map);
+      const mask = this.options.mask;
+      const data = mask.data;
+      // @link https://github.com/mapbox/geojson-rewind
+      rewind(data, true);
+
+      const tr = (coords) => {
+        const mercatorCoordinates: any[] = [];
+        for (let i = 0; i < coords.length; i++) {
+          const coord = coords[i];
+          const p = coordinateToPoint(map, new maptalks.Coordinate(coord), r);
+          mercatorCoordinates.push([p.x, p.y]);
+        }
+
+        return mercatorCoordinates;
+      };
+
+      const features = data.features;
+      const len = features.length;
+      let i = 0;
+      const fs: any[] = [];
+      for (; i < len; i++) {
+        const feature = features[i];
+
+        const coordinates = feature.geometry.coordinates;
+        const type = feature.geometry.type;
+
+        if (type === 'Polygon') {
+          fs.push({
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'Polygon',
+              coordinates: feature.geometry.coordinates.map((c) => tr(c)),
+            },
+          });
+        } else if (type === 'MultiPolygon') {
+          const css: any[] = [];
+          for (let k = 0; k < coordinates.length; k++) {
+            const coordinate = coordinates[k];
+            const cs: any[] = [];
+            for (let n = 0; n < coordinate.length; n++) {
+              cs.push(tr(coordinates[k][n]));
+            }
+
+            css.push(cs);
+          }
+
+          fs.push({
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'MultiPolygon',
+              coordinates: css,
+            },
+          });
+        }
+      }
+
+      return {
+        data: polygon2buffer(fs),
+        type: mask.type,
+      };
+    }
+  }
+
+  public setClipMask(mask) {
+    this.options.mask = Object.assign({}, this.options.mask, mask);
+
+    if (this.layer) {
+      this.layer.setMask(this.processMask());
+    }
+  }
+
   prepareToDraw(gl, scene) {
     const opt = this.options;
     const map = this.getMap();
@@ -369,7 +492,10 @@ class Layer extends maptalks.TileLayer {
     if (!map || !renderer) {
       return false;
     }
-    this.layer = new LayerCore(
+
+    this.getWorlds();
+
+    this.layer = new BaseLayer(
       this.source,
       {
         renderer: renderer.context,
@@ -384,38 +510,114 @@ class Layer extends maptalks.TileLayer {
         widthSegments: opt.widthSegments,
         heightSegments: opt.heightSegments,
         wireframe: opt.wireframe,
+        mask: this.processMask(),
         getZoom: () => map.getZoom(),
         triggerRepaint: () => {
           renderer.setToRedraw();
         },
+        flipY: true,
+        glScale: () => this.projWorldWidth,
+        // 由于核心库中计算瓦片坐标是从上到下是递增的，但是 maptalk 是从上到下是递减的
+        getTileProjSize: (z: number, tiles: TileID[]) => {
+          const t = tiles.find((tile: TileID) => tile.z === z);
+          if (t) {
+            return [
+              t.projTileBounds.right - t.projTileBounds.left,
+              t.projTileBounds.top - t.projTileBounds.bottom,
+            ];
+          }
+
+          return [this.projWorldWidth, this.projWorldWidth];
+        },
         getViewTiles: (source: SourceType) => {
           let { type } = source;
+          const worlds = this.getWorlds();
           // @ts-ignore
-          type = type !== 'timeline' ? type : source.privateType;
+          type = type !== LayerSourceType.timeline ? type : source.privateType;
           const wrapTiles: TileID[] = [];
-          if (type === 'image') {
+          const r = getGLRes(map);
+          if (type === LayerSourceType.image) {
+            const { coordinates } = source as ImageSource;
+            const [min, max] = [
+              [coordinates[0][0], coordinates[2][1]],
+              [coordinates[1][0], coordinates[0][1]],
+            ];
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // @ts-ignore
+            const p1 = coordinateToPoint(map, new maptalks.Coordinate([min[0], max[1]]), r); // 左上
+            // @ts-ignore
+            const p2 = coordinateToPoint(map, new maptalks.Coordinate([max[0], min[1]]), r); // 右下
             const x = 0;
             const y = 0;
             const z = 0;
-            const wrap = 0;
-            wrapTiles.push(
-              new TileID(z, x, y, z, wrap, {
-                getTileBounds: getTileBounds.bind(this, map),
-              }),
-            );
-          } else {
+            if (this.source.wrapX) {
+              for (let i = 0; i < worlds.length; i++) {
+                const { world, offset } = worlds[i];
+                wrapTiles.push(
+                  new TileID(z, world, z, x, y, {
+                    getTileBounds: () => [min[0], min[1], max[0], max[1]],
+                    getTileProjBounds: () => ({
+                      left: p1.x + offset,
+                      top: p1.y,
+                      right: p2.x + offset,
+                      bottom: p2.y,
+                    }),
+                  }),
+                );
+              }
+            } else {
+              const wrap = 0;
+              wrapTiles.push(
+                new TileID(z, wrap, z, x, y, {
+                  getTileBounds: () => [min[0], min[1], max[0], max[1]],
+                  getTileProjBounds: () => ({
+                    left: p1.x,
+                    top: p1.y,
+                    right: p2.x,
+                    bottom: p2.y,
+                  }),
+                }),
+              );
+            }
+          } else if (type === LayerSourceType.tile) {
             const { tileGrids } = this.getTiles();
             const { tiles } = tileGrids[0];
             for (let i = 0; i < tiles.length; i++) {
               const tile = tiles[i];
 
-              // const res = map._getResolution(tile.z);
-              // const tileConfig = this._getTileConfig();
-              // const tileExtent = tileConfig.getTilePrjExtent(tile.x, tile.y, res);
+              const res = map._getResolution(tile.z);
+              const tileConfig = this._getTileConfig();
+              const tileExtent = tileConfig.getTilePrjExtent(tile.x, tile.y, res);
+
+              let max = tileExtent.getMax();
+              let min = tileExtent.getMin();
+              const projection = map.getProjection();
+              min = projection.unproject(min);
+              max = projection.unproject(max);
+
+              const { extent2d, offset } = tile;
+
+              const scale = (tile._glScale = tile._glScale || tile.res / map.getGLRes());
+
+              const point1 = TILE_POINT.set(extent2d.xmin - offset[0], extent2d.ymax - offset[1]);
+              const x1 = point1.x * scale;
+              const y1 = point1.y * scale;
+
+              const point2 = TILE_POINT.set(extent2d.xmax - offset[0], extent2d.ymin - offset[1]);
+              const x2 = point2.x * scale;
+              const y2 = point2.y * scale;
+
+              const wrap = this.calcWitchWorld([(x2 - x1) / 2 + x1, (y2 - y1) / 2 + y1], worlds);
 
               wrapTiles.push(
-                new TileID(tile.z, tile.x, tile.y, tile.z, 0, {
-                  getTileBounds: getTileBounds.bind(this, map),
+                new TileID(tile.z, wrap, tile.z, tile.x, tile.y, {
+                  getTileBounds: () => [min.x, min.y, max.x, max.y],
+                  getTileProjBounds: () => ({
+                    left: x1,
+                    top: y1,
+                    right: x2,
+                    bottom: y2,
+                  }),
                 }),
               );
             }
@@ -423,8 +625,16 @@ class Layer extends maptalks.TileLayer {
           return wrapTiles;
         },
         getExtent: () => {
-          const projExtent = map.getProjExtent();
-          return [projExtent.xmin, projExtent.ymin, projExtent.xmax, projExtent.ymax];
+          const projExtent = map.getProjExtent()._scale(1 / getGLRes(map));
+          const r = getGLRes(map);
+          const p1 = coordinateToPoint(map, new maptalks.Coordinate([0, -90]), r);
+          const p2 = coordinateToPoint(map, new maptalks.Coordinate([0, 90]), r);
+          return [
+            projExtent.xmin,
+            projExtent.ymin < p1.y ? p1.y : projExtent.ymin,
+            projExtent.xmax,
+            projExtent.ymax > p2.y ? p2.y : projExtent.ymax,
+          ];
         },
       },
     );
@@ -442,166 +652,12 @@ class Layer extends maptalks.TileLayer {
     return map.isInteracting() || map.isAnimating();
   }
 
-  /**
-   * Draw method of ThreeLayer
-   * In default, it calls renderScene, refresh the camera and the scene
-   */
   draw(gl, view, scene, camera, timeStamp, context) {
     this.renderScene(context, this);
   }
 
-  /**
-   * Draw method of ThreeLayer when map is interacting
-   * In default, it calls renderScene, refresh the camera and the scene
-   */
   drawOnInteracting(gl, view, scene, camera, event, timeStamp, context) {
     this.renderScene(context, this);
-  }
-  /**
-   * Convert a geographic coordinate to THREE Vector3
-   * @param  {maptalks.Coordinate} coordinate - coordinate
-   * @param {Number} [z=0] z value
-   * @param out
-   * @return {Vector3}
-   */
-  coordinateToVector3(coordinate: any, z = 0, out?: Vector3): WithNull<Vector3> {
-    const map = this.getMap();
-    if (!map) {
-      return null;
-    }
-    const isArray = Array.isArray(coordinate);
-    if (isArray) {
-      TEMP_COORD.x = coordinate[0];
-      TEMP_COORD.y = coordinate[1];
-    } else if (!(coordinate instanceof maptalks.Coordinate)) {
-      // eslint-disable-next-line no-param-reassign
-      coordinate = new maptalks.Coordinate(coordinate);
-    }
-    const res = getGLRes(map);
-    const p = coordinateToPoint(map, isArray ? TEMP_COORD : coordinate, res, TEMP_POINT);
-    if (out) {
-      out.x = p.x;
-      out.y = p.y;
-      out.z = z;
-    }
-    return new Vector3(p.x, p.y, z);
-  }
-
-  coordinatiesToGLFloatArray(
-    coordinaties: Array<any>,
-    centerPt: Vector3,
-  ): WithNull<{
-    positions: Float32Array;
-    positons2d: Float32Array;
-  }> {
-    const map = this.getMap();
-    if (!map) {
-      return null;
-    }
-    const res = getGLRes(map);
-    const len = coordinaties.length;
-    const array = new Float32Array(len * 2);
-    const array3d = new Float32Array(len * 3);
-    for (let i = 0; i < len; i++) {
-      let coordinate = coordinaties[i];
-      const isArray = Array.isArray(coordinate);
-      if (isArray) {
-        TEMP_COORD.x = coordinate[0];
-        TEMP_COORD.y = coordinate[1];
-      } else if (!(coordinate instanceof maptalks.Coordinate)) {
-        coordinate = new maptalks.Coordinate(coordinate);
-      }
-      const p = coordinateToPoint(map, isArray ? TEMP_COORD : coordinate, res, TEMP_POINT);
-      p.x -= centerPt.x;
-      p.y -= centerPt.y;
-      const idx = i * 2;
-      array[idx] = p.x;
-      array[idx + 1] = p.y;
-
-      const idx1 = i * 3;
-      array3d[idx1] = p.x;
-      array3d[idx1 + 1] = p.y;
-      array3d[idx1 + 2] = 0;
-    }
-    return {
-      positions: array3d,
-      positons2d: array,
-    };
-  }
-
-  coordinatiesToGLArray(
-    coordinaties: Array<any>,
-    centerPt: Vector3,
-  ): WithNull<Array<Array<number>>> {
-    const map = this.getMap();
-    if (!map) {
-      return null;
-    }
-    const res = getGLRes(map);
-    const len = coordinaties.length;
-    const array = new Array(len);
-    for (let i = 0; i < len; i++) {
-      let coordinate = coordinaties[i];
-      const isArray = Array.isArray(coordinate);
-      if (isArray) {
-        TEMP_COORD.x = coordinate[0];
-        TEMP_COORD.y = coordinate[1];
-      } else if (!(coordinate instanceof maptalks.Coordinate)) {
-        coordinate = new maptalks.Coordinate(coordinate);
-      }
-      const p = coordinateToPoint(map, isArray ? TEMP_COORD : coordinate, res, TEMP_POINT);
-      p.x -= centerPt.x;
-      p.y -= centerPt.y;
-      array[i] = [p.x, p.y];
-    }
-    return array;
-  }
-
-  /**
-   * Convert geographic distance to THREE Vector3
-   * @param  {Number} w - width
-   * @param  {Number} h - height
-   * @param coord
-   * @return {Vector3}
-   */
-  distanceToVector3(w: number, h: number, coord?: any): Vector3 {
-    if ((w === 0 && h === 0) || !maptalks.Util.isNumber(w) || !maptalks.Util.isNumber(h)) {
-      return new Vector3(0, 0, 0);
-    }
-    const map = this.getMap();
-    const res = getGLRes(map);
-    let center = coord || map.getCenter();
-    if (!(center instanceof maptalks.Coordinate)) {
-      center = new maptalks.Coordinate(center);
-    }
-    const target = map.locate(center, w, h);
-    const p0 = coordinateToPoint(map, center, res),
-      p1 = coordinateToPoint(map, target, res);
-    const x = Math.abs(p1.x - p0.x) * maptalks.Util.sign(w);
-    const y = Math.abs(p1.y - p0.y) * maptalks.Util.sign(h);
-    return new Vector3(x, y, 0);
-  }
-
-  altitudeToVector3(altitude: number, altitude1: number, coord?: any, out?: Vector3): Vector3 {
-    if (altitude === 0 || !maptalks.Util.isNumber(altitude)) {
-      return new Vector3(0, 0, 0);
-    }
-    const map = this.getMap();
-    if (map.altitudeToPoint) {
-      const res = getGLRes(map);
-      let z = map.altitudeToPoint(altitude, res);
-      if (altitude < 0 && z > 0) {
-        z = -z;
-      }
-      if (out) {
-        out.x = z;
-        out.y = z;
-        out.z = 0;
-        return out;
-      }
-      return new Vector3(z, z, 0);
-    }
-    return this.distanceToVector3(altitude, altitude, coord);
   }
 
   getObjects() {
@@ -666,54 +722,6 @@ class Layer extends maptalks.TileLayer {
     return this;
   }
 
-  /**
-   * 添加 Mesh
-   * @param meshes
-   * @param render
-   */
-  addMesh(meshes: any, render = true) {
-    if (!meshes) return this;
-    if (!Array.isArray(meshes)) {
-      // eslint-disable-next-line no-param-reassign
-      meshes = [meshes];
-    }
-    const scene = this.getScene();
-    meshes.forEach((mesh) => {
-      scene?.add(mesh);
-    });
-    if (render) {
-      const renderer = this._getRenderer();
-      if (renderer) {
-        renderer.setToRedraw();
-      }
-    }
-    return this;
-  }
-
-  /**
-   * 移除对象
-   * @param meshes
-   * @param render
-   */
-  removeMesh(meshes: any, render = true) {
-    if (!meshes) return this;
-    if (!Array.isArray(meshes)) {
-      // eslint-disable-next-line no-param-reassign
-      meshes = [meshes];
-    }
-    const scene = this.getScene();
-    meshes.forEach((mesh) => {
-      scene?.remove(mesh);
-    });
-    if (render) {
-      const renderer = this._getRenderer();
-      if (renderer) {
-        renderer.setToRedraw();
-      }
-    }
-    return this;
-  }
-
   onAdd() {
     super.onAdd();
     const map = this.map || this.getMap();
@@ -736,6 +744,22 @@ class Layer extends maptalks.TileLayer {
       this.layer = null;
     }
     return this;
+  }
+
+  getEvents() {
+    return {
+      _zoomstart: this.onZoomStart,
+      _zooming: this.onZooming,
+      _zoomend: this.onZoomEnd,
+      _resize: this.onResize,
+      _movestart: this.onMoveStart,
+      _moving: this.onMoving,
+      _moveend: this.onMoveEnd,
+      _dragrotatestart: this.onDragRotateStart,
+      // '_dragrotating': this.onDragRotating,
+      _dragrotateend: this.onDragRotateEnd,
+      // _spatialreferencechange: this.onSpatialReferenceChange,
+    };
   }
 }
 

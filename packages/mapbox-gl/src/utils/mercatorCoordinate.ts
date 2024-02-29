@@ -16,11 +16,11 @@ export function circumferenceAtLatitude(latitude) {
   return earthCircumference * Math.cos((latitude * Math.PI) / 180);
 }
 
-export function mercatorXfromLng(lng) {
+export function mercatorXfromLng(lng: number) {
   return (180 + lng) / 360;
 }
 
-export function mercatorYfromLat(lat) {
+export function mercatorYfromLat(lat: number) {
   return (180 - (180 / Math.PI) * Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360))) / 360;
 }
 
@@ -28,8 +28,8 @@ export function mercatorZfromAltitude(altitude, lat) {
   return altitude / circumferenceAtLatitude(lat);
 }
 
-export function lngFromMercatorX(x) {
-  return x * 360 - 180;
+export function lngFromMercatorX(x: number, wrap = 0) {
+  return x * 360 - 180 + wrap * 360;
 }
 
 export function latFromMercatorY(y) {
@@ -58,6 +58,10 @@ export function mercatorScale(lat) {
 export function meterInMercatorCoordinateUnits(y) {
   // 1 meter / circumference at equator in meters * Mercator projection scale factor at this latitude
   return (1 / earthCircumference) * mercatorScale(latFromMercatorY(y));
+}
+
+export function pixelsInMercatorCoordinateUnits(lat, pixelsPerMeter) {
+  return (1 / earthCircumference) * mercatorScale(lat) * pixelsPerMeter;
 }
 
 export const MAX_MERCATOR_LATITUDE = 85.051129;
@@ -95,7 +99,7 @@ export function getTileCenter(x, y, z) {
   };
 }
 
-export function getCoordinatesCenterTileID(coords: Array<any>) {
+export function getCoordinatesCenterTileID(coords: Array<{ x: number; y: number }>) {
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
@@ -117,6 +121,7 @@ export function getCoordinatesCenterTileID(coords: Array<any>) {
   return {
     z: zoom,
     x: Math.floor((minX + maxX) / 2 * tilesAtZoom),
-    y: Math.floor((minY + maxY) / 2 * tilesAtZoom)
+    y: Math.floor((minY + maxY) / 2 * tilesAtZoom),
+    extent: [minX, minY, maxX, maxY],
   };
 }

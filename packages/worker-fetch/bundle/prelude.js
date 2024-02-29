@@ -7,10 +7,10 @@ function define(_, chunk) {
   } else if (!worker) {
     worker = chunk;
   } else {
-    var workerBundleString = 'var sharedChunk = {}; (' + shared + ')(sharedChunk); (' + worker + ')(sharedChunk);'
+    var workerBundleString = 'var sharedChunk = {}; (' + shared + ')(undefined, sharedChunk); (' + worker + ')(sharedChunk);'
 
     var sharedChunk = {};
-    shared(sharedChunk);
+    shared(undefined, sharedChunk);
     wgw = chunk(sharedChunk);
     if (typeof window !== 'undefined') {
       wgw.setWorkerUrl(window.URL.createObjectURL(new Blob([workerBundleString], { type: 'text/javascript' })));

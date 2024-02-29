@@ -54,7 +54,7 @@ const plugins = [
   glslify(),
   commonjs(),
   nodeResolve({ preferBuiltins: false }),
-  esbuild({ target: 'node14' }),
+  esbuild({ target: 'esnext', sourceMap: true }),
   json({
     namedExports: true,
   }),

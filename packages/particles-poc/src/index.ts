@@ -9,7 +9,34 @@ import screenVert from './shaders/screen.vert.glsl';
 import screenFrag from './shaders/screen.frag.glsl';
 
 function mod(x, y) {
+  // 取余（%）运算符返回左侧操作数除以右侧操作数的余数。它总是与被除数的符号保持一致。
   return ((x % y) + y) % y;
+}
+function wrap(x, minx, min, max) {
+  let wrappedX = mod(x + max, max - min) + min;
+  if (minx !== undefined && minx !== null && wrappedX < minx) {
+    wrappedX += max - min;
+  }
+  return wrappedX;
+}
+
+function calcBounds(bounds: number[][], yRange: [number, number]): any {
+  const xmin = bounds[0][0];
+  const ymin = bounds[0][1];
+  const xmax = bounds[1][0];
+  const ymax = bounds[1][1];
+
+  const min = -180;
+  const max = 180;
+
+  const dx = xmax - xmin;
+  const minX = dx < max - min ? wrap(xmin, undefined, min, max) : min;
+  const maxX = dx < max - min ? wrap(xmax, minX, min, max) : max;
+
+  const minY = Math.max(ymin, yRange[0]);
+  const maxY = Math.min(ymax, yRange[1]);
+
+  return [minX, minY, maxX, maxY];
 }
 
 /* eslint-disable @typescript-eslint/no-namespace */
@@ -51,10 +78,12 @@ declare namespace DrawParticlesCommand {
     u_data_bbox: REGL.Vec4;
     u_resolution: REGL.Vec2;
     u_aspectRatio: number;
+    u_offset: number;
   }
 
   export interface Attributes {
     a_index: Float32Array;
+    a_reference: Float32Array;
   }
 
   export type Props = Omit<Uniforms & Attributes, 'a_index'> & {
@@ -135,6 +164,7 @@ export default class ParticlesLayer {
   private backgroundTexture: Texture2D;
   private screenTexture: Texture2D;
   private particleIndexBuffer: Float32Array;
+  private particleReferences: Float32Array;
   private quadBuffer: Float32Array;
   private backgroundBuffer: Float32Array;
   private gl: WithUndef<WebGLRenderingContext>;
@@ -195,10 +225,15 @@ export default class ParticlesLayer {
     });
 
     const particleIndices = new Float32Array(this.indexCount);
+    const particleReferences = new Float32Array(this.indexCount * 2);
     for (let i = 0; i < this.indexCount; i++) {
+      const t = (i % particleRes) / particleRes;
+      const a = Math.trunc(i / particleRes) / particleRes;
+      particleReferences.set([a, t], 2 * i);
       particleIndices[i] = i;
     }
     this.particleIndexBuffer = particleIndices;
+    this.particleReferences = particleReferences;
   }
 
   setWind(windData) {
@@ -308,6 +343,7 @@ export default class ParticlesLayer {
       vert: particleDrawVert,
       attributes: {
         a_index: this.particleIndexBuffer,
+        a_reference: this.particleReferences,
       },
 
       uniforms: {
@@ -329,6 +365,7 @@ export default class ParticlesLayer {
         u_bbox: this.regl.prop<DrawParticlesCommand.Props, 'u_bbox'>('u_bbox'),
         u_data_bbox: this.regl.prop<DrawParticlesCommand.Props, 'u_data_bbox'>('u_data_bbox'),
         u_resolution: size as REGL.Vec2,
+        u_offset: this.regl.prop<DrawParticlesCommand.Props, 'u_offset'>('u_offset'),
         u_aspectRatio: size[0] / size[1],
       },
 
@@ -495,26 +532,13 @@ export default class ParticlesLayer {
   }
 
   getExtent() {
-    const bounds = this.map.getBounds().toArray();
-    const xmin = bounds[0][0];
-    const ymin = bounds[0][1];
-    const xmax = bounds[1][0];
-    const ymax = bounds[1][1];
+    const map = this.map as any;
+    const bounds: any = map?.getBounds().toArray();
 
-    const dx = xmax - xmin;
-
-    const minLng = dx < 360 ? mod(xmin + 180, 360) - 180 : -180;
-    let maxLng = 180;
-    if (dx < 360) {
-      maxLng = mod(xmax + 180, 360) - 180;
-      if (maxLng < minLng) {
-        maxLng += 360;
-      }
-    }
-    const minLat = Math.max(ymin, this.map.transform.minLat);
-    const maxLat = Math.min(ymax, this.map.transform.maxLat);
-
-    const mapBounds = [minLng, minLat, maxLng, maxLat];
+    const mapBounds = calcBounds(bounds, [
+      map.transform.latRange ? map.transform.latRange[0] : map.transform.minLat,
+      map.transform.latRange ? map.transform.latRange[1] : map.transform.maxLat,
+    ]);
 
     const p0 = mapboxgl.MercatorCoordinate.fromLngLat(
       new mapboxgl.LngLat(mapBounds[0], mapBounds[3]),
@@ -679,6 +703,7 @@ export default class ParticlesLayer {
         count: this.indexCount,
         u_bbox: this.getExtent(),
         u_data_bbox: this.windData.bbox,
+        u_offset: 0,
       });
     }
 

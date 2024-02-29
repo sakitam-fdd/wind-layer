@@ -1,4 +1,15 @@
-import { configDeps, TileID, ImageSource, TileSource, TimelineSource } from 'wind-gl-core';
+import {
+  configDeps,
+  TileID,
+  ImageSource,
+  TileSource,
+  TimelineSource,
+  RenderType,
+  MaskType,
+  RenderFrom,
+  DecodeType,
+  LayerSourceType,
+} from 'wind-gl-core';
 import WindLayer, { formatData, WindCore, Field } from './Canvas';
 export { Layer } from './layer';
 export {
@@ -11,4 +22,9 @@ export {
   WindLayer,
   Field,
   WindCore,
+  RenderFrom,
+  RenderType,
+  DecodeType,
+  LayerSourceType,
+  MaskType,
 };

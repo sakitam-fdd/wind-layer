@@ -1,9 +1,35 @@
 export type BandType = 0 | 1 | 2 | 3; // 对应以下四种数据类型，用于在着色器中标识使用何种数据解码方式
 export enum RenderType {
+  /**
+   * 栅格类型图层
+   */
   image = 0,
+
+  /**
+   * 色斑图
+   */
   colorize = 1,
+
+  /**
+   * 粒子
+   */
   particles = 2,
-} // 0: raster image, 1: raster colorize 2: wind particles
+
+  /**
+   * 矢量场箭头图层
+   */
+  arrow = 3,
+
+  /**
+   * 风羽图
+   */
+  barb = 4,
+
+  /**
+   * 海浪和波
+   */
+  wave = 5,
+}
 
 export enum RenderFrom {
   /**
@@ -68,9 +94,10 @@ export enum DecodeType {
   imageWithExif = 3,
 }
 
-export enum LayerDataType {
+export enum LayerSourceType {
   image = 'image',
   tile = 'tile',
+  timeline = 'timeline',
   jsonArray = 'jsonArray',
 }
 
@@ -87,12 +114,12 @@ export type DataRange = [number, number];
 export type Coordinates = [[number, number], [number, number], [number, number], [number, number]];
 
 export interface ImageSourceOptions {
-  type: LayerDataType.image;
   url: string | [string, string];
   /**
    * top left, top right, bottom right, bottom left
    */
   coordinates: Coordinates;
+  type?: LayerSourceType.image;
   dataRange?: DataRange | [DataRange, DataRange];
   /**
    * 指定数据解析类型
@@ -107,7 +134,7 @@ export interface ImageSourceOptions {
 }
 
 interface JsonArrayData {
-  type: LayerDataType.jsonArray;
+  type: LayerSourceType.jsonArray;
   header: {
     parameterCategory: number | string;
     parameterNumber: number | string;
@@ -127,8 +154,8 @@ interface JsonArrayData {
 export type Bounds = [number, number, number, number];
 
 export interface TileSourceOptions {
-  type: LayerDataType.tile;
   url: string | [string, string];
+  type?: LayerSourceType.tile;
   minZoom?: number;
   maxZoom?: number;
   tileSize?: TileSize;
@@ -150,25 +177,61 @@ export interface TileSourceOptions {
 
 export type LayerData = ImageSourceOptions | JsonArrayData | TileSourceOptions;
 
+/**
+ * 瓦片状态
+ */
 export enum TileState {
+  /**
+   * 加载中
+   */
   loading = '0',
+
+  /**
+   * 加载完成
+   */
   loaded = '1',
+
+  /**
+   * 加载失败
+   */
   errored = '2',
+
+  /**
+   * 未加载
+   */
   unloaded = '3',
+
+  /**
+   * 重新加载
+   */
   reloading = '4',
 }
 
 /**
- * 瓦片范围
+ * 瓦片范围 (经纬度) [xmin, ymin, xmax, ymax]
  */
-export interface TileBounds {
+export type TileBounds = Bounds;
+
+/**
+ * 投影后的瓦片范围
+ */
+export interface ProjTileBounds {
   left: number;
   top: number;
   right: number;
   bottom: number;
-  lngLatBounds: Bounds;
 }
 
 export type ParseOptionsType = {
   renderFrom: RenderFrom;
 };
+
+/**
+ * 图层掩膜类型
+ * 0. 不包含：区域外显示
+ * 1. 包含：区域内显示
+ */
+export enum MaskType {
+  outside,
+  inside,
+}

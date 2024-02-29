@@ -109,6 +109,9 @@ export default class SourceCache extends EventEmitter {
     return this.cacheTiles[id] && this.cacheTiles[id].hasData() && !this.coveredTiles[id];
   }
 
+  /**
+   * 获取已经加载的瓦片
+   */
   getVisibleCoordinates() {
     return this.getRenderableIds().map((id) => this.cacheTiles[id].tileID);
   }
@@ -535,6 +538,32 @@ export default class SourceCache extends EventEmitter {
     }
 
     this.#cache.reset();
+  }
+
+  /**
+   * 查找覆盖 queryGeometry 的瓦片
+   * @param {QueryGeometry} queryGeometry
+   * @param {boolean} [visualizeQueryGeometry=false]
+   * @param {boolean} use3DQuery
+   * @returns
+   * @private
+   */
+  tilesIn(queryGeometry: any): any[] {
+    const tileResults: any[] = [];
+
+    for (const tileID in this.cacheTiles) {
+      const tile = this.cacheTiles[tileID];
+
+      const tilesToCheck = [0];
+
+      for (const wrap of tilesToCheck) {
+        const tileResult = queryGeometry.containsTile(this.source, tile, wrap);
+        if (tileResult) {
+          tileResults.push(tileResult);
+        }
+      }
+    }
+    return tileResults;
   }
 
   destroy() {

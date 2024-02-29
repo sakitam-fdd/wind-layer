@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-import {asyncAll, isWorker} from './util';
+import { asyncAll, isWorker } from './util';
 import Actor from './Actor';
 import getRequest, { RequestAdapter } from './Request';
 

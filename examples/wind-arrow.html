@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'/>
+  <title>wind Arrow</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+  <meta name="renderer" content="webkit"/>
+  <meta name="force-rendering" content="webkit"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <script src="https://registry.npmmirror.com/mapbox-gl/^2/files/dist/mapbox-gl.js"></script>
+  <link rel="stylesheet" href="https://registry.npmmirror.com/mapbox-gl/^2/files/dist/mapbox-gl.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+      background: #202020;
+    }
+  </style>
+</head>
+<body>
+<div id='map'></div>
+<!--<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/mapbox-wind@1.0.0-alpha.10/dist/mapbox-wind.js"></script>-->
+<script src="../packages/mapbox-gl/dist/mapbox-wind.js"></script>
+<script src="https://unpkg.com/dat.gui/build/dat.gui.min.js"></script>
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoidTEwaW50IiwiYSI6InQtMnZvTkEifQ.c8mhXquPE7_xoB3P4Ag8cA';
+  const map = new mapboxgl.Map({
+    container: 'map',
+    // style: 'mapbox://styles/mapbox/satellite-streets-v12',
+    style: {
+      version: 8,
+      glyphs: "https://api.mapbox.com/fonts/v1/mapbox/{fontstack}/{range}.pbf?access_token=pk.eyJ1IjoidTEwaW50IiwiYSI6InQtMnZvTkEifQ.c8mhXquPE7_xoB3P4Ag8cA",
+      sources: {
+        carto: {
+          type: 'raster',
+          tiles: [
+            '//a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            '//b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            '//c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            '//d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+            // 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          ],
+          tileSize: 256,
+          // minzoom: 1,
+          // maxzoom: 18,
+        },
+      },
+      layers: [
+        {
+          id: 'carto',
+          type: 'raster',
+          source: 'carto',
+          // minzoom: 1,
+          // maxzoom: 22,
+          paint: {
+            // 'raster-resampling': 'nearest',
+            // 'raster-fade-duration': 0,
+          },
+        },
+        {
+          id: 'background',
+          type: 'background',
+          layout: {
+            visibility: 'none',
+          },
+        },
+      ],
+    },
+    center: { lng: 105.70150033978689, lat: 22.76021405309811 }, // starting position [lng, lat]
+    zoom: 0, // starting zoom
+    antialias: true,
+  });
+
+  const color = {
+    temp: [[203,[115,70,105,255]],
+      [218,[202,172,195,255]],
+      [233,[162,70,145,255]],
+      [248,[143,89,169,255]],
+      [258,[157,219,217,255]],
+      [265,[106,191,181,255]],
+      [269,[100,166,189,255]],
+      [273.15,[93,133,198,255]],
+      [274,[68,125,99,255]],
+      [283,[128,147,24,255]],
+      [294,[243,183,4,255]],
+      [303,[232,83,25,255]],
+      [320,[71,14,0,255]]],
+    wind: [[0,[98,113,183,255]],
+      [1,[57,97,159,255]],
+      [3,[74,148,169,255]],
+      [5,[77,141,123,255]],
+      [7,[83,165,83,255]],
+      [9,[53,159,53,255]],
+      [11,[167,157,81,255]],
+      [13,[159,127,58,255]],
+      [15,[161,108,92,255]],
+      [17,[129,58,78,255]],
+      [19,[175,80,136,255]],
+      [21,[117,74,147,255]],
+      [24,[109,97,163,255]],
+      [27,[68,105,141,255]],
+      [29,[92,144,152,255]],
+      [36,[125,68,165,255]],
+      [46,[231,215,215,256]],
+      [51,[219,212,135,256]],
+      [77,[205,202,112,256]],
+      [104,[128,128,128,255]]]
+  };
+
+  map.on('load', async function () {
+    const clip = await fetch('./data/china.geojson').then(res => res.json());
+    const interpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);
+
+    const imageSource = new mapboxWind.ImageSource('wind1', {
+      // tileSize: 256,
+      // minZoom: 0,
+      // maxZoom: 0,
+      // roundZoom: false,
+      decodeType: mapboxWind.DecodeType.imageWithExif,
+      wrapX: true,
+      coordinates: [
+        [-180, 85.051129],
+        [180, 85.051129],
+        [180, -85.051129],
+        [-180, -85.051129],
+      ],
+      url: 'http://localhost:5000/2023111700/2023111703/0/0/0/wind-surface.jpeg',
+    });
+
+    const source = new mapboxWind.TimelineSource('wind', {
+      sourceType: mapboxWind.LayerSourceType.tile,
+      tileSize: 256,
+      minZoom: 0,
+      maxZoom: 2,
+      roundZoom: true,
+      duration: 1,
+      endDelay: 0,
+      repeat: true,
+      autoplay: true,
+      decodeType: mapboxWind.DecodeType.imageWithExif,
+      intervals: [
+        '03',
+        '06',
+        '09',
+        '12',
+        '15',
+        '18',
+        '21',
+      ].map((id, index) => ({
+        // url: `http://localhost:5000/processed/2023041700/20230417${index < 10 ? '0' + index.toString() : index.toString()}/{z}/{x}/{y}/wind-surface.jpeg`,
+        url: `http://localhost:5000/2023111700/20231117${id}/{z}/{x}/{y}/wind-surface.jpeg`
+      })),
+      wrapX: true,
+    });
+
+    window.imageSource = imageSource;
+    window.tileSource = source;
+
+    const fill = new mapboxWind.Layer('fill', source, {
+      wireframe: true,
+      styleSpec: {
+        'fill-color': [
+          'interpolate',
+          ['linear'],
+          ['get', 'value'],
+          ...interpolateColor
+        ],
+        'opacity': 1,
+      },
+      renderFrom: mapboxWind.RenderFrom.rg,
+      widthSegments: 1,
+      heightSegments: 1,
+      displayRange: [0, 104],
+      renderType: mapboxWind.RenderType.colorize,
+      picking: true,
+      // mask: {
+      //   data: clip,
+      //   // type: mapboxWind.MaskType.outside,
+      //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+      // }
+    });
+
+    const particlesConfig = {
+      speedFactor: [
+        'interpolate',
+        ['exponential', 0.5],
+        ['zoom'],
+        0,
+        1,
+        15,
+        0.01
+      ],
+      fadeOpacity: 0.93,
+      dropRate: 0.003,
+      dropRateBump: 0.002,
+    }
+
+    const wind = new mapboxWind.Layer('wind', source, {
+      wireframe: false,
+      styleSpec: {
+        'fill-color': [
+          'interpolate',
+          ['step', 1],
+          ['get', 'value'],
+          0, '#fff',
+          104, '#fff',
+        ],
+        'opacity': [
+          'interpolate',
+          ['exponential', 0.5],
+          ['zoom'],
+          1,
+          1,
+          2,
+          1
+        ],
+        numParticles: [
+          'interpolate',
+          ['exponential', 0.5],
+          ['zoom'],
+          0, // zoom
+          65535 / 8, // numParticles
+          8, // zoom
+          65535 / 16 // numParticles
+        ],
+        ...particlesConfig,
+      },
+      renderFrom: mapboxWind.RenderFrom.rg,
+      displayRange: [0, 104],
+      renderType: mapboxWind.RenderType.particles,
+      // mask: {
+      //   data: clip,
+      //   // type: mapboxWind.MaskType.outside,
+      //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+      // }
+    });
+
+    const arrow = new mapboxWind.Layer('arrow', source, {
+      wireframe: false,
+      styleSpec: {
+        'fill-color': [
+          'interpolate',
+          ['step', 1],
+          ['get', 'value'],
+          // ...interpolateColor
+          0, '#fff',
+          104, '#fff',
+        ],
+        'opacity': 1,
+        space: 20,
+        size: [12, 10],
+      },
+      renderFrom: mapboxWind.RenderFrom.rg,
+      displayRange: [0, 104],
+      renderType: mapboxWind.RenderType.arrow,
+      picking: true,
+      // mask: {
+      //   data: clip,
+      //   // type: mapboxWind.MaskType.outside,
+      //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+      // }
+    });
+
+    map.on('click', e => {
+      arrow.picker(e.lngLat).then((v) => {
+        console.log(v)
+      })
+    })
+
+    map.addLayer(fill);
+    // map.addLayer(wind);
+    map.addLayer(arrow);
+  });
+</script>
+</body>
+</html>

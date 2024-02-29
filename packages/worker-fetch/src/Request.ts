@@ -1,3 +1,4 @@
+import { parse } from 'exifr';
 import RequestScheduler from './RequestScheduler';
 import {
   arrayBufferToImageBitmap,
@@ -363,7 +364,7 @@ export class RequestAdapter {
             result.numberOfRasters = fileDirectory.SamplesPerPixel;
 
             image
-              .readRasters()
+              .readRasters({ pool: getPool() })
               .then((rasters) => {
                 result.rasters = rasters;
                 const r = rasters[0];
@@ -404,15 +405,15 @@ export class RequestAdapter {
    * @param callback
    */
   parseExif(data: ArrayBuffer, callback: any) {
-    // @ts-ignore
-    if (!self.exifr) {
-      throw new Error(
-        'Must config [exifr](https://github.com/MikeKovarik/exifr) dep use `configDeps`',
-      );
-    }
-    // @ts-ignore
-    self.exifr
-      .parse(data)
+    // // @ts-ignore
+    // if (!self.exifr) {
+    //   throw new Error(
+    //     'Must config [exifr](https://github.com/MikeKovarik/exifr) dep use `configDeps`',
+    //   );
+    // }
+    // // @ts-ignore
+    // self.exifr
+    parse(data)
       .then((res) => {
         this.arrayBuffer2Image(data, (error, image) => {
           if (error) {

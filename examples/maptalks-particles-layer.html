@@ -39,15 +39,23 @@
 
   window.map = map;
 
-  mtkWind.configDeps(['https://unpkg.com/geotiff/dist-browser/geotiff.js', 'https://unpkg.com/exifr/dist/full.umd.js']);
+  mtkWind.configDeps(['https://unpkg.com/geotiff/dist-browser/geotiff.js']);
 
-  const source = new mtkWind.ImageSource('temp', {
-    type: 'image',
+  const source = new mtkWind.TileSource('temp', {
     tileSize: 256,
     // minZoom: 0,
     // maxZoom: 0,
     // roundZoom: false,
-    decodeType: 3,
+    decodeType: mtkWind.DecodeType.imageWithExif,
+    wrapX: false,
+    url: 'http://localhost:5000/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
+  });
+  const source1 = new mtkWind.ImageSource('temp', {
+    tileSize: 256,
+    // minZoom: 0,
+    // maxZoom: 0,
+    // roundZoom: false,
+    decodeType: mtkWind.DecodeType.imageWithExif,
     coordinates: [
       [-180, 85.051129],
       [180, 85.051129],
@@ -55,7 +63,7 @@
       [-180, -85.051129],
     ],
     wrapX: true,
-    url: 'http://localhost:5000/processed/2023042600/2023042601/0/0/0/wind-surface.jpeg',
+    url: 'http://localhost:5000/2023111700/2023111703/0/0/0/wind-surface.jpeg',
   });
 
   window.source = source;
@@ -98,7 +106,46 @@
 
   const interpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);
 
-  const layer = new mtkWind.Layer('wind', source, {
+  const fill = new mtkWind.Layer('fill', source, {
+    wireframe: true,
+    styleSpec: {
+      'fill-color': [
+        'interpolate',
+        ['step', 1],
+        ['get', 'value'],
+        ...interpolateColor
+      ],
+      'opacity': [
+        'interpolate',
+        ['exponential', 1],
+        ['zoom'],
+        1,
+        1,
+        10,
+        0
+      ]
+    },
+    renderFrom: mtkWind.RenderFrom.rg,
+    widthSegments: 64,
+    heightSegments: 64,
+    displayRange: [0, 104],
+    renderType: mtkWind.RenderType.colorize,
+    picking: true,
+    // mask: {
+    //   data: clip,
+    //   // type: mapboxWind.MaskType.outside,
+    //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+    // }
+  });
+
+  const particlesConfig = {
+    speedFactor: 0.5,
+    fadeOpacity: 0.93,
+    dropRate: 0.003,
+    dropRateBump: 0.002,
+  }
+
+  const layer = new mtkWind.Layer('wind', source1, {
     wireframe: false,
     styleSpec: {
       'fill-color': [
@@ -117,22 +164,35 @@
         2,
         1
       ],
-      numParticles: 1024,
-      speedFactor: 1,
-      fadeOpacity: 0.93,
-      dropRate: 0.003,
-      dropRateBump: 0.002,
+      numParticles: [
+        'interpolate',
+        ['exponential', 0.5],
+        ['zoom'],
+        0, // zoom
+        65535 / 8, // numParticles
+        8, // zoom
+        65535 / 16 // numParticles
+      ],
+      ...particlesConfig,
     },
-    renderFrom: 'rg',
+    renderFrom: mtkWind.RenderFrom.rg,
     widthSegments: 1,
     heightSegments: 1,
     displayRange: [0, 104],
-    hasMask: false,
-    renderType: 2,
-    picking: true
+    renderType: mtkWind.RenderType.particles,
+    // picking: true
   });
 
-  map.addLayer(layer);
+  fetch('./data/china.geojson').then(res => res.json()).then(clip => {
+    fill.setClipMask({
+      data: clip,
+      // type: mtkWind.MaskType.outside,
+      type: mtkWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+    })
+  });
+
+  map.addLayer(fill);
+  // map.addLayer(layer);
 </script>
 </body>
 </html>

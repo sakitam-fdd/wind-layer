@@ -114,7 +114,7 @@
     });
 
     map.on('click', () => {
-      // imageSource.setUrl('http://localhost:5000/jpeg/1/0/0.jpeg');
+      // imageSource.update({ url: 'http://localhost:5000/jpeg/1/0/0.jpeg' });
     });
 
     const fillLayer = new mapboxWind.Layer('temp', imageSource, {
@@ -140,7 +140,6 @@
       widthSegments: 1,
       heightSegments: 1,
       displayRange: [-80, 80],
-      hasMask: false,
       picking: true,
       renderType: 1,
     });

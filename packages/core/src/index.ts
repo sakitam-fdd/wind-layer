@@ -56,14 +56,11 @@ class WindCore {
   private particles: any[] = [];
   private animationLoop: number;
   private then: number;
-  private starting: boolean;
-  private generated: boolean = false;
+  private generated = false;
 
-  constructor(
-    ctx: CanvasRenderingContext2D,
-    options: Partial<IOptions>,
-    field?: Field,
-  ) {
+  private starting: boolean;
+
+  constructor(ctx: CanvasRenderingContext2D, options: Partial<IOptions>, field?: Field) {
     this.ctx = ctx;
 
     if (!this.ctx) {
@@ -88,11 +85,7 @@ class WindCore {
 
     const { width, height } = this.ctx.canvas;
 
-    if (
-      'particleAge' in options &&
-      !('maxAge' in options) &&
-      isNumber(this.options.particleAge)
-    ) {
+    if ('particleAge' in options && !('maxAge' in options) && isNumber(this.options.particleAge)) {
       // @ts-ignore
       this.options.maxAge = this.options.particleAge;
     }
@@ -102,9 +95,7 @@ class WindCore {
       !('paths' in options) &&
       isNumber(this.options.particleMultiplier)
     ) {
-      this.options.paths = Math.round(
-        width * height * (this.options.particleMultiplier as number),
-      );
+      this.options.paths = Math.round(width * height * (this.options.particleMultiplier as number));
     }
 
     this.prerender();
@@ -154,6 +145,10 @@ class WindCore {
     this.stop();
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     this.forceStop = false;
+  }
+
+  isStop() {
+    return !this.starting;
   }
 
   /**
@@ -225,8 +220,9 @@ class WindCore {
     const particles = this.particles;
     // 清空组
     const maxAge = this.options.maxAge;
-    // @ts-ignore
-    const velocityScale = isFunction(this.options.velocityScale) ? this.options.velocityScale() : this.options.velocityScale;
+    const velocityScale = isFunction(this.options.velocityScale)
+      ? this.options.velocityScale()
+      : this.options.velocityScale;
 
     let i = 0;
     const len = particles.length;
@@ -280,12 +276,10 @@ class WindCore {
     this.ctx.globalAlpha = this.options.globalAlpha;
 
     this.ctx.fillStyle = `rgba(0, 0, 0, ${this.options.globalAlpha})`;
-    this.ctx.lineWidth = (isNumber(this.options.lineWidth)
-      ? this.options.lineWidth
-      : 1) as number;
-    this.ctx.strokeStyle = (isString(this.options.colorScale)
-      ? this.options.colorScale
-      : '#fff') as string;
+    this.ctx.lineWidth = (isNumber(this.options.lineWidth) ? this.options.lineWidth : 1) as number;
+    this.ctx.strokeStyle = (
+      isString(this.options.colorScale) ? this.options.colorScale : '#fff'
+    ) as string;
 
     let i = 0;
     const len = particles.length;
@@ -293,10 +287,7 @@ class WindCore {
       let min: number;
       let max: number;
       // 如果配置了风速范围
-      if (
-        isValide(this.options.minVelocity) &&
-        isValide(this.options.maxVelocity)
-      ) {
+      if (isValide(this.options.minVelocity) && isValide(this.options.maxVelocity)) {
         min = this.options.minVelocity as number;
         max = this.options.maxVelocity as number;
       } else {
@@ -304,11 +295,11 @@ class WindCore {
         [min, max] = this.field.range as [number, number];
       }
       for (; i < len; i++) {
-        this[
-          this.options.useCoordsDraw
-            ? 'drawCoordsParticle'
-            : 'drawPixelParticle'
-        ](particles[i], min, max);
+        this[this.options.useCoordsDraw ? 'drawCoordsParticle' : 'drawPixelParticle'](
+          particles[i],
+          min,
+          max,
+        );
       }
     }
   }
@@ -343,12 +334,7 @@ class WindCore {
         // @ts-ignore
         this.ctx.strokeStyle = this.options.colorScale(particle.m) as string;
       } else if (Array.isArray(this.options.colorScale)) {
-        const colorIdx = indexFor(
-          particle.m,
-          min,
-          max,
-          this.options.colorScale,
-        );
+        const colorIdx = indexFor(particle.m, min, max, this.options.colorScale);
         this.ctx.strokeStyle = this.options.colorScale[colorIdx];
       }
 
@@ -401,12 +387,7 @@ class WindCore {
           // @ts-ignore
           this.ctx.strokeStyle = this.options.colorScale(particle.m) as string;
         } else if (Array.isArray(this.options.colorScale)) {
-          const colorIdx = indexFor(
-            particle.m,
-            min,
-            max,
-            this.options.colorScale,
-          );
+          const colorIdx = indexFor(particle.m, min, max, this.options.colorScale);
           this.ctx.strokeStyle = this.options.colorScale[colorIdx];
         }
 
@@ -424,9 +405,7 @@ class WindCore {
     // 由用户自行处理，不再自动修改粒子数
     const { width, height } = this.ctx.canvas;
     const particleCount =
-      typeof this.options.paths === 'function'
-        ? this.options.paths(this)
-        : this.options.paths;
+      typeof this.options.paths === 'function' ? this.options.paths(this) : this.options.paths;
     const particles: any[] = [];
     if (!this.field) {
       return [];
@@ -454,9 +433,4 @@ class WindCore {
 
 export * from './utils';
 
-export {
-  WindCore,
-  Field,
-  Vector,
-  IField,
-};
+export { WindCore, Field, Vector, IField };

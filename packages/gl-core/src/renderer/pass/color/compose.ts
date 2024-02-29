@@ -7,11 +7,13 @@ import { RenderFrom, BandType } from '../../../type';
 import { littleEndian } from '../../../utils/common';
 import TileID from '../../../tile/TileID';
 import { SourceType } from '../../../source';
+import MaskPass from '../mask';
 
 export interface ComposePassOptions {
   source: SourceType;
   bandType: BandType;
   renderFrom: RenderFrom;
+  maskPass?: MaskPass;
   stencilConfigForOverlap: (tiles: any[]) => [{ [_: number]: any }, TileID[]];
 }
 
@@ -20,12 +22,12 @@ export interface ComposePassOptions {
  * 在下一步再进行完整的着色
  */
 export default class ComposePass extends Pass<ComposePassOptions> {
-  readonly #program: Program;
-
   readonly prerender = true;
 
-  #current: RenderTarget;
-  #next: RenderTarget;
+  #program: WithNull<Program>;
+  #current: WithNull<RenderTarget>;
+  #next: WithNull<RenderTarget>;
+  #uid: string;
 
   constructor(
     id: string,
@@ -33,6 +35,8 @@ export default class ComposePass extends Pass<ComposePassOptions> {
     options: ComposePassOptions = {} as ComposePassOptions,
   ) {
     super(id, renderer, options);
+
+    this.#uid = utils.uid('ColorComposePass');
 
     this.#program = new Program(renderer, {
       vertexShader: vert,
@@ -75,18 +79,25 @@ export default class ComposePass extends Pass<ComposePassOptions> {
   }
 
   resize(width: number, height: number) {
-    this.#current.resize(width, height);
-    this.#next.resize(width, height);
+    this.#current?.resize(width, height);
+    this.#next?.resize(width, height);
+  }
+
+  get renderTarget() {
+    return {
+      current: this.#current,
+      next: this.#next,
+    };
   }
 
   get textures() {
     return {
-      current: this.#current.texture,
-      next: this.#next.texture,
+      current: this.#current?.texture,
+      next: this.#next?.texture,
     };
   }
 
-  renderTexture(renderTarget, rendererParams, sourceCache) {
+  renderTexture(renderTarget, rendererParams, rendererState, sourceCache) {
     if (renderTarget) {
       renderTarget.clear();
       renderTarget.bind();
@@ -106,6 +117,12 @@ export default class ComposePass extends Pass<ComposePassOptions> {
 
       if (!coordsDescending.length) return;
 
+      let stencil;
+
+      if (this.maskPass) {
+        stencil = this.maskPass.render(rendererParams, rendererState);
+      }
+
       const [stencilModes, coords] = stencilConfigForOverlap(coordsDescending);
 
       for (let i = 0; i < coords.length; i++) {
@@ -113,10 +130,10 @@ export default class ComposePass extends Pass<ComposePassOptions> {
         const tile = sourceCache.getTile(coord);
         if (!(tile && tile.hasData())) continue;
 
-        const tileBBox = coord.getTileBounds();
-        if (!tileBBox) continue;
+        const bbox = coord.getTileProjBounds();
+        if (!bbox) continue;
 
-        const tileMesh = tile.createMesh(this.id, tileBBox, this.renderer, this.#program);
+        const tileMesh = tile.createMesh(this.#uid, bbox, this.renderer, this.#program);
         const mesh = tileMesh.getMesh();
 
         const dataRange: number[] = [];
@@ -138,28 +155,37 @@ export default class ComposePass extends Pass<ComposePassOptions> {
         const stencilMode = stencilModes[coord.overscaledZ];
 
         if (stencilMode) {
-          if (stencilMode.stencil) {
-            this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
-
-            this.renderer.state.setStencilFunc(
-              stencilMode.func?.cmp,
-              stencilMode.func?.ref,
-              stencilMode.func?.mask,
-            );
-            this.renderer.state.setStencilOp(
-              stencilMode.op?.fail,
-              stencilMode.op?.zfail,
-              stencilMode.op?.zpass,
-            );
-          } else {
-            this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
-          }
+          // if (stencilMode.stencil) {
+          //   const s = this.renderer.gl.getParameter(this.renderer.gl.STENCIL_TEST);
+          //   if (!s) {
+          //     this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
+          //   }
+          //
+          //   this.renderer.gl.stencilFunc(
+          //     stencilMode.func?.cmp,
+          //     stencilMode.func?.ref,
+          //     stencilMode.func?.mask,
+          //   );
+          //   this.renderer.gl.stencilOp(
+          //     stencilMode.op?.fail,
+          //     stencilMode.op?.zfail,
+          //     stencilMode.op?.zpass,
+          //   );
+          // } else {
+          //   this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
+          // }
         }
 
         mesh.draw({
           ...utils.omit(rendererParams, ['target']),
           camera,
         });
+      }
+
+      this.renderer.clear(false, false, true);
+
+      if (!stencil) {
+        this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
       }
     }
 
@@ -178,15 +204,32 @@ export default class ComposePass extends Pass<ComposePassOptions> {
     const sourceCache = source.sourceCache;
     if (Array.isArray(sourceCache)) {
       if (sourceCache.length === 2) {
-        this.renderTexture(this.#current, rendererParams, sourceCache[0]);
-        this.renderTexture(this.#next, rendererParams, sourceCache[1]);
+        this.renderTexture(this.#current, rendererParams, rendererState, sourceCache[0]);
+        this.renderTexture(this.#next, rendererParams, rendererState, sourceCache[1]);
       } else {
-        this.renderTexture(this.#current, rendererParams, sourceCache[0]);
-        this.renderTexture(this.#next, rendererParams, sourceCache[0]);
+        this.renderTexture(this.#current, rendererParams, rendererState, sourceCache[0]);
+        this.renderTexture(this.#next, rendererParams, rendererState, sourceCache[0]);
       }
     } else {
-      this.renderTexture(this.#current, rendererParams, sourceCache);
-      this.renderTexture(this.#next, rendererParams, sourceCache);
+      this.renderTexture(this.#current, rendererParams, rendererState, sourceCache);
+      this.renderTexture(this.#next, rendererParams, rendererState, sourceCache);
+    }
+  }
+
+  destroy() {
+    if (this.#program) {
+      this.#program.destroy();
+      this.#program = null;
+    }
+
+    if (this.#current) {
+      this.#current.destroy();
+      this.#current = null;
+    }
+
+    if (this.#next) {
+      this.#next.destroy();
+      this.#next = null;
     }
   }
 }

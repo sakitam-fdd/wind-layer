@@ -1,7 +1,13 @@
-import { Renderer, utils } from '@sakitam-gis/vis-engine';
+import { Renderer, utils, EventEmitter } from '@sakitam-gis/vis-engine';
 import SourceCache from './cahce';
-import { DecodeType, LayerDataType, ParseOptionsType, TileSourceOptions, TileState } from '../type';
-import { containsExtent, resolveURL } from '../utils/common';
+import {
+  DecodeType,
+  LayerSourceType,
+  ParseOptionsType,
+  TileSourceOptions,
+  TileState,
+} from '../type';
+import { containTile, resolveURL } from '../utils/common';
 import TileID from '../tile/TileID';
 import Tile from '../tile/Tile';
 import Layer from '../renderer';
@@ -21,7 +27,11 @@ function formatUrl(url: string, data: any) {
   });
 }
 
-export default class TileSource {
+export interface TileSourceInterval {
+  url: TileSourceOptions['url'];
+}
+
+export default class TileSource extends EventEmitter {
   /**
    * 数据源 id
    */
@@ -30,7 +40,7 @@ export default class TileSource {
   /**
    * 数据源类型
    */
-  public type: LayerDataType.tile;
+  public type: LayerSourceType.tile;
 
   /**
    * 支持的最小层级
@@ -51,6 +61,8 @@ export default class TileSource {
    * 瓦片规范
    */
   public scheme: 'xyz' | 'tms';
+
+  public url: string | string[];
 
   /**
    * 瓦片大小
@@ -82,11 +94,12 @@ export default class TileSource {
   #tileWorkers: Map<string, any> = new Map();
 
   constructor(id, options: TileSourceOptions) {
+    super();
     this.id = id;
 
-    this.type = LayerDataType.tile;
-    this.minZoom = options.minZoom || 0;
-    this.maxZoom = options.maxZoom || 22;
+    this.type = LayerSourceType.tile;
+    this.minZoom = options.minZoom ?? 0;
+    this.maxZoom = options.maxZoom ?? 22;
     this.roundZoom = Boolean(options.roundZoom);
     this.scheme = options.scheme || 'xyz';
     this.tileSize = options.tileSize || 512;
@@ -110,13 +123,13 @@ export default class TileSource {
     return this.#sourceCache;
   }
 
-  onAdd(layer) {
+  onAdd(layer, cb?: any) {
     this.layer = layer;
-    this.load();
+    this.load(cb);
   }
 
-  setUrl(url: TileSourceOptions['url'], clear = true): this {
-    this.options.url = url;
+  update(data: TileSourceInterval, clear = true): this {
+    this.options.url = data.url;
     this.reload(clear);
 
     return this;
@@ -134,6 +147,7 @@ export default class TileSource {
    */
   load(cb?: any) {
     this.#loaded = true;
+    this.url = this.options.url;
     if (cb) {
       cb(null);
     }
@@ -143,7 +157,8 @@ export default class TileSource {
     return this.#loaded;
   }
 
-  reload(clear) {
+  reload(clear: boolean) {
+    this.#loaded = false;
     this.load(() => {
       if (clear) {
         this.#sourceCache.clearTiles();
@@ -154,17 +169,16 @@ export default class TileSource {
     });
   }
 
-  hasTile(coord) {
-    const bounds = coord.getTileBounds(new TileID(coord.z, coord.x, coord.y, coord.z, 0));
-    return !this.tileBounds || containsExtent(this.tileBounds, bounds.lngLatBounds);
+  hasTile(coord: TileID) {
+    return !this.tileBounds || containTile(this.tileBounds, coord.getTileBounds());
   }
 
   getFadeTime() {
     return 0;
   }
 
-  getUrl(x, y, z) {
-    const { url, subdomains } = this.options;
+  getUrl(x: number, y: number, z: number) {
+    const { subdomains } = this.options;
     let domain: string | number = '';
     if (subdomains && Array.isArray(subdomains) && subdomains.length > 0) {
       const { length } = subdomains;
@@ -182,19 +196,19 @@ export default class TileSource {
       s: domain,
     };
 
-    if (Array.isArray(url)) {
-      if (url.length > 2) {
+    if (Array.isArray(this.url)) {
+      if (this.url.length > 2) {
         console.warn(
-          `[TileSource]: Only supports up to two urls, Now there are more than two urls-${url.toString()}, and only the first two are selected by default`,
+          `[TileSource]: Only supports up to two urls, Now there are more than two urls-${this.url.toString()}, and only the first two are selected by default`,
         );
       }
-      return url.filter((item, index) => index < 2).map((u) => formatUrl(u, data));
+      return this.url.filter((item, index) => index < 2).map((u) => formatUrl(u, data));
     }
 
-    return formatUrl(url, data);
+    return formatUrl(this.url, data);
   }
 
-  asyncActor(tile, url) {
+  asyncActor(tile: Tile, url: string) {
     return new Promise((resolve, reject) => {
       const id = `${tile.tileID.tileKey}-${url}`;
       tile.actor.send(
@@ -216,7 +230,7 @@ export default class TileSource {
     });
   }
 
-  getTileUrl(tileID) {
+  getTileUrl(tileID: TileID) {
     const z = tileID.z;
     const x = tileID.x;
     const y = this.scheme === 'tms' ? Math.pow(2, tileID.z) - tileID.y - 1 : tileID.y;
@@ -245,23 +259,28 @@ export default class TileSource {
           p.push(this.asyncActor(tile, urls[i]));
         }
 
-        Promise.all(p).then((data) => {
-          tile.request.clear();
+        Promise.all(p)
+          .then((data) => {
+            tile.request.clear();
 
-          if (tile.aborted) {
-            tile.state = TileState.unloaded;
-            return callback(null);
-          }
+            if (tile.aborted) {
+              tile.state = TileState.unloaded;
+              return callback(null);
+            }
 
-          if (!data) return callback(null);
+            if (!data) return callback(null);
 
-          data.forEach((d, index) => {
-            tile.setTextures(this.renderer, index, d, this.parseOptions, this.options);
+            data.forEach((d, index) => {
+              tile.setTextures(this.renderer, index, d, this.parseOptions, this.options);
+            });
+
+            tile.state = TileState.loaded;
+            callback(null);
+          })
+          .catch((e) => {
+            tile.state = TileState.errored;
+            console.log(e);
           });
-
-          tile.state = TileState.loaded;
-          callback(null);
-        });
       } else if (tile.state === TileState.loading) {
         // schedule tile reloading after it has been loaded
         tile.reloadCallback = callback;
@@ -272,7 +291,7 @@ export default class TileSource {
     }
   }
 
-  abortTile(tile, callback) {
+  abortTile(tile: Tile, callback) {
     if (tile.request) {
       if (tile.request.size > 0 && tile.actor) {
         const iterator = tile.request.entries();
@@ -301,7 +320,7 @@ export default class TileSource {
     callback();
   }
 
-  unloadTile(tile, callback) {
+  unloadTile(tile: Tile, callback) {
     if (tile.actor) {
       // tile.actor.send('removeTile', {uid: tile.uid, type: this.type, source: this.id});
     }

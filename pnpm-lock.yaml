@@ -146,6 +146,9 @@ importers:
       terser:
         specifier: ^5.15.1
         version: 5.15.1
+      turbo:
+        specifier: ^1.10.16
+        version: 1.10.16
       typedoc:
         specifier: ^0.23.17
         version: 0.23.17(typescript@4.8.4)
@@ -194,11 +197,18 @@ importers:
   packages/gl-core:
     dependencies:
       '@sakitam-gis/vis-engine':
-        specifier: ^1.5.0
-        version: 1.5.0
+        specifier: ^1.5.1
+        version: 1.5.1
+      earcut:
+        specifier: ^2.2.4
+        version: 2.2.4
       wind-gl-worker:
         specifier: workspace:*
         version: link:../worker-fetch
+    devDependencies:
+      '@types/earcut':
+        specifier: ^2.1.4
+        version: 2.1.4
 
   packages/leaflet:
     dependencies:
@@ -218,9 +228,18 @@ importers:
 
   packages/mapbox-gl:
     dependencies:
+      '@mapbox/geojson-rewind':
+        specifier: ^0.5.2
+        version: 0.5.2
+      '@sakitam-gis/rbush':
+        specifier: workspace:*
+        version: link:../rbush
       '@sakitam-gis/vis-engine':
-        specifier: ^1.5.0
-        version: 1.5.0
+        specifier: ^1.5.1
+        version: 1.5.1
+      gl-matrix:
+        specifier: ^3.4.3
+        version: 3.4.3
       wind-core:
         specifier: workspace:*
         version: link:../core
@@ -237,9 +256,12 @@ importers:
 
   packages/maptalks:
     dependencies:
+      '@mapbox/geojson-rewind':
+        specifier: ^0.5.2
+        version: 0.5.2
       '@sakitam-gis/vis-engine':
-        specifier: ^1.5.0
-        version: 1.5.0
+        specifier: ^1.5.1
+        version: 1.5.1
       wind-core:
         specifier: workspace:*
         version: link:../core
@@ -254,7 +276,7 @@ importers:
   packages/ol:
     dependencies:
       wind-core:
-        specifier: workspace:*
+        specifier: ^1.1.3
         version: link:../core
     devDependencies:
       '@types/ol':
@@ -299,7 +321,17 @@ importers:
         specifier: ^2.1.0
         version: 2.1.0
 
-  packages/worker-fetch: {}
+  packages/rbush:
+    dependencies:
+      quickselect:
+        specifier: ^2.0.0
+        version: 2.0.0
+
+  packages/worker-fetch:
+    dependencies:
+      exifr:
+        specifier: ^7.1.3
+        version: 7.1.3
 
   playground:
     dependencies:
@@ -2424,8 +2456,8 @@ packages:
       rollup: 3.2.3
     dev: true
 
-  /@sakitam-gis/vis-engine@1.5.0:
-    resolution: {integrity: sha512-Ku6GkEdsIWoUyw9lZjLvCTeFbePgf/NEx9Vp4bC0p8x7M09NIM0FVPphNiXS8FhFvgxtLTRDd33awVNFuk3qoA==}
+  /@sakitam-gis/vis-engine@1.5.1:
+    resolution: {integrity: sha512-OVrsrYDGJi/xQtJ+43h/RSS94t/n9pp43xIDaRMaQh12ozazdisb4XKbGvMUtGLk+bhB112dq93VmqZPLjbMqQ==}
     engines: {node: '>= 14.18.1', npm: '>= 6.14.15'}
     dependencies:
       colord: 2.9.3
@@ -2449,6 +2481,10 @@ packages:
 
   /@types/chai@4.3.3:
     resolution: {integrity: sha512-hC7OMnszpxhZPduX+m+nrx+uFoLkWOMiR4oa/AZF3MuSETYTZmFfJAHqZEM8MVlvfG7BEUcgvtwoCTxBp6hm3g==}
+    dev: true
+
+  /@types/earcut@2.1.4:
+    resolution: {integrity: sha512-qp3m9PPz4gULB9MhjGID7wpo3gJ4bTGXm7ltNDsmOvsPduTeHp8wSW9YckBj3mljeOh4F0m2z/0JKAALRKbmLQ==}
     dev: true
 
   /@types/estree@0.0.39:
@@ -4793,6 +4829,10 @@ packages:
       signal-exit: 3.0.7
       strip-final-newline: 3.0.0
     dev: true
+
+  /exifr@7.1.3:
+    resolution: {integrity: sha512-g/aje2noHivrRSLbAUtBPWFbxKdKhgj/xr1vATDdUXPOFYJlQ62Ft0oy+72V6XLIpDJfHs6gXLbBLAolqOXYRw==}
+    dev: false
 
   /extend@3.0.2:
     resolution: {integrity: sha512-fjquC59cD7CyW6urNXK0FBufkZcoiGG80wTuPujX590cB5Ttln20E2UB4S/WARVqhXffZl2LNgS+gQdPIIim/g==}
@@ -8436,6 +8476,66 @@ packages:
     resolution: {integrity: sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==}
     dependencies:
       safe-buffer: 5.2.1
+    dev: true
+
+  /turbo-darwin-64@1.10.16:
+    resolution: {integrity: sha512-+Jk91FNcp9e9NCLYlvDDlp2HwEDp14F9N42IoW3dmHI5ZkGSXzalbhVcrx3DOox3QfiNUHxzWg4d7CnVNCuuMg==}
+    cpu: [x64]
+    os: [darwin]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /turbo-darwin-arm64@1.10.16:
+    resolution: {integrity: sha512-jqGpFZipIivkRp/i+jnL8npX0VssE6IAVNKtu573LXtssZdV/S+fRGYA16tI46xJGxSAivrZ/IcgZrV6Jk80bw==}
+    cpu: [arm64]
+    os: [darwin]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /turbo-linux-64@1.10.16:
+    resolution: {integrity: sha512-PpqEZHwLoizQ6sTUvmImcRmACyRk9EWLXGlqceogPZsJ1jTRK3sfcF9fC2W56zkSIzuLEP07k5kl+ZxJd8JMcg==}
+    cpu: [x64]
+    os: [linux]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /turbo-linux-arm64@1.10.16:
+    resolution: {integrity: sha512-TMjFYz8to1QE0fKVXCIvG/4giyfnmqcQIwjdNfJvKjBxn22PpbjeuFuQ5kNXshUTRaTJihFbuuCcb5OYFNx4uw==}
+    cpu: [arm64]
+    os: [linux]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /turbo-windows-64@1.10.16:
+    resolution: {integrity: sha512-+jsf68krs0N66FfC4/zZvioUap/Tq3sPFumnMV+EBo8jFdqs4yehd6+MxIwYTjSQLIcpH8KoNMB0gQYhJRLZzw==}
+    cpu: [x64]
+    os: [win32]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /turbo-windows-arm64@1.10.16:
+    resolution: {integrity: sha512-sKm3hcMM1bl0B3PLG4ifidicOGfoJmOEacM5JtgBkYM48ncMHjkHfFY7HrJHZHUnXM4l05RQTpLFoOl/uIo2HQ==}
+    cpu: [arm64]
+    os: [win32]
+    requiresBuild: true
+    dev: true
+    optional: true
+
+  /turbo@1.10.16:
+    resolution: {integrity: sha512-2CEaK4FIuSZiP83iFa9GqMTQhroW2QryckVqUydmg4tx78baftTOS0O+oDAhvo9r9Nit4xUEtC1RAHoqs6ZEtg==}
+    hasBin: true
+    optionalDependencies:
+      turbo-darwin-64: 1.10.16
+      turbo-darwin-arm64: 1.10.16
+      turbo-linux-64: 1.10.16
+      turbo-linux-arm64: 1.10.16
+      turbo-windows-64: 1.10.16
+      turbo-windows-arm64: 1.10.16
     dev: true
 
   /tweetnacl@0.14.5:

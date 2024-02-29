@@ -44,16 +44,22 @@ vec2 bilinear(const vec2 uv) {
     return mix(mix(tl, tr, f.x), mix(bl, br, f.x), f.y);
 }
 
+bool containsXY(vec2 pos, vec4 bbox) {
+    float x = pos.x;
+    return (
+    bbox.x < x && x < bbox.z &&
+    bbox.y < pos.y && pos.y < bbox.w
+    );
+}
+
 void main() {
     vec2 pos = v_particle_pos;
 
-    vec2 uv = pos;
-
-    if (calcTexture(uv).a < 1.0) {
+    if (!containsXY(pos.xy, u_data_bbox) || !containsXY(pos.xy, u_bbox) || calcTexture(pos).a == 0.0) {
         discard;
     }
 
-    vec2 velocity = bilinear(uv);
+    vec2 velocity = bilinear(pos);
 
     float value = length(velocity);
 

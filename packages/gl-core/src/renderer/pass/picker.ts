@@ -1,6 +1,6 @@
 import { Program, Renderer, Mesh, Geometry, Texture, RenderTarget } from '@sakitam-gis/vis-engine';
 import Pass from './base';
-import vert from '../../shaders/common.vert.glsl';
+import vert from '../../shaders/picker.vert.glsl';
 import frag from '../../shaders/picker.frag.glsl';
 import * as shaderLib from '../../shaders/shaderLib';
 import { SourceType } from '../../source';
@@ -16,12 +16,12 @@ export interface PickerPassOptions {
  * picking
  */
 export default class PickerPass extends Pass<PickerPassOptions> {
-  readonly #program: Program;
-  readonly #mesh: Mesh;
-  readonly #geometry: Geometry;
-  readonly prerender = true;
+  readonly prerender = false;
 
-  #picker: RenderTarget;
+  #program: WithNull<Program>;
+  #mesh: WithNull<Mesh>;
+  #geometry: WithNull<Geometry>;
+  #picker: WithNull<RenderTarget>;
 
   #rendererParams: any;
   #rendererState: any;
@@ -99,7 +99,7 @@ export default class PickerPass extends Pass<PickerPassOptions> {
   }
 
   resize(width: number, height: number) {
-    this.#picker.resize(width, height);
+    this.#picker?.resize(width, height);
   }
 
   /**
@@ -109,6 +109,7 @@ export default class PickerPass extends Pass<PickerPassOptions> {
    */
   render(rendererParams = this.#rendererParams, rendererState = this.#rendererState, pixel) {
     return new Promise((resolve) => {
+      if (!this.#picker || !this.#mesh) return resolve(null);
       this.#rendererParams =
         this.#rendererParams !== rendererParams ? rendererParams : this.#rendererParams;
       this.#rendererState =
@@ -142,9 +143,35 @@ export default class PickerPass extends Pass<PickerPassOptions> {
             a,
           );
           resolve(a);
+        } else {
+          resolve(null);
         }
+      } else {
+        resolve(null);
       }
       this.#picker.unbind();
     });
+  }
+
+  destroy() {
+    if (this.#mesh) {
+      this.#mesh.destroy();
+      this.#mesh = null;
+    }
+
+    if (this.#program) {
+      this.#program.destroy();
+      this.#program = null;
+    }
+
+    if (this.#geometry) {
+      this.#geometry.destroy();
+      this.#geometry = null;
+    }
+
+    if (this.#picker) {
+      this.#picker.destroy();
+      this.#picker = null;
+    }
   }
 }

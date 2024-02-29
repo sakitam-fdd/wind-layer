@@ -1,4 +1,4 @@
-import {DataTexture, Raf, Renderer, Scene, utils, Vector2} from '@sakitam-gis/vis-engine';
+import {Attributes, DataTexture, Raf, Renderer, Scene, utils, Vector2,} from '@sakitam-gis/vis-engine';
 import wgw from 'wind-gl-worker';
 import Pipelines from './Pipelines';
 import ColorizeComposePass from './pass/color/compose';
@@ -12,15 +12,41 @@ import ParticlesPass from './pass/particles/particles';
 import PickerPass from './pass/picker';
 import {isFunction, resolveURL} from '../utils/common';
 import {createLinearGradient, createZoom} from '../utils/style-parser';
-import {getBandType, RenderFrom, RenderType} from '../type';
+import {getBandType, MaskType, RenderFrom, RenderType} from '../type';
 import {SourceType} from '../source';
 import Tile from '../tile/Tile';
+import TileID from '../tile/TileID';
+import MaskPass from './pass/mask';
+import ArrowComposePass from './pass/arrow/compose';
+import ArrowPass from './pass/arrow/arrow';
 
-export interface LayerOptions {
+export interface BaseLayerOptions {
   /**
    * 获取当前视野内的瓦片
    */
-  getViewTiles: (data: any) => any[];
+  getViewTiles: (data: any, renderType: RenderType) => TileID[];
+
+  /**
+   * 这里我们 Mock 一个瓦片图层，用于获取视野内的所有可渲染瓦片，与getViewTiles不同的是
+   * 此方法不会限制层级，方便我们在大层级时也能合理采样
+   */
+  getGridTiles: (tileSize: number) => TileID[];
+
+  /**
+   * 获取某层级下瓦片的投影宽高
+   * @param z
+   */
+  getTileProjSize: (z: number, tiles: TileID[]) => [number, number];
+
+  /**
+   * 获取当前视图下像素和投影的转换关系
+   */
+  getPixelsToUnits: () => [number, number];
+
+  /**
+   * 像素到投影坐标的转换关系
+   */
+  getPixelsToProjUnit: () => [number, number];
 
   /**
    * 渲染类型
@@ -42,6 +68,16 @@ export interface LayerOptions {
     fadeOpacity?: number | any[];
     dropRate?: number | any[];
     dropRateBump?: number | any[];
+
+    /**
+     * arrow space
+     */
+    space?: number | any[];
+
+    /**
+     * arrow size
+     */
+    size?: [number, number];
   };
   getZoom?: () => number;
   getExtent?: () => number[];
@@ -51,6 +87,11 @@ export interface LayerOptions {
   widthSegments?: number;
   heightSegments?: number;
   wireframe?: boolean;
+
+  flipY?: boolean;
+
+  glScale?: () => number;
+
   /**
    * 是否开启拾取
    */
@@ -58,13 +99,20 @@ export interface LayerOptions {
   /**
    * 可以为任意 GeoJSON 数据
    */
-  mask?: any;
+  mask?: {
+    data: Attributes[];
+    type: MaskType;
+  };
   onInit?: (error, data) => void;
 }
 
-export const defaultOptions: LayerOptions = {
+export const defaultOptions: BaseLayerOptions = {
   getViewTiles: () => [],
-  renderType: 1,
+  getGridTiles: () => [],
+  getTileProjSize: (z) => [256, 256],
+  getPixelsToUnits: () => [1, 1],
+  getPixelsToProjUnit: () => [1, 1],
+  renderType: RenderType.colorize,
   renderFrom: RenderFrom.r,
   styleSpec: {
     'fill-color': [
@@ -94,11 +142,15 @@ export const defaultOptions: LayerOptions = {
     fadeOpacity: 0.93,
     dropRate: 0.003,
     dropRateBump: 0.002,
+    space: 20,
+    size: [16, 16],
   },
   displayRange: [Infinity, Infinity],
   widthSegments: 1,
   heightSegments: 1,
   wireframe: false,
+  flipY: false,
+  glScale: () => 1,
   onInit: () => undefined,
 };
 
@@ -107,9 +159,9 @@ export const defaultOptions: LayerOptions = {
  */
 let registerDeps = false;
 
-export default class Layer {
-  private options: LayerOptions;
-  private uid: string;
+export default class BaseLayer {
+  private options: BaseLayerOptions;
+  private readonly uid: string;
   private renderPipeline: WithNull<Pipelines>;
   private readonly scene: Scene;
   private readonly renderer: Renderer;
@@ -119,7 +171,6 @@ export default class Layer {
   private sharedState: {
     u_bbox: [number, number, number, number];
     u_data_bbox: [number, number, number, number];
-    u_offset: [number, number];
     u_scale: [number, number];
   };
 
@@ -129,14 +180,17 @@ export default class Layer {
   #fadeOpacity: number;
   #dropRate: number;
   #dropRateBump: number;
+  #space: number;
+  #size: [number, number];
   #colorRange: Vector2;
   #colorRampTexture: DataTexture;
   #nextStencilID: number;
+  #maskPass: MaskPass;
 
   constructor(
     source: SourceType,
     rs: { renderer: Renderer; scene: Scene },
-    options?: Partial<LayerOptions>,
+    options?: Partial<BaseLayerOptions>,
   ) {
     this.renderer = rs.renderer;
     this.scene = rs.scene;
@@ -150,15 +204,21 @@ export default class Layer {
 
     if (!options) {
       // eslint-disable-next-line no-param-reassign
-      options = {} as LayerOptions;
+      options = {} as BaseLayerOptions;
     }
 
     this.options = {
       ...defaultOptions,
       ...options,
+      styleSpec: {
+        ...defaultOptions.styleSpec,
+        ...options.styleSpec,
+      },
     };
 
     this.#opacity = this.options.opacity || 1;
+
+    this.#nextStencilID = 1;
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -201,16 +261,23 @@ export default class Layer {
     this.sharedState = {
       u_bbox: [0, 0, 1, 1],
       u_data_bbox: [0, 0, 1, 1],
-      u_offset: [0, 0],
       u_scale: [1, 1],
     };
     this.renderPipeline = new Pipelines(this.renderer);
     const bandType = getBandType(this.options.renderFrom ?? RenderFrom.r);
+
+    if (this.options.mask) {
+      this.#maskPass = new MaskPass('MaskPass', this.renderer, {
+        mask: this.options.mask,
+      });
+    }
+
     if (this.options.renderType === RenderType.image) {
       const composePass = new RasterComposePass('RasterComposePass', this.renderer, {
         bandType,
         source: this.source,
         renderFrom: this.options.renderFrom ?? RenderFrom.r,
+        maskPass: this.#maskPass,
         stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
       });
       const rasterPass = new RasterPass('RasterPass', this.renderer, {
@@ -235,6 +302,7 @@ export default class Layer {
         bandType,
         source: this.source,
         renderFrom: this.options.renderFrom ?? RenderFrom.r,
+        maskPass: this.#maskPass,
         stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
       });
       const colorizePass = new ColorizePass('ColorizePass', this.renderer, {
@@ -258,10 +326,12 @@ export default class Layer {
       this.renderPipeline?.addPass(colorizePass);
     } else if (this.options.renderType === RenderType.particles) {
       const composePass = new ParticlesComposePass('ParticlesComposePass', this.renderer, {
+        id: utils.uid('ParticlesComposePass'),
         bandType,
         source: this.source,
         renderFrom: this.options.renderFrom ?? RenderFrom.r,
         stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
+        getTileProjSize: this.options.getTileProjSize,
       });
       this.renderPipeline?.addPass(composePass);
 
@@ -281,6 +351,7 @@ export default class Layer {
         textureNext: composePass.textures.next,
         getParticles: () => updatePass.textures,
         getParticleNumber: () => this.#numParticles,
+        maskPass: this.#maskPass,
       });
 
       const particlesTexturePass = new ScreenPass('ParticlesTexturePass', this.renderer, {
@@ -312,23 +383,46 @@ export default class Layer {
         },
         { autoStart: true },
       );
+    } else if (this.options.renderType === RenderType.arrow) {
+      const composePass = new ArrowComposePass('ArrowComposePass', this.renderer, {
+        id: utils.uid('ArrowComposePass'),
+        bandType,
+        source: this.source,
+        renderFrom: this.options.renderFrom ?? RenderFrom.r,
+        stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
+        getTileProjSize: this.options.getTileProjSize,
+      });
+      const arrowPass = new ArrowPass('ArrowPass', this.renderer, {
+        bandType,
+        source: this.source,
+        texture: composePass.textures.current,
+        textureNext: composePass.textures.next,
+        getPixelsToUnits: this.options.getPixelsToUnits,
+        getGridTiles: this.options.getGridTiles,
+        maskPass: this.#maskPass,
+      });
+      this.renderPipeline?.addPass(composePass);
+      this.renderPipeline?.addPass(arrowPass);
     }
   }
 
-  updateOptions(options: Partial<LayerOptions>) {
+  updateOptions(options: Partial<BaseLayerOptions>) {
     this.options = {
       ...this.options,
       ...options,
+      styleSpec: {
+        ...this.options.styleSpec,
+        ...options?.styleSpec,
+      },
     };
 
     this.buildColorRamp();
     this.parseStyleSpec(true);
   }
 
-  resize() {
+  resize(width: number, height: number) {
     if (this.renderPipeline) {
-      const attr = this.renderer.attributes;
-      this.renderPipeline.resize(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
+      this.renderPipeline.resize(width, height);
     }
   }
 
@@ -388,6 +482,22 @@ export default class Layer {
   }
 
   /**
+   * 设置 symbol 的间距
+   * @param space
+   */
+  setSymbolSpace(space) {
+    this.#space = space;
+  }
+
+  /**
+   * 设置 symbol 的大小
+   * @param size
+   */
+  setSymbolSize(size) {
+    this.#size = size;
+  }
+
+  /**
    * 解析样式配置
    * @param clear
    */
@@ -409,6 +519,11 @@ export default class Layer {
         this.setDropRateBump(
           createZoom(this.uid, zoom, 'dropRateBump', this.options.styleSpec, clear),
         );
+      }
+
+      if (this.options.renderType === RenderType.arrow) {
+        this.setSymbolSize(this.options.styleSpec?.size);
+        this.setSymbolSpace(createZoom(this.uid, zoom, 'space', this.options.styleSpec, clear));
       }
     }
   }
@@ -481,6 +596,7 @@ export default class Layer {
     return [
       {
         [minTileZ]: {
+          // 禁止写入
           stencil: false,
           mask: 0,
           func: {
@@ -524,6 +640,7 @@ export default class Layer {
 
       if (updatePass) {
         // updatePass.initializeRenderTarget();
+        updatePass.setInitialize(true);
       }
 
       this.renderPipeline.passes.forEach((pass) => {
@@ -533,6 +650,7 @@ export default class Layer {
 
         if (pass.id === 'ParticlesPass') {
           pass.prerender = true;
+          // pass.resetParticles();
         }
       });
     }
@@ -542,7 +660,7 @@ export default class Layer {
    * 更新视野内的瓦片
    */
   update() {
-    const tiles = this.options.getViewTiles(this.source);
+    const tiles = this.options.getViewTiles(this.source, this.options.renderType);
     if (Array.isArray(this.source.sourceCache)) {
       this.source.sourceCache.forEach((s) => {
         s?.update(tiles);
@@ -555,6 +673,40 @@ export default class Layer {
   onTileLoaded() {
     if (this.options.triggerRepaint && isFunction(this.options.triggerRepaint)) {
       this.options.triggerRepaint();
+    }
+  }
+
+  setMask(mask: BaseLayerOptions['mask']) {
+    this.options.mask = mask;
+
+    if (this.options.mask) {
+      if (!this.#maskPass) {
+        this.#maskPass = new MaskPass('MaskPass', this.renderer, {
+          mask: this.options.mask,
+        });
+
+        const raster = this.renderPipeline?.getPass('RasterComposePass');
+        if (raster) {
+          raster.setMaskPass(this.#maskPass);
+        }
+        const colorize = this.renderPipeline?.getPass('ColorizeComposePass');
+        if (colorize) {
+          colorize.setMaskPass(this.#maskPass);
+        }
+        const particles = this.renderPipeline?.getPass('ParticlesPass');
+        if (particles) {
+          particles.setMaskPass(this.#maskPass);
+        }
+
+        const arrow = this.renderPipeline?.getPass('ArrowPass');
+        if (arrow) {
+          arrow.setMaskPass(this.#maskPass);
+        }
+      }
+
+      this.#maskPass.updateGeometry();
+
+      this.options?.triggerRepaint?.();
     }
   }
 
@@ -581,10 +733,14 @@ export default class Layer {
           colorRange: this.#colorRange,
           colorRampTexture: this.#colorRampTexture,
           sharedState: this.sharedState,
-          u_data_matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
           u_drop_rate: this.#dropRate,
           u_drop_rate_bump: this.#dropRateBump,
           u_speed_factor: this.#speedFactor,
+          u_flip_y: this.options.flipY,
+          u_gl_scale: this.options.glScale?.(),
+          symbolSize: this.#size,
+          symbolSpace: this.#space,
+          pixelsToProjUnit: this.options.getPixelsToProjUnit(),
         },
       );
     }
@@ -603,10 +759,14 @@ export default class Layer {
         displayRange: this.options.displayRange,
         useDisplayRange: Boolean(this.options.displayRange),
         sharedState: this.sharedState,
-        u_data_matrix: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
         u_drop_rate: this.#dropRate,
         u_drop_rate_bump: this.#dropRateBump,
         u_speed_factor: this.#speedFactor,
+        u_flip_y: this.options.flipY,
+        u_gl_scale: this.options.glScale?.(),
+        symbolSize: this.#size,
+        symbolSpace: this.#space,
+        pixelsToProjUnit: this.options.getPixelsToProjUnit(),
       };
 
       this.renderPipeline.render(

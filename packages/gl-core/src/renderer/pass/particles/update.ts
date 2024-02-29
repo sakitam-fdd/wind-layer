@@ -1,12 +1,13 @@
 import {
+  BlendType,
+  Geometry,
+  Mesh,
   Program,
   Renderer,
-  Mesh,
-  Geometry,
+  RenderTarget,
   Texture,
   utils,
   Vector2,
-  RenderTarget,
 } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
@@ -22,16 +23,20 @@ export interface UpdatePassOptions {
   textureNext: Texture;
   bandType: BandType;
   getParticleNumber: () => number;
-  hasMask?: boolean;
 }
 
 export default class UpdatePass extends Pass<UpdatePassOptions> {
-  readonly #program: Program;
-  readonly #mesh: Mesh;
-  readonly #geometry: Geometry;
   readonly prerender = true;
-  #current: RenderTarget;
-  #next: RenderTarget;
+
+  #program: WithNull<Program>;
+  #mesh: WithNull<Mesh>;
+  #geometry: WithNull<Geometry>;
+  #current: WithNull<RenderTarget>;
+  #next: WithNull<RenderTarget>;
+
+  #initialize = true;
+
+  #particleRes: number;
 
   constructor(
     id: string,
@@ -64,7 +69,7 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
       },
       defines: [`RENDER_TYPE ${this.options.bandType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
-      blending: 0,
+      blending: BlendType.NoBlending,
       transparent: true,
     });
 
@@ -90,29 +95,37 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
     });
   }
 
-  resize() {
-    const particleRes = Math.ceil(Math.sqrt(this.options.getParticleNumber()));
+  #getParticleRes() {
+    return Math.ceil(Math.sqrt(this.options.getParticleNumber()));
+  }
 
-    this.#current.resize(particleRes, particleRes);
-    this.#next.resize(particleRes, particleRes);
+  resize() {
+    const particleRes = this.#getParticleRes();
+
+    this.#current?.resize(particleRes, particleRes);
+    this.#next?.resize(particleRes, particleRes);
   }
 
   get textures() {
     return {
-      currentParticles: this.#current.texture,
-      nextParticles: this.#next.texture,
+      currentParticles: this.#current?.texture,
+      nextParticles: this.#next?.texture,
     };
+  }
+
+  setInitialize(state: boolean) {
+    this.#initialize = state;
   }
 
   /**
    * 创建 RenderTarget
    */
   initializeRenderTarget() {
-    const particleRes = Math.ceil(Math.sqrt(this.options.getParticleNumber()));
+    const particleRes = this.#getParticleRes();
 
     const particleState = new Float32Array(particleRes ** 2 * 4);
     for (let i = 0; i < particleState.length; i++) {
-      // randomize the initial particle positions
+      // 不同地图初始化的实际投影位置是不同的，但是这里只能归一化到 0-1（gl），需要在着色器中反算
       particleState[i] = Math.floor(Math.random() * 256);
     }
 
@@ -155,6 +168,12 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
   render(rendererParams, rendererState) {
     const attr = this.renderer.attributes;
     const camera = rendererParams.cameras.planeCamera;
+    const particleRes = this.#getParticleRes();
+    if (!this.#particleRes || this.#particleRes !== particleRes) {
+      this.#particleRes = particleRes;
+      this.initializeRenderTarget();
+    }
+
     if (this.#next) {
       this.#next.bind();
       if (attr.depth && this.#next.depth) {
@@ -163,20 +182,21 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
       }
       this.renderer.setViewport(this.#next.width, this.#next.height);
     }
-    if (rendererState) {
+    if (rendererState && this.#mesh) {
       const uniforms = utils.pick(rendererState, [
         'dataRange',
         'useDisplayRange',
         'displayRange',
-        'u_data_matrix',
         'u_drop_rate',
         'u_drop_rate_bump',
         'u_speed_factor',
+        'u_flip_y',
+        'u_gl_scale',
       ]);
 
       Object.keys(uniforms).forEach((key) => {
         if (uniforms[key] !== undefined) {
-          this.#mesh.program.setUniform(key, uniforms[key]);
+          this.#mesh?.program.setUniform(key, uniforms[key]);
         }
       });
 
@@ -187,8 +207,9 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
       );
       this.#mesh.program.setUniform('u_fade_t', fade);
       this.#mesh.program.setUniform('u_rand_seed', Math.random());
-      this.#mesh.program.setUniform('u_particles', this.#current.texture);
+      this.#mesh.program.setUniform('u_particles', this.#current?.texture);
       this.#mesh.program.setUniform('u_bbox', rendererState.extent);
+      this.#mesh.program.setUniform('u_initialize', this.#initialize);
       this.#mesh.program.setUniform('u_data_bbox', rendererState.sharedState.u_data_bbox);
 
       this.#mesh.updateMatrix();
@@ -202,6 +223,36 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
     if (this.#next) {
       this.#next.unbind();
     }
+
+    this.#initialize = false;
+
     this.swapRenderTarget();
+  }
+
+  destroy() {
+    if (this.#mesh) {
+      this.#mesh.destroy();
+      this.#mesh = null;
+    }
+
+    if (this.#program) {
+      this.#program.destroy();
+      this.#program = null;
+    }
+
+    if (this.#geometry) {
+      this.#geometry.destroy();
+      this.#geometry = null;
+    }
+
+    if (this.#current) {
+      this.#current.destroy();
+      this.#current = null;
+    }
+
+    if (this.#next) {
+      this.#next.destroy();
+      this.#next = null;
+    }
   }
 }

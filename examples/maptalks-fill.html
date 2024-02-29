@@ -22,8 +22,9 @@
 <script src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.js"></script>
 <script src="https://cdn.jsdelivr.net/npm//axios/dist/axios.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
-<script src="../packages/maptalks/dist/maptalks-wind.js"></script>
+<!--<script src="../packages/maptalks/dist/maptalks-wind.js"></script>-->
 <!--<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js"></script>-->
+<script src="maptalks-wind.js"></script>
 <script>
   const map = new maptalks.Map('map', {
     // center: [113.53450137499999, 34.44104525],
@@ -88,116 +89,61 @@
           [77,[205,202,112,255]],
           [104,[128,128,128,255]]
         ],
+        RAIN: [
+          [0, [255, 255, 255, 0]],
+          [1, [255, 255, 255, 0]],
+          [1, [166, 242, 143, 1]],
+          [1.5, [166, 242, 143, 1]],
+          [1.5, [61, 186, 61, 1]],
+          [7, [61, 186, 61, 1]],
+          [7, [97, 184, 255, 1]],
+          [15, [0, 0, 225, 1]],
+          [40, [250, 0, 250, 1]],
+          [50, [128, 0, 64, 1]],
+        ]
       };
 
       const windInterpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
       const tempInterpolateColor = color.temp.reduce((result, item, key) => result.concat(item[0] - 273.15, 'rgba(' + item[1].join(',') + ')'), []);
+      const QWInterpolateColor = color.RAIN.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
+
+      const image = new maptalks.ImageLayer('id', [{
+        url : './data/tp1.png',
+        extent: [109.4, 20, 118, 25.7],
+        opacity : 1
+      }])
+
+      map.addLayer(image)
 
       const scalarLayer = new MaptalksWind.ScalarLayer('scalar', {
-        // "type": "jsonArray",
-        // "data": res,
         "type": "image",
-        "url": "./data/var_ugrd-var_vgrd.png",
+        "url": "./data/tp1.png",
         "extent": [
-          [-180, 85.051129],
-          [-180, -85.051129],
-          [180, 85.051129],
-          [180, -85.051129],
+          [109.4, 25.7],
+          [109.4, 20],
+          [118, 25.7],
+          [118, 20],
         ],
-        // "width": res[0]['header']['nx'],
-        // "height": res[0]['header']['ny'] - 1,
-        // max: 42.25002441406252,
-        // min: -50.84996643066404,
-        // "uMin": res[0]['header']['min'],
-        // "uMax": res[0]['header']['max'],
-        // "vMin": res[1]['header']['min'],
-        // "vMax": res[1]['header']['max'],
-        "width": 1440,
-        "height": 720,
-        "uMin": -21.34380340576172,
-        "uMax": 30.7261962890625,
-        "vMin": -23.916271209716797,
-        "vMax": 24.693727493286133,
-      }, {
-        styleSpec: {
-          'fill-color': [
-            'interpolate',
-            ['linear'],
-            ['get', 'value'],
-            ...windInterpolateColor
-          ],
-          'opacity': [
-            'interpolate',
-            ['exponential', 0.5],
-            ['zoom'],
-            5,
-            0.5,
-            8,
-            1
-          ],
-        },
-        renderForm: 'rg',
-        // colorScale: [
-        //   'rgba(36, 104, 180, 0.5)',
-        //   'rgba(60, 157, 194, 0.5)',
-        //   'rgba(128, 205, 193, 0.5)',
-        //   'rgba(151, 218, 168, 0.5)',
-        //   'rgba(198, 231, 181, 0.5)',
-        //   'rgba(238, 247, 217, 0.5)',
-        //   'rgba(255, 238, 159, 0.5)',
-        //   'rgba(252, 217, 125, 0.5)',
-        //   'rgba(255, 182, 100, 0.5)',
-        //   'rgba(252, 150, 75, 0.5)',
-        //   'rgba(250, 112, 52, 0.5)',
-        //   'rgba(245, 64, 32, 0.5)',
-        //   'rgba(237, 45, 28, 0.5)',
-        //   'rgba(220, 24, 32, 0.5)',
-        //   'rgba(180, 0, 35, 0.5)',
-        // ],
-      });
+        "width": 861,
+        "height": 571,
+        "min": 0,
+        "max": 2.553428,
 
-      const tempLayer = new MaptalksWind.ScalarLayer('temp', {
-        // "type": "jsonArray",
-        // "data": res,
-        "type": "image",
-        "url": "./data/var_tmp.png",
-        "extent": [
-          [-180, 85.051129],
-          [-180, -85.051129],
-          [180, 85.051129],
-          [180, -85.051129],
-        ],
-        "width": 1440,
-        "height": 720,
-        "min": -50.84996643066404,
-        "max": 42.25002441406252,
       }, {
         styleSpec: {
           'fill-color': [
             'interpolate',
             ['linear'],
             ['get', 'value'],
-            ...tempInterpolateColor
+            ...QWInterpolateColor
           ],
-          'opacity': [
-            'interpolate',
-            ['exponential', 0.5],
-            ['zoom'],
-            5,
-            1,
-            8,
-            1
-          ],
+          'opacity': 1,
         },
         wrapX: true,
         renderForm: 'r',
-        widthSegments: 180,
-        heightSegments: 180,
-        // widthSegments: 1,
-        // heightSegments: 1,
-        // displayRange: [0, 80],
-        mappingRange: [0, 20000],
-        // mappingRange: [0, 0],
+        widthSegments: 1,
+        heightSegments: 1,
+        mappingRange: [0, 0],
         wireframe: false,
       });
 
@@ -242,8 +188,8 @@
 
       }
 
-      map.addLayer(tempLayer);
-      // map.addLayer(scalarLayer);
+      // map.addLayer(tempLayer);
+      map.addLayer(scalarLayer);
 
       initGui();
     });

@@ -1,47 +1,20 @@
 import * as mapboxgl from 'mapbox-gl';
-
+import rewind from '@mapbox/geojson-rewind';
 import { OrthographicCamera, Renderer, Scene, utils } from '@sakitam-gis/vis-engine';
 
-import type { LayerOptions, SourceType } from 'wind-gl-core';
-import { Layer as LayerCore, mod, TileID } from 'wind-gl-core';
+import type { BaseLayerOptions, SourceType } from 'wind-gl-core';
+import { BaseLayer, LayerSourceType, RenderType, TileID, polygon2buffer } from 'wind-gl-core';
 
 import CameraSync from './utils/CameraSync';
 import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
 
-function getCoords(x, y, z) {
-  const zz = Math.pow(2, z);
+import { expandTiles, getTileBounds, getTileProjBounds } from './utils/tile';
 
-  const lng = (x / zz) * 360 - 180;
-  // const lng = x / zz;
-  let lat = (y / zz) * 360 - 180;
-  lat = (180 / Math.PI) * (2 * Math.atan(Math.exp((lat * Math.PI) / 180)) - Math.PI / 2);
-
-  return [lng, lat];
-}
-
-function getTileBounds(x, y, z, wrap = 0) {
-  // for Google/OSM tile scheme we need to alter the y
-  // eslint-disable-next-line no-param-reassign
-  y = 2 ** z - y - 1;
-
-  const min = getCoords(x, y, z);
-  const max = getCoords(x + 1, y + 1, z);
-
-  const p1 = mapboxgl.MercatorCoordinate.fromLngLat([min[0], max[1]]); // 左上
-  const p2 = mapboxgl.MercatorCoordinate.fromLngLat([max[0], min[1]]); // 右下
-
-  return {
-    left: p1.x + wrap,
-    top: p1.y,
-    right: p2.x + wrap,
-    bottom: p2.y,
-    lngLatBounds: [min[0], min[1], max[0], max[1]],
-  };
-}
-
-export interface ILayerOptions extends LayerOptions {
+export interface LayerOptions extends BaseLayerOptions {
   renderingMode: '2d' | '3d';
 }
+
+export type ILayerOptions = Omit<LayerOptions, 'getViewTiles'>;
 
 export default class Layer {
   public gl: WebGLRenderingContext | WebGL2RenderingContext | null;
@@ -55,7 +28,7 @@ export default class Layer {
   public renderer: Renderer;
   private options: any;
   private source: SourceType;
-  private layer: WithNull<LayerCore>;
+  private layer: WithNull<BaseLayer>;
 
   constructor(id: string, source: SourceType, options?: ILayerOptions) {
     this.id = id;
@@ -99,12 +72,14 @@ export default class Layer {
 
   handleResize() {
     if (this.renderer && this.gl) {
-      this.renderer.setSize(this.gl?.canvas?.width, this.gl?.canvas?.height);
+      const { width, height } = (this.map as any).painter;
+      this.renderer.setSize(width, height);
+
+      if (this.layer) {
+        this.layer.resize(width, height);
+      }
+      this.update();
     }
-    if (this.layer) {
-      this.layer.resize();
-    }
-    this.update();
   }
 
   handleZoom() {
@@ -113,7 +88,7 @@ export default class Layer {
     }
   }
 
-  updateOptions(options: ILayerOptions) {
+  updateOptions(options: Partial<ILayerOptions>) {
     this.options = {
       ...this.options,
       ...(options || {}),
@@ -123,9 +98,89 @@ export default class Layer {
     }
   }
 
-  onAdd(map: mapboxgl.Map, gl: WebGLRenderingContext) {
+  public getMask() {
+    return this.options.mask;
+  }
+
+  private processMask() {
+    if (this.options.mask) {
+      const mask = this.options.mask;
+      const data = mask.data;
+      // @link https://github.com/mapbox/geojson-rewind
+      rewind(data, true);
+
+      const tr = (coords) => {
+        const mercatorCoordinates: any[] = [];
+        for (let i = 0; i < coords.length; i++) {
+          const coord = coords[i];
+          const p = mapboxgl.MercatorCoordinate.fromLngLat(coord);
+          mercatorCoordinates.push([p.x, p.y]);
+        }
+
+        return mercatorCoordinates;
+      };
+
+      const features = data.features;
+      const len = features.length;
+      let i = 0;
+      const fs: any[] = [];
+      for (; i < len; i++) {
+        const feature = features[i];
+
+        const coordinates = feature.geometry.coordinates;
+        const type = feature.geometry.type;
+
+        if (type === 'Polygon') {
+          fs.push({
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'Polygon',
+              coordinates: feature.geometry.coordinates.map((c) => tr(c)),
+            },
+          });
+        } else if (type === 'MultiPolygon') {
+          const css: any[] = [];
+          for (let k = 0; k < coordinates.length; k++) {
+            const coordinate = coordinates[k];
+            const cs: any[] = [];
+            for (let n = 0; n < coordinate.length; n++) {
+              cs.push(tr(coordinates[k][n]));
+            }
+
+            css.push(cs);
+          }
+
+          fs.push({
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'MultiPolygon',
+              coordinates: css,
+            },
+          });
+        }
+      }
+
+      return {
+        data: polygon2buffer(fs),
+        type: mask.type,
+      };
+    }
+  }
+
+  public setMask(mask) {
+    this.options.mask = Object.assign({}, this.options.mask, mask);
+
+    if (this.layer) {
+      this.layer.setMask(this.processMask());
+    }
+  }
+
+  onAdd(m: mapboxgl.Map, gl: WebGLRenderingContext) {
     this.gl = gl;
-    this.map = map;
+    this.map = m;
+    const canvas = m.getCanvas();
 
     this.renderer = new Renderer(gl, {
       autoClear: false,
@@ -138,9 +193,10 @@ export default class Layer {
     });
 
     this.scene = new Scene();
-    this.sync = new CameraSync(map, 'perspective', this.scene);
+    this.sync = new CameraSync(this.map, 'perspective', this.scene);
     this.planeCamera = new OrthographicCamera(0, 1, 1, 0, 0, 1);
-    this.layer = new LayerCore(
+
+    this.layer = new BaseLayer(
       this.source,
       {
         renderer: this.renderer,
@@ -156,17 +212,37 @@ export default class Layer {
         heightSegments: this.options.heightSegments,
         wireframe: this.options.wireframe,
         picking: this.options.picking,
+        mask: this.processMask(),
         getZoom: () => this.map?.getZoom() as number,
         triggerRepaint: () => {
           this.map?.triggerRepaint();
         },
-        getViewTiles: (source: SourceType) => {
+        getTileProjSize: (z: number) => {
+          const w = 1 / Math.pow(2, z);
+          return [w, w];
+        },
+        getPixelsToUnits: (): [number, number] => {
+          const pixel = 1;
+          const y = canvas.clientHeight / 2 - pixel / 2;
+          const x = canvas.clientWidth / 2 - pixel / 2;
+          const left = mapboxgl.MercatorCoordinate.fromLngLat(m.unproject([x, y]));
+          const right = mapboxgl.MercatorCoordinate.fromLngLat(m.unproject([x + pixel, y + pixel]));
+
+          return [Math.abs(right.x - left.x), Math.abs(left.y - right.y)];
+        },
+        getPixelsToProjUnit: () => [
+          (this.map as any)?.transform.pixelsPerMeter,
+          (this.map as any)?.transform.pixelsPerMeter,
+        ],
+        getViewTiles: (source: SourceType, renderType: RenderType) => {
           let { type } = source;
           // @ts-ignore
-          type = type !== 'timeline' ? type : source.privateType;
-          const { transform } = this.map as any;
+          type = type !== LayerSourceType.timeline ? type : source.privateType;
+          const map = this.map as any;
+          if (!map) return [];
+          const { transform } = map;
           const wrapTiles: TileID[] = [];
-          if (type === 'image') {
+          if (type === LayerSourceType.image) {
             // @ts-ignore
             const cornerCoords = source.coordinates.map((c: any) =>
               mapboxgl.MercatorCoordinate.fromLngLat(c),
@@ -177,8 +253,19 @@ export default class Layer {
                 const { canonical, wrap } = unwrapped;
                 const { x, y, z } = canonical;
                 wrapTiles.push(
-                  new TileID(z, x, y, z, wrap, {
-                    getTileBounds,
+                  new TileID(z, wrap, z, x, y, {
+                    getTileBounds: () => [
+                      (source as any).coordinates[0][0],
+                      (source as any).coordinates[2][1],
+                      (source as any).coordinates[1][0],
+                      (source as any).coordinates[0][1],
+                    ],
+                    getTileProjBounds: () => ({
+                      left: tileID.extent[0] + wrap,
+                      top: tileID.extent[1],
+                      right: tileID.extent[2] + wrap,
+                      bottom: tileID.extent[3],
+                    }),
                   }),
                 );
               });
@@ -188,20 +275,35 @@ export default class Layer {
               const z = tileID.z;
               const wrap = 0;
               wrapTiles.push(
-                new TileID(z, x, y, z, wrap, {
-                  getTileBounds,
+                new TileID(z, wrap, z, x, y, {
+                  getTileBounds: () => [
+                    (source as any).coordinates[0][0],
+                    (source as any).coordinates[2][1],
+                    (source as any).coordinates[1][0],
+                    (source as any).coordinates[0][1],
+                  ],
+                  getTileProjBounds: () => ({
+                    left: tileID.extent[0] + wrap,
+                    top: tileID.extent[1],
+                    right: tileID.extent[2] + wrap,
+                    bottom: tileID.extent[3],
+                  }),
                 }),
               );
             }
-          } else if (type === 'tile') {
-            const tiles = transform.coveringTiles({
+          } else if (type === LayerSourceType.tile) {
+            const opts = {
               tileSize: utils.isNumber(this.source.tileSize)
                 ? source.tileSize
                 : source.tileSize?.[0] || 512,
+              // for mapbox
               minzoom: source.minZoom,
               maxzoom: source.maxZoom,
               roundZoom: source.roundZoom,
-            });
+            };
+
+            // eslint-disable-next-line no-empty
+            const tiles = transform.coveringTiles(opts);
 
             for (let i = 0; i < tiles.length; i++) {
               const tile = tiles[i];
@@ -209,65 +311,88 @@ export default class Layer {
               const { x, y, z } = canonical;
               if (source.wrapX) {
                 wrapTiles.push(
-                  new TileID(z, x, y, z, wrap, {
+                  new TileID(z, wrap, z, x, y, {
                     getTileBounds,
+                    getTileProjBounds,
                   }),
                 );
               } else if (tile.wrap === 0) {
                 wrapTiles.push(
-                  new TileID(z, x, y, z, wrap, {
+                  new TileID(z, wrap, z, x, y, {
                     getTileBounds,
+                    getTileProjBounds,
                   }),
                 );
               }
             }
+
+            // 针对粒子图层，需要补齐所需瓦片，避免采样出现问题
+            if (renderType === RenderType.particles) {
+              wrapTiles.push(...expandTiles(wrapTiles));
+            }
           }
+
           return wrapTiles;
         },
         getExtent: () => {
-          const bounds: any = this.map?.getBounds().toArray();
+          const map = this.map as any;
+          const bounds: any = map?.getBounds().toArray();
+
           const xmin = bounds[0][0];
           const ymin = bounds[0][1];
           const xmax = bounds[1][0];
           const ymax = bounds[1][1];
-
-          const dx = xmax - xmin;
-
-          const minLng = dx < 360 ? mod(xmin + 180, 360) - 180 : -180;
-          let maxLng = 180;
-          if (dx < 360) {
-            maxLng = mod(xmax + 180, 360) - 180;
-            if (maxLng < minLng) {
-              maxLng += 360;
-            }
-          }
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          const minLat = Math.max(ymin, this.map.transform.latRange[0]);
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          const maxLat = Math.min(ymax, this.map.transform.latRange[1]);
-
-          const mapBounds = [minLng, minLat, maxLng, maxLat];
-
-          const p0 = mapboxgl.MercatorCoordinate.fromLngLat(
-            new mapboxgl.LngLat(mapBounds[0], mapBounds[3]),
+          const minY = Math.max(
+            ymin,
+            map.transform.latRange ? map.transform.latRange[0] : map.transform.minLat,
           );
-          const p1 = mapboxgl.MercatorCoordinate.fromLngLat(
-            new mapboxgl.LngLat(mapBounds[2], mapBounds[1]),
+          const maxY = Math.min(
+            ymax,
+            map.transform.latRange ? map.transform.latRange[1] : map.transform.maxLat,
           );
-
+          const p0 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmin, maxY));
+          const p1 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmax, minY));
           return [p0.x, p0.y, p1.x, p1.y];
+        },
+        getGridTiles: (tileSize) => {
+          const map = this.map as any;
+          if (!map) return [];
+          const { transform } = map;
+
+          const opts = {
+            tileSize: tileSize ?? 256,
+            minzoom: map.getMinZoom(),
+            maxzoom: map.getMaxZoom(),
+            roundZoom: false,
+          };
+
+          const tiles = transform.coveringTiles(opts);
+          const wrapTiles: TileID[] = [];
+
+          for (let i = 0; i < tiles.length; i++) {
+            const tile = tiles[i];
+            const { canonical, wrap } = tile;
+            const { x, y, z } = canonical;
+            wrapTiles.push(
+              new TileID(z, wrap, z, x, y, {
+                getTileBounds,
+                getTileProjBounds,
+              }),
+            );
+          }
+
+          return wrapTiles;
         },
       },
     );
 
-    map.on('movestart', this.moveStart);
-    map.on('move', this.update);
-    map.on('moveend', this.moveEnd);
-    map.on('zoom', this.handleZoom);
-    map.on('zoomend', this.handleZoom);
-    map.on('resize', this.handleResize);
+    this.map.on('movestart', this.moveStart);
+    this.map.on('move', this.update);
+    this.map.on('moveend', this.moveEnd);
+    this.map.on('zoom', this.handleZoom);
+    this.map.on('zoomend', this.handleZoom);
+    this.map.on('resize', this.handleResize);
+    this.handleResize();
     this.update();
   }
 
@@ -302,6 +427,7 @@ export default class Layer {
 
   onRemove() {
     if (this.layer) {
+      this.layer.destroy();
       this.layer = null;
     }
     this.map?.off('zoom', this.handleZoom);
