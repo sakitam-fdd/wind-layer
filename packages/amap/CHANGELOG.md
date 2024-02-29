@@ -1,5 +1,16 @@
 # amap-wind
 
+## 1.2.0
+
+### Minor Changes
+
+- [`9a8ed0d`](https://github.com/sakitam-fdd/wind-layer/commit/9a8ed0d298cbb8240d23e81e480e7cf5a046d52c) Thanks [@sakitam-fdd](https://github.com/sakitam-fdd)! - release: bump version
+
+### Patch Changes
+
+- Updated dependencies [[`9a8ed0d`](https://github.com/sakitam-fdd/wind-layer/commit/9a8ed0d298cbb8240d23e81e480e7cf5a046d52c)]:
+  - wind-core@1.1.4
+
 ## 1.1.2
 
 ### Patch Changes
