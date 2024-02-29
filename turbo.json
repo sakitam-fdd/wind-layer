@@ -4,6 +4,9 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "build:minify": {
+      "outputs": ["dist/**"]
+    },
     "lint": {
       "outputs": []
     },
