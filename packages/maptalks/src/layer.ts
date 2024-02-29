@@ -244,12 +244,12 @@ export interface BaseLayerOptionType extends UserOptions {
   requestWebGl2?: boolean;
 }
 
-const options: BaseLayerOptionType = {
+const options = {
   renderer: 'gl',
   doubleBuffer: false,
   glOptions: undefined,
   forceRenderOnZooming: true,
-};
+} as BaseLayerOptionType;
 
 class Layer extends maptalks.TileLayer {
   type: string;
@@ -504,7 +504,6 @@ class Layer extends maptalks.TileLayer {
         scene: renderer.scene,
       },
       {
-        opacity: opt.opacity,
         renderType: opt.renderType,
         renderFrom: opt.renderFrom,
         styleSpec: opt.styleSpec,
