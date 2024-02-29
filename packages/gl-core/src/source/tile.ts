@@ -320,7 +320,7 @@ export default class TileSource extends EventEmitter {
     callback();
   }
 
-  unloadTile(tile: Tile, callback) {
+  unloadTile(tile: Tile, callback) { // eslint-disable-line
     if (tile.actor) {
       // tile.actor.send('removeTile', {uid: tile.uid, type: this.type, source: this.id});
     }

@@ -1,4 +1,12 @@
-import {Attributes, DataTexture, Raf, Renderer, Scene, utils, Vector2,} from '@sakitam-gis/vis-engine';
+import {
+  Attributes,
+  DataTexture,
+  Raf,
+  Renderer,
+  Scene,
+  utils,
+  Vector2,
+} from '@sakitam-gis/vis-engine';
 import wgw from 'wind-gl-worker';
 import Pipelines from './Pipelines';
 import ColorizeComposePass from './pass/color/compose';
@@ -10,44 +18,17 @@ import UpdatePass from './pass/particles/update';
 import ScreenPass from './pass/particles/screen';
 import ParticlesPass from './pass/particles/particles';
 import PickerPass from './pass/picker';
-import {isFunction, resolveURL} from '../utils/common';
-import {createLinearGradient, createZoom} from '../utils/style-parser';
-import {getBandType, MaskType, RenderFrom, RenderType} from '../type';
-import {SourceType} from '../source';
+import { isFunction, resolveURL } from '../utils/common';
+import { createLinearGradient, createZoom } from '../utils/style-parser';
+import { getBandType, MaskType, RenderFrom, RenderType } from '../type';
+import { SourceType } from '../source';
 import Tile from '../tile/Tile';
 import TileID from '../tile/TileID';
 import MaskPass from './pass/mask';
 import ArrowComposePass from './pass/arrow/compose';
 import ArrowPass from './pass/arrow/arrow';
 
-export interface BaseLayerOptions {
-  /**
-   * 获取当前视野内的瓦片
-   */
-  getViewTiles: (data: any, renderType: RenderType) => TileID[];
-
-  /**
-   * 这里我们 Mock 一个瓦片图层，用于获取视野内的所有可渲染瓦片，与getViewTiles不同的是
-   * 此方法不会限制层级，方便我们在大层级时也能合理采样
-   */
-  getGridTiles: (tileSize: number) => TileID[];
-
-  /**
-   * 获取某层级下瓦片的投影宽高
-   * @param z
-   */
-  getTileProjSize: (z: number, tiles: TileID[]) => [number, number];
-
-  /**
-   * 获取当前视图下像素和投影的转换关系
-   */
-  getPixelsToUnits: () => [number, number];
-
-  /**
-   * 像素到投影坐标的转换关系
-   */
-  getPixelsToProjUnit: () => [number, number];
-
+export interface UserOptions {
   /**
    * 渲染类型
    * 目前支持三种类型：
@@ -79,18 +60,13 @@ export interface BaseLayerOptions {
      */
     size?: [number, number];
   };
-  getZoom?: () => number;
-  getExtent?: () => number[];
-  opacity?: number;
-  triggerRepaint?: () => void;
+
   displayRange?: [number, number];
   widthSegments?: number;
   heightSegments?: number;
   wireframe?: boolean;
 
   flipY?: boolean;
-
-  glScale?: () => number;
 
   /**
    * 是否开启拾取
@@ -103,13 +79,49 @@ export interface BaseLayerOptions {
     data: Attributes[];
     type: MaskType;
   };
+}
+
+export interface BaseLayerOptions extends UserOptions {
+  /**
+   * 获取当前视野内的瓦片
+   */
+  getViewTiles: (data: any, renderType: RenderType) => TileID[];
+
+  /**
+   * 这里我们 Mock 一个瓦片图层，用于获取视野内的所有可渲染瓦片，与getViewTiles不同的是
+   * 此方法不会限制层级，方便我们在大层级时也能合理采样
+   */
+  getGridTiles: (tileSize: number) => TileID[];
+
+  /**
+   * 获取某层级下瓦片的投影宽高
+   * @param z
+   */
+  getTileProjSize: (z: number, tiles: TileID[]) => [number, number];
+
+  /**
+   * 获取当前视图下像素和投影的转换关系
+   */
+  getPixelsToUnits: () => [number, number];
+
+  /**
+   * 像素到投影坐标的转换关系
+   */
+  getPixelsToProjUnit: () => [number, number];
+
+  getZoom?: () => number;
+  getExtent?: () => number[];
+  triggerRepaint?: () => void;
+  flipY?: boolean;
+
+  glScale?: () => number;
   onInit?: (error, data) => void;
 }
 
 export const defaultOptions: BaseLayerOptions = {
   getViewTiles: () => [],
   getGridTiles: () => [],
-  getTileProjSize: (z) => [256, 256],
+  getTileProjSize: (z) => [256, 256], // eslint-disable-line
   getPixelsToUnits: () => [1, 1],
   getPixelsToProjUnit: () => [1, 1],
   renderType: RenderType.colorize,
@@ -216,7 +228,7 @@ export default class BaseLayer {
       },
     };
 
-    this.#opacity = this.options.opacity || 1;
+    this.#opacity = 1;
 
     this.#nextStencilID = 1;
 
@@ -406,7 +418,7 @@ export default class BaseLayer {
     }
   }
 
-  updateOptions(options: Partial<BaseLayerOptions>) {
+  updateOptions(options: Partial<UserOptions>) {
     this.options = {
       ...this.options,
       ...options,

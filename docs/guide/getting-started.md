@@ -10,7 +10,7 @@ Getting Started
 ## 介绍
 
 [wind-layer](./) 是一个专注于气象格点数据可视的插件，设计之处是参考了 [earth](http://earth.nullschool.net) [cambecc](https://github.com/cambecc/earth) 的一个气象数据的展示，他使用了流体场的方式去展示了全球的风速和风向，富有很强的
-表现力, 这个插件的早期的很多核心代码也是来源于此。当然现在塔不仅仅是做风场的展示，常规的气象数据都可以依赖此插件进行可视化。
+表现力, 这个插件的早期的很多核心代码也是来源于此。当然现在它不仅仅是做风场的展示，常规的气象数据都可以依赖此插件进行可视化。
 
 ## 特性 (相对于原始 [windy.js](https://github.com/Esri/wind-js))
 
@@ -34,13 +34,24 @@ Getting Started
 - [x] 色斑图渲染，支持瓦片和单张。
 - [x] 多数据源支持（geotiff、灰度图-可解析带 exif 信息、png-多通道浮点数压缩）。
 - [x] TimelineSource（时序数据源）支持。
-- [ ] 粒子渲染，支持瓦片和单张。
+- [x] 粒子渲染，支持瓦片和单张。
+- [x] 箭头图层，支持瓦片和单张（矢量数据：风或洋流）。
+- [x] 图层拾取。
+- [x] 图层掩膜。
 
-- fill
-  https://sakitam-fdd.github.io/wind-layer/wind-animation.mp4
+https://github.com/sakitam-fdd/wind-layer/assets/19517451/b36b7eea-c647-42ed-91a4-e1f182d0343c
 
-- particles
-  https://sakitam-fdd.github.io/wind-layer/particles.mp4
+https://sakitam-fdd.github.io/wind-layer/wind-animation.mp4
+
+https://github.com/sakitam-fdd/wind-layer/assets/19517451/bf27d98e-68ed-4f9c-b1e4-812764665bff
+
+https://sakitam-fdd.github.io/wind-layer/particles.mp4
+
+https://sakitam-fdd.github.io/wind-layer/arrow.mp4
+
+https://github.com/sakitam-fdd/wind-layer/assets/19517451/064f0ea4-f72f-4e9a-80e7-7a0097f60013
+
+https://sakitam-fdd.github.io/wind-layer/particles-poc.mp4
 
 示例请查看
 

@@ -45,7 +45,7 @@ class OlWind extends ImageLayer {
   private pixelRatio: number;
   private viewProjection: IProjection;
 
-  constructor (data: any, options: Partial<IWindOptions> = {}) {
+  constructor(data: any, options: Partial<IWindOptions> = {}) {
     const opt = assign({}, _options, options);
     // @ts-ignore
     super(options);
@@ -71,7 +71,7 @@ class OlWind extends ImageLayer {
       resolutions: options.resolutions,
       canvasFunction: this.canvasFunction.bind(this),
       // projection: (options.hasOwnProperty('projection') ? options.projection : 'EPSG:3857'),
-      ratio: (options.hasOwnProperty('ratio') ? options.ratio : 1)
+      ratio: options.hasOwnProperty('ratio') ? options.ratio : 1,
     } as ImageCanvasOptions;
 
     this.setSource(new ImageCanvas(sourceOptions));
@@ -85,7 +85,7 @@ class OlWind extends ImageLayer {
    * append layer to map
    * @param map
    */
-  public appendTo (map: Map) {
+  public appendTo(map: Map) {
     if (map) {
       this.setMap(map);
     } else {
@@ -105,12 +105,12 @@ class OlWind extends ImageLayer {
     }
   }
 
-  public canvasFunction (
+  public canvasFunction(
     extent: IExtent,
     resolution: number,
     pixelRatio: number,
     size: ISize,
-    proj: IProjection
+    proj: IProjection, // eslint-disable-line
   ): HTMLCanvasElement {
     this.pixelRatio = pixelRatio;
     if (!this.canvas) {
@@ -127,7 +127,7 @@ class OlWind extends ImageLayer {
     return this.canvas;
   }
 
-  private getContext () {
+  private getContext() {
     if (this.canvas === null) return;
     return this.canvas.getContext('2d');
   }
@@ -137,7 +137,7 @@ class OlWind extends ImageLayer {
    * @param canvas
    * @returns {BMapWind}
    */
-  private render (canvas: HTMLCanvasElement) {
+  private render(canvas: HTMLCanvasElement) {
     const map = this.getMap();
     if (!this.getData() || !map) return this;
     const opt = this.getWindOptions();
@@ -168,11 +168,10 @@ class OlWind extends ImageLayer {
 
   public project(coordinate: Coordinate): [number, number] {
     const map = this.getMap();
-    const pixel = map.getPixelFromCoordinate(transform(coordinate, 'EPSG:4326', this.viewProjection));
-    return [
-      pixel[0] * this.pixelRatio,
-      pixel[1] * this.pixelRatio,
-    ];
+    const pixel = map.getPixelFromCoordinate(
+      transform(coordinate, 'EPSG:4326', this.viewProjection),
+    );
+    return [pixel[0] * this.pixelRatio, pixel[1] * this.pixelRatio];
   }
 
   public unproject(pixel: IPixel): [number, number] {
@@ -187,10 +186,7 @@ class OlWind extends ImageLayer {
     const view = map.getView();
     const size = map.getSize();
     if (view && size) {
-      const extent = view.calculateExtent([
-        size[0] * this.pixelRatio,
-        size[1] * this.pixelRatio,
-      ]);
+      const extent = view.calculateExtent([size[0] * this.pixelRatio, size[1] * this.pixelRatio]);
       return containsCoordinate(extent, transform(coordinate, 'EPSG:4326', this.viewProjection));
     }
     return false;
@@ -211,7 +207,7 @@ class OlWind extends ImageLayer {
   /**
    * get wind layer data
    */
-  public getData () {
+  public getData() {
     return this.field;
   }
 
@@ -221,7 +217,7 @@ class OlWind extends ImageLayer {
    * @param options
    * @returns {OlWind}
    */
-  public setData (data: any, options: Partial<IField> = {}) {
+  public setData(data: any, options: Partial<IField> = {}) {
     if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
@@ -240,7 +236,7 @@ class OlWind extends ImageLayer {
     return this;
   }
 
-  public updateParams(options : Partial<IOptions> = {}) {
+  public updateParams(options: Partial<IOptions> = {}) {
     warnLog('will move to setWindOptions');
     this.setWindOptions(options);
     return this;
@@ -267,7 +263,7 @@ class OlWind extends ImageLayer {
     return this.options.windOptions || {};
   }
 
-  private getProjection () {
+  private getProjection() {
     let projection;
     const map = this.getMap();
     // tslint:disable-next-line: prefer-conditional-expression
@@ -283,7 +279,7 @@ class OlWind extends ImageLayer {
    * set map
    * @param map
    */
-  public setMap (map: any) {
+  public setMap(map: any) {
     if (!map && this.wind) {
       this.wind.stop();
     }
@@ -295,7 +291,7 @@ class OlWind extends ImageLayer {
   /**
    * get map
    */
-  public getMap () {
+  public getMap() {
     return this.get('originMap');
   }
 
@@ -306,9 +302,6 @@ class OlWind extends ImageLayer {
 
 const WindLayer = OlWind;
 
-export {
-  Field,
-  WindLayer,
-};
+export { Field, WindLayer };
 
 export default OlWind;

@@ -8,103 +8,166 @@ sidebarDepth: 4
 
 # Module: gl-core/src
 
+## Enumerations
+
+- [DecodeType](../enums/gl_core_src.DecodeType.md)
+- [LayerSourceType](../enums/gl_core_src.LayerSourceType.md)
+- [MaskType](../enums/gl_core_src.MaskType.md)
+- [RenderFrom](../enums/gl_core_src.RenderFrom.md)
+- [RenderType](../enums/gl_core_src.RenderType.md)
+- [TileState](../enums/gl_core_src.TileState.md)
+
 ## Classes
 
-- [ScalarFill](../classes/gl_core_src.ScalarFill.md)
-- [WindParticles](../classes/gl_core_src.WindParticles.md)
+- [BaseLayer](../classes/gl_core_src.BaseLayer.md)
+- [ImageSource](../classes/gl_core_src.ImageSource.md)
+- [Tile](../classes/gl_core_src.Tile.md)
+- [TileID](../classes/gl_core_src.TileID.md)
+- [TileSource](../classes/gl_core_src.TileSource.md)
+- [TimelineSource](../classes/gl_core_src.TimelineSource.md)
 
 ## Interfaces
 
-- [IGFSItem](../interfaces/gl_core_src.IGFSItem.md)
-- [IJsonArrayData](../interfaces/gl_core_src.IJsonArrayData.md)
-- [IOptions](../interfaces/gl_core_src.IOptions.md)
-- [IPlaneBuffer](../interfaces/gl_core_src.IPlaneBuffer.md)
-- [IWindOptions](../interfaces/gl_core_src.IWindOptions.md)
+- [BaseLayerOptions](../interfaces/gl_core_src.BaseLayerOptions.md)
+- [ImageSourceOptions](../interfaces/gl_core_src.ImageSourceOptions.md)
+- [ProjTileBounds](../interfaces/gl_core_src.ProjTileBounds.md)
+- [TileSourceOptions](../interfaces/gl_core_src.TileSourceOptions.md)
+
+## Type Aliases
+
+### BandType
+
+Ƭ **BandType**: ``0`` \| ``1`` \| ``2`` \| ``3``
+
+#### Defined in
+
+[packages/gl-core/src/type.ts:1](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L1)
+
+___
+
+### Bounds
+
+Ƭ **Bounds**: [`number`, `number`, `number`, `number`]
+
+#### Defined in
+
+[packages/gl-core/src/type.ts:154](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L154)
+
+___
+
+### Coordinates
+
+Ƭ **Coordinates**: [[`number`, `number`], [`number`, `number`], [`number`, `number`], [`number`, `number`]]
+
+#### Defined in
+
+[packages/gl-core/src/type.ts:114](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L114)
+
+___
+
+### DataRange
+
+Ƭ **DataRange**: [`number`, `number`]
+
+数据范围
+
+#### Defined in
+
+[packages/gl-core/src/type.ts:112](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L112)
+
+___
+
+### LayerData
+
+Ƭ **LayerData**: [`ImageSourceOptions`](../interfaces/gl_core_src.ImageSourceOptions.md) \| `JsonArrayData` \| [`TileSourceOptions`](../interfaces/gl_core_src.TileSourceOptions.md)
+
+#### Defined in
+
+[packages/gl-core/src/type.ts:178](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L178)
+
+___
+
+### ParseOptionsType
+
+Ƭ **ParseOptionsType**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `renderFrom` | [`RenderFrom`](../enums/gl_core_src.RenderFrom.md) |
+
+#### Defined in
+
+[packages/gl-core/src/type.ts:225](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L225)
+
+___
+
+### SourceType
+
+Ƭ **SourceType**: [`TileSource`](../classes/gl_core_src.TileSource.md) \| [`ImageSource`](../classes/gl_core_src.ImageSource.md) \| [`TimelineSource`](../classes/gl_core_src.TimelineSource.md)
+
+#### Defined in
+
+[packages/gl-core/src/source/index.ts:5](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/index.ts#L5)
+
+___
+
+### TileBounds
+
+Ƭ **TileBounds**: [`Bounds`](gl_core_src.md#bounds)
+
+瓦片范围 (经纬度) [xmin, ymin, xmax, ymax]
+
+#### Defined in
+
+[packages/gl-core/src/type.ts:213](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L213)
+
+___
+
+### TileSize
+
+Ƭ **TileSize**: `number`
+
+瓦片尺寸
+
+#### Defined in
+
+[packages/gl-core/src/type.ts:107](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L107)
 
 ## Variables
 
+### configDeps
+
+• `Const` **configDeps**: `any` = `wgw.configDeps`
+
+#### Defined in
+
+[packages/gl-core/src/index.ts:7](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/index.ts#L7)
+
+___
+
 ### defaultOptions
 
-• `Const` **defaultOptions**: [`IOptions`](../interfaces/gl_core_src.IOptions.md)
+• `Const` **defaultOptions**: [`BaseLayerOptions`](../interfaces/gl_core_src.BaseLayerOptions.md)
 
 #### Defined in
 
-[packages/gl-core/src/ScalarFill.ts:91](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/ScalarFill.ts#L91)
+[packages/gl-core/src/renderer/index.ts:109](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L109)
+
+___
+
+### littleEndian
+
+• `Const` **littleEndian**: `boolean`
+
+判断大小端
+
+#### Defined in
+
+[packages/gl-core/src/utils/common.ts:81](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/utils/common.ts#L81)
 
 ## Functions
-
-### bindAttribute
-
-▸ **bindAttribute**(`gl`, `buffer`, `attribute`, `numComponents`): `void`
-
-bind attribute
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `gl` | `WebGLRenderingContext` |
-| `buffer` | `WebGLBuffer` |
-| `attribute` | `number` |
-| `numComponents` | `number` |
-
-#### Returns
-
-`void`
-
-#### Defined in
-
-[packages/gl-core/src/utils/gl-utils.ts:300](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L300)
-
-___
-
-### bindFramebuffer
-
-▸ **bindFramebuffer**(`gl`, `framebuffer`, `texture?`): `void`
-
-bind framebuffer
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `gl` | `WebGLRenderingContext` |
-| `framebuffer` | ``null`` \| `WebGLFramebuffer` |
-| `texture?` | `WebGLTexture` |
-
-#### Returns
-
-`void`
-
-#### Defined in
-
-[packages/gl-core/src/utils/gl-utils.ts:317](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L317)
-
-___
-
-### bindTexture
-
-▸ **bindTexture**(`gl`, `texture`, `unit`): `void`
-
-bind texture
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `gl` | `WebGLRenderingContext` |
-| `texture` | `WebGLTexture` |
-| `unit` | `number` |
-
-#### Returns
-
-`void`
-
-#### Defined in
-
-[packages/gl-core/src/utils/gl-utils.ts:243](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L243)
-
-___
 
 ### calcMinMax
 
@@ -122,176 +185,92 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/utils/common.ts:1](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/common.ts#L1)
+[packages/gl-core/src/utils/common.ts:5](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/utils/common.ts#L5)
 
 ___
 
-### clearScene
+### containTile
 
-▸ **clearScene**(`gl`, `color`, `depth?`, `stencil?`, `fbo?`): `void`
-
-clear scene
+▸ **containTile**(`a`, `b`): `boolean`
 
 #### Parameters
 
-| Name | Type | Default value |
+| Name | Type |
+| :------ | :------ |
+| `a` | [`Bounds`](gl_core_src.md#bounds) |
+| `b` | [`Bounds`](gl_core_src.md#bounds) |
+
+#### Returns
+
+`boolean`
+
+#### Defined in
+
+[packages/gl-core/src/utils/common.ts:195](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/utils/common.ts#L195)
+
+___
+
+### containsExtent
+
+▸ **containsExtent**(`extent1`, `extent2`): `boolean`
+
+extent1 是否包含 extent2
+          extent1[3]
+          |--------|
+          |        |
+extent1[0]|        |extent1[2]
+          |--------|
+          extent1[1]
+
+           extent2[3]
+          |--------|
+          |        |
+extent2[0]|        |extent2[2]
+          |--------|
+          extent2[1]
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `extent1` | [`Bounds`](gl_core_src.md#bounds) |
+| `extent2` | [`Bounds`](gl_core_src.md#bounds) |
+
+#### Returns
+
+`boolean`
+
+#### Defined in
+
+[packages/gl-core/src/utils/common.ts:166](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/utils/common.ts#L166)
+
+___
+
+### containsXY
+
+▸ **containsXY**(`extent`, `x`, `y`): `boolean`
+
+判断坐标是否在矩形范围内
+
+**`Api`**
+
+#### Parameters
+
+| Name | Type | Description |
 | :------ | :------ | :------ |
-| `gl` | `WebGLRenderingContext` | `undefined` |
-| `color` | `number`[] | `undefined` |
-| `depth` | `number` | `1` |
-| `stencil` | `number` | `0` |
-| `fbo?` | `WebGLFramebuffer` | `undefined` |
+| `extent` | `any` | Extent. |
+| `x` | `any` | X coordinate. |
+| `y` | `any` | Y coordinate. |
 
 #### Returns
 
-`void`
+`boolean`
+
+The x, y values are contained in the extent.
 
 #### Defined in
 
-[packages/gl-core/src/utils/gl-utils.ts:362](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L362)
-
-___
-
-### createBuffer
-
-▸ **createBuffer**(`gl`, `data`): ``null`` \| `WebGLBuffer`
-
-create data buffer
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `gl` | `WebGLRenderingContext` |
-| `data` | `any` |
-
-#### Returns
-
-``null`` \| `WebGLBuffer`
-
-#### Defined in
-
-[packages/gl-core/src/utils/gl-utils.ts:270](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L270)
-
-___
-
-### createProgram
-
-▸ **createProgram**(`gl`, `vertexShaderSource`, `fragmentShaderSource`): `WebGLProgram` \| ``null``
-
-create program from vertex and frag
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `gl` | `WebGLRenderingContext` |
-| `vertexShaderSource` | `string` |
-| `fragmentShaderSource` | `string` |
-
-#### Returns
-
-`WebGLProgram` \| ``null``
-
-#### Defined in
-
-[packages/gl-core/src/utils/gl-utils.ts:137](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L137)
-
-___
-
-### createShader
-
-▸ **createShader**(`gl`, `type`, `source`): `WebGLShader`
-
-create shader and compile shader
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `gl` | `WebGLRenderingContext` |
-| `type` | `number` |
-| `source` | `string` |
-
-#### Returns
-
-`WebGLShader`
-
-#### Defined in
-
-[packages/gl-core/src/utils/gl-utils.ts:114](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L114)
-
-___
-
-### createTexture
-
-▸ **createTexture**(`gl`, `filter`, `data`, `width`, `height`): `WebGLTexture` \| ``null``
-
-create 2d texture
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `gl` | `WebGLRenderingContext` |
-| `filter` | `number` |
-| `data` | `TexImageSource` \| `Uint8Array` |
-| `width` | `number` |
-| `height` | `number` |
-
-#### Returns
-
-`WebGLTexture` \| ``null``
-
-#### Defined in
-
-[packages/gl-core/src/utils/gl-utils.ts:174](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L174)
-
-___
-
-### defineShader
-
-▸ **defineShader**(`shader`, `defines`): `string`
-
-defines
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `shader` | `string` |
-| `defines` | `any` |
-
-#### Returns
-
-`string`
-
-#### Defined in
-
-[packages/gl-core/src/utils/gl-utils.ts:87](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L87)
-
-___
-
-### destroyTexture
-
-▸ **destroyTexture**(`gl`, `texture`): `void`
-
-delete texture
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `gl` | `WebGLRenderingContext` |
-| `texture` | `WebGLTexture` |
-
-#### Returns
-
-`void`
-
-#### Defined in
-
-[packages/gl-core/src/utils/gl-utils.ts:257](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L257)
+[packages/gl-core/src/utils/common.ts:183](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/utils/common.ts#L183)
 
 ___
 
@@ -312,19 +291,185 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/utils/common.ts:34](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/common.ts#L34)
+[packages/gl-core/src/utils/common.ts:35](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/utils/common.ts#L35)
 
 ___
 
-### fp64LowPart
+### flattenForPolygons
 
-▸ **fp64LowPart**(`x`): `number`
+▸ **flattenForPolygons**(`features`): `any`[]
+
+将多面转换为单面
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `x` | `number` |
+| `features` | `any` |
+
+#### Returns
+
+`any`[]
+
+#### Defined in
+
+[packages/gl-core/src/utils/common.ts:203](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/utils/common.ts#L203)
+
+___
+
+### getBandType
+
+▸ **getBandType**(`renderFrom`): ``1`` \| ``0`` \| ``2`` \| ``3``
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `renderFrom` | [`RenderFrom`](../enums/gl_core_src.RenderFrom.md) |
+
+#### Returns
+
+``1`` \| ``0`` \| ``2`` \| ``3``
+
+#### Defined in
+
+[packages/gl-core/src/type.ts:57](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L57)
+
+___
+
+### inRange
+
+▸ **inRange**(`value`, `start`, `end`): `boolean`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `value` | `number` |
+| `start` | `number` |
+| `end` | `number` |
+
+#### Returns
+
+`boolean`
+
+#### Defined in
+
+[packages/gl-core/src/utils/common.ts:187](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/utils/common.ts#L187)
+
+___
+
+### intersects
+
+▸ **intersects**(`extent1`, `extent2`): `boolean`
+
+extent1 是否包含 extent2
+          extent1[3]
+          |--------|
+          |        |
+extent1[0]|        |extent1[2]
+          |--------|
+          extent1[1]
+
+           extent2[3]
+          |--------|
+          |        |
+extent2[0]|        |extent2[2]
+          |--------|
+          extent2[1]
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `extent1` | [`Bounds`](gl_core_src.md#bounds) |
+| `extent2` | [`Bounds`](gl_core_src.md#bounds) |
+
+#### Returns
+
+`boolean`
+
+#### Defined in
+
+[packages/gl-core/src/utils/common.ts:139](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/utils/common.ts#L139)
+
+___
+
+### isFunction
+
+▸ **isFunction**(`val`): val is Function
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `val` | `any` |
+
+#### Returns
+
+val is Function
+
+#### Defined in
+
+[packages/gl-core/src/utils/common.ts:31](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/utils/common.ts#L31)
+
+___
+
+### isImageBitmap
+
+▸ **isImageBitmap**(`image`): image is ImageBitmap
+
+判断数据是否是 `ImageBitmap`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `image` | `any` |
+
+#### Returns
+
+image is ImageBitmap
+
+#### Defined in
+
+[packages/gl-core/src/utils/common.ts:91](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/utils/common.ts#L91)
+
+___
+
+### keysDifference
+
+▸ **keysDifference**(`obj`, `other`): (`string` \| `number`)[]
+
+获取两个对象中不同的 key
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `obj` | `any` |
+| `other` | `any` |
+
+#### Returns
+
+(`string` \| `number`)[]
+
+#### Defined in
+
+[packages/gl-core/src/utils/common.ts:111](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/utils/common.ts#L111)
+
+___
+
+### mod
+
+▸ **mod**(`x`, `y`): `number`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `x` | `any` |
+| `y` | `any` |
 
 #### Returns
 
@@ -332,104 +477,64 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/utils/common.ts:64](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/common.ts#L64)
+[packages/gl-core/src/utils/common.ts:191](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/utils/common.ts#L191)
 
 ___
 
-### getDevicePixelRatio
+### parseRange
 
-▸ **getDevicePixelRatio**(): `number`
+▸ **parseRange**(`exif`): `any`
 
-#### Returns
-
-`number`
-
-#### Defined in
-
-[packages/gl-core/src/utils/gl-utils.ts:4](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L4)
-
-___
-
-### getEye
-
-▸ **getEye**(`matrix`): `number`[]
+从 exif 解析数据范围
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `matrix` | `number`[] |
+| `exif` | `any` |
 
 #### Returns
 
-`number`[]
+`any`
 
 #### Defined in
 
-[packages/gl-core/src/utils/common.ts:140](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/common.ts#L140)
+[packages/gl-core/src/utils/common.ts:99](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/utils/common.ts#L99)
 
 ___
 
-### getGlContext
+### polygon2buffer
 
-▸ **getGlContext**(`canvas`, `glOptions?`): ``null`` \| `WebGLRenderingContext`
-
-get gl context
+▸ **polygon2buffer**(`features`): `Attributes`[]
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `canvas` | `HTMLCanvasElement` |
-| `glOptions` | `Object` |
+| `features` | `any`[] |
 
 #### Returns
 
-``null`` \| `WebGLRenderingContext`
+`Attributes`[]
 
 #### Defined in
 
-[packages/gl-core/src/utils/gl-utils.ts:45](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L45)
+[packages/gl-core/src/utils/common.ts:235](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/utils/common.ts#L235)
 
 ___
 
-### getPlaneBuffer
+### resolveURL
 
-▸ **getPlaneBuffer**(`startX`, `endX`, `startY`, `endY`, `widthSegments`, `heightSegments`): [`IPlaneBuffer`](../interfaces/gl_core_src.IPlaneBuffer.md)
+▸ **resolveURL**(`path`): `string`
+
+使用相对地址时使用 `a.href` 和 `image.src` 可以获取完整的 url
+但是不同的是 `image.src` 会直接请求资源。
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `startX` | `number` |
-| `endX` | `number` |
-| `startY` | `number` |
-| `endY` | `number` |
-| `widthSegments` | `number` |
-| `heightSegments` | `number` |
-
-#### Returns
-
-[`IPlaneBuffer`](../interfaces/gl_core_src.IPlaneBuffer.md)
-
-#### Defined in
-
-[packages/gl-core/src/utils/gl-utils.ts:439](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L439)
-
-___
-
-### injectShaderModule
-
-▸ **injectShaderModule**(`shader`, `modules?`): `string`
-
-inject shader module
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `shader` | `string` |
-| `modules` | `any` |
+| `path` | `string` |
 
 #### Returns
 
@@ -437,210 +542,4 @@ inject shader module
 
 #### Defined in
 
-[packages/gl-core/src/utils/gl-utils.ts:98](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L98)
-
-___
-
-### isNumber
-
-▸ **isNumber**(`val`): `boolean`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `val` | `any` |
-
-#### Returns
-
-`boolean`
-
-#### Defined in
-
-[packages/gl-core/src/utils/common.ts:26](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/common.ts#L26)
-
-___
-
-### isValide
-
-▸ **isValide**(`val`): `boolean`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `val` | `any` |
-
-#### Returns
-
-`boolean`
-
-#### Defined in
-
-[packages/gl-core/src/utils/common.ts:30](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/common.ts#L30)
-
-___
-
-### loadImage
-
-▸ **loadImage**(`src`): `Promise`<`HTMLImageElement`\>
-
-load image by url
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `src` | `string` |
-
-#### Returns
-
-`Promise`<`HTMLImageElement`\>
-
-#### Defined in
-
-[packages/gl-core/src/utils/gl-utils.ts:396](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L396)
-
-___
-
-### mat4Invert
-
-▸ **mat4Invert**(`out`, `a`): ``null`` \| `number`[]
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `out` | `number`[] |
-| `a` | `number`[] |
-
-#### Returns
-
-``null`` \| `number`[]
-
-#### Defined in
-
-[packages/gl-core/src/utils/common.ts:68](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/common.ts#L68)
-
-___
-
-### resizeCanvasSize
-
-▸ **resizeCanvasSize**(`canvas`, `pixelRatio?`): `boolean`
-
-resize gl context
-
-**`Link`**
-
-https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
-
-**`Link`**
-
-https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-anti-patterns.html
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `canvas` | `HTMLCanvasElement` |
-| `pixelRatio?` | `number` |
-
-#### Returns
-
-`boolean`
-
-#### Defined in
-
-[packages/gl-core/src/utils/gl-utils.ts:16](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L16)
-
-___
-
-### resizeFramebuffer
-
-▸ **resizeFramebuffer**(`gl`, `framebuffer`, `width`, `height`, `texture?`): `void`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `gl` | `WebGLRenderingContext` |
-| `framebuffer` | ``null`` \| `WebGLFramebuffer` |
-| `width` | `number` |
-| `height` | `number` |
-| `texture?` | `WebGLTexture` |
-
-#### Returns
-
-`void`
-
-#### Defined in
-
-[packages/gl-core/src/utils/gl-utils.ts:336](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L336)
-
-___
-
-### resizeTexture
-
-▸ **resizeTexture**(`gl`, `texture`, `width`, `height`, `data`): `void`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `gl` | `WebGLRenderingContext` |
-| `texture` | `WebGLTexture` |
-| `width` | `number` |
-| `height` | `number` |
-| `data` | `TexImageSource` \| `Uint8Array` |
-
-#### Returns
-
-`void`
-
-#### Defined in
-
-[packages/gl-core/src/utils/gl-utils.ts:211](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L211)
-
-___
-
-### transformMat4
-
-▸ **transformMat4**(`out`, `a`, `m`): `number`[]
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `out` | `number`[] |
-| `a` | `number`[] |
-| `m` | `number`[] |
-
-#### Returns
-
-`number`[]
-
-#### Defined in
-
-[packages/gl-core/src/utils/common.ts:128](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/common.ts#L128)
-
-___
-
-### updateBufferData
-
-▸ **updateBufferData**(`gl`, `buffer`, `data`): `WebGLBuffer`
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `gl` | `WebGLRenderingContext` |
-| `buffer` | `WebGLBuffer` |
-| `data` | `any` |
-
-#### Returns
-
-`WebGLBuffer`
-
-#### Defined in
-
-[packages/gl-core/src/utils/gl-utils.ts:281](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/gl-core/src/utils/gl-utils.ts#L281)
+[packages/gl-core/src/utils/common.ts:72](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/utils/common.ts#L72)

@@ -13,3 +13,5 @@ Class Docs
 - [maptalks/src](modules/maptalks_src.md)
 - [ol5/src](modules/ol5_src.md)
 - [openlayers/src](modules/openlayers_src.md)
+- [particles-poc/src](modules/particles_poc_src.md)
+- [rbush/src](modules/rbush_src.md)

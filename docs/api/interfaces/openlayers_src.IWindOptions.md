@@ -32,7 +32,7 @@ IOptions.colorScale
 
 #### Defined in
 
-packages/core/dist/index.d.ts:351
+packages/core/dist/index.d.ts:352
 
 ___
 
@@ -42,7 +42,7 @@ ___
 
 #### Defined in
 
-[packages/openlayers/src/index.ts:21](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L21)
+[packages/openlayers/src/index.ts:21](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/openlayers/src/index.ts#L21)
 
 ___
 
@@ -52,7 +52,7 @@ ___
 
 #### Defined in
 
-[packages/openlayers/src/index.ts:26](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L26)
+[packages/openlayers/src/index.ts:26](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/openlayers/src/index.ts#L26)
 
 ___
 
@@ -66,7 +66,7 @@ IOptions.frameRate
 
 #### Defined in
 
-packages/core/dist/index.d.ts:357
+packages/core/dist/index.d.ts:358
 
 ___
 
@@ -80,7 +80,7 @@ IOptions.globalAlpha
 
 #### Defined in
 
-packages/core/dist/index.d.ts:349
+packages/core/dist/index.d.ts:350
 
 ___
 
@@ -94,7 +94,7 @@ IOptions.gpet
 
 #### Defined in
 
-packages/core/dist/index.d.ts:361
+packages/core/dist/index.d.ts:362
 
 ___
 
@@ -108,7 +108,7 @@ IOptions.lineWidth
 
 #### Defined in
 
-packages/core/dist/index.d.ts:350
+packages/core/dist/index.d.ts:351
 
 ___
 
@@ -118,7 +118,7 @@ ___
 
 #### Defined in
 
-[packages/openlayers/src/index.ts:19](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L19)
+[packages/openlayers/src/index.ts:19](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/openlayers/src/index.ts#L19)
 
 ___
 
@@ -132,7 +132,7 @@ IOptions.maxAge
 
 #### Defined in
 
-packages/core/dist/index.d.ts:354
+packages/core/dist/index.d.ts:355
 
 ___
 
@@ -142,7 +142,7 @@ ___
 
 #### Defined in
 
-[packages/openlayers/src/index.ts:23](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L23)
+[packages/openlayers/src/index.ts:23](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/openlayers/src/index.ts#L23)
 
 ___
 
@@ -156,7 +156,7 @@ IOptions.maxVelocity
 
 #### Defined in
 
-packages/core/dist/index.d.ts:359
+packages/core/dist/index.d.ts:360
 
 ___
 
@@ -166,7 +166,7 @@ ___
 
 #### Defined in
 
-[packages/openlayers/src/index.ts:22](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L22)
+[packages/openlayers/src/index.ts:22](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/openlayers/src/index.ts#L22)
 
 ___
 
@@ -180,7 +180,7 @@ IOptions.minVelocity
 
 #### Defined in
 
-packages/core/dist/index.d.ts:358
+packages/core/dist/index.d.ts:359
 
 ___
 
@@ -190,7 +190,7 @@ ___
 
 #### Defined in
 
-[packages/openlayers/src/index.ts:18](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L18)
+[packages/openlayers/src/index.ts:18](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/openlayers/src/index.ts#L18)
 
 ___
 
@@ -204,7 +204,7 @@ IOptions.particleAge
 
 #### Defined in
 
-packages/core/dist/index.d.ts:353
+packages/core/dist/index.d.ts:354
 
 ___
 
@@ -218,7 +218,7 @@ IOptions.particleMultiplier
 
 #### Defined in
 
-packages/core/dist/index.d.ts:355
+packages/core/dist/index.d.ts:356
 
 ___
 
@@ -232,7 +232,7 @@ IOptions.paths
 
 #### Defined in
 
-packages/core/dist/index.d.ts:356
+packages/core/dist/index.d.ts:357
 
 ___
 
@@ -246,7 +246,7 @@ IOptions.useCoordsDraw
 
 #### Defined in
 
-packages/core/dist/index.d.ts:360
+packages/core/dist/index.d.ts:361
 
 ___
 
@@ -260,7 +260,7 @@ IOptions.velocityScale
 
 #### Defined in
 
-packages/core/dist/index.d.ts:352
+packages/core/dist/index.d.ts:353
 
 ___
 
@@ -270,7 +270,7 @@ ___
 
 #### Defined in
 
-[packages/openlayers/src/index.ts:20](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L20)
+[packages/openlayers/src/index.ts:20](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/openlayers/src/index.ts#L20)
 
 ___
 
@@ -280,7 +280,7 @@ ___
 
 #### Defined in
 
-[packages/openlayers/src/index.ts:25](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L25)
+[packages/openlayers/src/index.ts:25](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/openlayers/src/index.ts#L25)
 
 ___
 
@@ -290,4 +290,4 @@ ___
 
 #### Defined in
 
-[packages/openlayers/src/index.ts:24](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/openlayers/src/index.ts#L24)
+[packages/openlayers/src/index.ts:24](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/openlayers/src/index.ts#L24)

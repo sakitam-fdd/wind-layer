@@ -40,7 +40,7 @@ class OlWind extends ol.layer.Image {
   public pixelRatio: number;
   private type: string;
 
-  constructor (data: any, options: Partial<IWindOptions> = {}) {
+  constructor(data: any, options: Partial<IWindOptions> = {}) {
     const opt = assign({}, _options, options);
     // @ts-ignore
     super(options);
@@ -65,7 +65,7 @@ class OlWind extends ol.layer.Image {
       attributions: options.attributions,
       resolutions: options.resolutions,
       canvasFunction: this.canvasFunction.bind(this),
-      ratio: (options.hasOwnProperty('ratio') ? options.ratio : 1)
+      ratio: options.hasOwnProperty('ratio') ? options.ratio : 1,
     } as olx.source.ImageCanvasOptions;
 
     const source = new ol.source.ImageCanvas(sourceOptions);
@@ -88,7 +88,7 @@ class OlWind extends ol.layer.Image {
    * append layer to map
    * @param map
    */
-  public appendTo (map: ol.Map) {
+  public appendTo(map: ol.Map) {
     if (map) {
       this.setMap(map);
     } else {
@@ -108,7 +108,7 @@ class OlWind extends ol.layer.Image {
     }
   }
 
-  public canvasFunction (
+  public canvasFunction(
     extent: ol.Extent,
     resolution: number,
     pixelRatio: number,
@@ -130,7 +130,7 @@ class OlWind extends ol.layer.Image {
     return this.canvas;
   }
 
-  private getContext () {
+  private getContext() {
     if (this.canvas === null) return;
     return this.canvas.getContext('2d');
   }
@@ -140,7 +140,7 @@ class OlWind extends ol.layer.Image {
    * @param canvas
    * @returns {OlWind}
    */
-  private render (canvas: HTMLCanvasElement) {
+  private render(canvas: HTMLCanvasElement) {
     const map = this.getMap();
     if (!this.getData() || !map) return this;
     const opt = this.getWindOptions();
@@ -173,11 +173,10 @@ class OlWind extends ol.layer.Image {
 
   public project(coordinate: [number, number]): [number, number] {
     const map = this.getMap();
-    const pixel = map.getPixelFromCoordinate(ol.proj.transform(coordinate, 'EPSG:4326', this.viewProjection));
-    return [
-      pixel[0] * this.pixelRatio,
-      pixel[1] * this.pixelRatio,
-    ];
+    const pixel = map.getPixelFromCoordinate(
+      ol.proj.transform(coordinate, 'EPSG:4326', this.viewProjection),
+    );
+    return [pixel[0] * this.pixelRatio, pixel[1] * this.pixelRatio];
   }
 
   public unproject(pixel: [number, number]): [number, number] {
@@ -196,11 +195,11 @@ class OlWind extends ol.layer.Image {
     const view = map.getView();
     const size = map.getSize();
     if (view && size) {
-      const extent = view.calculateExtent([
-        size[0] * this.pixelRatio,
-        size[1] * this.pixelRatio,
-      ]);
-      return ol.extent.containsCoordinate(extent, ol.proj.transform(coordinate, 'EPSG:4326', this.viewProjection));
+      const extent = view.calculateExtent([size[0] * this.pixelRatio, size[1] * this.pixelRatio]);
+      return ol.extent.containsCoordinate(
+        extent,
+        ol.proj.transform(coordinate, 'EPSG:4326', this.viewProjection),
+      );
     }
     return false;
   }
@@ -220,7 +219,7 @@ class OlWind extends ol.layer.Image {
   /**
    * get wind layer data
    */
-  public getData () {
+  public getData() {
     return this.field;
   }
 
@@ -230,7 +229,7 @@ class OlWind extends ol.layer.Image {
    * @param options
    * @returns {OlWind}
    */
-  public setData (data: any, options: Partial<IField> = {}) {
+  public setData(data: any, options: Partial<IField> = {}) {
     if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
@@ -249,7 +248,7 @@ class OlWind extends ol.layer.Image {
     return this;
   }
 
-  public updateParams(options : Partial<IOptions> = {}) {
+  public updateParams(options: Partial<IOptions> = {}) {
     warnLog('will move to setWindOptions');
     this.setWindOptions(options);
     return this;
@@ -276,7 +275,7 @@ class OlWind extends ol.layer.Image {
     return this.options.windOptions || {};
   }
 
-  private getProjection () {
+  private getProjection() {
     let projection;
     const map = this.getMap();
     // tslint:disable-next-line: prefer-conditional-expression
@@ -292,7 +291,7 @@ class OlWind extends ol.layer.Image {
    * set map
    * @param map
    */
-  public setMap (map: ol.Map) {
+  public setMap(map: ol.Map) {
     if (!map && this.wind) {
       this.wind.stop();
     }
@@ -304,7 +303,7 @@ class OlWind extends ol.layer.Image {
   /**
    * get map
    */
-  public getMap () {
+  public getMap() {
     return this.get('originMap');
   }
 
@@ -315,9 +314,6 @@ class OlWind extends ol.layer.Image {
 
 const WindLayer = OlWind;
 
-export {
-  Field,
-  WindLayer,
-};
+export { Field, WindLayer };
 
 export default OlWind;

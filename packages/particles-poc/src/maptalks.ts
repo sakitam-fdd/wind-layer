@@ -378,7 +378,9 @@ export default class ParticlesLayer {
         u_particles_next: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_particles_next'>(
           'u_particles_next',
         ),
-        u_color_ramp: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_color_ramp'>('u_color_ramp'),
+        u_color_ramp: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_color_ramp'>(
+          'u_color_ramp',
+        ),
         u_particles_res: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_particles_res'>(
           'u_particles_res',
         ),
@@ -389,7 +391,8 @@ export default class ParticlesLayer {
         u_wind_max: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_wind_max'>('u_wind_max'),
         u_matrix: (_, { u_matrix }) => u_matrix,
         u_globeToMercMatrix: (_, { u_globeToMercMatrix }) => u_globeToMercMatrix,
-        u_globeToMercatorTransition: (_, { u_globeToMercatorTransition }) => u_globeToMercatorTransition,
+        u_globeToMercatorTransition: (_, { u_globeToMercatorTransition }) =>
+          u_globeToMercatorTransition,
         u_centerInMerc: (_, { u_centerInMerc }) => u_centerInMerc,
         u_pixelsPerMeterRatio: (_, { u_pixelsPerMeterRatio }) => u_pixelsPerMeterRatio,
         u_bbox: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_bbox'>('u_bbox'),
@@ -424,7 +427,7 @@ export default class ParticlesLayer {
 
       count: this.regl.prop<GlobalDrawParticlesCommand.Props, 'count'>('count'),
       // primitive: 'triangles',
-      primitive: "points"
+      primitive: 'points',
     });
 
     this.textureCommand = this.regl<

@@ -10,22 +10,64 @@ sidebarDepth: 4
 
 ## Classes
 
-- [Particles](../classes/mapbox_gl_src.Particles.md)
-- [ScalarFill](../classes/mapbox_gl_src.ScalarFill.md)
-- [WindLayer](../classes/mapbox_gl_src.WindLayer.md)
-
-## Interfaces
-
-- [IWindOptions](../interfaces/mapbox_gl_src.IWindOptions.md)
+- [Layer](../classes/mapbox_gl_src.Layer.md)
 
 ## References
 
-### Field
+### DecodeType
 
-Re-exports [Field](../classes/maptalks_src.Field.md)
+Re-exports [DecodeType](../enums/maptalks_src.DecodeType.md)
 
 ___
 
-### default
+### ImageSource
 
-Renames and re-exports [WindLayer](../classes/mapbox_gl_src.WindLayer.md)
+Re-exports [ImageSource](../classes/maptalks_src.ImageSource.md)
+
+___
+
+### LayerSourceType
+
+Re-exports [LayerSourceType](../enums/maptalks_src.LayerSourceType.md)
+
+___
+
+### MaskType
+
+Re-exports [MaskType](../enums/maptalks_src.MaskType.md)
+
+___
+
+### RenderFrom
+
+Re-exports [RenderFrom](../enums/maptalks_src.RenderFrom.md)
+
+___
+
+### RenderType
+
+Re-exports [RenderType](../enums/maptalks_src.RenderType.md)
+
+___
+
+### TileID
+
+Re-exports [TileID](../classes/maptalks_src.TileID.md)
+
+___
+
+### TileSource
+
+Re-exports [TileSource](../classes/maptalks_src.TileSource.md)
+
+___
+
+### TimelineSource
+
+Re-exports [TimelineSource](../classes/maptalks_src.TimelineSource.md)
+
+___
+
+### configDeps
+
+Re-exports [configDeps](maptalks_src.md#configdeps)

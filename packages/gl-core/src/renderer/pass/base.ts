@@ -33,7 +33,7 @@ export default class Pass<T> {
     this.maskPass = pass;
   }
 
-  render(rendererParams, rendererState, cb) {
+  render(rendererParams, rendererState, cb) { // eslint-disable-line
     throw new Error(ERR_PASS_METHOD_UNDEFINED);
   }
 

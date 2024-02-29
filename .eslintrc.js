@@ -138,12 +138,7 @@ module.exports = {
 
         '@typescript-eslint/camelcase': 'off', // 使用驼峰命名
         '@typescript-eslint/explicit-function-return-type': 'off', // 在函数和类方法上须声明返回类型
-        '@typescript-eslint/ban-ts-comment': ['warn', {
-          'ts-expect-error': 'allow-with-description',
-          'ts-ignore': 'allow-with-description',
-          'ts-nocheck': 'allow-with-description',
-          'ts-check': 'allow-with-description',
-        }],
+        '@typescript-eslint/ban-ts-comment': 'off',
         // @link https://github.com/typescript-eslint/typescript-eslint/blob/main/docs/linting/TROUBLESHOOTING.md
         'no-undef': 'off',
         'prettier/prettier': 'warn', // 不符合prettier规范的进行警告

@@ -129,7 +129,7 @@ export interface ImageSourceOptions {
   /**
    * 是否跨世界渲染
    */
-  wrapX?: number;
+  wrapX?: boolean;
   maxTileCacheSize?: number;
 }
 
@@ -170,7 +170,7 @@ export interface TileSourceOptions {
   /**
    * 是否跨世界渲染
    */
-  wrapX?: number;
+  wrapX?: boolean;
   maxTileCacheSize?: number;
   tileBounds?: Bounds;
 }

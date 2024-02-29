@@ -17,6 +17,7 @@ import {
   polygon2buffer,
   SourceType,
   TileID,
+  UserOptions,
 } from 'wind-gl-core';
 
 highPrecision(true);
@@ -231,7 +232,7 @@ class VeRenderer extends maptalks.renderer.CanvasLayerRenderer {
   }
 }
 
-export interface BaseLayerOptionType {
+export interface BaseLayerOptionType extends UserOptions {
   renderer?: string;
   doubleBuffer?: boolean;
   glOptions?: {
@@ -485,6 +486,7 @@ class Layer extends maptalks.TileLayer {
     }
   }
 
+  // eslint-disable-next-line
   prepareToDraw(gl, scene) {
     const opt = this.options;
     const map = this.getMap();

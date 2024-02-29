@@ -120,8 +120,8 @@ export function getCoordinatesCenterTileID(coords: Array<{ x: number; y: number 
 
   return {
     z: zoom,
-    x: Math.floor((minX + maxX) / 2 * tilesAtZoom),
-    y: Math.floor((minY + maxY) / 2 * tilesAtZoom),
+    x: Math.floor(((minX + maxX) / 2) * tilesAtZoom),
+    y: Math.floor(((minY + maxY) / 2) * tilesAtZoom),
     extent: [minX, minY, maxX, maxY],
   };
 }

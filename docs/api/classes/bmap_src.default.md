@@ -35,7 +35,7 @@ BMap.Overlay.constructor
 
 #### Defined in
 
-[packages/bmap/src/index.ts:50](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L50)
+[packages/bmap/src/index.ts:50](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L50)
 
 ## Properties
 
@@ -45,7 +45,7 @@ BMap.Overlay.constructor
 
 #### Defined in
 
-[packages/bmap/src/index.ts:40](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L40)
+[packages/bmap/src/index.ts:40](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L40)
 
 ___
 
@@ -55,7 +55,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:42](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L42)
+[packages/bmap/src/index.ts:42](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L42)
 
 ___
 
@@ -65,7 +65,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:48](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L48)
+[packages/bmap/src/index.ts:48](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L48)
 
 ___
 
@@ -75,7 +75,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:43](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L43)
+[packages/bmap/src/index.ts:43](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L43)
 
 ___
 
@@ -85,7 +85,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:44](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L44)
+[packages/bmap/src/index.ts:44](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L44)
 
 ___
 
@@ -95,7 +95,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:47](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L47)
+[packages/bmap/src/index.ts:47](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L47)
 
 ___
 
@@ -105,7 +105,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:39](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L39)
+[packages/bmap/src/index.ts:39](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L39)
 
 ___
 
@@ -115,17 +115,17 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:45](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L45)
+[packages/bmap/src/index.ts:45](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L45)
 
 ___
 
 ### wind
 
-• `Private` **wind**: ``null`` \| `WindCore`
+• `Private` **wind**: ``null`` \| [`WindCore`](maptalks_src.WindCore.md)
 
 #### Defined in
 
-[packages/bmap/src/index.ts:41](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L41)
+[packages/bmap/src/index.ts:41](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L41)
 
 ___
 
@@ -135,7 +135,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:46](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L46)
+[packages/bmap/src/index.ts:46](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L46)
 
 ## Methods
 
@@ -149,7 +149,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:170](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L170)
+[packages/bmap/src/index.ts:170](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L170)
 
 ___
 
@@ -163,7 +163,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:150](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L150)
+[packages/bmap/src/index.ts:150](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L150)
 
 ___
 
@@ -185,7 +185,7 @@ append layer to map
 
 #### Defined in
 
-[packages/bmap/src/index.ts:87](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L87)
+[packages/bmap/src/index.ts:87](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L87)
 
 ___
 
@@ -199,7 +199,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:112](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L112)
+[packages/bmap/src/index.ts:112](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L112)
 
 ___
 
@@ -213,7 +213,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:166](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L166)
+[packages/bmap/src/index.ts:166](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L166)
 
 ___
 
@@ -227,7 +227,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:228](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L228)
+[packages/bmap/src/index.ts:228](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L228)
 
 ___
 
@@ -243,7 +243,7 @@ get canvas context
 
 #### Defined in
 
-[packages/bmap/src/index.ts:223](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L223)
+[packages/bmap/src/index.ts:223](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L223)
 
 ___
 
@@ -259,7 +259,7 @@ get wind layer data
 
 #### Defined in
 
-[packages/bmap/src/index.ts:337](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L337)
+[packages/bmap/src/index.ts:337](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L337)
 
 ___
 
@@ -273,7 +273,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:370](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L370)
+[packages/bmap/src/index.ts:370](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L370)
 
 ___
 
@@ -287,7 +287,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:232](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L232)
+[packages/bmap/src/index.ts:232](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L232)
 
 ___
 
@@ -301,7 +301,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:387](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L387)
+[packages/bmap/src/index.ts:387](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L387)
 
 ___
 
@@ -315,7 +315,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:412](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L412)
+[packages/bmap/src/index.ts:412](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L412)
 
 ___
 
@@ -329,7 +329,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:107](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L107)
+[packages/bmap/src/index.ts:107](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L107)
 
 ___
 
@@ -343,7 +343,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:399](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L399)
+[packages/bmap/src/index.ts:399](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L399)
 
 ___
 
@@ -363,7 +363,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:95](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L95)
+[packages/bmap/src/index.ts:95](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L95)
 
 ___
 
@@ -383,7 +383,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:317](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L317)
+[packages/bmap/src/index.ts:317](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L317)
 
 ___
 
@@ -397,7 +397,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:322](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L322)
+[packages/bmap/src/index.ts:322](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L322)
 
 ___
 
@@ -417,7 +417,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:304](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L304)
+[packages/bmap/src/index.ts:304](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L304)
 
 ___
 
@@ -437,7 +437,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:272](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L272)
+[packages/bmap/src/index.ts:272](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L272)
 
 ___
 
@@ -459,7 +459,7 @@ render windy layer
 
 #### Defined in
 
-[packages/bmap/src/index.ts:190](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L190)
+[packages/bmap/src/index.ts:190](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L190)
 
 ___
 
@@ -482,7 +482,7 @@ set layer data
 
 #### Defined in
 
-[packages/bmap/src/index.ts:347](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L347)
+[packages/bmap/src/index.ts:347](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L347)
 
 ___
 
@@ -502,7 +502,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:375](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L375)
+[packages/bmap/src/index.ts:375](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L375)
 
 ___
 
@@ -522,7 +522,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:405](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L405)
+[packages/bmap/src/index.ts:405](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L405)
 
 ___
 
@@ -536,7 +536,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:391](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L391)
+[packages/bmap/src/index.ts:391](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L391)
 
 ___
 
@@ -550,7 +550,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:138](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L138)
+[packages/bmap/src/index.ts:138](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L138)
 
 ___
 
@@ -564,7 +564,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:144](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L144)
+[packages/bmap/src/index.ts:144](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L144)
 
 ___
 
@@ -584,7 +584,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:258](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L258)
+[packages/bmap/src/index.ts:258](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L258)
 
 ___
 
@@ -598,7 +598,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:125](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L125)
+[packages/bmap/src/index.ts:125](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L125)
 
 ___
 
@@ -618,7 +618,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:311](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L311)
+[packages/bmap/src/index.ts:311](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L311)
 
 ___
 
@@ -638,4 +638,4 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:364](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/bmap/src/index.ts#L364)
+[packages/bmap/src/index.ts:364](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L364)

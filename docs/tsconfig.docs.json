@@ -18,13 +18,16 @@
     "jsx": "preserve",
     "isolatedModules": true,
     "removeComments": false,
-    "lib": ["esnext", "dom"],
+    "lib": ["esnext", "dom", "webworker"],
     "types": ["node", "vitest"],
     "allowSyntheticDefaultImports": true
   },
   "include": [
     "../packages/*/src/**/*.ts",
     "../packages/core/typings.d.ts",
+    "../packages/gl-core/typings.d.ts",
+    "../packages/worker-fetch/typings.d.ts",
+    "../packages/maptalks/typings.d.ts",
     "typings.d.ts"
   ],
   "exclude": [

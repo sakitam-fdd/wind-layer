@@ -17,5 +17,7 @@ createTypeDocApp({
     path.resolve(__dirname, '../../packages/leaflet/src/index.ts'),
     path.resolve(__dirname, '../../packages/amap/src/index.ts'),
     path.resolve(__dirname, '../../packages/bmap/src/index.ts'),
+    path.resolve(__dirname, '../../packages/rbush/src/index.ts'),
+    path.resolve(__dirname, '../../packages/particles-poc/src/index.ts'),
   ],
 }).build();

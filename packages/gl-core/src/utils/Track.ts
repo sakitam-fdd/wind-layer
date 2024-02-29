@@ -62,7 +62,7 @@ export const defaultTrackOptions = {
   repeat: true,
   delay: 0,
   endDelay: 0,
-  track: (p: number) => undefined,
+  track: (p: number) => undefined, // eslint-disable-line
 };
 
 const trackManger = getTrackManger();

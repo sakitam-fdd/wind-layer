@@ -24,7 +24,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-[packages/core/src/Field.ts:53](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L53)
+[packages/core/src/Field.ts:53](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L53)
 
 ## Properties
 
@@ -34,7 +34,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-[packages/core/src/Field.ts:39](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L39)
+[packages/core/src/Field.ts:39](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L39)
 
 ___
 
@@ -44,7 +44,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:45](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L45)
+[packages/core/src/Field.ts:45](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L45)
 
 ___
 
@@ -54,7 +54,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:44](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L44)
+[packages/core/src/Field.ts:44](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L44)
 
 ___
 
@@ -64,7 +64,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:48](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L48)
+[packages/core/src/Field.ts:48](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L48)
 
 ___
 
@@ -74,7 +74,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:49](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L49)
+[packages/core/src/Field.ts:49](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L49)
 
 ___
 
@@ -84,7 +84,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:43](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L43)
+[packages/core/src/Field.ts:43](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L43)
 
 ___
 
@@ -94,7 +94,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:47](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L47)
+[packages/core/src/Field.ts:47](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L47)
 
 ___
 
@@ -104,7 +104,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:50](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L50)
+[packages/core/src/Field.ts:50](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L50)
 
 ___
 
@@ -114,7 +114,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:40](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L40)
+[packages/core/src/Field.ts:40](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L40)
 
 ___
 
@@ -124,7 +124,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:46](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L46)
+[packages/core/src/Field.ts:46](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L46)
 
 ___
 
@@ -134,7 +134,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:41](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L41)
+[packages/core/src/Field.ts:41](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L41)
 
 ___
 
@@ -144,7 +144,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:42](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L42)
+[packages/core/src/Field.ts:42](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L42)
 
 ___
 
@@ -154,7 +154,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:51](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L51)
+[packages/core/src/Field.ts:51](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L51)
 
 ___
 
@@ -164,7 +164,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:36](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L36)
+[packages/core/src/Field.ts:36](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L36)
 
 ___
 
@@ -174,7 +174,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:35](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L35)
+[packages/core/src/Field.ts:35](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L35)
 
 ___
 
@@ -184,7 +184,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:38](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L38)
+[packages/core/src/Field.ts:38](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L38)
 
 ___
 
@@ -194,7 +194,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:37](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L37)
+[packages/core/src/Field.ts:37](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L37)
 
 ## Methods
 
@@ -231,7 +231,7 @@ https://en.wikipedia.org/wiki/Bilinear_interpolation
 
 #### Defined in
 
-[packages/core/src/Field.ts:166](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L166)
+[packages/core/src/Field.ts:166](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L166)
 
 ___
 
@@ -245,7 +245,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:110](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L110)
+[packages/core/src/Field.ts:110](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L110)
 
 ___
 
@@ -261,7 +261,7 @@ calculate vector value range
 
 #### Defined in
 
-[packages/core/src/Field.ts:188](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L188)
+[packages/core/src/Field.ts:188](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L188)
 
 ___
 
@@ -279,7 +279,7 @@ boolean
 
 #### Defined in
 
-[packages/core/src/Field.ts:523](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L523)
+[packages/core/src/Field.ts:523](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L523)
 
 ___
 
@@ -304,7 +304,7 @@ i - inside the allowed indexes
 
 #### Defined in
 
-[packages/core/src/Field.ts:364](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L364)
+[packages/core/src/Field.ts:364](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L364)
 
 ___
 
@@ -329,7 +329,7 @@ j - inside the allowed indexes
 
 #### Defined in
 
-[packages/core/src/Field.ts:383](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L383)
+[packages/core/src/Field.ts:383](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L383)
 
 ___
 
@@ -350,7 +350,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:250](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L250)
+[packages/core/src/Field.ts:250](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L250)
 
 ___
 
@@ -367,7 +367,7 @@ grib data extent
 
 #### Defined in
 
-[packages/core/src/Field.ts:145](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L145)
+[packages/core/src/Field.ts:145](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L145)
 
 ___
 
@@ -390,7 +390,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:267](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L267)
+[packages/core/src/Field.ts:267](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L267)
 
 ___
 
@@ -415,7 +415,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:402](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L402)
+[packages/core/src/Field.ts:402](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L402)
 
 ___
 
@@ -441,7 +441,7 @@ from 4 integer indexes
 
 #### Defined in
 
-[packages/core/src/Field.ts:427](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L427)
+[packages/core/src/Field.ts:427](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L427)
 
 ___
 
@@ -455,7 +455,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:233](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L233)
+[packages/core/src/Field.ts:233](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L233)
 
 ___
 
@@ -476,7 +476,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:326](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L326)
+[packages/core/src/Field.ts:326](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L326)
 
 ___
 
@@ -499,7 +499,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:336](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L336)
+[packages/core/src/Field.ts:336](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L336)
 
 ___
 
@@ -523,7 +523,7 @@ Get interpolated grid value lon-lat coordinates
 
 #### Defined in
 
-[packages/core/src/Field.ts:311](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L311)
+[packages/core/src/Field.ts:311](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L311)
 
 ___
 
@@ -545,7 +545,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Field.ts:229](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L229)
+[packages/core/src/Field.ts:229](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L229)
 
 ___
 
@@ -569,7 +569,7 @@ latitude at the center of the cell
 
 #### Defined in
 
-[packages/core/src/Field.ts:490](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L490)
+[packages/core/src/Field.ts:490](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L490)
 
 ___
 
@@ -594,7 +594,7 @@ Lon-Lat for grid indexes
 
 #### Defined in
 
-[packages/core/src/Field.ts:464](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L464)
+[packages/core/src/Field.ts:464](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L464)
 
 ___
 
@@ -618,7 +618,7 @@ longitude at the center of the cell
 
 #### Defined in
 
-[packages/core/src/Field.ts:476](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L476)
+[packages/core/src/Field.ts:476](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L476)
 
 ___
 
@@ -645,7 +645,7 @@ IPosition
 
 #### Defined in
 
-[packages/core/src/Field.ts:503](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L503)
+[packages/core/src/Field.ts:503](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L503)
 
 ___
 
@@ -661,7 +661,7 @@ release data
 
 #### Defined in
 
-[packages/core/src/Field.ts:137](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L137)
+[packages/core/src/Field.ts:137](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L137)
 
 ___
 
@@ -685,7 +685,7 @@ Nearest value at lon-lat coordinates
 
 #### Defined in
 
-[packages/core/src/Field.ts:284](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L284)
+[packages/core/src/Field.ts:284](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L284)
 
 ___
 
@@ -708,4 +708,4 @@ Value for grid indexes
 
 #### Defined in
 
-[packages/core/src/Field.ts:454](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Field.ts#L454)
+[packages/core/src/Field.ts:454](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Field.ts#L454)

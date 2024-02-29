@@ -32,7 +32,7 @@ IOptions.colorScale
 
 #### Defined in
 
-packages/core/dist/index.d.ts:351
+packages/core/dist/index.d.ts:352
 
 ___
 
@@ -42,7 +42,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:27](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/ol5/src/index.ts#L27)
+[packages/ol5/src/index.ts:27](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L27)
 
 ___
 
@@ -52,7 +52,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:32](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/ol5/src/index.ts#L32)
+[packages/ol5/src/index.ts:32](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L32)
 
 ___
 
@@ -66,7 +66,7 @@ IOptions.frameRate
 
 #### Defined in
 
-packages/core/dist/index.d.ts:357
+packages/core/dist/index.d.ts:358
 
 ___
 
@@ -80,7 +80,7 @@ IOptions.globalAlpha
 
 #### Defined in
 
-packages/core/dist/index.d.ts:349
+packages/core/dist/index.d.ts:350
 
 ___
 
@@ -94,7 +94,7 @@ IOptions.gpet
 
 #### Defined in
 
-packages/core/dist/index.d.ts:361
+packages/core/dist/index.d.ts:362
 
 ___
 
@@ -108,7 +108,7 @@ IOptions.lineWidth
 
 #### Defined in
 
-packages/core/dist/index.d.ts:350
+packages/core/dist/index.d.ts:351
 
 ___
 
@@ -118,7 +118,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:25](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/ol5/src/index.ts#L25)
+[packages/ol5/src/index.ts:25](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L25)
 
 ___
 
@@ -132,7 +132,7 @@ IOptions.maxAge
 
 #### Defined in
 
-packages/core/dist/index.d.ts:354
+packages/core/dist/index.d.ts:355
 
 ___
 
@@ -142,7 +142,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:29](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/ol5/src/index.ts#L29)
+[packages/ol5/src/index.ts:29](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L29)
 
 ___
 
@@ -156,7 +156,7 @@ IOptions.maxVelocity
 
 #### Defined in
 
-packages/core/dist/index.d.ts:359
+packages/core/dist/index.d.ts:360
 
 ___
 
@@ -166,7 +166,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:28](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/ol5/src/index.ts#L28)
+[packages/ol5/src/index.ts:28](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L28)
 
 ___
 
@@ -180,7 +180,7 @@ IOptions.minVelocity
 
 #### Defined in
 
-packages/core/dist/index.d.ts:358
+packages/core/dist/index.d.ts:359
 
 ___
 
@@ -190,7 +190,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:24](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/ol5/src/index.ts#L24)
+[packages/ol5/src/index.ts:24](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L24)
 
 ___
 
@@ -204,7 +204,7 @@ IOptions.particleAge
 
 #### Defined in
 
-packages/core/dist/index.d.ts:353
+packages/core/dist/index.d.ts:354
 
 ___
 
@@ -218,7 +218,7 @@ IOptions.particleMultiplier
 
 #### Defined in
 
-packages/core/dist/index.d.ts:355
+packages/core/dist/index.d.ts:356
 
 ___
 
@@ -232,7 +232,7 @@ IOptions.paths
 
 #### Defined in
 
-packages/core/dist/index.d.ts:356
+packages/core/dist/index.d.ts:357
 
 ___
 
@@ -246,7 +246,7 @@ IOptions.useCoordsDraw
 
 #### Defined in
 
-packages/core/dist/index.d.ts:360
+packages/core/dist/index.d.ts:361
 
 ___
 
@@ -260,7 +260,7 @@ IOptions.velocityScale
 
 #### Defined in
 
-packages/core/dist/index.d.ts:352
+packages/core/dist/index.d.ts:353
 
 ___
 
@@ -270,7 +270,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:26](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/ol5/src/index.ts#L26)
+[packages/ol5/src/index.ts:26](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L26)
 
 ___
 
@@ -280,7 +280,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:31](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/ol5/src/index.ts#L31)
+[packages/ol5/src/index.ts:31](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L31)
 
 ___
 
@@ -290,4 +290,4 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:30](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/ol5/src/index.ts#L30)
+[packages/ol5/src/index.ts:30](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L30)

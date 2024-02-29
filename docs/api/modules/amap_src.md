@@ -30,4 +30,4 @@ Re-exports [Field](../classes/maptalks_src.Field.md)
 
 #### Defined in
 
-[packages/amap/src/index.ts:374](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/amap/src/index.ts#L374)
+[packages/amap/src/index.ts:373](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/amap/src/index.ts#L373)

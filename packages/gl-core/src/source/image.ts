@@ -182,7 +182,7 @@ export default class ImageSource extends EventEmitter {
     });
   }
 
-  getTileUrl(tileID) {
+  getTileUrl(tileID) { // eslint-disable-line
     let urls: string[] = this.url as string[];
     if (utils.isString(this.url)) {
       urls = [this.url];
@@ -238,7 +238,7 @@ export default class ImageSource extends EventEmitter {
     }
   }
 
-  hasTile(coord) {
+  hasTile(coord) { // eslint-disable-line
     return true;
   }
 

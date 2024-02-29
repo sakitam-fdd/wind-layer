@@ -1,12 +1,4 @@
-import {
-  WindCore,
-  Field,
-  isArray,
-  formatData,
-  warnLog,
-  assign,
-  defaultOptions,
-} from 'wind-core';
+import { WindCore, Field, isArray, formatData, warnLog, assign, defaultOptions } from 'wind-core';
 import type { IField, IOptions } from 'wind-core';
 
 export interface IWindOptions extends IOptions {
@@ -32,7 +24,9 @@ const _options = {
 const BMap = G?.BMap;
 
 if (!BMap) {
-  throw new Error('Before using this plugin, you must first introduce the BMap JS API <http://lbsyun.baidu.com/index.php?title=jspopular3.0>');
+  throw new Error(
+    'Before using this plugin, you must first introduce the BMap JS API <http://lbsyun.baidu.com/index.php?title=jspopular3.0>',
+  );
 }
 
 class BMapWind extends BMap.Overlay {
@@ -47,7 +41,7 @@ class BMapWind extends BMap.Overlay {
   private mixBlendMode: any;
   public enableMassClear: boolean;
 
-  constructor (data: any, options: Partial<IWindOptions> = {}) {
+  constructor(data: any, options: Partial<IWindOptions> = {}) {
     const opt = assign({}, _options, options);
     super(options);
     this.options = opt;
@@ -84,7 +78,7 @@ class BMapWind extends BMap.Overlay {
    * append layer to map
    * @param map
    */
-  public appendTo (map: any) {
+  public appendTo(map: any) {
     if (map) {
       map.addOverlay(this);
     } else {
@@ -92,16 +86,16 @@ class BMapWind extends BMap.Overlay {
     }
   }
 
-  public initialize (map: any) {
+  public initialize(map: any) {
     this.map = map;
-    const canvas = this.canvas = document.createElement('canvas');
+    const canvas = (this.canvas = document.createElement('canvas'));
     canvas.style.cssText = `position:absolute; left:0; top:0; z-index: ${this.zIndex} ;user-select:none;`;
     // @ts-ignore
     canvas.style.mixBlendMode = this.mixBlendMode;
     this.adjustSize();
     map.getPanes()[this.paneName].appendChild(canvas);
     this.bindEvent();
-    return this.canvas
+    return this.canvas;
   }
 
   private handleResize() {
@@ -147,7 +141,7 @@ class BMapWind extends BMap.Overlay {
     }
   }
 
-  private adjustSize () {
+  private adjustSize() {
     const size = this.map.getSize();
     const canvas = this.canvas;
     const devicePixelRatio = window.devicePixelRatio || 1;
@@ -156,18 +150,18 @@ class BMapWind extends BMap.Overlay {
       canvas.width = size.width * devicePixelRatio;
       canvas.height = size.height * devicePixelRatio;
       if (this.context === '2d') {
-        canvas.getContext(this.context)!.scale(devicePixelRatio, devicePixelRatio)
+        canvas.getContext(this.context)!.scale(devicePixelRatio, devicePixelRatio);
       }
       canvas.style.width = size.width + 'px';
       canvas.style.height = size.height + 'px';
     }
   }
 
-  public draw () {
+  public draw() {
     this._draw();
   }
 
-  private _draw () {
+  private _draw() {
     const map = this.map;
     const size = map.getSize();
     const center = map.getCenter();
@@ -187,7 +181,7 @@ class BMapWind extends BMap.Overlay {
    * @param canvas
    * @returns {BMapWind}
    */
-  public render (canvas: HTMLCanvasElement) {
+  public render(canvas: HTMLCanvasElement) {
     if (!this.getData() || !this.map) return this;
     const opt = this.getWindOptions();
     if (canvas && !this.wind) {
@@ -220,12 +214,12 @@ class BMapWind extends BMap.Overlay {
    * get canvas context
    * @returns {*}
    */
-  private getContext () {
+  private getContext() {
     if (this.canvas === null) return;
     return this.canvas.getContext(this.context);
   }
 
-  public getContainer () {
+  public getContainer() {
     return this.canvas;
   }
 
@@ -238,17 +232,14 @@ class BMapWind extends BMap.Overlay {
       projection = mapType.getProjection();
     } else {
       projection = {
-        lngLatToPoint: function(point: {
-          lng: number;
-          lat: number;
-        }) {
+        lngLatToPoint: function (point: { lng: number; lat: number }) {
           const mc = map.lnglatToMercator(point.lng, point.lat);
           return {
             x: mc[0],
-            y: mc[1]
-          }
-        }
-      }
+            y: mc[1],
+          };
+        },
+      };
     }
 
     return projection;
@@ -258,12 +249,17 @@ class BMapWind extends BMap.Overlay {
   public transferToMercator(coordinates: [number, number]): [number, number] {
     const projection = this.getProjection();
 
-    if (coordinates[0] < -180 || coordinates[0] > 180 || coordinates[1] < -90 || coordinates[1] > 90) {
+    if (
+      coordinates[0] < -180 ||
+      coordinates[0] > 180 ||
+      coordinates[1] < -90 ||
+      coordinates[1] > 90
+    ) {
       return coordinates;
     } else {
       const pixel = projection.lngLatToPoint({
         lng: coordinates[0],
-        lat: coordinates[1]
+        lat: coordinates[1],
       });
       return [pixel.x, pixel.y];
     }
@@ -278,12 +274,12 @@ class BMapWind extends BMap.Overlay {
 
     const projection = this.getProjection();
     let mcCenter;
-    if  (map.getMapType().getProjection) {
+    if (map.getMapType().getProjection) {
       mcCenter = projection.lngLatToPoint(map.getCenter());
-    } else  {
+    } else {
       mcCenter = {
         x: map.getCenter().lng,
-        y: map.getCenter().lat
+        y: map.getCenter().lat,
       };
     }
 
@@ -294,10 +290,13 @@ class BMapWind extends BMap.Overlay {
       zoomUnit = Math.pow(2, 18 - map.getZoom());
     }
 
-    const nwMc = new BMap.Pixel(mcCenter.x - (map.getSize().width / 2) * zoomUnit, mcCenter.y + (map.getSize().height / 2) * zoomUnit); //左上角墨卡托坐标
+    const nwMc = new BMap.Pixel(
+      mcCenter.x - (map.getSize().width / 2) * zoomUnit,
+      mcCenter.y + (map.getSize().height / 2) * zoomUnit,
+    ); //左上角墨卡托坐标
 
-    const x = (coordinate[0] - nwMc.x) / zoomUnit * scale;
-    const y = (nwMc.y - coordinate[1]) / zoomUnit * scale;
+    const x = ((coordinate[0] - nwMc.x) / zoomUnit) * scale;
+    const y = ((nwMc.y - coordinate[1]) / zoomUnit) * scale;
     return [x, y];
   }
 
@@ -334,7 +333,7 @@ class BMapWind extends BMap.Overlay {
   /**
    * get wind layer data
    */
-  public getData () {
+  public getData() {
     return this.field;
   }
 
@@ -344,7 +343,7 @@ class BMapWind extends BMap.Overlay {
    * @param options
    * @returns {BMapWind}
    */
-  public setData (data: any, options: Partial<IField> = {}) {
+  public setData(data: any, options: Partial<IField> = {}) {
     if (data && data.checkFields && data.checkFields()) {
       this.field = data;
     } else if (isArray(data)) {
@@ -361,7 +360,7 @@ class BMapWind extends BMap.Overlay {
     return this;
   }
 
-  public updateParams(options : Partial<IOptions> = {}) {
+  public updateParams(options: Partial<IOptions> = {}) {
     warnLog('will move to setWindOptions');
     this.setWindOptions(options);
     return this;
@@ -402,23 +401,20 @@ class BMapWind extends BMap.Overlay {
     }
   }
 
-  public setZIndex (zIndex: number) {
+  public setZIndex(zIndex: number) {
     this.zIndex = zIndex;
     if (this.canvas) {
       this.canvas.style.zIndex = String(this.zIndex);
     }
   }
 
-  public getZIndex () {
+  public getZIndex() {
     return this.zIndex;
   }
 }
 
 const WindLayer = BMapWind;
 
-export {
-  Field,
-  WindLayer,
-};
+export { Field, WindLayer };
 
 export default BMapWind;

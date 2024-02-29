@@ -18,7 +18,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-[packages/core/src/index.ts:25](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/index.ts#L25)
+[packages/core/src/index.ts:25](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/index.ts#L25)
 
 ___
 
@@ -28,7 +28,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/index.ts:31](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/index.ts#L31)
+[packages/core/src/index.ts:31](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/index.ts#L31)
 
 ___
 
@@ -38,7 +38,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/index.ts:23](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/index.ts#L23)
+[packages/core/src/index.ts:23](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/index.ts#L23)
 
 ___
 
@@ -48,7 +48,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/index.ts:35](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/index.ts#L35)
+[packages/core/src/index.ts:35](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/index.ts#L35)
 
 ___
 
@@ -58,7 +58,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/index.ts:24](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/index.ts#L24)
+[packages/core/src/index.ts:24](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/index.ts#L24)
 
 ___
 
@@ -68,7 +68,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/index.ts:28](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/index.ts#L28)
+[packages/core/src/index.ts:28](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/index.ts#L28)
 
 ___
 
@@ -78,7 +78,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/index.ts:33](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/index.ts#L33)
+[packages/core/src/index.ts:33](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/index.ts#L33)
 
 ___
 
@@ -88,7 +88,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/index.ts:32](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/index.ts#L32)
+[packages/core/src/index.ts:32](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/index.ts#L32)
 
 ___
 
@@ -98,7 +98,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/index.ts:27](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/index.ts#L27)
+[packages/core/src/index.ts:27](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/index.ts#L27)
 
 ___
 
@@ -108,7 +108,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/index.ts:29](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/index.ts#L29)
+[packages/core/src/index.ts:29](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/index.ts#L29)
 
 ___
 
@@ -118,7 +118,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/index.ts:30](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/index.ts#L30)
+[packages/core/src/index.ts:30](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/index.ts#L30)
 
 ___
 
@@ -128,7 +128,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/index.ts:34](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/index.ts#L34)
+[packages/core/src/index.ts:34](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/index.ts#L34)
 
 ___
 
@@ -138,4 +138,4 @@ ___
 
 #### Defined in
 
-[packages/core/src/index.ts:26](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/index.ts#L26)
+[packages/core/src/index.ts:26](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/index.ts#L26)

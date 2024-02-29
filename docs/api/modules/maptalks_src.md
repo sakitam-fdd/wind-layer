@@ -8,25 +8,54 @@ sidebarDepth: 4
 
 # Module: maptalks/src
 
+## Enumerations
+
+- [DecodeType](../enums/maptalks_src.DecodeType.md)
+- [LayerSourceType](../enums/maptalks_src.LayerSourceType.md)
+- [MaskType](../enums/maptalks_src.MaskType.md)
+- [RenderFrom](../enums/maptalks_src.RenderFrom.md)
+- [RenderType](../enums/maptalks_src.RenderType.md)
+
 ## Classes
 
 - [Field](../classes/maptalks_src.Field.md)
-- [ScalarLayer](../classes/maptalks_src.ScalarLayer.md)
-- [ScalarLayerRenderer](../classes/maptalks_src.ScalarLayerRenderer.md)
-- [WindLayerRenderer](../classes/maptalks_src.WindLayerRenderer.md)
-- [default](../classes/maptalks_src.default.md)
-
-## Interfaces
-
-- [IWindLayerRenderer](../interfaces/maptalks_src.IWindLayerRenderer.md)
-- [IWindOptions](../interfaces/maptalks_src.IWindOptions.md)
+- [ImageSource](../classes/maptalks_src.ImageSource.md)
+- [Layer](../classes/maptalks_src.Layer.md)
+- [TileID](../classes/maptalks_src.TileID.md)
+- [TileSource](../classes/maptalks_src.TileSource.md)
+- [TimelineSource](../classes/maptalks_src.TimelineSource.md)
+- [WindCore](../classes/maptalks_src.WindCore.md)
+- [WindLayer](../classes/maptalks_src.WindLayer.md)
 
 ## Variables
 
-### WindLayer
+### configDeps
 
-• `Const` **WindLayer**: typeof [`default`](../classes/maptalks_src.default.md) = `MaptalksWind`
+• `Const` **configDeps**: `any`
 
 #### Defined in
 
-[packages/maptalks/src/index.ts:302](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/maptalks/src/index.ts#L302)
+packages/gl-core/dist/index.d.ts:1158
+
+## Functions
+
+### formatData
+
+▸ **formatData**(`data`, `options?`): [`Field`](../classes/maptalks_src.Field.md) \| `undefined`
+
+format gfs json to vector
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `data` | `IGFSItem`[] |
+| `options?` | `Partial`<`IField`\> |
+
+#### Returns
+
+[`Field`](../classes/maptalks_src.Field.md) \| `undefined`
+
+#### Defined in
+
+packages/core/dist/index.d.ts:318

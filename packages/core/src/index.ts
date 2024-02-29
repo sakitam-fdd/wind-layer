@@ -213,7 +213,9 @@ class WindCore {
   /**
    * each frame render end
    */
-  public postrender() {}
+  public postrender() {
+    //
+  }
 
   private moveParticles() {
     const { width, height } = this.ctx.canvas;

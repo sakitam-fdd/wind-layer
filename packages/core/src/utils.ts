@@ -2,8 +2,7 @@ import Field from './Field';
 import type { IField } from './Field';
 
 const hasOwnProperty = Object.prototype.hasOwnProperty;
-const symToStringTag =
-  typeof Symbol !== 'undefined' ? Symbol.toStringTag : undefined;
+const symToStringTag = typeof Symbol !== 'undefined' ? Symbol.toStringTag : undefined;
 
 function baseGetTag(value: any) {
   if (value === null) {
@@ -18,7 +17,9 @@ function baseGetTag(value: any) {
   try {
     value[symToStringTag] = undefined;
     unmasked = true;
-  } catch (e) {}
+  } catch (e) {
+    //
+  }
 
   const result = Object.prototype.toString.call(value);
   if (unmasked) {
@@ -32,10 +33,7 @@ function baseGetTag(value: any) {
 }
 
 export function TypeOf(value: any) {
-  return Object.prototype.toString
-    .call(value)
-    .slice(8, -1)
-    .toLowerCase();
+  return Object.prototype.toString.call(value).slice(8, -1).toLowerCase();
 }
 
 /**
@@ -94,10 +92,7 @@ export function isString(value: any): boolean {
   if (value == null) {
     return false;
   }
-  return (
-    typeof value === 'string' ||
-    (value.constructor !== null && value.constructor === String)
-  );
+  return typeof value === 'string' || (value.constructor !== null && value.constructor === String);
 }
 
 /**
@@ -106,9 +101,7 @@ export function isString(value: any): boolean {
  * @returns {boolean}
  */
 export function isNumber(value: any) {
-  return (
-    Object.prototype.toString.call(value) === '[object Number]' && !isNaN(value)
-  );
+  return Object.prototype.toString.call(value) === '[object Number]' && !isNaN(value);
 }
 
 /**
@@ -116,7 +109,7 @@ export function isNumber(value: any) {
  * @param object
  * @returns {boolean}
  */
-export function isEmpty(object: {}) {
+export function isEmpty(object: any) {
   let property;
   for (property in object) {
     return false;
@@ -224,12 +217,8 @@ export function formatData(data: IGFSItem[], options: Partial<IField> = {}) {
     console.time('format-data');
   }
 
-  data.forEach(function(record: IGFSItem) {
-    switch (
-      record.header.parameterCategory +
-      ',' +
-      record.header.parameterNumber
-    ) {
+  data.forEach(function (record: IGFSItem) {
+    switch (record.header.parameterCategory + ',' + record.header.parameterNumber) {
       case '1,2':
       case '2,2':
         uComp = record;
@@ -311,7 +300,8 @@ export function removeDomNode(node: HTMLElement | HTMLCanvasElement) {
 const keyword = /(\D+)/;
 const hex = /^#([a-f0-9]{6})([a-f0-9]{2})?$/i;
 // eslint-disable-next-line no-useless-escape
-const rgba = /^rgba?\(\s*([+-]?\d+)\s*,\s*([+-]?\d+)\s*,\s*([+-]?\d+)\s*(?:,\s*([+-]?[\d\.]+)\s*)?\)$/;
+const rgba =
+  /^rgba?\(\s*([+-]?\d+)\s*,\s*([+-]?\d+)\s*,\s*([+-]?\d+)\s*(?:,\s*([+-]?[\d.]+)\s*)?\)$/;
 const colorNames: {
   [key: string]: number[];
 } = {

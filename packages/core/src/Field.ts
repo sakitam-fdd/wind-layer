@@ -1,4 +1,4 @@
-import {floorMod, warnOnce} from './utils';
+import { floorMod, warnOnce } from './utils';
 import Vector from './Vector';
 
 export interface IField {
@@ -97,7 +97,10 @@ export default class Field {
     this.isContinuous = Math.floor(this.cols * params.deltaX) >= 360;
     this.translateX = 'translateX' in params ? params.translateX : this.xmax > 180; // [0, 360] --> [-180, 180];
     if ('wrappedX' in params) {
-      warnOnce('[wind-core]: ', '`wrappedX` namespace will deprecated please use `translateX` instead！')
+      warnOnce(
+        '[wind-core]: ',
+        '`wrappedX` namespace will deprecated please use `translateX` instead！',
+      );
     }
 
     this.wrapX = Boolean(params.wrapX);
@@ -108,7 +111,7 @@ export default class Field {
 
   // from https://github.com/sakitam-fdd/wind-layer/blob/95368f9433/src/windy/windy.js#L110
   public buildGrid(): (Vector | null)[][] {
-    let grid: any[] = [];
+    const grid: any[] = [];
     let p = 0;
 
     const { rows, cols, us, vs } = this;
@@ -116,9 +119,9 @@ export default class Field {
     for (let j = 0; j < rows; j++) {
       const row: any[] = [];
       for (let i = 0; i < cols; i++, p++) {
-        let u = us[p];
-        let v = vs[p];
-        let valid = this.isValid(u) && this.isValid(v);
+        const u = us[p];
+        const v = vs[p];
+        const valid = this.isValid(u) && this.isValid(v);
         row[i] = valid ? new Vector(u, v) : null;
       }
 
@@ -143,12 +146,7 @@ export default class Field {
    * 格点数据范围
    */
   public extent() {
-    return [
-      this.xmin,
-      this.ymin,
-      this.xmax,
-      this.ymax,
-    ]
+    return [this.xmin, this.ymin, this.xmax, this.ymax];
   }
 
   /**
@@ -164,11 +162,12 @@ export default class Field {
    * @returns {Vector}
    */
   private bilinearInterpolateVector(
-    x: number, y: number,
-    g00: { u: number; v: number; },
-    g10: { u: number; v: number; },
-    g01: { u: number; v: number; },
-    g11: { u: number; v: number; }
+    x: number,
+    y: number,
+    g00: { u: number; v: number },
+    g10: { u: number; v: number },
+    g01: { u: number; v: number },
+    g11: { u: number; v: number },
   ) {
     const rx = 1 - x;
     const ry = 1 - y;
@@ -249,7 +248,7 @@ export default class Field {
 
   public contains(lon: number, lat: number) {
     const [xmin, xmax] = this.getWrappedLongitudes();
-    let longitudeIn = lon >= xmin && lon <= xmax;
+    const longitudeIn = lon >= xmin && lon <= xmax;
     let latitudeIn;
     if (this.deltaY >= 0) {
       latitudeIn = lat >= this.ymin && lat <= this.ymax;
@@ -293,8 +292,8 @@ export default class Field {
     if (!flag) return null;
 
     const indexes = this.getDecimalIndexes(lon, lat);
-    let ii = Math.floor(indexes[0]);
-    let jj = Math.floor(indexes[1]);
+    const ii = Math.floor(indexes[0]);
+    const jj = Math.floor(indexes[1]);
 
     const ci = this.clampColumnIndex(ii);
     const cj = this.clampRowIndex(jj);
@@ -319,12 +318,12 @@ export default class Field {
 
     if (!flag) return null;
 
-    let [i, j] = this.getDecimalIndexes(lon, lat);
+    const [i, j] = this.getDecimalIndexes(lon, lat);
     return this.interpolatePoint(i, j);
   }
 
   public hasValueAt(lon: number, lat: number) {
-    let value = this.valueAt(lon, lat);
+    const value = this.valueAt(lon, lat);
     return value !== null;
   }
 
@@ -344,7 +343,7 @@ export default class Field {
     //         |      |           column, so the index ci can be used without taking a modulo.
     const indexes = this.getFourSurroundingIndexes(i, j);
     const [fi, ci, fj, cj] = indexes;
-    let values = this.getFourSurroundingValues(fi, ci, fj, cj);
+    const values = this.getFourSurroundingValues(fi, ci, fj, cj);
     if (values) {
       const [g00, g10, g01, g11] = values;
       // @ts-ignore
@@ -366,7 +365,7 @@ export default class Field {
     if (ii < 0) {
       i = 0;
     }
-    let maxCol = this.cols - 1;
+    const maxCol = this.cols - 1;
     if (ii > maxCol) {
       i = maxCol;
     }
@@ -385,7 +384,7 @@ export default class Field {
     if (jj < 0) {
       j = 0;
     }
-    let maxRow = this.rows - 1;
+    const maxRow = this.rows - 1;
     if (jj > maxRow) {
       j = maxRow;
     }
@@ -400,7 +399,7 @@ export default class Field {
    * @returns {Array} [fi, ci, fj, cj]
    */
   private getFourSurroundingIndexes(i: number, j: number) {
-    let fi = Math.floor(i); // 左
+    const fi = Math.floor(i); // 左
     let ci = fi + 1; // 右
     // duplicate colum to simplify interpolation logic (wrapped value)
     if (this.isContinuous && ci >= this.cols) {
@@ -408,8 +407,8 @@ export default class Field {
     }
     ci = this.clampColumnIndex(ci);
 
-    let fj = this.clampRowIndex(Math.floor(j)); // 上 纬度方向索引（取整）
-    let cj = this.clampRowIndex(fj + 1); // 下
+    const fj = this.clampRowIndex(Math.floor(j)); // 上 纬度方向索引（取整）
+    const cj = this.clampRowIndex(fj + 1); // 下
 
     return [fi, ci, fj, cj];
   }
@@ -429,11 +428,7 @@ export default class Field {
     if ((row = this.grid[fj])) {
       const g00 = row[fi]; // << left
       const g10 = row[ci]; // right >>
-      if (
-        this.isValid(g00) &&
-        this.isValid(g10) &&
-        (row = this.grid[cj])
-      ) {
+      if (this.isValid(g00) && this.isValid(g10) && (row = this.grid[cj])) {
         // lower row vv
         const g01 = row[fi]; // << left
         const g11 = row[ci]; // right >>
@@ -462,8 +457,8 @@ export default class Field {
    * @returns {Number[]} [lon, lat]
    */
   public lonLatAtIndexes(i: number, j: number) {
-    let lon = this.longitudeAtX(i);
-    let lat = this.latitudeAtY(j);
+    const lon = this.longitudeAtX(i);
+    const lat = this.latitudeAtY(j);
 
     return [lon, lat];
   }
@@ -474,7 +469,7 @@ export default class Field {
    * @returns {Number} longitude at the center of the cell
    */
   private longitudeAtX(i: number) {
-    let halfXPixel = this.deltaX / 2.0;
+    const halfXPixel = this.deltaX / 2.0;
     let lon = this.xmin + halfXPixel + i * this.deltaX;
     if (this.translateX) {
       lon = lon > 180 ? lon - 360 : lon;
@@ -488,7 +483,7 @@ export default class Field {
    * @returns {Number} latitude at the center of the cell
    */
   private latitudeAtY(j: number) {
-    let halfYPixel = this.deltaY / 2.0;
+    const halfYPixel = this.deltaY / 2.0;
     return this.ymax - halfYPixel - j * this.deltaY;
   }
 
@@ -500,9 +495,14 @@ export default class Field {
    * @param unproject
    * @return IPosition
    */
-  public randomize(o: IPosition = {}, width: number, height: number, unproject: (a: number[]) => ([number, number] | null)) {
-    let i = (Math.random() * (width || this.cols)) | 0;
-    let j = (Math.random() * (height || this.rows)) | 0;
+  public randomize(
+    o: IPosition = {},
+    width: number,
+    height: number,
+    unproject: (a: number[]) => [number, number] | null,
+  ) {
+    const i = (Math.random() * (width || this.cols)) | 0;
+    const j = (Math.random() * (height || this.rows)) | 0;
 
     const coords = unproject([i, j]);
     if (coords !== null) {

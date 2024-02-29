@@ -131,7 +131,9 @@ export function createLinearGradient(
         createGradient(interpolateColor, min, max, w, h, gradient, ctx);
         const len = Math.round((max - min) / interval);
         const canvas2 = document.createElement('canvas');
-        const ctx2 = canvas2.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D;
+        const ctx2 = canvas2.getContext('2d', {
+          willReadFrequently: true,
+        }) as CanvasRenderingContext2D;
         canvas2.width = w;
         canvas2.height = h;
         for (let j = 0; j < len; j++) {
@@ -241,11 +243,7 @@ export function createZoom(
     return styleAttrField as number;
   }
 
-  if (
-    styleAttrField &&
-    Array.isArray(styleAttrField) &&
-    (!cachedStyle[ukey] || clearCache)
-  ) {
+  if (styleAttrField && Array.isArray(styleAttrField) && (!cachedStyle[ukey] || clearCache)) {
     cachedStyle[ukey] = parseZoomStyle(styleAttrField);
   }
 

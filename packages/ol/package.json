@@ -61,7 +61,7 @@
     "dev": "cross-env NODE_ENV=development rollup -wm -c rollup.config.ts --configPlugin esbuild",
     "build": "rollup --c rollup.config.ts --configPlugin esbuild",
     "build:minify": "cross-env MINIFY=true rollup --c rollup.config.ts --configPlugin esbuild",
-    "lint": "eslint src/**/* --ext .js,.ts,.tsx",
+    "lint": "eslint \"src/**/*.{js,jsx,mjs,ts,tsx}\"",
     "prettier": "prettier --parser=typescript --write **/*.{js,ts,md}",
     "test": "pnpm run build && pnpm run test-only",
     "test-only": "vitest run",

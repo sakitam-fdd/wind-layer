@@ -2,7 +2,7 @@ import * as mapboxgl from 'mapbox-gl';
 import rewind from '@mapbox/geojson-rewind';
 import { OrthographicCamera, Renderer, Scene, utils } from '@sakitam-gis/vis-engine';
 
-import type { BaseLayerOptions, SourceType } from 'wind-gl-core';
+import type { UserOptions, SourceType } from 'wind-gl-core';
 import { BaseLayer, LayerSourceType, RenderType, TileID, polygon2buffer } from 'wind-gl-core';
 
 import CameraSync from './utils/CameraSync';
@@ -10,11 +10,9 @@ import { getCoordinatesCenterTileID } from './utils/mercatorCoordinate';
 
 import { expandTiles, getTileBounds, getTileProjBounds } from './utils/tile';
 
-export interface LayerOptions extends BaseLayerOptions {
-  renderingMode: '2d' | '3d';
+export interface LayerOptions extends UserOptions {
+  renderingMode?: '2d' | '3d';
 }
-
-export type ILayerOptions = Omit<LayerOptions, 'getViewTiles'>;
 
 export default class Layer {
   public gl: WebGLRenderingContext | WebGL2RenderingContext | null;
@@ -30,7 +28,7 @@ export default class Layer {
   private source: SourceType;
   private layer: WithNull<BaseLayer>;
 
-  constructor(id: string, source: SourceType, options?: ILayerOptions) {
+  constructor(id: string, source: SourceType, options?: LayerOptions) {
     this.id = id;
     this.type = 'custom';
     this.renderingMode = options?.renderingMode || '2d';
@@ -88,7 +86,7 @@ export default class Layer {
     }
   }
 
-  updateOptions(options: Partial<ILayerOptions>) {
+  updateOptions(options: Partial<LayerOptions>) {
     this.options = {
       ...this.options,
       ...(options || {}),

@@ -25,7 +25,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-[packages/core/src/Vector.ts:6](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Vector.ts#L6)
+[packages/core/src/Vector.ts:6](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Vector.ts#L6)
 
 ## Properties
 
@@ -35,7 +35,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-[packages/core/src/Vector.ts:4](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Vector.ts#L4)
+[packages/core/src/Vector.ts:4](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Vector.ts#L4)
 
 ___
 
@@ -45,7 +45,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Vector.ts:2](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Vector.ts#L2)
+[packages/core/src/Vector.ts:2](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Vector.ts#L2)
 
 ___
 
@@ -55,7 +55,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/Vector.ts:3](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Vector.ts#L3)
+[packages/core/src/Vector.ts:3](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Vector.ts#L3)
 
 ## Methods
 
@@ -72,7 +72,7 @@ N is 0º and E is 90º
 
 #### Defined in
 
-[packages/core/src/Vector.ts:40](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Vector.ts#L40)
+[packages/core/src/Vector.ts:40](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Vector.ts#L40)
 
 ___
 
@@ -89,7 +89,7 @@ N is 0º and E is 90º
 
 #### Defined in
 
-[packages/core/src/Vector.ts:26](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Vector.ts#L26)
+[packages/core/src/Vector.ts:26](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Vector.ts#L26)
 
 ___
 
@@ -105,4 +105,4 @@ ___
 
 #### Defined in
 
-[packages/core/src/Vector.ts:17](https://github.com/sakitam-fdd/wind-layer/blob/cc04063/packages/core/src/Vector.ts#L17)
+[packages/core/src/Vector.ts:17](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/Vector.ts#L17)

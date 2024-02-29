@@ -1,0 +1,688 @@
+---
+sidebar: "auto"
+editLinks: false
+sidebarDepth: 4
+---
+
+[Class Docs](../index.md) / [maptalks/src](../modules/maptalks_src.md) / ImageSource
+
+# Class: ImageSource
+
+[maptalks/src](../modules/maptalks_src.md).ImageSource
+
+## Hierarchy
+
+- `EventEmitter`
+
+  ↳ **`ImageSource`**
+
+## Constructors
+
+### constructor
+
+• **new ImageSource**(`id`, `options`)
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `id` | `any` |
+| `options` | `ImageSourceOptions` |
+
+#### Overrides
+
+EventEmitter.constructor
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:483
+
+## Properties
+
+### #private
+
+• `Private` **#private**: `any`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:441
+
+___
+
+### coordinates
+
+• **coordinates**: `Coordinates`
+
+影像坐标
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:478
+
+___
+
+### dispatcher
+
+• **dispatcher**: `any`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:472
+
+___
+
+### id
+
+• **id**: `string`
+
+数据源 id
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:445
+
+___
+
+### layer
+
+• **layer**: `WithNull`<`BaseLayer`\>
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:473
+
+___
+
+### maxZoom
+
+• **maxZoom**: `number`
+
+支持的最大层级
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:457
+
+___
+
+### minZoom
+
+• **minZoom**: `number`
+
+支持的最小层级
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:453
+
+___
+
+### options
+
+• **options**: `ImageSourceOptions`
+
+配置项
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:469
+
+___
+
+### parseOptions
+
+• **parseOptions**: `ParseOptionsType`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:474
+
+___
+
+### renderer
+
+• **renderer**: `Renderer`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:471
+
+___
+
+### roundZoom
+
+• **roundZoom**: `boolean`
+
+是否对层级进行四舍五入
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:461
+
+___
+
+### tileSize
+
+• **tileSize**: `number`
+
+瓦片大小
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:465
+
+___
+
+### type
+
+• **type**: [`image`](../enums/maptalks_src.LayerSourceType.md#image)
+
+数据源类型
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:449
+
+___
+
+### url
+
+• **url**: `string` \| [`string`, `string`]
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:470
+
+___
+
+### wrapX
+
+• **wrapX**: `boolean`
+
+是否跨世界渲染
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:482
+
+## Accessors
+
+### sourceCache
+
+• `get` **sourceCache**(): `SourceCache`
+
+#### Returns
+
+`SourceCache`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:484
+
+## Methods
+
+### abortTile
+
+▸ **abortTile**(`tile`, `callback`): `void`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `tile` | `Tile` |
+| `callback` | `any` |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:502
+
+___
+
+### asyncActor
+
+▸ **asyncActor**(`tile`, `url`): `Promise`<`unknown`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `tile` | `any` |
+| `url` | `any` |
+
+#### Returns
+
+`Promise`<`unknown`\>
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:490
+
+___
+
+### clear
+
+▸ **clear**(): [`ImageSource`](maptalks_src.ImageSource.md)
+
+清空所有的订阅者
+
+#### Returns
+
+[`ImageSource`](maptalks_src.ImageSource.md)
+
+#### Inherited from
+
+EventEmitter.clear
+
+#### Defined in
+
+node_modules/.pnpm/@sakitam-gis+vis-engine@1.5.2/node_modules/@sakitam-gis/vis-engine/dist/index.d.ts:165
+
+___
+
+### destroy
+
+▸ **destroy**(): `void`
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:504
+
+___
+
+### emit
+
+▸ **emit**(`type`, `args?`): `any`
+
+触发事件
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `type` | `any` |
+| `args?` | `any` |
+
+#### Returns
+
+`any`
+
+#### Inherited from
+
+EventEmitter.emit
+
+#### Defined in
+
+node_modules/.pnpm/@sakitam-gis+vis-engine@1.5.2/node_modules/@sakitam-gis/vis-engine/dist/index.d.ts:160
+
+___
+
+### getFadeTime
+
+▸ **getFadeTime**(): `number`
+
+#### Returns
+
+`number`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:501
+
+___
+
+### getTileUrl
+
+▸ **getTileUrl**(`tileID`): `string`[]
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `tileID` | `any` |
+
+#### Returns
+
+`string`[]
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:498
+
+___
+
+### has
+
+▸ **has**(`type`): `any`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `type` | `any` |
+
+#### Returns
+
+`any`
+
+#### Inherited from
+
+EventEmitter.has
+
+#### Defined in
+
+node_modules/.pnpm/@sakitam-gis+vis-engine@1.5.2/node_modules/@sakitam-gis/vis-engine/dist/index.d.ts:161
+
+___
+
+### hasTile
+
+▸ **hasTile**(`coord`): `boolean`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `coord` | `any` |
+
+#### Returns
+
+`boolean`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:500
+
+___
+
+### load
+
+▸ **load**(`cb?`): `void`
+
+兼容 TileJSON 加载，需要具体实现
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `cb?` | `any` |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:495
+
+___
+
+### loadTile
+
+▸ **loadTile**(`tile`, `callback`): `any`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `tile` | `Tile` |
+| `callback` | `any` |
+
+#### Returns
+
+`any`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:499
+
+___
+
+### loaded
+
+▸ **loaded**(): `boolean`
+
+#### Returns
+
+`boolean`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:496
+
+___
+
+### off
+
+▸ **off**(`type`, `handler?`, `context?`): [`ImageSource`](maptalks_src.ImageSource.md)
+
+取消监听
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `type` | `any` |
+| `handler?` | `any` |
+| `context?` | `any` |
+
+#### Returns
+
+[`ImageSource`](maptalks_src.ImageSource.md)
+
+#### Inherited from
+
+EventEmitter.off
+
+#### Defined in
+
+node_modules/.pnpm/@sakitam-gis+vis-engine@1.5.2/node_modules/@sakitam-gis/vis-engine/dist/index.d.ts:154
+
+___
+
+### on
+
+▸ **on**(`type`, `handler`, `context?`): [`ImageSource`](maptalks_src.ImageSource.md)
+
+添加订阅者
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `type` | `any` | 事件类型 |
+| `handler` | `any` | 回调函数 |
+| `context?` | `any` | 上下文 |
+
+#### Returns
+
+[`ImageSource`](maptalks_src.ImageSource.md)
+
+#### Inherited from
+
+EventEmitter.on
+
+#### Defined in
+
+node_modules/.pnpm/@sakitam-gis+vis-engine@1.5.2/node_modules/@sakitam-gis/vis-engine/dist/index.d.ts:140
+
+___
+
+### onAdd
+
+▸ **onAdd**(`layer`, `cb?`): `void`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `layer` | `any` |
+| `cb?` | `any` |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:485
+
+___
+
+### once
+
+▸ **once**(`type`, `handler`, `context?`): [`ImageSource`](maptalks_src.ImageSource.md)
+
+添加一次性订阅者
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `type` | `any` |
+| `handler` | `any` |
+| `context?` | `any` |
+
+#### Returns
+
+[`ImageSource`](maptalks_src.ImageSource.md)
+
+#### Inherited from
+
+EventEmitter.once
+
+#### Defined in
+
+node_modules/.pnpm/@sakitam-gis+vis-engine@1.5.2/node_modules/@sakitam-gis/vis-engine/dist/index.d.ts:147
+
+___
+
+### prepare
+
+▸ **prepare**(`renderer`, `dispatcher`, `parseOptions`): `void`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `renderer` | `Renderer` |
+| `dispatcher` | `any` |
+| `parseOptions` | `ParseOptionsType` |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:486
+
+___
+
+### reload
+
+▸ **reload**(`clear`): `void`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `clear` | `any` |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:497
+
+___
+
+### setCoordinates
+
+▸ **setCoordinates**(`coordinates`): `void`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `coordinates` | `Coordinates` |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:489
+
+___
+
+### unloadTile
+
+▸ **unloadTile**(`tile`, `cb`): `void`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `tile` | `any` |
+| `cb` | `any` |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:503
+
+___
+
+### update
+
+▸ **update**(`data`, `clear?`): `void`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `data` | `ImageSourceInterval` |
+| `clear?` | `boolean` |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:487
+
+___
+
+### updateImage
+
+▸ **updateImage**(`options`, `clear?`): `void`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `options` | `Pick`<`ImageSourceOptions`, ``"url"`` \| ``"coordinates"``\> |
+| `clear?` | `boolean` |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+packages/gl-core/dist/index.d.ts:488

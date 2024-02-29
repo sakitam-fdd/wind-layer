@@ -28,9 +28,10 @@ const WindLayer = L.Layer.extend({
 
     this.pickWindOptions();
 
-    this.devicePixelRatio = this.options.devicePixelRatio ||
+    this.devicePixelRatio =
+      this.options.devicePixelRatio ||
       // @ts-ignore
-      (window.devicePixelRatio || (window.screen.deviceXDPI / window.screen.logicalXDPI)) as number;
+      ((window.devicePixelRatio || window.screen.deviceXDPI / window.screen.logicalXDPI) as number);
 
     if (data) {
       this.setData(data, options.fieldOptions);
@@ -60,7 +61,7 @@ const WindLayer = L.Layer.extend({
     };
   },
 
-  _reset(){
+  _reset() {
     const topLeft = this._map.containerPointToLayerPoint([0, 0]);
     L.DomUtil.setPosition(this.canvas, topLeft);
   },
@@ -73,12 +74,12 @@ const WindLayer = L.Layer.extend({
     this._resizeCanvas(this.devicePixelRatio);
   },
 
-  _zoomStart(){
+  _zoomStart() {
     this._moveStart();
   },
 
-  _moveStart(){
-    if (!this._updating){
+  _moveStart() {
+    if (!this._updating) {
       this._updating = true;
     }
   },
@@ -86,7 +87,11 @@ const WindLayer = L.Layer.extend({
   _animateZoom(event: L.ZoomAnimEvent) {
     const scale = this._map.getZoomScale(event.zoom);
 
-    const offset = this._map._latLngToNewLayerPoint(this._map.getBounds().getNorthWest(), event.zoom, event.center);
+    const offset = this._map._latLngToNewLayerPoint(
+      this._map.getBounds().getNorthWest(),
+      event.zoom,
+      event.center,
+    );
 
     L.DomUtil.setTransform(this.canvas, offset, scale);
   },
@@ -122,18 +127,12 @@ const WindLayer = L.Layer.extend({
 
   project(coordinate: [number, number]): [number, number] {
     const pixel = this._map.latLngToContainerPoint(new L.LatLng(coordinate[1], coordinate[0]));
-    return [
-      pixel.x * this.devicePixelRatio,
-      pixel.y * this.devicePixelRatio,
-    ];
+    return [pixel.x * this.devicePixelRatio, pixel.y * this.devicePixelRatio];
   },
 
   unproject(pixel: [number, number]): [number, number] {
     const coordinates = this._map.containerPointToLatLng(new L.Point(pixel[0], pixel[1]));
-    return [
-      coordinates.lng,
-      coordinates.lat,
-    ];
+    return [coordinates.lng, coordinates.lat];
   },
 
   intersectsCoordinate(coordinate: [number, number]): boolean {
@@ -183,7 +182,7 @@ const WindLayer = L.Layer.extend({
     };
 
     if (this._map.options.zoomAnimation && L.Browser.any3d) {
-      events.zoomanim =  this._animateZoom;
+      events.zoomanim = this._animateZoom;
     }
 
     return events;
@@ -247,9 +246,6 @@ const WindLayer = L.Layer.extend({
   },
 });
 
-export {
-  Field,
-  WindLayer,
-}
+export { Field, WindLayer };
 
 export default WindLayer;
