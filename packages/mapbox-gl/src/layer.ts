@@ -201,7 +201,6 @@ export default class Layer {
         scene: this.scene,
       },
       {
-        opacity: this.options.opacity,
         renderType: this.options.renderType,
         renderFrom: this.options.renderFrom,
         styleSpec: this.options.styleSpec,

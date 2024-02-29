@@ -11,13 +11,16 @@
       "cache": false
     },
     "test": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["build"]
     },
     "test-only": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["build"]
     },
     "coverage": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["build"]
     },
     "docs": {}
   }
