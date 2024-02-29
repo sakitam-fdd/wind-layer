@@ -227,18 +227,9 @@ class AMapWind {
     const type = this.map.getViewMode_();
     let [southWest, northEast] = [undefined, undefined];
     const bounds = this.map.getBounds();
-    if (type.toLowerCase() === '2d') {
-      northEast = bounds.getNorthEast(); // xmax ymax
-      southWest = bounds.getSouthWest(); // xmin ymin
-    } else {
-      // TODO: 高德地图3D模式下目前返回的bounds顺序为左上-右上-右下-左下-左上
-      const arrays = bounds.bounds.map((item: any) => {
-        return [item.getLng(), item.getLat()];
-      });
-      // const extent = getExtent(arrays);
-      southWest = new AMap.LngLat(arrays[3][0], arrays[3][1]);
-      northEast = new AMap.LngLat(arrays[1][0], arrays[1][1]);
-    }
+    // FIX: 高德地图3D模式和2D模式，map.getBounds接口已统一
+    northEast = bounds.getNorthEast(); // xmax ymax
+    southWest = bounds.getSouthWest(); // xmin ymin
     return new AMap.Bounds(southWest, northEast);
   }
 
