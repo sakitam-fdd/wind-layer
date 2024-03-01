@@ -160,18 +160,6 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
     const tileSize = this.options.source.tileSize ?? 256;
     const tiles = this.options.getGridTiles(tileSize);
 
-    // export default function(tile: interface {tileID: OverscaledTileID, tileSize: number}, pixelValue: number, z: number): number {
-    //   return pixelValue * (EXTENT / (tile.tileSize * Math.pow(2, z - tile.tileID.overscaledZ)));
-    // }
-    //
-    // scaleFactor
-    //
-    // function getPixelsToTileUnitsMatrix(tile: interface {tileID: OverscaledTileID, tileSize: number, +tileTransform: TileTransform}, transform: Transform): Float32Array {
-    //   const {scale} = tile.tileTransform;
-    //   const s = scale * EXTENT / (tile.tileSize * Math.pow(2, transform.zoom - tile.tileID.overscaledZ + tile.tileID.canonical.z));
-    //   return mat2.scale(new Float32Array(4), transform.inverseAdjustmentMatrix, [s, s]);
-    // }
-
     let stencil;
 
     if (this.maskPass) {
@@ -271,7 +259,7 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
 
         const scaleFactor = Math.pow(2, zoom - tile.overscaledZ);
 
-        const max = Math.max(bounds.right - bounds.right, bounds.bottom - bounds.top);
+        const max = Math.max(bounds.right - bounds.left, bounds.bottom - bounds.top);
         const scale = 1 / max;
 
         const pixelToUnits = 1 / (tileSize * scaleFactor) / scale;

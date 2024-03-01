@@ -266,6 +266,20 @@ class Layer extends maptalks.TileLayer {
       tileSize: source.tileSize,
       repeatWorld: source.wrapX ? 'x' : false,
     });
+
+    this.tempLayer = new maptalks.TileLayer(id + '_temp', {
+      ...opts,
+      minZoom: source.minZoom,
+      maxZoom: source.maxZoom,
+      urlTemplate: 'custom',
+      tileSize: source.tileSize,
+      repeatWorld: source.wrapX ? 'x' : false,
+    });
+
+    this.tempLayer.isRendering = function () {
+      return false;
+    }
+
     this.source = source;
     this.type = 'VeLayer';
   }
@@ -511,6 +525,7 @@ class Layer extends maptalks.TileLayer {
         widthSegments: opt.widthSegments,
         heightSegments: opt.heightSegments,
         wireframe: opt.wireframe,
+        picking: opt.picking,
         mask: this.processMask(),
         getZoom: () => map.getZoom(),
         triggerRepaint: () => {
@@ -581,7 +596,7 @@ class Layer extends maptalks.TileLayer {
               );
             }
           } else if (type === LayerSourceType.tile) {
-            const { tileGrids } = this.getTiles();
+            const { tileGrids } = this.tempLayer.getTiles();
             const { tiles } = tileGrids[0];
             for (let i = 0; i < tiles.length; i++) {
               const tile = tiles[i];
@@ -637,6 +652,53 @@ class Layer extends maptalks.TileLayer {
             projExtent.ymax > p2.y ? p2.y : projExtent.ymax,
           ];
         },
+        getGridTiles: (tileSize: number) => {
+          const { tileGrids } = this.getTiles();
+          const { tiles } = tileGrids[0];
+          const wrapTiles: TileID[] = [];
+          const worlds = this.getWorlds();
+          for (let i = 0; i < tiles.length; i++) {
+            const tile = tiles[i];
+
+            const res = map._getResolution(tile.z);
+            const tileConfig = this._getTileConfig();
+            const tileExtent = tileConfig.getTilePrjExtent(tile.x, tile.y, res);
+
+            let max = tileExtent.getMax();
+            let min = tileExtent.getMin();
+            const projection = map.getProjection();
+            min = projection.unproject(min);
+            max = projection.unproject(max);
+
+            const { extent2d, offset } = tile;
+
+            const scale = (tile._glScale = tile._glScale || tile.res / map.getGLRes());
+
+            const point1 = TILE_POINT.set(extent2d.xmin - offset[0], extent2d.ymax - offset[1]);
+            const x1 = point1.x * scale;
+            const y1 = point1.y * scale;
+
+            const point2 = TILE_POINT.set(extent2d.xmax - offset[0], extent2d.ymin - offset[1]);
+            const x2 = point2.x * scale;
+            const y2 = point2.y * scale;
+
+            const wrap = this.calcWitchWorld([(x2 - x1) / 2 + x1, (y2 - y1) / 2 + y1], worlds);
+
+            wrapTiles.push(
+              new TileID(tile.z, wrap, tile.z, tile.x, tile.y, {
+                getTileBounds: () => [min.x, min.y, max.x, max.y],
+                getTileProjBounds: () => ({
+                  left: x1,
+                  top: y1,
+                  right: x2,
+                  bottom: y2,
+                }),
+              }),
+            );
+          }
+
+          return wrapTiles;
+        }
       },
     );
 
@@ -727,6 +789,8 @@ class Layer extends maptalks.TileLayer {
     super.onAdd();
     const map = this.map || this.getMap();
     if (!map) return this;
+
+    map.addLayer(this.tempLayer);
 
     this._needsUpdate = true;
 
