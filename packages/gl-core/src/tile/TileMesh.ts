@@ -1,28 +1,5 @@
 import { Program, Mesh, Geometry } from '@sakitam-gis/vis-engine';
 
-let geom;
-
-function getPlaneGeometry(renderer) {
-  if (!geom) {
-    geom = new Geometry(renderer, {
-      position: {
-        size: 2,
-        data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
-      },
-      uv: {
-        size: 2,
-        data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
-      },
-      index: {
-        size: 1,
-        data: new Uint16Array([0, 1, 2, 2, 1, 3]),
-      },
-    });
-  }
-
-  return geom;
-}
-
 export default class TileMesh {
   public id: string;
   public program: Program;
@@ -48,7 +25,20 @@ export default class TileMesh {
 
     this.planeMesh = new Mesh(renderer, {
       program,
-      geometry: getPlaneGeometry(renderer),
+      geometry: new Geometry(renderer, {
+        position: {
+          size: 2,
+          data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
+        },
+        uv: {
+          size: 2,
+          data: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
+        },
+        index: {
+          size: 1,
+          data: new Uint16Array([0, 1, 2, 2, 1, 3]),
+        },
+      }),
     });
   }
 

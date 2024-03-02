@@ -1,4 +1,4 @@
-import { Geometry, Plane, Program, Renderer, Texture } from '@sakitam-gis/vis-engine';
+import { Geometry, Program, Renderer, Texture } from '@sakitam-gis/vis-engine';
 import TileMesh from './TileMesh';
 import { ParseOptionsType, ProjTileBounds, RenderFrom, TileBounds, TileState } from '../type';
 import { isImageBitmap, parseRange } from '../utils/common';
@@ -68,7 +68,7 @@ export default class Tile {
 
   public tileMeshs: Map<string, TileMesh> = new Map();
 
-  public geometry: Plane;
+  public geometry: Geometry;
 
   request: Map<string, any>;
 
@@ -178,6 +178,8 @@ export default class Tile {
         },
       });
     }
+
+    return this.geometry;
   }
 
   /**
@@ -195,14 +197,10 @@ export default class Tile {
     program: Program,
     force?: boolean,
   ) {
-    this.updateGeometry(bbox, renderer, force);
+    const geometry = this.updateGeometry(bbox, renderer, force);
     if (!this.tileMeshs.get(passId) || force) {
-      const tileMesh = new TileMesh(
-        passId + '_' + this.tileID.tileKey,
-        renderer,
-        program,
-        this.geometry,
-      );
+      const uid = passId + '_' + this.tileID.tileKey;
+      const tileMesh = new TileMesh(uid, renderer, program, geometry);
       tileMesh.setCenter(this.tileCenter);
       this.tileMeshs.set(passId, tileMesh);
     }

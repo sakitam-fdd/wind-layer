@@ -224,39 +224,6 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
           this.#mesh.updateGeometry(t.dep.geometry, false);
         }
 
-        // const bounds = tile.getTileProjBounds();
-        //
-        // for (let j = 0; j < position.length; j += 2) {
-        //   pos[j] = bounds.left + position[j] * (bounds.right - bounds.left);
-        //   pos[j + 1] = bounds.top + position[j + 1] * (bounds.bottom - bounds.top);
-        // }
-        //
-        // const geometry = new Geometry(this.renderer, {
-        //   index: {
-        //     size: 1,
-        //     // data: new Uint16Array([0, 1, 2, 2, 1, 3]),
-        //     data: new Uint16Array([0, 1, 2, 0, 2, 3]),
-        //   },
-        //   position: {
-        //     size: 2,
-        //     // data: new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1]),
-        //     data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]),
-        //   },
-        //   uv: {
-        //     size: 2,
-        //     data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]),
-        //   },
-        //   coords: {
-        //     divisor: 1,
-        //     data: pos,
-        //     offset: 0,
-        //     size: 2,
-        //     stride: 8,
-        //   },
-        // });
-        //
-        // this.#mesh.updateGeometry(geometry);
-
         const scaleFactor = Math.pow(2, zoom - tile.overscaledZ);
 
         const max = Math.max(bounds.right - bounds.left, bounds.bottom - bounds.top);
@@ -282,6 +249,8 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
         this.#mesh.program.setUniform('u_data_bbox', dataBounds);
         this.#mesh.program.setUniform('u_head', 0.1);
         this.#mesh.program.setUniform('u_devicePixelRatio', attr.dpr);
+        this.#mesh.program.setUniform('u_texture', this.options.texture);
+        this.#mesh.program.setUniform('u_textureNext', this.options.textureNext);
 
         this.#mesh.updateMatrix();
         this.#mesh.worldMatrixNeedsUpdate = false;
