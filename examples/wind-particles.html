@@ -217,12 +217,12 @@
     window.imageSource = imageSource;
     window.tileSource = tileSource;
 
-    const fill = new mapboxWind.Layer('fill', imageSource, {
+    const fill = new mapboxWind.Layer('fill', tileSource, {
       wireframe: true,
       styleSpec: {
         'fill-color': [
           'interpolate',
-          ['step', 1],
+          ['linear'],
           ['get', 'value'],
           ...interpolateColor
         ],
@@ -234,11 +234,11 @@
       displayRange: [0, 104],
       renderType: mapboxWind.RenderType.colorize,
       picking: true,
-      mask: {
-        data: clip,
-        // type: mapboxWind.MaskType.outside,
-        type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
-      }
+      // mask: {
+      //   data: clip,
+      //   // type: mapboxWind.MaskType.outside,
+      //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+      // }
     });
 
     const particlesConfig = {
@@ -305,7 +305,7 @@
     })
 
     map.addLayer(fill);
-    map.addLayer(wind);
+    // map.addLayer(wind);
 
     const gui = new dat.GUI();
 
