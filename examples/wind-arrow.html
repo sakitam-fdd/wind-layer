@@ -147,12 +147,12 @@
       decodeType: mapboxWind.DecodeType.imageWithExif,
       intervals: [
         '03',
-        '06',
-        '09',
-        '12',
-        '15',
-        '18',
-        '21',
+        // '06',
+        // '09',
+        // '12',
+        // '15',
+        // '18',
+        // '21',
       ].map((id, index) => ({
         // url: `http://localhost:5000/processed/2023041700/20230417${index < 10 ? '0' + index.toString() : index.toString()}/{z}/{x}/{y}/wind-surface.jpeg`,
         url: `http://localhost:5000/2023111700/20231117${id}/{z}/{x}/{y}/wind-surface.jpeg`
@@ -173,6 +173,29 @@
           ...interpolateColor
         ],
         'opacity': 1,
+      },
+      renderFrom: mapboxWind.RenderFrom.rg,
+      widthSegments: 1,
+      heightSegments: 1,
+      displayRange: [0, 104],
+      renderType: mapboxWind.RenderType.colorize,
+      picking: true,
+      // mask: {
+      //   data: clip,
+      //   // type: mapboxWind.MaskType.outside,
+      //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+      // }
+    });
+    const fill2 = new mapboxWind.Layer('fill2', source, {
+      wireframe: true,
+      styleSpec: {
+        'fill-color': [
+          'interpolate',
+          ['linear'],
+          ['get', 'value'],
+          ...interpolateColor
+        ],
+        'opacity': 0.4,
       },
       renderFrom: mapboxWind.RenderFrom.rg,
       widthSegments: 1,
@@ -249,11 +272,36 @@
           'interpolate',
           ['step', 1],
           ['get', 'value'],
+          ...interpolateColor
+          // 0, '#fff',
+          // 104, '#fff',
+        ],
+        'opacity': 1,
+        space: 20,
+        size: [12, 10],
+      },
+      renderFrom: mapboxWind.RenderFrom.rg,
+      displayRange: [0, 104],
+      renderType: mapboxWind.RenderType.arrow,
+      picking: true,
+      // mask: {
+      //   data: clip,
+      //   // type: mapboxWind.MaskType.outside,
+      //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+      // }
+    });
+    const arrow2 = new mapboxWind.Layer('arrow2', source, {
+      wireframe: false,
+      styleSpec: {
+        'fill-color': [
+          'interpolate',
+          ['step', 1],
+          ['get', 'value'],
           // ...interpolateColor
           0, '#fff',
           104, '#fff',
         ],
-        'opacity': 1,
+        'opacity': 0.9,
         space: 20,
         size: [12, 10],
       },
@@ -274,9 +322,11 @@
       })
     })
 
-    // map.addLayer(fill);
+    map.addLayer(fill);
+    map.addLayer(fill2);
     // map.addLayer(wind);
-    map.addLayer(arrow);
+    // map.addLayer(arrow);
+    map.addLayer(arrow2);
   });
 </script>
 </body>

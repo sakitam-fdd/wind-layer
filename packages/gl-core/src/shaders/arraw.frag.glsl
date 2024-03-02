@@ -120,10 +120,12 @@ void main() {
     if (display) {
         if (v_speed > 0.2) {
             float d = arrow_stealth(pos.xy, v_body, v_head, v_linewidth, v_antialias);
-            gl_FragColor = filled(d, 0.15, 0.01, color);
+            vec4 rc = filled(d, 0.15, 0.01, color);
+            gl_FragColor = vec4(floor(255.0 * rc * opacity) / 255.0);
         } else {
             float d = disc(pos, 0.15);
-            gl_FragColor = filled(d, 0.01, 0.01, color);
+            vec4 rc = filled(d, 0.01, 0.01, color);
+            gl_FragColor = vec4(floor(255.0 * rc * opacity) / 255.0);
         }
     } else {
         gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
