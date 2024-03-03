@@ -7,7 +7,6 @@ import {
   utils,
   Vector2,
 } from '@sakitam-gis/vis-engine';
-import LRUCache from '../../../utils/LRUCache';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
 import vert from '../../../shaders/arrow.vert.glsl';
@@ -24,7 +23,7 @@ export interface ArrowPassOptions {
   textureNext: Texture;
   bandType: BandType;
   getPixelsToUnits: () => [number, number];
-  getGridTiles: (tileSize: number) => TileID[];
+  getGridTiles: (source: SourceType) => TileID[];
   maskPass?: MaskPass;
 }
 
@@ -40,8 +39,6 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
   #vertexArray: Float32Array;
   #lastTileSize: number;
   #lastSpace: number;
-
-  #cache: LRUCache<TileID>;
 
   readonly prerender = false;
 
@@ -103,13 +100,6 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
         },
       }),
     });
-
-    this.#cache = new LRUCache(128, (t) => {
-      if (t && t.dep && t.dep.geometry) {
-        t.dep.geometry.destroy();
-        t.dep = null;
-      }
-    });
   }
 
   createTileVertexArray(tileSize: number, space = 20) {
@@ -144,6 +134,32 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
         this.#vertexArray[2 * i] = pos.x / TILE_EXTENT;
         this.#vertexArray[2 * i + 1] = pos.y / TILE_EXTENT;
       }
+
+      const geometry = new Geometry(this.renderer, {
+        index: {
+          size: 1,
+          data: new Uint16Array([0, 1, 2, 0, 2, 3]),
+        },
+        position: {
+          size: 2,
+          data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]),
+        },
+        uv: {
+          size: 2,
+          data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]),
+        },
+        coords: {
+          divisor: 1,
+          data: this.#vertexArray,
+          offset: 0,
+          size: 2,
+          stride: 8,
+        },
+      });
+
+      if (this.#mesh) {
+        this.#mesh.updateGeometry(geometry, true);
+      }
     }
 
     return this.#vertexArray;
@@ -158,7 +174,7 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
     this.renderer.setViewport(this.renderer.width * attr.dpr, this.renderer.height * attr.dpr);
     const camera = rendererParams.cameras.camera;
     const tileSize = this.options.source.tileSize ?? 256;
-    const tiles = this.options.getGridTiles(tileSize);
+    const tiles = this.options.getGridTiles(this.options.source);
 
     let stencil;
 
@@ -178,51 +194,10 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
 
       const zoom = rendererState.zoom;
       const dataBounds = rendererState.sharedState.u_data_bbox;
-      const position = this.createTileVertexArray(tileSize, rendererState.symbolSpace);
-      const pos = new Float32Array(position.length);
+      this.createTileVertexArray(tileSize, rendererState.symbolSpace);
       for (let i = 0; i < tiles.length; i++) {
         const tile = tiles[i];
         const bounds = tile.getTileProjBounds();
-
-        if (!this.#cache.has(tile.tileKey)) {
-          for (let j = 0; j < position.length; j += 2) {
-            pos[j] = bounds.left + position[j] * (bounds.right - bounds.left);
-            pos[j + 1] = bounds.top + position[j + 1] * (bounds.bottom - bounds.top);
-          }
-
-          const geometry = new Geometry(this.renderer, {
-            index: {
-              size: 1,
-              // data: new Uint16Array([0, 1, 2, 2, 1, 3]),
-              data: new Uint16Array([0, 1, 2, 0, 2, 3]),
-            },
-            position: {
-              size: 2,
-              // data: new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1]),
-              data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]),
-            },
-            uv: {
-              size: 2,
-              data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]),
-            },
-            coords: {
-              divisor: 1,
-              data: pos,
-              offset: 0,
-              size: 2,
-              stride: 8,
-            },
-          });
-
-          this.#mesh.updateGeometry(geometry, false);
-
-          tile.dep = { geometry };
-
-          this.#cache.add(tile.tileKey, tile);
-        } else {
-          const t = this.#cache.get(tile.tileKey);
-          this.#mesh.updateGeometry(t.dep.geometry, false);
-        }
 
         const scaleFactor = Math.pow(2, zoom - tile.overscaledZ);
 
@@ -247,6 +222,12 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
         this.#mesh.program.setUniform('pixelsToProjUnit', new Vector2(pixelToUnits, pixelToUnits));
         this.#mesh.program.setUniform('u_bbox', rendererState.extent);
         this.#mesh.program.setUniform('u_data_bbox', dataBounds);
+        this.#mesh.program.setUniform('u_tile_bbox', [
+          bounds.left,
+          bounds.top,
+          bounds.right,
+          bounds.bottom,
+        ]);
         this.#mesh.program.setUniform('u_head', 0.1);
         this.#mesh.program.setUniform('u_devicePixelRatio', attr.dpr);
         this.#mesh.program.setUniform('u_texture', this.options.texture);
@@ -282,7 +263,5 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
       this.#geometry.destroy();
       this.#geometry = null;
     }
-
-    this.#cache.clear();
   }
 }

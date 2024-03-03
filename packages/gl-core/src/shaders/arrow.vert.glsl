@@ -30,6 +30,7 @@ uniform bool useDisplayRange;
 uniform vec2 displayRange;
 uniform vec4 u_bbox; // 当前地图范围
 uniform vec4 u_data_bbox; // 数据范围
+uniform vec4 u_tile_bbox; // 瓦片范围
 
 #include <mercatorToWGS84>
 
@@ -82,6 +83,7 @@ void rotate2d(inout vec2 v, float a){
 
 void main () {
     vUv = uv;
+    vec2 pos = u_tile_bbox.xy + coords.xy * (u_tile_bbox.zw - u_tile_bbox.xy);
     vec2 size = arrowSize * pixelsToProjUnit * u_devicePixelRatio;
     vec2 halfSize = size / 2.0;
     vec2 worldPosition = vec2(-halfSize.x, -halfSize.y);
@@ -98,14 +100,14 @@ void main () {
 
     vUv = vec2(uv.x, uv.y);
 
-    vec2 textureCoord = (coords.xy - u_data_bbox.xy) / (u_data_bbox.zw - u_data_bbox.xy);
+    vec2 textureCoord = (pos.xy - u_data_bbox.xy) / (u_data_bbox.zw - u_data_bbox.xy);
 
     vec2 rg = bilinear(textureCoord);
     float value = getValue(rg);
     float angle = getAngle(rg);
 
     rotate2d(worldPosition, angle);
-    worldPosition += coords;
+    worldPosition += pos;
 
     v_speed = value;
     v_speed_t = (value - colorRange.x) / (colorRange.y - colorRange.x);

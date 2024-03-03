@@ -91,7 +91,7 @@ export interface BaseLayerOptions extends UserOptions {
    * 这里我们 Mock 一个瓦片图层，用于获取视野内的所有可渲染瓦片，与getViewTiles不同的是
    * 此方法不会限制层级，方便我们在大层级时也能合理采样
    */
-  getGridTiles: (tileSize: number) => TileID[];
+  getGridTiles: (source: SourceType) => TileID[];
 
   /**
    * 获取某层级下瓦片的投影宽高
