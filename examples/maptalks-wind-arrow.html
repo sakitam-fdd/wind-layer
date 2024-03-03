@@ -127,6 +127,30 @@
 
   const interpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);
 
+  const layer = new mtkWind.Layer('wind', imageSource, {
+    wireframe: true,
+    styleSpec: {
+      'fill-color': [
+        'interpolate',
+        ['step', 1],
+        ['get', 'value'],
+        ...interpolateColor
+      ],
+      'opacity': 1,
+    },
+    renderFrom: mtkWind.RenderFrom.rg,
+    widthSegments: 1,
+    heightSegments: 1,
+    displayRange: [0, 104],
+    renderType: mtkWind.RenderType.colorize,
+    picking: true,
+    // mask: {
+    //   data: clip,
+    //   // type: mapboxWind.MaskType.outside,
+    //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+    // }
+  });
+
   const arrow = new mtkWind.Layer('arrow', tileSource, {
     wireframe: false,
     styleSpec: {
@@ -153,6 +177,7 @@
     // }
   });
 
+  map.addLayer(layer);
   map.addLayer(arrow);
 </script>
 </body>

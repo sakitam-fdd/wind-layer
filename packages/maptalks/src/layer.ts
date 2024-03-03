@@ -276,9 +276,22 @@ class Layer extends maptalks.TileLayer {
       repeatWorld: source.wrapX ? 'x' : false,
     });
 
-    this.tempLayer.isRendering = function () {
-      return false;
-    }
+    this.tempLayer.on('renderercreate', (e) => {
+      e.renderer.loadTile = function loadTile(tile) {
+        return tile;
+      };
+
+      e.renderer.deleteTile = (tile) => {
+        if (!tile || !tile.image) {
+          return;
+        }
+        tile.image.onload = null;
+        tile.image.onerror = null;
+      };
+      e.renderer.loadTileImage = (img, url, key) => {
+        //
+      };
+    });
 
     this.source = source;
     this.type = 'VeLayer';
