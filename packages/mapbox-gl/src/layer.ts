@@ -351,7 +351,9 @@ export default class Layer {
           const p1 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmax, minY));
           return [p0.x, p0.y, p1.x, p1.y];
         },
-        getGridTiles: (tileSize: number) => {
+        getGridTiles: (source: any) => {
+          const tileSize = source.tileSize;
+          const wrapX = source.wrapX;
           const map = this.map as any;
           if (!map) return [];
           const { transform } = map;
@@ -370,12 +372,21 @@ export default class Layer {
             const tile = tiles[i];
             const { canonical, wrap } = tile;
             const { x, y, z } = canonical;
-            wrapTiles.push(
-              new TileID(z, wrap, z, x, y, {
-                getTileBounds,
-                getTileProjBounds,
-              }),
-            );
+            if (wrapX) {
+              wrapTiles.push(
+                new TileID(z, wrap, z, x, y, {
+                  getTileBounds,
+                  getTileProjBounds,
+                }),
+              );
+            } else if (tile.wrap === 0) {
+              wrapTiles.push(
+                new TileID(z, wrap, z, x, y, {
+                  getTileBounds,
+                  getTileProjBounds,
+                }),
+              );
+            }
           }
 
           return wrapTiles;
