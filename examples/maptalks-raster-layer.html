@@ -26,8 +26,8 @@
 <!--<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js"></script>-->
 <script>
   const map = new maptalks.Map('map', {
-    center: [113.53450137499999, 34.44104525],
-    zoom: 0,
+    zoom: 2,
+    center: [34.371, 131.287].reverse(),
     // baseLayer: new maptalks.TileLayer('base', {
     //   urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
     //   // urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
@@ -82,7 +82,7 @@
         1
       ],
     },
-    renderType: 0,
+    renderType: mtkWind.RenderType.image,
   });
 
   map.addLayer(layer);

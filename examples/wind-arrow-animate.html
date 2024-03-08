@@ -133,19 +133,37 @@
       ],
       url: 'http://localhost:5000/2023111700/2023111703/0/0/0/wind-surface.jpeg',
     });
-    const tileSource = new mapboxWind.TileSource('wind2', {
+
+    const source = new mapboxWind.TimelineSource('wind', {
+      sourceType: mapboxWind.LayerSourceType.tile,
       tileSize: 256,
       minZoom: 0,
       maxZoom: 4,
       roundZoom: true,
+      duration: 1,
+      endDelay: 0,
+      repeat: true,
+      autoplay: true,
       decodeType: mapboxWind.DecodeType.imageWithExif,
-      wrapX: false,
-      url: 'http://localhost:5000/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
+      intervals: [
+        '03',
+        // '06',
+        // '09',
+        // '12',
+        // '15',
+        // '18',
+        // '21',
+      ].map((id, index) => ({
+        // url: `http://localhost:5000/processed/2023041700/20230417${index < 10 ? '0' + index.toString() : index.toString()}/{z}/{x}/{y}/wind-surface.jpeg`,
+        url: `http://localhost:5000/2023111700/20231117${id}/{z}/{x}/{y}/wind-surface.jpeg`
+      })),
+      wrapX: true,
     });
 
     window.imageSource = imageSource;
+    window.tileSource = source;
 
-    const fill = new mapboxWind.Layer('fill', imageSource, {
+    const fill = new mapboxWind.Layer('fill', source, {
       wireframe: true,
       styleSpec: {
         'fill-color': [
@@ -168,7 +186,7 @@
       //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
       // }
     });
-    const fill2 = new mapboxWind.Layer('fill2', imageSource, {
+    const fill2 = new mapboxWind.Layer('fill2', source, {
       wireframe: true,
       styleSpec: {
         'fill-color': [
@@ -207,7 +225,7 @@
       dropRateBump: 0.002,
     }
 
-    const wind = new mapboxWind.Layer('wind', imageSource, {
+    const wind = new mapboxWind.Layer('wind', source, {
       wireframe: false,
       styleSpec: {
         'fill-color': [
@@ -247,7 +265,7 @@
       // }
     });
 
-    const arrow = new mapboxWind.Layer('arrow', imageSource, {
+    const arrow = new mapboxWind.Layer('arrow', source, {
       wireframe: false,
       styleSpec: {
         'fill-color': [
@@ -272,7 +290,8 @@
       //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
       // }
     });
-    const arrow2 = new mapboxWind.Layer('arrow2', tileSource, {
+    const arrow2 = new mapboxWind.Layer('arrow2', source, {
+      wireframe: false,
       styleSpec: {
         'fill-color': [
           'interpolate',
@@ -303,7 +322,7 @@
       })
     })
 
-    map.addLayer(fill);
+    // map.addLayer(fill);
     // map.addLayer(fill2);
     // map.addLayer(wind);
     // map.addLayer(arrow);

@@ -22,9 +22,7 @@
 <script src="https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.js"></script>
 <script src="https://cdn.jsdelivr.net/npm//axios/dist/axios.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
-<script src="../packages/maptalks/dist/maptalks-wind.js"></script>
-<!--<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js"></script>-->
-<!--<script src="maptalks-wind.js"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind@1.x/dist/maptalks-wind.js"></script>
 <script>
   const map = new maptalks.Map('map', {
     // center: [113.53450137499999, 34.44104525],
@@ -105,11 +103,10 @@
 
       const windInterpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
       const tempInterpolateColor = color.temp.reduce((result, item, key) => result.concat(item[0] - 273.15, 'rgba(' + item[1].join(',') + ')'), []);
-      const QWInterpolateColor = color.RAIN.reduce((result, item, key) => result.concat(item[0], 'rgba(' + item[1].join(',') + ')'), []);
 
       const image = new maptalks.ImageLayer('id', [{
-        url : './data/tp1.png',
-        extent: [109.4, 20, 118, 25.7],
+        url : './data/var_tmp.png',
+        extent: [-180, -85.051129, 180, 85.051129],
         opacity : 1
       }])
 
@@ -117,17 +114,17 @@
 
       const scalarLayer = new MaptalksWind.ScalarLayer('scalar', {
         "type": "image",
-        "url": "./data/tp1.png",
+        "url": "./data/var_tmp.png",
         "extent": [
-          [109.4, 25.7],
-          [109.4, 20],
-          [118, 25.7],
-          [118, 20],
+          [-180, 85.051129],
+          [-180, -85.051129],
+          [180, 85.051129],
+          [180, -85.051129],
         ],
-        "width": 861,
-        "height": 571,
-        "min": 0,
-        "max": 2.553428,
+        "width": 1440,
+        "height": 720,
+        "min": -50.84996643066404,
+        "max": 42.25002441406252,
 
       }, {
         styleSpec: {
@@ -135,15 +132,15 @@
             'interpolate',
             ['linear'],
             ['get', 'value'],
-            ...QWInterpolateColor
+            ...tempInterpolateColor
           ],
           'opacity': 1,
         },
         wrapX: true,
         renderForm: 'r',
-        widthSegments: 1,
-        heightSegments: 1,
-        mappingRange: [0, 0],
+        widthSegments: 128,
+        heightSegments: 128,
+        mappingRange: [0, 100000],
         wireframe: false,
       });
 
