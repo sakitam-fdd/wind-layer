@@ -267,6 +267,8 @@ class Layer extends maptalks.TileLayer {
       repeatWorld: source.wrapX ? 'x' : false,
     });
 
+    // 此处使用临时图层来获取瓦片行列号，因为如果直接给 Layer 设置minZoom 和 maxZoom 相关参数
+    // 可能会造成渲染的 canvas 不可见，所以我们保证 Layer 一直可见，使用临时图层来构建数据源瓦片
     this.tempLayer = new maptalks.TileLayer(id + '_temp', {
       ...opts,
       minZoom: source.minZoom,
@@ -371,7 +373,7 @@ class Layer extends maptalks.TileLayer {
     );
     const projWorldWidth = Math.abs(p1.x - p2.x);
 
-    let startX = extent[0];
+    let startX = projectionExtent[0];
     let world = 0;
     const result: {
       world: number;
@@ -386,7 +388,7 @@ class Layer extends maptalks.TileLayer {
         xmax: p2.x,
       },
     ];
-    while (startX < projectionExtent[0]) {
+    while (startX > extent[0]) {
       --world;
       result.push({
         world,
@@ -394,11 +396,11 @@ class Layer extends maptalks.TileLayer {
         xmin: p1.x + world * projWorldWidth,
         xmax: p2.x + world * projWorldWidth,
       });
-      startX += worldWidth;
+      startX -= worldWidth;
     }
     world = 0;
-    startX = extent[2];
-    while (startX > projectionExtent[2]) {
+    startX = projectionExtent[2];
+    while (startX < extent[2]) {
       ++world;
       result.push({
         world,
@@ -406,7 +408,7 @@ class Layer extends maptalks.TileLayer {
         xmin: p1.x + world * projWorldWidth,
         xmax: p2.x + world * projWorldWidth,
       });
-      startX -= worldWidth;
+      startX += worldWidth;
     }
 
     this.projWorldWidth = projWorldWidth;
@@ -665,7 +667,7 @@ class Layer extends maptalks.TileLayer {
             projExtent.ymax > p2.y ? p2.y : projExtent.ymax,
           ];
         },
-        getGridTiles: (tileSize: number) => {
+        getGridTiles: (_: any) => {
           const { tileGrids } = this.getTiles();
           const { tiles } = tileGrids[0];
           const wrapTiles: TileID[] = [];
@@ -711,7 +713,7 @@ class Layer extends maptalks.TileLayer {
           }
 
           return wrapTiles;
-        }
+        },
       },
     );
 
