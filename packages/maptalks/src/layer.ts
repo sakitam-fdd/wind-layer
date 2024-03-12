@@ -548,6 +548,7 @@ class Layer extends maptalks.TileLayer {
         },
         flipY: true,
         glScale: () => this.projWorldWidth,
+        zoomScale: () => 2,
         // 由于核心库中计算瓦片坐标是从上到下是递增的，但是 maptalk 是从上到下是递减的
         getTileProjSize: (z: number, tiles: TileID[]) => {
           const t = tiles.find((tile: TileID) => tile.z === z);

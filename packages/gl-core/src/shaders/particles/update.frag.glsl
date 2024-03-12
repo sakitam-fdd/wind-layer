@@ -66,11 +66,21 @@ vec2 update(vec2 pos) {
     // 1. xy 必定在 bbox 内
     vec2 uv = (pos.xy - u_data_bbox.xy) / (u_data_bbox.zw - u_data_bbox.xy); // 0-1
 
+    if (u_flip_y) {
+        uv = vec2(uv.x, 1.0 - uv.y);
+    }
+
     vec2 velocity = bilinear(uv);
 
     float speed = length(velocity);
 
-    vec2 offset = vec2(velocity.x, -velocity.y) * 0.0001 * u_speed_factor * u_gl_scale;
+    vec2 v = vec2(velocity.x, -velocity.y);
+
+    if (u_flip_y) {
+        v = vec2(velocity.x, velocity.y);
+    }
+
+    vec2 offset = v * 0.0001 * u_speed_factor * u_gl_scale;
 
     pos = pos + offset;
 

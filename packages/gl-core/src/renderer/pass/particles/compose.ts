@@ -205,7 +205,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
         if (!rendererState.u_flip_y) {
           mesh.position.set((tileBBox.left - xmin) / dx, (tileBBox.top - ymin) / dy, 0);
         } else {
-          mesh.position.set((tileBBox.left - xmin) / dx, (tileBBox.bottom - ymin) / dy, 0);
+          mesh.position.set((tileBBox.left - xmin) / dx, 1 - (tileBBox.top - ymin) / dy, 0);
         }
 
         const dataRange: number[] = [];

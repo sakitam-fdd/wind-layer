@@ -9,15 +9,15 @@ import {
 } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
-import vert from '../../../shaders/arrow.vert.glsl';
-import frag from '../../../shaders/arraw.frag.glsl';
+import vert from '../../../shaders/compose-render.vert.glsl';
+import frag from '../../../shaders/color.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
 import { BandType } from '../../../type';
 import { SourceType } from '../../../source';
 import TileID from '../../../tile/TileID';
 import MaskPass from '../mask';
 
-export interface ArrowPassOptions {
+export interface ComposeRenderPassOptions {
   source: SourceType;
   texture: Texture;
   textureNext: Texture;
@@ -30,9 +30,9 @@ export interface ArrowPassOptions {
 const TILE_EXTENT = 4096.0;
 
 /**
- * arrow
+ * 用于测试 compose pass 合并是否正确
  */
-export default class ArrowPass extends Pass<ArrowPassOptions> {
+export default class ComposeRenderPass extends Pass<ComposeRenderPassOptions> {
   #mesh: WithNull<Mesh>;
   #program: WithNull<Program>;
   #geometry: WithNull<Geometry>;
@@ -42,7 +42,7 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
 
   readonly prerender = false;
 
-  constructor(id: string, renderer: Renderer, options: ArrowPassOptions = {} as ArrowPassOptions) {
+  constructor(id: string, renderer: Renderer, options: ComposeRenderPassOptions = {} as ComposeRenderPassOptions) {
     super(id, renderer, options);
 
     this.#program = new Program(renderer, {
@@ -136,6 +136,25 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
       }
 
       const geometry = new Geometry(this.renderer, {
+        // index: {
+        //   size: 1,
+        //   data: new Uint16Array([0, 1, 2, 0, 2, 3]),
+        // },
+        // position: {
+        //   size: 2,
+        //   data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]),
+        // },
+        // uv: {
+        //   size: 2,
+        //   data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]),
+        // },
+        // coords: {
+        //   divisor: 1,
+        //   data: this.#vertexArray,
+        //   offset: 0,
+        //   size: 2,
+        //   stride: 8,
+        // },
         index: {
           size: 1,
           data: new Uint16Array([0, 1, 2, 0, 2, 3]),
@@ -147,13 +166,6 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
         uv: {
           size: 2,
           data: new Float32Array([0, 1, 0, 0, 1, 0, 1, 1]),
-        },
-        coords: {
-          divisor: 1,
-          data: this.#vertexArray,
-          offset: 0,
-          size: 2,
-          stride: 8,
         },
       });
 
@@ -233,7 +245,6 @@ export default class ArrowPass extends Pass<ArrowPassOptions> {
         this.#mesh.program.setUniform('u_texture', this.options.texture);
         this.#mesh.program.setUniform('u_textureNext', this.options.textureNext);
         this.#mesh.program.setUniform('u_flip_y', rendererState.u_flip_y);
-        this.#mesh.program.setUniform('u_zoomScale', rendererState.u_zoomScale);
 
         this.#mesh.updateMatrix();
         this.#mesh.worldMatrixNeedsUpdate = false;

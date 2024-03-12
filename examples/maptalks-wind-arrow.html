@@ -26,12 +26,15 @@
 <script src="../packages/maptalks/dist/maptalks-wind.js"></script>
 <!--<script src="https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js"></script>-->
 <script>
+  const key = 'pk.eyJ1IjoidTEwaW50IiwiYSI6InQtMnZvTkEifQ.c8mhXquPE7_xoB3P4Ag8cA'
   const map = new maptalks.Map('map', {
     // center: [113.53450137499999, 34.44104525],
     zoom: 2,
     center: [34.371, 131.287].reverse(),
     // zoom: 4
     baseLayer: new maptalks.TileLayer('base', {
+      // urlTemplate: 'https://{s}.tiles.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=' + key,
+      // tileSize: 512,
       urlTemplate: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
       // urlTemplate: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
       subdomains: ['a', 'b', 'c', 'd'],
@@ -42,41 +45,15 @@
 
   const imageSource = new mtkWind.ImageSource('wind', {
     decodeType: mtkWind.DecodeType.imageWithExif,
-    wrapX: true,
+    wrapX: false,
     coordinates: [
       [-180, 85.051129],
       [180, 85.051129],
       [180, -85.051129],
       [-180, -85.051129],
     ],
-    // url: 'http://localhost:5000/2023111700/2023111703/0/0/0/wind-surface.jpeg',
-    // coordinates: [
-    //   [-78.120282611, 68.846393966],
-    //   [132.453327310, 68.846393966],
-    //   [132.453327310, -75.191804486],
-    //   [-78.120282611, -75.191804486],
-    // ],
+
     url: 'http://localhost:5000/2023111700/2023111703/0/0/0/wind-surface.jpeg',
-    // coordinates: [
-    //   [
-    //     0,
-    //     85.051129
-    //   ],
-    //   [
-    //     180,
-    //     85.051129
-    //   ],
-    //   [
-    //     180,
-    //     -85.051129
-    //   ],
-    //   [
-    //     0,
-    //     -85.051129
-    //   ],
-    // ],
-    // url: 'http://localhost:5000/2023111700/2023111703/0/0/0/7.jpeg',
-    // dataRange: [-34.37186050415039, 46.51813888549805, -42.12305450439453, 49.66694259643555],
   });
 
   const tileSource = new mtkWind.TileSource('wind', {
@@ -157,9 +134,9 @@
         'interpolate',
         ['step', 1],
         ['get', 'value'],
-        // ...interpolateColor
-        0, '#fff',
-        104, '#fff',
+        ...interpolateColor
+        // 0, '#fff',
+        // 104, '#fff',
       ],
       'opacity': 1,
       space: 20,
@@ -176,7 +153,7 @@
     // }
   });
 
-  map.addLayer(layer);
+  // map.addLayer(layer);
   map.addLayer(arrow);
 </script>
 </body>

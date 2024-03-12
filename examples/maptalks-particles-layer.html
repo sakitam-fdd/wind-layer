@@ -41,20 +41,17 @@
 
   mtkWind.configDeps(['https://unpkg.com/geotiff/dist-browser/geotiff.js']);
 
-  const source = new mtkWind.TileSource('temp', {
+  const tileSource = new mtkWind.TileSource('wind', {
     tileSize: 256,
-    // minZoom: 0,
-    // maxZoom: 0,
-    // roundZoom: false,
+    minZoom: 0,
+    maxZoom: 4,
+    roundZoom: true,
     decodeType: mtkWind.DecodeType.imageWithExif,
     wrapX: false,
     url: 'http://localhost:5000/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
   });
-  const source1 = new mtkWind.ImageSource('temp', {
-    tileSize: 256,
-    // minZoom: 0,
-    // maxZoom: 0,
-    // roundZoom: false,
+
+  const imageSource = new mtkWind.ImageSource('wind-2', {
     decodeType: mtkWind.DecodeType.imageWithExif,
     coordinates: [
       [-180, 85.051129],
@@ -62,11 +59,9 @@
       [180, -85.051129],
       [-180, -85.051129],
     ],
-    wrapX: true,
+    wrapX: false,
     url: 'http://localhost:5000/2023111700/2023111703/0/0/0/wind-surface.jpeg',
   });
-
-  window.source = source;
 
   const color = {
     temp: [[203,[115,70,105,255]],
@@ -106,7 +101,7 @@
 
   const interpolateColor = color.wind.reduce((result, item, key) => result.concat(item[0] - 0/*273.15*/, 'rgba(' + item[1].join(',') + ')'), []);
 
-  const fill = new mtkWind.Layer('fill', source, {
+  const fill = new mtkWind.Layer('fill', tileSource, {
     wireframe: true,
     styleSpec: {
       'fill-color': [
@@ -145,8 +140,7 @@
     dropRateBump: 0.002,
   }
 
-  const layer = new mtkWind.Layer('wind', source, {
-    wireframe: false,
+  const layer = new mtkWind.Layer('wind', imageSource, {
     styleSpec: {
       'fill-color': [
         'interpolate',
@@ -191,7 +185,7 @@
     // })
   });
 
-  // map.addLayer(fill);
+  map.addLayer(fill);
   map.addLayer(layer);
 </script>
 </body>

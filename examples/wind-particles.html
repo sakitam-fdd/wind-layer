@@ -166,7 +166,7 @@
       // maxZoom: 0,
       // roundZoom: false,
       decodeType: mapboxWind.DecodeType.imageWithExif,
-      wrapX: true,
+      wrapX: false,
       coordinates: [
         [-180, 85.051129],
         [180, 85.051129],
@@ -256,8 +256,7 @@
       dropRateBump: 0.002,
     }
 
-    const wind = new mapboxWind.Layer('wind', tileSource, {
-      wireframe: false,
+    const wind = new mapboxWind.Layer('wind', imageSource, {
       styleSpec: {
         'fill-color': [
           'interpolate',
@@ -287,15 +286,13 @@
         ...particlesConfig,
       },
       renderFrom: mapboxWind.RenderFrom.rg,
-      widthSegments: 1,
-      heightSegments: 1,
       displayRange: [0, 104],
       renderType: mapboxWind.RenderType.particles,
-      mask: {
-        data: clip,
-        // type: mapboxWind.MaskType.outside,
-        type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
-      }
+      // mask: {
+      //   data: clip,
+      //   // type: mapboxWind.MaskType.outside,
+      //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+      // }
     });
 
     map.on('click', e => {
@@ -304,8 +301,8 @@
       })
     })
 
-    map.addLayer(fill);
-    // map.addLayer(wind);
+    // map.addLayer(fill);
+    map.addLayer(wind);
 
     const gui = new dat.GUI();
 

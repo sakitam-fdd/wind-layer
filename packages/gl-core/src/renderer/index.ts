@@ -27,6 +27,7 @@ import TileID from '../tile/TileID';
 import MaskPass from './pass/mask';
 import ArrowComposePass from './pass/arrow/compose';
 import ArrowPass from './pass/arrow/arrow';
+// import ComposeRenderPass from './pass/particles/compose-test';
 
 export interface UserOptions {
   /**
@@ -115,6 +116,7 @@ export interface BaseLayerOptions extends UserOptions {
   flipY?: boolean;
 
   glScale?: () => number;
+  zoomScale?: () => number;
   onInit?: (error, data) => void;
 }
 
@@ -163,6 +165,7 @@ export const defaultOptions: BaseLayerOptions = {
   wireframe: false,
   flipY: false,
   glScale: () => 1,
+  zoomScale: () => 1,
   onInit: () => undefined,
 };
 
@@ -353,6 +356,7 @@ export default class BaseLayer {
         texture: composePass.textures.current,
         textureNext: composePass.textures.next,
         getParticleNumber: () => this.#numParticles,
+        glScale: this.options.glScale?.() as number,
       });
       this.renderPipeline?.addPass(updatePass);
 
@@ -750,6 +754,7 @@ export default class BaseLayer {
           u_speed_factor: this.#speedFactor,
           u_flip_y: this.options.flipY,
           u_gl_scale: this.options.glScale?.(),
+          u_zoomScale: this.options.zoomScale?.(),
           symbolSize: this.#size,
           symbolSpace: this.#space,
           pixelsToProjUnit: this.options.getPixelsToProjUnit(),
@@ -776,6 +781,7 @@ export default class BaseLayer {
         u_speed_factor: this.#speedFactor,
         u_flip_y: this.options.flipY,
         u_gl_scale: this.options.glScale?.(),
+        u_zoomScale: this.options.zoomScale?.(),
         symbolSize: this.#size,
         symbolSpace: this.#space,
         pixelsToProjUnit: this.options.getPixelsToProjUnit(),

@@ -23,6 +23,7 @@ export interface UpdatePassOptions {
   textureNext: Texture;
   bandType: BandType;
   getParticleNumber: () => number;
+  glScale: number;
 }
 
 export default class UpdatePass extends Pass<UpdatePassOptions> {
@@ -124,9 +125,10 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
     const particleRes = this.#getParticleRes();
 
     const particleState = new Float32Array(particleRes ** 2 * 4);
+    const s = this.options.glScale;
     for (let i = 0; i < particleState.length; i++) {
       // 不同地图初始化的实际投影位置是不同的，但是这里只能归一化到 0-1（gl），需要在着色器中反算
-      particleState[i] = Math.floor(Math.random() * 256);
+      particleState[i] = Math.random() * s;
     }
 
     // @link https://webgl2fundamentals.org/webgl/lessons/webgl-data-textures.html

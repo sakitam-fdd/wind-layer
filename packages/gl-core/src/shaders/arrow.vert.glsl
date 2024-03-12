@@ -27,6 +27,8 @@ uniform float u_fade_t;
 uniform vec2 u_image_res;
 uniform vec2 colorRange;
 uniform bool useDisplayRange;
+uniform bool u_flip_y;
+uniform float u_zoomScale;
 uniform vec2 displayRange;
 uniform vec4 u_bbox; // 当前地图范围
 uniform vec4 u_data_bbox; // 数据范围
@@ -84,7 +86,7 @@ void rotate2d(inout vec2 v, float a){
 void main () {
     vUv = uv;
     vec2 pos = u_tile_bbox.xy + coords.xy * (u_tile_bbox.zw - u_tile_bbox.xy);
-    vec2 size = arrowSize * pixelsToProjUnit * u_devicePixelRatio;
+    vec2 size = arrowSize * u_zoomScale * pixelsToProjUnit * u_devicePixelRatio;
     vec2 halfSize = size / 2.0;
     vec2 worldPosition = vec2(-halfSize.x, -halfSize.y);
     if(position.x == 1.0) {
@@ -98,13 +100,17 @@ void main () {
     // 这里需要实现 anchor
     worldPosition += halfSize * vec2(1.0, 0);
 
-    vUv = vec2(uv.x, uv.y);
-
     vec2 textureCoord = (pos.xy - u_data_bbox.xy) / (u_data_bbox.zw - u_data_bbox.xy);
+
+    if (u_flip_y) {
+        textureCoord = vec2(textureCoord.x, 1.0 - textureCoord.y);
+    }
 
     vec2 rg = bilinear(textureCoord);
     float value = getValue(rg);
     float angle = getAngle(rg);
+
+    angle = u_flip_y ? angle * -1. : angle;
 
     rotate2d(worldPosition, angle);
     worldPosition += pos;
