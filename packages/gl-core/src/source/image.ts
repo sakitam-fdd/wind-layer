@@ -83,7 +83,7 @@ export default class ImageSource extends EventEmitter {
     this.minZoom = 0;
     this.maxZoom = 22;
     this.roundZoom = false;
-    this.tileSize = 256;
+    this.tileSize = 512;
     this.coordinates = options.coordinates;
     this.wrapX = Boolean(options.wrapX);
     this.url = options.url;
