@@ -14,7 +14,6 @@ uniform float opacity;
 
 varying vec2 vUv;
 
-#include <mercatorToWGS84>
 #include <decodeFloat>
 
 vec4 calcTexture(const vec2 puv) {
@@ -74,9 +73,6 @@ float getValue(const vec2 uv) {
 
 void main () {
     vec2 uv = vUv;
-    #ifdef USE_WGS84
-    uv = mercatorToWGS84(vUv);
-    #endif
     if(calcTexture(uv).a == 0.0) {
         discard;
     }

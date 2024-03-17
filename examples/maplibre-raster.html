@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'/>
+  <title>mapbox wind</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+  <meta name="renderer" content="webkit"/>
+  <meta name="force-rendering" content="webkit"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+      background: #202020;
+    }
+  </style>
+</head>
+<body>
+<div id='map'></div>
+<script src="../packages/maplibre-gl/dist/maplibre-wind.js"></script>
+<script src="https://unpkg.com/dat.gui@0.7.9/build/dat.gui.min.js"></script>
+<script>
+  const map = new maplibregl.Map({
+    container: 'map',
+    style: {
+      version: 8,
+      sources: {
+      },
+      layers: [
+        {
+          id: 'background',
+          type: 'background',
+          layout: {
+            visibility: 'none',
+          },
+        },
+      ],
+    },
+    center: { lng: 105.70150033978689, lat: 22.76021405309811 }, // starting position [lng, lat]
+    zoom: 0, // starting zoom
+    antialias: true,
+  });
+
+  map.on('load', async function () {
+    const source = new maplibreWind.TileSource('temp', {
+      tileSize: 256,
+      url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+      minZoom: 0,
+      maxZoom: 18,
+      roundZoom: true,
+      subdomains: ['a', 'b', 'c', 'd'],
+      wrapX: true,
+      // tileBounds: [-90, -45, 90, 45],
+    });
+
+    let flag = 0;
+    map.on('click', () => {
+      if (flag === 0) {
+        flag = 1;
+        source.update({ url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png' }, false);
+      } else {
+        flag = 0;
+        source.update({ url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png' }, false);
+      }
+    });
+
+    const clip = await fetch('./data/china.geojson').then(res => res.json());
+
+    const layer = new maplibreWind.Layer('raster', source, {
+      wireframe: false,
+      widthSegments: 1,
+      heightSegments: 1,
+      styleSpec: {
+        'fill-color': [
+          'interpolate',
+          ['step', 3],
+          ['get', 'value'],
+          0, '#000',
+          1, '#fff'
+        ],
+        'opacity': [
+          'interpolate',
+          ['exponential', 0.5],
+          ['zoom'],
+          1,
+          1,
+          2,
+          1
+        ],
+      },
+      renderType: maplibreWind.RenderType.image,
+      picking: true,
+      mask: {
+        data: clip,
+        // type: maplibreWind.MaskType.outside,
+        type: maplibreWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+      }
+    });
+
+    map.addLayer(layer);
+
+    map.on('click', e => {
+      layer.picker(e.lngLat).then((v) => {
+        console.log(v)
+      })
+    })
+  });
+</script>
+</body>
+</html>

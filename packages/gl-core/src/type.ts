@@ -98,7 +98,6 @@ export enum LayerSourceType {
   image = 'image',
   tile = 'tile',
   timeline = 'timeline',
-  jsonArray = 'jsonArray',
 }
 
 /**
@@ -133,24 +132,6 @@ export interface ImageSourceOptions {
   maxTileCacheSize?: number;
 }
 
-interface JsonArrayData {
-  type: LayerSourceType.jsonArray;
-  header: {
-    parameterCategory: number | string;
-    parameterNumber: number | string;
-    dx: number;
-    dy: number;
-    nx: number;
-    ny: number;
-    lo1: number;
-    lo2: number;
-    la1: number;
-    la2: number;
-    [key: string]: any;
-  };
-  data: number[];
-}
-
 export type Bounds = [number, number, number, number];
 
 export interface TileSourceOptions {
@@ -175,7 +156,7 @@ export interface TileSourceOptions {
   tileBounds?: Bounds;
 }
 
-export type LayerData = ImageSourceOptions | JsonArrayData | TileSourceOptions;
+export type LayerData = ImageSourceOptions | TileSourceOptions;
 
 /**
  * 瓦片状态

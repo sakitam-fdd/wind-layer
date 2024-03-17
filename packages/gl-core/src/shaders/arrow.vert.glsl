@@ -34,8 +34,6 @@ uniform vec4 u_bbox; // 当前地图范围
 uniform vec4 u_data_bbox; // 数据范围
 uniform vec4 u_tile_bbox; // 瓦片范围
 
-#include <mercatorToWGS84>
-
 varying vec2 vUv;
 
 varying float v_speed;

@@ -8,7 +8,7 @@ extension to show wind field。
 [wind-layer](./) 是一个专注于气象格点数据可视的插件，设计之处是参考了 [earth](http://earth.nullschool.net) [cambecc](https://github.com/cambecc/earth) 的一个气象数据的展示，他使用了流体场的方式去展示了全球的风速和风向，富有很强的
 表现力, 这个插件的早期的很多核心代码也是来源于此。当然现在它不仅仅是做风场的展示，常规的气象数据都可以依赖此插件进行可视化。
 
-## 特性 (相对于原始 [windy.js](https://github.com/Esri/wind-js))
+## 特性 (1.x 通用版本相对于原始 [windy.js](https://github.com/Esri/wind-js))
 
 * 易于配置粒子数量，原始 windy.js 只能给定一个系数，会根据地图元素的大小进行计算粒子数量；现在可以支持系数方式和固定粒子数量以及回调函数的的三种方式。
 * 颜色配置支持三种方式：
@@ -18,10 +18,9 @@ extension to show wind field。
 * 线条宽度支持动态设置。
 * 抽离了核心渲染库，便于扩展到其他地图渲染库。
 
-## 关于webgl
+## 2.x webgl 版本
 
-其中的大部分代码来自于 [webgl-wind](https://github.com/mapbox/webgl-wind) 和 [windgl](https://github.com/astrosat/windgl),
-并且色斑图目前只针对 `mapbox` 和 `maptalks` 做了相关适配。
+`gl-core`扩展目前只针对 `mapbox`、`maplibre` 和 `maptalks` 做了相关适配，其他引擎适配欢迎 PR。
 
 目前计划支持的图层如下：
 
@@ -29,11 +28,17 @@ extension to show wind field。
 - [x] 常规 Image 图层，单张 raster 图层。
 - [x] 色斑图渲染，支持瓦片和单张。
 - [x] 多数据源支持（geotiff、灰度图-可解析带 exif 信息、png-多通道浮点数压缩）。
+  - geotiff 的支持需要配置 `configDeps`, `exif` 默认支持，因为在 `safari` 浏览器下 `configDeps` 有兼容性问题，所以默认打包了 exif 的解析库。
+  ```ts
+  mapboxWind.configDeps(['https://unpkg.com/geotiff/dist-browser/geotiff.js']);
+  ```
 - [x] TimelineSource（时序数据源）支持。
 - [x] 粒子渲染，支持瓦片和单张。
 - [x] 箭头图层，支持瓦片和单张（矢量数据：风或洋流）。
 - [x] 图层拾取。
 - [x] 图层掩膜。
+
+TIP: 注意 2.0 之后不再支持 `jsonArray` 数据和 `EPSG:4326` 的图片数据，如果有需求请使用 1.x 版本
 
 https://github.com/sakitam-fdd/wind-layer/assets/19517451/b36b7eea-c647-42ed-91a4-e1f182d0343c
 
@@ -60,6 +65,7 @@ https://github.com/sakitam-fdd/wind-layer/assets/19517451/064f0ea4-f72f-4e9a-80e
 | [amap-wind](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/amap) | [![Npm package](https://img.shields.io/npm/v/amap-wind.svg)](https://www.npmjs.org/package/amap-wind) | [![NPM downloads](https://img.shields.io/npm/dm/amap-wind.svg)](https://npmjs.org/package/amap-wind) | [![](https://data.jsdelivr.com/v1/package/npm/amap-wind/badge)](https://www.jsdelivr.com/package/npm/amap-wind) | 高德地图风场扩展插件 |
 | [bmap-wind](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/bmap) | [![Npm package](https://img.shields.io/npm/v/bmap-wind.svg)](https://www.npmjs.org/package/bmap-wind) | [![NPM downloads](https://img.shields.io/npm/dm/bmap-wind.svg)](https://npmjs.org/package/bmap-wind) | [![](https://data.jsdelivr.com/v1/package/npm/bmap-wind/badge)](https://www.jsdelivr.com/package/npm/bmap-wind) | 百度地图风场扩展插件 |
 | [mapbox-wind](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/mapbox-gl) | [![Npm package](https://img.shields.io/npm/v/@sakitam-gis/mapbox-wind.svg)](https://www.npmjs.org/package/@sakitam-gis/mapbox-wind) | [![NPM downloads](https://img.shields.io/npm/dm/@sakitam-gis/mapbox-wind.svg)](https://npmjs.org/package/@sakitam-gis/mapbox-wind) | [![](https://data.jsdelivr.com/v1/package/npm/@sakitam-gis/mapbox-wind/badge)](https://www.jsdelivr.com/package/npm/@sakitam-gis/mapbox-wind) | mapbox-gl 风场扩展插件 |
+| [maplibre-wind](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/maplibre-gl)             | [![Npm package](https://img.shields.io/npm/v/@sakitam-gis/maplibre-wind.svg)](https://www.npmjs.org/package/@sakitam-gis/maplibre-wind) | [![NPM downloads](https://img.shields.io/npm/dm/@sakitam-gis/maplibre-wind.svg)](https://npmjs.org/package/@sakitam-gis/maplibre-wind) | [![](https://data.jsdelivr.com/v1/package/npm/@sakitam-gis/maplibre-wind/badge)](https://www.jsdelivr.com/package/npm/@sakitam-gis/maplibre-wind) | maplibre-gl 风场扩展插件 |
 | [leaflet-wind](https://github.com/sakitam-fdd/wind-layer/tree/master/packages/leaflet) | [![Npm package](https://img.shields.io/npm/v/leaflet-wind.svg)](https://www.npmjs.org/package/leaflet-wind) | [![NPM downloads](https://img.shields.io/npm/dm/leaflet-wind.svg)](https://npmjs.org/package/leaflet-wind) | [![](https://data.jsdelivr.com/v1/package/npm/leaflet-wind/badge)](https://www.jsdelivr.com/package/npm/leaflet-wind) | Leaflet风场扩展插件 |
 
 ### 特殊说明
@@ -88,6 +94,7 @@ pnpm install amap-wind
 pnpm install bmap-wind
 pnpm install leaflet-wind
 pnpm install @sakitam-gis/mapbox-wind
+pnpm install @sakitam-gis/maplibre-wind
 
 # yarn
 yarn add wind-core
@@ -100,6 +107,7 @@ yarn add amap-wind
 yarn add bmap-wind
 yarn add leaflet-wind
 yarn add @sakitam-gis/mapbox-wind
+yarn add @sakitam-gis/maplibre-wind
 ```
 
 ### 部分插件亦可以通过浏览器引入
@@ -108,18 +116,19 @@ yarn add @sakitam-gis/mapbox-wind
 
 我们在仓库发布包内的 `dist` 目录下提供了 `xxx.js` 以及 `xxx.min.js`；
 
-| Project | unpkg | jsdelivr |
-|---------|---------|-------------|
-| [wind-core](https://cdn.jsdelivr.net/npm/wind-core/dist/) | https://unpkg.com/wind-core/dist/wind-core.js | https://cdn.jsdelivr.net/npm/wind-core/dist/wind-core.js |
-| [wind-gl-core](https://cdn.jsdelivr.net/npm/wind-gl-core/dist/) | https://unpkg.com/wind-gl-core/dist/wind-gl-core.js | https://cdn.jsdelivr.net/npm/wind-gl-core/dist/wind-gl-core.js |
+| Project                                                                                                                                      | unpkg | jsdelivr |
+|----------------------------------------------------------------------------------------------------------------------------------------------|---------|-------------|
+| [wind-core](https://cdn.jsdelivr.net/npm/wind-core/dist/)                                                                                    | https://unpkg.com/wind-core/dist/wind-core.js | https://cdn.jsdelivr.net/npm/wind-core/dist/wind-core.js |
+| [wind-gl-core](https://cdn.jsdelivr.net/npm/wind-gl-core/dist/)                                                                              | https://unpkg.com/wind-gl-core/dist/wind-gl-core.js | https://cdn.jsdelivr.net/npm/wind-gl-core/dist/wind-gl-core.js |
 | [ol-wind](https://cdn.jsdelivr.net/npm/ol-wind/dist/) 因 `ol6` 重构原因，无法直接使用，你可以自行构建<https://cdn.jsdelivr.net/npm/@sakitam-gis/ol6@6.3.3/dist/> | https://unpkg.com/ol-wind/dist/ol-wind.js | https://cdn.jsdelivr.net/npm/ol-wind/dist/ol-wind.js |
-| [ol5-wind](https://cdn.jsdelivr.net/npm/ol5-wind/dist/) | https://unpkg.com/ol5-wind/dist/ol-wind.js | https://cdn.jsdelivr.net/npm/ol5-wind/dist/ol-wind.js |
-| [openlayers-wind](https://cdn.jsdelivr.net/npm/openlayers-wind/dist/) | https://unpkg.com/openlayers-wind/dist/ol-wind.js | https://cdn.jsdelivr.net/npm/openlayers-wind/dist/ol-wind.js |
-| [@sakitam-gis/maptalks-wind](https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/) | https://unpkg.com/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js | https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js |
-| [amap-wind](https://cdn.jsdelivr.net/npm/amap-wind/dist/) | https://unpkg.com/amap-wind/dist/amap-wind.js | https://cdn.jsdelivr.net/npm/amap-wind/dist/amap-wind.js |
-| [bmap-wind](https://cdn.jsdelivr.net/npm/bmap-wind/dist/) | https://unpkg.com/bmap-wind/dist/bmap-wind.js | https://cdn.jsdelivr.net/npm/bmap-wind/dist/bmap-wind.js |
-| [leaflet-wind](https://cdn.jsdelivr.net/npm/leaflet-wind/dist/) | https://unpkg.com/leaflet-wind/dist/leaflet-wind.js | https://cdn.jsdelivr.net/npm/leaflet-wind/dist/leaflet-wind.js |
-| [@sakitam-gis/mapbox-wind](https://cdn.jsdelivr.net/npm/@sakitam-gis/mapbox-wind/dist/) | https://unpkg.com/@sakitam-gis/mapbox-wind/dist/mapbox-wind.js | https://cdn.jsdelivr.net/npm/@sakitam-gis/mapbox-wind/dist/mapbox-wind.js |
+| [ol5-wind](https://cdn.jsdelivr.net/npm/ol5-wind/dist/)                                                                                      | https://unpkg.com/ol5-wind/dist/ol-wind.js | https://cdn.jsdelivr.net/npm/ol5-wind/dist/ol-wind.js |
+| [openlayers-wind](https://cdn.jsdelivr.net/npm/openlayers-wind/dist/)                                                                        | https://unpkg.com/openlayers-wind/dist/ol-wind.js | https://cdn.jsdelivr.net/npm/openlayers-wind/dist/ol-wind.js |
+| [@sakitam-gis/maptalks-wind](https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/)                                                  | https://unpkg.com/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js | https://cdn.jsdelivr.net/npm/@sakitam-gis/maptalks-wind/dist/maptalks-wind.js |
+| [amap-wind](https://cdn.jsdelivr.net/npm/amap-wind/dist/)                                                                                    | https://unpkg.com/amap-wind/dist/amap-wind.js | https://cdn.jsdelivr.net/npm/amap-wind/dist/amap-wind.js |
+| [bmap-wind](https://cdn.jsdelivr.net/npm/bmap-wind/dist/)                                                                                    | https://unpkg.com/bmap-wind/dist/bmap-wind.js | https://cdn.jsdelivr.net/npm/bmap-wind/dist/bmap-wind.js |
+| [leaflet-wind](https://cdn.jsdelivr.net/npm/leaflet-wind/dist/)                                                                              | https://unpkg.com/leaflet-wind/dist/leaflet-wind.js | https://cdn.jsdelivr.net/npm/leaflet-wind/dist/leaflet-wind.js |
+| [@sakitam-gis/mapbox-wind](https://cdn.jsdelivr.net/npm/@sakitam-gis/mapbox-wind/dist/)                                                      | https://unpkg.com/@sakitam-gis/mapbox-wind/dist/mapbox-wind.js | https://cdn.jsdelivr.net/npm/@sakitam-gis/mapbox-wind/dist/mapbox-wind.js |
+| [@sakitam-gis/maplibre-wind](https://cdn.jsdelivr.net/npm/@sakitam-gis/maplibre-wind/dist/)                                                    | https://unpkg.com/@sakitam-gis/maplibre-wind/dist/maplibre-wind.js | https://cdn.jsdelivr.net/npm/@sakitam-gis/maplibre-wind/dist/maplibre-wind.js |
 
 ## 基础
 
@@ -274,9 +283,6 @@ yarn add @sakitam-gis/mapbox-wind
   fetch('data.json')
     .then(res => res.json())
     .then(res => {
-      // const range = vectorField.range || [0.02, 28.21618329965979];
-      // const scale = chroma.scale('OrRd').domain(range);
-
       const windLayer = new MaptalksWind.WindLayer('wind', res, {
         windOptions: {
           // colorScale: (m) => {
@@ -342,74 +348,7 @@ grib2json -d -n -o current-wind-surface-level-gfs-1.0.json gfs.t00z.pgrb2.1p00.f
 cp current-wind-surface-level-gfs-1.0.json <earth-git-repository>/public/data/weather/current
 ```
 
-## 使用node服务获取数据
-
-> 默认运行在3000端口, 使用koa2构建。
-目前仅抓取少量数据, 全部数据数据量过大会造成抓取时间过长和转换失败。
-
-```bash
-npm run start // 调试环境启动服务
-npm run prd:server // 部署环境启动服务
-```
-
-### 目前共暴露7个接口
-
-| url | params | desc |
-| :--- | :--- | :---------- |
-| `autofetch` | `null` | 无需参数，开启自动抓取程序，默认30分钟抓取一次数据源 |
-| `stopautofetch` | `null` | 停止自动抓取程序 |
-| `getdata` | `Object` (目前只支持`time` 参数，时间戳) | 获取json数据，存在转换过的直接返回，若只存在元数据则转换后返回，若元数据也不存在则抓取转换后再响应 |
-| `gribdata` | `Object` (目前只支持`time` 参数，时间戳) | 获取grib2数据（强制抓取数据） |
-| `getSourceTree` | `null` | 无需参数，获取抓取的数据源 `grib2` 源数据。返回一个list，包含文件名和服务器地址。 |
-| `getParseTree` | `null` | 无需参数，获取转换后的 `json` 数据。返回一个list，包含文件名和服务器地址。 |
-| `getDataByFileName` | `{ filename }` | 通过文件名请求 `json` 数据，文件名可为源数据文件和json文件名 |
-
-## 使用Docker
-
-### 简单运行
-
-> 如果想简单的运行一下看看，可以执行这个命令：
-
-```bash
-docker run -d -p 8080:3333 sakitamclone/wind-server:latest
-```
-
-启动后就可以通过主机的 8080 端口看到运行结果了，比如用的是本机 Docker 的话，访问：http://localhost:8080 即可。
-
-测试结束后，彻底清除容器可以用命令：
-
-```bash
-docker rm -fv <容器ID>
-```
-
-这样可以停止、删除容器，并清除数据。
-
-### 使用 DockerCompose
-
-新建文件 ``docker-compose.yml``, 内容如下：
-
-```yaml
-version: '3'
-
-services:
-  wind-server:
-    image: sakitamclone/wind-server:latest
-    build:
-      context: ./
-      args:
-        NODE_ENV: development
-    hostname: wind-server
-    environment:
-      - CORS_ORIGIN=****
-    ports:
-      - "8080:3333"
-
-volumes:
-  yarn:
-
-```
-
-然后使用命令 docker-compose up -d 来启动，停止服务使用 docker-compose down。
+对于 2.x 版本的数据格式我们可以使用 https://github.com/sakitam-gis/raster-process 来生成所需要的瓦片和单张图片。
 
 ## Acknowledgments
 

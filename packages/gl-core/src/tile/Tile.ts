@@ -164,22 +164,23 @@ export default class Tile {
       this.geometries.set(
         passId,
         new Geometry(renderer, {
-        position: {
-          size: 3,
-          data: new Float32Array(position),
-        },
-        normal: {
-          size: 3,
-          data: new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]),
-        },
-        uv: {
-          size: 2,
-          data: new Float32Array([0, 1, 1, 1, 0, 0, 1, 0]),
-        },
-        index: {
-          data: new Uint16Array([0, 2, 1, 2, 3, 1]),
-        },
-      }));
+          position: {
+            size: 3,
+            data: new Float32Array(position),
+          },
+          normal: {
+            size: 3,
+            data: new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]),
+          },
+          uv: {
+            size: 2,
+            data: new Float32Array([0, 1, 1, 1, 0, 0, 1, 0]),
+          },
+          index: {
+            data: new Uint16Array([0, 2, 1, 2, 3, 1]),
+          },
+        }),
+      );
     }
 
     return this.geometries.get(passId);
@@ -188,6 +189,8 @@ export default class Tile {
   /**
    * 创建 `TileMesh`
    * @param passId 在多个 render pass 共享 tile 时我们可能需要针对多个 pass 创建渲染资源
+   * 在 mapbox 这种共享 gl 上下文的一般我们不需要重建，但是对于 maptalks 这种每个图层一个 gl
+   * 上下文的我们需要针对每个 gl上下文绑定资源
    * @param bbox
    * @param renderer
    * @param program

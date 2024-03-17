@@ -1,13 +1,13 @@
-# `mapbox-wind`
+# `maplibre-wind`
 
-> [mapbox-gl](https://mapbox.com) wind layer adapter
+> [maplibre-gl](https://maplibre.org/) wind layer adapter
 
 ## Usage
 
 ### Install
 
 ```bash
-pnpm i @sakitam-gis/mapbox-wind -S
+pnpm i @sakitam-gis/maplibre-wind -S
 ```
 
 ## Example
@@ -15,7 +15,7 @@ pnpm i @sakitam-gis/mapbox-wind -S
 ### raster
 
 ```js
-const source = new mapboxWind.TileSource('carto', {
+const source = new maplibreWind.TileSource('carto', {
     tileSize: 256,
     minZoom: 0,
     maxZoom: 22,
@@ -31,7 +31,7 @@ const source = new mapboxWind.TileSource('carto', {
     wrapX: true,
 });
 
-const layer = new mapboxWind.Layer('carto', source, {
+const layer = new maplibreWind.Layer('carto', source, {
     styleSpec: {
       'opacity': [
         'interpolate',
@@ -43,7 +43,7 @@ const layer = new mapboxWind.Layer('carto', source, {
         1
       ],
     },
-    renderType: mapboxWind.RenderType.image,
+    renderType: maplibreWind.RenderType.image,
 });
 
 map.addLayer(layer);
@@ -52,18 +52,18 @@ map.addLayer(layer);
 ### colorize
 
 ```js
-const tileSource = new mapboxWind.TileSource('wind', {
+const tileSource = new maplibreWind.TileSource('wind', {
   tileSize: 256,
   minZoom: 0,
   maxZoom: 4,
   roundZoom: true,
-  decodeType: mapboxWind.DecodeType.imageWithExif,
+  decodeType: maplibreWind.DecodeType.imageWithExif,
   wrapX: true,
   // tileBounds: [-78.120282611, -75.191804486, 132.453327310, 68.846393966],
   url: 'http://localhost:5000/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
 });
 
-const layer = new mapboxWind.Layer('wind', tileSource, {
+const layer = new maplibreWind.Layer('wind', tileSource, {
   styleSpec: {
     'fill-color': [
       'interpolate',
@@ -73,16 +73,16 @@ const layer = new mapboxWind.Layer('wind', tileSource, {
     ],
     'opacity': 1,
   },
-  renderFrom: mapboxWind.RenderFrom.rg,
+  renderFrom: maplibreWind.RenderFrom.rg,
   widthSegments: 1,
   heightSegments: 1,
   displayRange: [0, 104],
-  renderType: mapboxWind.RenderType.colorize,
+  renderType: maplibreWind.RenderType.colorize,
   picking: true,
   // mask: {
   //   data: clip,
-  //   // type: mapboxWind.MaskType.outside,
-  //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+  //   // type: maplibreWind.MaskType.outside,
+  //   type: maplibreWind.MaskType.inside, // 默认是 inside，即只显示范围内的
   // }
 });
 
@@ -92,18 +92,18 @@ map.addLayer(layer);
 ### particles
 
 ```js
-const tileSource = new mapboxWind.TileSource('wind', {
+const tileSource = new maplibreWind.TileSource('wind', {
   tileSize: 256,
   minZoom: 0,
   maxZoom: 4,
   roundZoom: true,
-  decodeType: mapboxWind.DecodeType.imageWithExif,
+  decodeType: maplibreWind.DecodeType.imageWithExif,
   wrapX: true,
   // tileBounds: [-78.120282611, -75.191804486, 132.453327310, 68.846393966],
   url: 'http://localhost:5000/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
 });
 
-const layer = new mapboxWind.Layer('wind', tileSource, {
+const layer = new maplibreWind.Layer('wind', tileSource, {
   styleSpec: {
     'fill-color': [
       'interpolate',
@@ -132,13 +132,13 @@ const layer = new mapboxWind.Layer('wind', tileSource, {
     ],
     ...particlesConfig,
   },
-  renderFrom: mapboxWind.RenderFrom.rg,
+  renderFrom: maplibreWind.RenderFrom.rg,
   displayRange: [0, 104],
-  renderType: mapboxWind.RenderType.particles,
+  renderType: maplibreWind.RenderType.particles,
   // mask: {
   //   data: clip,
-  //   // type: mapboxWind.MaskType.outside,
-  //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+  //   // type: maplibreWind.MaskType.outside,
+  //   type: maplibreWind.MaskType.inside, // 默认是 inside，即只显示范围内的
   // }
 });
 
@@ -148,18 +148,18 @@ map.addLayer(layer);
 ### arrow
 
 ```js
-const tileSource = new mapboxWind.TileSource('wind', {
+const tileSource = new maplibreWind.TileSource('wind', {
   tileSize: 256,
   minZoom: 0,
   maxZoom: 4,
   roundZoom: true,
-  decodeType: mapboxWind.DecodeType.imageWithExif,
+  decodeType: maplibreWind.DecodeType.imageWithExif,
   wrapX: true,
   // tileBounds: [-78.120282611, -75.191804486, 132.453327310, 68.846393966],
   url: 'http://localhost:5000/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
 });
 
-const layer = new mapboxWind.Layer('wind', tileSource, {
+const layer = new maplibreWind.Layer('wind', tileSource, {
   styleSpec: {
     'fill-color': [
       'interpolate',
@@ -173,13 +173,13 @@ const layer = new mapboxWind.Layer('wind', tileSource, {
     space: 20,
     size: [12, 10],
   },
-  renderFrom: mapboxWind.RenderFrom.rg,
+  renderFrom: maplibreWind.RenderFrom.rg,
   displayRange: [0, 104],
-  renderType: mapboxWind.RenderType.arrow,
+  renderType: maplibreWind.RenderType.arrow,
   // mask: {
   //   data: clip,
-  //   // type: mapboxWind.MaskType.outside,
-  //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+  //   // type: maplibreWind.MaskType.outside,
+  //   type: maplibreWind.MaskType.inside, // 默认是 inside，即只显示范围内的
   // }
 });
 
@@ -195,4 +195,3 @@ map.addLayer(layer);
 3. TimelineSource：时序数据源
 
 以上三类仅仅是数据源不同，图层使用方式是一致的
-

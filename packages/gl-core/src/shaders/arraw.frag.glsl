@@ -21,8 +21,6 @@ varying float v_body;
 varying float v_antialias;
 varying float v_linewidth;
 
-#include <mercatorToWGS84>
-
 vec4 calcTexture(const vec2 puv) {
     vec4 color0 = texture2D(u_texture, puv);
     vec4 color1 = texture2D(u_textureNext, puv);
@@ -98,9 +96,6 @@ float arrow_stealth(vec2 texcoord, float body, float head, float linewidth, floa
 
 void main() {
     vec2 uv = vUv;
-    #ifdef USE_WGS84
-    uv = mercatorToWGS84(vUv);
-    #endif
     if(calcTexture(uv).a == 0.0 || v_speed < 0.0) {
         discard;
     }

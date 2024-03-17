@@ -11,6 +11,7 @@ createTypeDocApp({
     path.resolve(__dirname, '../../packages/gl-core/src/index.ts'),
     path.resolve(__dirname, '../../packages/maptalks/src/index.ts'),
     path.resolve(__dirname, '../../packages/mapbox-gl/src/index.ts'),
+    path.resolve(__dirname, '../../packages/maplibre-gl/src/index.ts'),
     path.resolve(__dirname, '../../packages/src/src/index.ts'),
     path.resolve(__dirname, '../../packages/ol5/src/index.ts'),
     path.resolve(__dirname, '../../packages/openlayers/src/index.ts'),

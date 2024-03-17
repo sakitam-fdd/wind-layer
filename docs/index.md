@@ -7,7 +7,7 @@ titleTemplate: 风场插件
 hero:
   name: wind-layer
   text: Visualization library of meteorological data.
-  tagline: a maptalks / mapbox-gl / leaflet / openlayers / bmap / amap extension to show grib data.
+  tagline: a maptalks / mapbox-gl / maplibre-gl / leaflet / openlayers / bmap / amap extension to show grib data.
   actions:
     - theme: brand
       text: Get Started / 开始
