@@ -1,6 +1,6 @@
 {
   "name": "ol-wind",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "ol wind",
   "keywords": [
     "openlayers",
@@ -72,7 +72,7 @@
   },
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
   "dependencies": {
-    "wind-core": "^1.1.4"
+    "wind-core": "^1.1.5"
   },
   "peerDependencies": {
     "ol": ">=6.0.0"

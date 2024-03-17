@@ -1,5 +1,11 @@
 # wind-core
 
+## 1.1.5
+
+### Patch Changes
+
+- [`515d3dc`](https://github.com/sakitam-fdd/wind-layer/commit/515d3dcdc94432b783d3d08a7079d3cc1d722a5f) Thanks [@sakitam-fdd](https://github.com/sakitam-fdd)! - release: bump version
+
 ## 1.1.4
 
 ### Patch Changes
