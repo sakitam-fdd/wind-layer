@@ -181,20 +181,28 @@ class VeRenderer extends maptalks.renderer.CanvasLayerRenderer {
           height,
           depth: false,
         });
-        this.context.render({
-          camera: this.camera,
-          scene: this.scene,
-          target: this.#renderTarget,
-        });
       } else {
         this.#renderTarget.resize(width, height);
       }
+
+      this.layer.layer?.prerender(
+        {
+          camera: this.camera,
+          planeCamera: this.planeCamera,
+        },
+        // this.#renderTarget,
+      );
+
       this.#renderTarget.swapHandle(context.renderTarget.getFramebuffer(context.renderTarget.fbo));
-      this.context.render({
-        camera: this.camera,
-        scene: this.scene,
-        target: this.#renderTarget,
-      });
+
+      this.layer.layer?.render(
+        {
+          camera: this.camera,
+          planeCamera: this.planeCamera,
+        },
+        this.#renderTarget,
+      );
+
       this.#renderTarget.restoreHandle();
     } else {
       this.layer.layer?.prerender({

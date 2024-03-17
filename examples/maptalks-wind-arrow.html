@@ -21,6 +21,7 @@
 
 <div id="map" class="container"></div>
 <script src="https://unpkg.com/maptalks/dist/maptalks.js"></script>
+<script src="https://unpkg.com/@maptalks/gl/dist/maptalksgl.js"></script>
 <script src="https://unpkg.com/axios/dist/axios.js"></script>
 <script src="https://unpkg.com/dat.gui@0.7.6/build/dat.gui.js"></script>
 <script src="../packages/maptalks/dist/maptalks-wind.js"></script>
@@ -121,11 +122,6 @@
     displayRange: [0, 104],
     renderType: mtkWind.RenderType.colorize,
     picking: true,
-    // mask: {
-    //   data: clip,
-    //   // type: mapboxWind.MaskType.outside,
-    //   type: mapboxWind.MaskType.inside, // 默认是 inside，即只显示范围内的
-    // }
   });
 
   const arrow = new mtkWind.Layer('arrow', tileSource, {
@@ -154,7 +150,25 @@
   });
 
   // map.addLayer(layer);
-  map.addLayer(arrow);
+  // map.addLayer(arrow);
+
+  fetch('./data/china.geojson').then(res => res.json()).then(clip => {
+    layer.setClipMask({
+      data: clip,
+      // type: mtkWind.MaskType.outside,
+      type: mtkWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+    })
+  });
+
+  const sceneConfig = {
+    postProcess: {
+      enable: true,
+      antialias: { enable: true },
+    },
+  };
+
+  const groupLayer = new maptalksgl.GroupGLLayer('group', [layer, arrow], { sceneConfig });
+  groupLayer.addTo(map);
 </script>
 </body>
 </html>
