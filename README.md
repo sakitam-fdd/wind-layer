@@ -37,17 +37,11 @@ extension to show wind field。
 
 https://github.com/sakitam-fdd/wind-layer/assets/19517451/b36b7eea-c647-42ed-91a4-e1f182d0343c
 
-https://sakitam-fdd.github.io/wind-layer/wind-animation.mp4
-
 https://github.com/sakitam-fdd/wind-layer/assets/19517451/bf27d98e-68ed-4f9c-b1e4-812764665bff
 
-https://sakitam-fdd.github.io/wind-layer/particles.mp4
-
-https://sakitam-fdd.github.io/wind-layer/arrow.mp4
+https://github.com/sakitam-fdd/wind-layer/assets/19517451/90542837-b80c-450e-857d-4df6f52b6a49
 
 https://github.com/sakitam-fdd/wind-layer/assets/19517451/064f0ea4-f72f-4e9a-80e7-7a0097f60013
-
-https://sakitam-fdd.github.io/wind-layer/particles-poc.mp4
 
 ## 示例图片
 

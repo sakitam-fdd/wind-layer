@@ -152,7 +152,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
         }
 
         mesh.draw({
-          ...utils.omit(rendererParams, ['target']),
+          ...rendererParams,
           camera,
         });
       }

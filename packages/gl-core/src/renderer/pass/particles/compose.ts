@@ -1,4 +1,4 @@
-import { Program, Renderer, RenderTarget, utils } from '@sakitam-gis/vis-engine';
+import { Program, Renderer, RenderTarget } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import vert from '../../../shaders/common.vert.glsl';
 import frag from '../../../shaders/compose.frag.glsl';
@@ -246,7 +246,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
         }
 
         mesh.draw({
-          ...utils.omit(rendererParams, ['target']),
+          ...rendererParams,
           camera,
         });
       }

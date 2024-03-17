@@ -733,12 +733,13 @@ export default class BaseLayer {
     return pickerPass.render(undefined, undefined, pixel);
   }
 
-  prerender(cameras) {
+  prerender(cameras, renderTarget?: any) {
     if (this.renderPipeline) {
       this.renderPipeline.prerender(
         {
           scene: this.scene,
           cameras,
+          ...(renderTarget ? { target: renderTarget } : {}),
         },
         {
           zoom: this.options?.getZoom?.() ?? 0,
@@ -763,7 +764,7 @@ export default class BaseLayer {
     }
   }
 
-  render(cameras) {
+  render(cameras, renderTarget?: any) {
     if (this.renderPipeline) {
       const state: any = {
         zoom: this.options?.getZoom?.() ?? 0,
@@ -791,6 +792,7 @@ export default class BaseLayer {
         {
           scene: this.scene,
           cameras,
+          ...(renderTarget ? { target: renderTarget } : {}),
         },
         state,
       );

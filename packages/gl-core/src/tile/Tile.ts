@@ -68,7 +68,7 @@ export default class Tile {
 
   public tileMeshs: Map<string, TileMesh> = new Map();
 
-  public geometry: Geometry;
+  public geometries: Map<string, Geometry> = new Map<string, Geometry>();
 
   request: Map<string, any>;
 
@@ -131,13 +131,14 @@ export default class Tile {
 
   /**
    * 更新瓦片顶点信息
+   * @param passId
    * @param bbox
    * @param renderer
    * @param force
    */
-  updateGeometry(bbox: ProjTileBounds, renderer: Renderer, force?: boolean) {
+  updateGeometry(passId: string, bbox: ProjTileBounds, renderer: Renderer, force?: boolean) {
     this.tileBounds = bbox;
-    if (!this.geometry || force) {
+    if (!this.geometries.get(passId) || force) {
       const position = [
         this.tileBounds.left,
         this.tileBounds.top,
@@ -160,7 +161,9 @@ export default class Tile {
         position[i + 1] = position[i + 1] - this.tileCenter[1];
         position[i + 2] = position[i + 2] - this.tileCenter[2];
       }
-      this.geometry = new Geometry(renderer, {
+      this.geometries.set(
+        passId,
+        new Geometry(renderer, {
         position: {
           size: 3,
           data: new Float32Array(position),
@@ -176,15 +179,15 @@ export default class Tile {
         index: {
           data: new Uint16Array([0, 2, 1, 2, 3, 1]),
         },
-      });
+      }));
     }
 
-    return this.geometry;
+    return this.geometries.get(passId);
   }
 
   /**
    * 创建 `TileMesh`
-   * @param passId
+   * @param passId 在多个 render pass 共享 tile 时我们可能需要针对多个 pass 创建渲染资源
    * @param bbox
    * @param renderer
    * @param program
@@ -197,8 +200,9 @@ export default class Tile {
     program: Program,
     force?: boolean,
   ) {
-    const geometry = this.updateGeometry(bbox, renderer, force);
+    const geometry = this.updateGeometry(passId, bbox, renderer, force);
     if (!this.tileMeshs.get(passId) || force) {
+      this.uses++;
       const uid = passId + '_' + this.tileID.tileKey;
       const tileMesh = new TileMesh(uid, renderer, program, geometry);
       tileMesh.setCenter(this.tileCenter);
@@ -304,9 +308,13 @@ export default class Tile {
       }
     }
     this.#textures.clear();
-    if (this.geometry) {
-      this.geometry.destroy();
+
+    for (const [, value] of this.geometries) {
+      if (value) {
+        value?.destroy();
+      }
     }
+
     for (const [, value] of this.tileMeshs) {
       if (value) {
         value?.destroy();

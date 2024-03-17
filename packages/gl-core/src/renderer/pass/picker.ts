@@ -16,7 +16,7 @@ export interface PickerPassOptions {
  * picking
  */
 export default class PickerPass extends Pass<PickerPassOptions> {
-  readonly prerender = false;
+  readonly prerender = true;
 
   #program: WithNull<Program>;
   #mesh: WithNull<Mesh>;

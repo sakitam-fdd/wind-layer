@@ -17,7 +17,7 @@ export interface MaskPassOptions {
  */
 export default class MaskPass extends Pass<MaskPassOptions> {
   readonly #program: Program;
-  readonly prerender = false;
+  readonly prerender = true;
 
   #meshes: Mesh[];
 
