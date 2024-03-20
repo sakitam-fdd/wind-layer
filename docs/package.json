@@ -1,11 +1,40 @@
 {
   "name": "docs",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "api": "node scripts/generate-docs.js"
+    "api": "node scripts/generate-docs.js",
+    "dev": "vitepress dev --base /",
+    "build": "vitepress build --base /wind-layer/",
+    "serve": "vitepress serve docs"
   },
   "dependencies": {
+    "@sakitam-gis/vitepress-playground": "^1.1.2",
+    "@sakitam-gis/maptalks-wind": "workspace:*",
+    "@sakitam-gis/mapbox-wind": "workspace:*",
+    "@sakitam-gis/maplibre-wind": "workspace:*",
+    "@vue/repl": "^4.1.1",
+    "mapbox-gl": "^2.15.0",
+    "maplibre-gl": "^4.1.1",
+    "ol": "^6.15.1",
+    "ol-wind": "workspace:*",
+    "leaflet": "^1.9.4",
+    "leaflet-wind": "workspace:*",
+    "maptalks": "^1.0.0-rc.33",
     "proj4": "^2.8.0",
-    "vitepress": "^1.0.0-alpha.22"
+    "tweakpane": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.26",
+    "@types/mapbox-gl": "^2.7.19",
+    "@types/proj4": "^2.5.5",
+    "@types/markdown-it": "latest",
+    "@vue/compiler-core": "^3.3.7",
+    "less": "^4.2.0",
+    "fs-extra": "^11.2.0",
+    "markdown-it": "^14.0.0",
+    "markdown-it-container": "^4.0.0",
+    "vitepress": "^1.0.0-rc.45",
+    "vue": "^3.3.7"
   }
 }

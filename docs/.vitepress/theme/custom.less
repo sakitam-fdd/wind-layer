@@ -1,0 +1,291 @@
+:root {
+  --vp-layout-max-width: 1920px;
+  scroll-behavior: smooth;
+}
+
+.content-container {
+  width: 90%;
+  max-width: 1440px !important;
+}
+
+@media (max-width: 600px) {
+  .content-container {
+    width: 100%;
+  }
+}
+@media (min-width: 1440px) and (max-width: 1919px) {
+  .VPSidebar {
+    padding-left: 32px !important;
+    width: auto !important;
+  }
+
+  .VPContent.has-sidebar {
+    padding-left: var(--vp-sidebar-width) !important;
+    padding-right: unset !important;
+  }
+
+  .VPNavBar.has-sidebar > .container > .content {
+    padding-left: var(--vp-sidebar-width) !important;
+    padding-right: 32px !important;
+  }
+
+  .VPNavBar.has-sidebar .curtain {
+    width: calc(100% - var(--vp-sidebar-width) - 32px) !important;
+  }
+
+  .VPNavBar.has-sidebar > .container > .title {
+    width: var(--vp-sidebar-width) !important;
+  }
+}
+
+.heroDemos {
+  padding: 0 24px;
+  margin-top: 48px;
+}
+
+.heroDemos > .container {
+  margin: 0 auto;
+  max-width: 1152px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2em;
+}
+
+@media (min-width: 640px) {
+  .heroDemos {
+    padding: 0 48px;
+  }
+}
+
+@media (min-width: 960px) {
+  .heroDemos {
+    padding: 0 64px;
+  }
+}
+
+.heroDemos .playground {
+  width: calc(50% - 1em);
+}
+
+.heroDemos .playground > iframe {
+  border-radius: 0;
+}
+
+@media (max-width: 499px) {
+  .heroDemos .playground {
+    width: 100%;
+  }
+  .heroDemos .playground + .playground {
+    margin-left: 0;
+  }
+}
+
+.VPHome {
+  padding-bottom: 36px !important;
+}
+
+.vp-doc p {
+  text-align: justify;
+}
+
+.vp-doc table {
+  width: 100%;
+  display: table;
+  table-layout: auto;
+}
+
+thead,
+tbody {
+  width: 100%;
+}
+
+tr {
+  width: 100%;
+}
+
+td,
+th {
+  max-width: 50%;
+  overflow: auto;
+  word-break: normal;
+}
+
+td > code {
+  word-break: normal;
+}
+
+#type-alias-engineconfig ~ table {
+  table-layout: fixed;
+}
+
+#docs-core ~ ul {
+  list-style-type: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 2em;
+}
+
+#docs-core ~ ul > li {
+  width: calc(33% - 2em);
+  display: flex;
+  margin-top: 8px;
+}
+
+#docs-core ~ ul > li > a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aside-curtain {
+  display: none;
+}
+
+.VPNavBar .VPNavBarTranslations svg.option-icon {
+  margin-right: 2.5em;
+}
+
+.VPNavBar .VPNavBarTranslations > .button > .text::after {
+  content: '中文';
+  position: absolute;
+  left: 3.5em;
+}
+
+.VPNavBar .VPLink > svg {
+  pointer-events: none;
+}
+
+.vp-doc {
+  div.fold[class*="language-"] {
+    overflow: unset;
+    margin-bottom: var(--codeblocks-margin-bottom);
+
+    > .line-numbers-wrapper {
+      overflow: hidden;
+    }
+
+    > .codeblocks-mask {
+      display: block;
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: 48px;
+      width: 100%;
+      z-index: 9;
+      pointer-events: none;
+    }
+
+    > .fold-btn {
+      display: flex;
+      position: absolute;
+      left: 0;
+      bottom: -36px;
+      height: 36px;
+      width: 100%;
+      z-index: 9;
+      border-radius: 0 0 8px 8px;
+      cursor: pointer;
+      user-select: none;
+      justify-content: center;
+      align-items: center;
+
+      > svg.fold-btn-icon {
+        animation: float1 infinite .8s;
+
+        &.turn {
+          animation: float2 infinite .8s;
+        }
+      }
+
+      @keyframes float1 {
+        0% {
+          transform: translateY(0px)
+        }
+        50% {
+          transform: translateY(-5px)
+        }
+        100% {
+          transform: translateY(0px)
+        }
+      }
+      @keyframes float2 {
+        0% {
+          transform: translateY(0px) rotate(180deg)
+        }
+        50% {
+          transform: translateY(-5px) rotate(180deg)
+        }
+        100% {
+          transform: translateY(0px) rotate(180deg)
+        }
+      }
+    }
+  }
+
+  /* 设置全局滚动条样式 */
+  pre.shiki {
+    /*--ms-滚动条--*/
+    scrollbar-width: auto !important;
+    scrollbar-color: transparent transparent !important;
+
+    /*-webkit-滚动条*/
+    &::-webkit-scrollbar {
+      width: 4px !important;
+      height: 4px !important;
+      background-color: transparent;
+    }
+
+    /*-webkit-滑块*/
+    &::-webkit-scrollbar-thumb {
+      height: 10px !important;
+      outline-offset: 0 !important;
+      outline: unset !important;
+      border-radius: 2px !important;
+      border: 1px transparent solid !important;
+      background-color: transparent !important;
+    }
+
+    /*-webkit-滑块hover效果*/
+    &::-webkit-scrollbar-thumb:hover {
+      height: 10px !important;
+      border-radius: 2px !important;
+      background-color: transparent !important;
+    }
+
+    /*-webkit-滚动框*/
+    &::-webkit-scrollbar-track-piece {
+      -webkit-border-radius: 0 !important;
+      background-color: transparent !important;
+    }
+
+    /* -webkit-滑轨 */
+    &::-webkit-scrollbar-track {
+      right: 0 !important;
+      background-color: transparent !important;
+    }
+
+    /* -webkit-滑轨两头的按钮 */
+    &::-webkit-scrollbar-button {
+    // display: none;
+      height: 4px !important;
+      width: 4px !important;
+      background-color: transparent !important;
+    }
+
+    /* -webkit-边角 */
+    &::-webkit-scrollbar-corner {
+      background-color: transparent !important;
+    }
+  }
+}
+
+.gui-panel {
+  position: absolute;
+  z-index: 1;
+}
+
+.playground-content {
+  width: 100%;
+  height: 450px;
+}

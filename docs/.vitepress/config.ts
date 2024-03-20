@@ -1,12 +1,43 @@
 import { defineConfig } from 'vitepress';
-// import container from 'markdown-it-container';
+import path from 'path';
+import { readFileSync, readdirSync, statSync } from 'fs';
+import { applyPlugins } from './plugins/md';
+
+type SidebarItem = {
+  text: string;
+  collapsible?: boolean;
+  collapsed?: boolean;
+  items: {
+    text: string;
+    link: string;
+    items?: { text: string; link: string }[];
+  }[];
+}[];
 
 function nav() {
   return [
     { text: 'Guide', link: '/guide/getting-started', activeMatch: '/guide/' },
-    { text: 'Api', link: '/api/index', activeMatch: '/api/' },
     {
-      text: 'v1.0.0',
+      text: 'Playgrounds',
+      link: '/playgrounds/mapbox-gl/raster/sample',
+      target: '',
+      activeMatch: '/playgrounds/',
+    },
+    {
+      text: 'Api',
+      items: [
+        {
+          text: 'wind-layer',
+          items: [
+            { text: 'all', link: '/api/' },
+            { text: 'gl-core', link: '/api/modules/gl_core_src' },
+            { text: 'mapbox-gl 插件', link: '/api/modules/mapbox_gl_src' },
+          ],
+        },
+      ],
+    },
+    {
+      text: 'v2.x',
       items: [
         {
           text: 'Changelog',
@@ -47,11 +78,6 @@ function sidebarGuide() {
         { text: 'bmap', link: '/guide/bmap' }
       ]
     },
-  ]
-}
-
-function sidebarConfig() {
-  return [
   ]
 }
 
@@ -96,54 +122,122 @@ const renderPermalink = (slug, opts, state, permalink) => {
   } catch (e) {}
 }
 
-// const markDownPlugin = function (md) {
-//   md.use(container, 'demo', {
-//     validate(params) {
-//       return params.trim().match(/^demo\s*(.*)$/);
-//     },
-//     render(tokens, idx) {
-//       const m = tokens[idx].info.trim().match(/^demo\s*(.*)$/);
-//       if (tokens[idx].nesting === 1) {
-//         const description = m && m.length > 1 ? m[1] : '';
-//         const content = tokens[idx + 1].type === "fence" ? tokens[idx + 1].content : '';
-//
-//         return `
-//         <clientOnly>
-//           <Common-DemoBlock>
-//             ${description ? `<div>${md.render(description).html}</div>` : ''}
-//             <!--demo-block: ${md.utils.escapeHtml(content)} :demo-block-->
-//         `;
-//       }
-//       return `</Common-DemoBlock></clientOnly>`;
-//     },
-//   });
-// };
+function getSidebarItems(dir: string[], currentRoot: string | undefined, root: string | undefined): any[] {
+  return dir
+    .filter((e) => e.endsWith('.md') || statSync(path.resolve(currentRoot ?? '/', e)).isDirectory())
+    .map((e: string) => {
+      const childDir = path.resolve(currentRoot ?? '/', e);
+      if (statSync(childDir).isDirectory()) {
+        const items = getSidebarItems(readdirSync(childDir), childDir, root);
+        const fileName = e.split('/').pop() ?? '';
+        return items.length
+          ? {
+            text: (fileName.charAt(0).toUpperCase() + fileName.slice(1)).replaceAll('-', ' '),
+            collapsible: true,
+            collapsed: true,
+            items,
+          }
+          : null!;
+      }
+      if (e.endsWith('.md') && e[0] !== '_') {
+        return {
+          text: (e.charAt(0).toUpperCase() + e.slice(1)).slice(0, -3).replaceAll('-', ' '),
+          link: childDir.replace(root ?? '', ''),
+        };
+      }
+      return null!;
+    })
+    .filter((i) => !!i);
+}
+
+function autoSidebar(dirs: string[]): SidebarItem[] {
+  const root = path.join(process.cwd(), '/');
+
+  return getSidebarItems(dirs, root, root);
+}
+
+function sidebar(root = '', packages: string) {
+  const index: { [key: string]: { text: string; link: string }[] } = {};
+  const mds = readFileSync(`${__dirname}/../${packages}/index.md`, 'utf-8').match(/.*.(\n|\r)/g) as string[];
+  let lastTitle = '';
+  for (const line of mds) {
+    if (line.match(/# @/)) continue;
+    else if (line.match(/##\s\w+/)) {
+      lastTitle = line.slice(3, -1).trim();
+      index[lastTitle] = [];
+    } else {
+      const text = line.match(/\w+/);
+      const md = line.match(/\w+\/\w+\.md/);
+      if (md && text) {
+        index[lastTitle].push({
+          text: text[0],
+          link: `${root}/${packages}/${md[0]}`,
+        });
+      }
+    }
+  }
+
+  const s: SidebarItem = [
+    {
+      text: 'Packages',
+      items: [
+        {
+          text: '@sakitam-gis/core',
+          link: '/core/',
+        },
+      ],
+    },
+  ];
+  for (const i in index) {
+    s.push({
+      text: i,
+      collapsible: true,
+      collapsed: false,
+      items: index[i],
+    });
+  }
+
+  return s;
+}
 
 export default defineConfig({
-  base: '/wind-layer/',
-  lang: 'en-US',
+  lang: 'zh',
   title: 'wind-layer',
   description: 'wind-layer & vis grib data library.',
-
   lastUpdated: true,
-  cleanUrls: 'without-subfolders',
-
-  head: [['meta', { name: 'theme-color', content: '#3c8772' }]],
-
+  ignoreDeadLinks: true,
+  appearance: 'dark',
+  head: [
+    [
+      'meta',
+      {
+        name: 'viewport',
+        content: 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no',
+      },
+    ],
+    ['meta', { name: 'mobile-web-app-capable', content: 'yes' }],
+    ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
+    ['link', { rel: 'apple-touch-icon', href: '/images/icons/icon-512.png' }],
+    ['meta', { name: 'theme-color', content: '#242424' }],
+    ['link', { rel: 'manifest', href: '/manifest.json' }],
+  ],
+  locales: {
+    root: { label: '简体中文' },
+    en: { label: 'English', link: '' },
+  },
   markdown: {
+    config: (md) => {
+      applyPlugins(md);
+    },
+    lineNumbers: true,
     anchor: {
       permalink: renderPermalink,
     },
+    theme: {
+      light: 'github-light',
+      dark: 'one-dark-pro',
+    },
   },
-
-  // markdown: {
-  //   headers: {
-  //     level: [0, 0]
-  //   },
-  //   config: (md) => {
-  //     md.use(markDownPlugin, {})
-  //   }
-  // },
 
   themeConfig: {
     editLink: {
@@ -153,21 +247,80 @@ export default defineConfig({
     nav: nav(),
     sidebar: {
       '/guide/': sidebarGuide(),
-      '/config/': sidebarConfig()
+      '/playgrounds/': autoSidebar(['playgrounds'])[0],
+      '/api/': sidebar('', 'api'),
     },
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright © 2022-present sakitam-fdd'
+      copyright: 'Copyright © 2022-Present <a href="mailto:smilefdd@gmail.com">sakitam-fdd</a>'
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/sakitam-fdd/wind-layer' }
+      { icon: 'github', link: 'https://github.com/sakitam-fdd/wind-layer' },
+      {
+        icon: {
+          svg: '',
+        },
+        link: 'mailto:smilefdd@gmail.com',
+      },
     ],
+    search: {
+      provider: 'algolia',
+      options: {
+        appId: '7HSJME72X5',
+        apiKey: 'b7a68c2706d9d2053ce96743b17c829b',
+        indexName: 'wind-layer',
+        searchParameters: {
+          facetFilters: ['tags:latest'],
+        },
+        placeholder: '搜索文档',
+        translations: {
+          button: {
+            buttonText: '搜索文档',
+            buttonAriaLabel: '搜索文档',
+          },
+          modal: {
+            searchBox: {
+              resetButtonTitle: '清除查询条件',
+              resetButtonAriaLabel: '清除查询条件',
+              cancelButtonText: '取消',
+              cancelButtonAriaLabel: '取消',
+            },
+            startScreen: {
+              recentSearchesTitle: '搜索历史',
+              noRecentSearchesText: '没有搜索历史',
+              saveRecentSearchButtonTitle: '保存至搜索历史',
+              removeRecentSearchButtonTitle: '从搜索历史中移除',
+              favoriteSearchesTitle: '收藏',
+              removeFavoriteSearchButtonTitle: '从收藏中移除',
+            },
+            errorScreen: {
+              titleText: '无法获取结果',
+              helpText: '你可能需要检查你的网络连接',
+            },
+            footer: {
+              selectText: '选择',
+              navigateText: '切换',
+              closeText: '关闭',
+              searchByText: '搜索提供者',
+            },
+            noResultsScreen: {
+              noResultsText: '无法找到相关结果',
+              suggestedQueryText: '你可以尝试查询',
+              reportMissingResultsText: '你认为该查询应该有结果？',
+              reportMissingResultsLinkText: '点击反馈',
+            },
+          },
+        },
+      },
+    },
+    lastUpdated: {
+      text: '最后更新',
+    },
 
-    algolia: {
-      appId: '7HSJME72X5',
-      apiKey: 'b7a68c2706d9d2053ce96743b17c829b',
-      indexName: 'wind-layer',
+    docFooter: {
+      prev: '上一篇',
+      next: '下一篇',
     },
   }
 })
