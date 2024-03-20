@@ -368,11 +368,11 @@ importers:
         version: link:../packages/ol
     devDependencies:
       vite:
-        specifier: ^3.2.4
-        version: 3.2.4(@types/node@18.11.2)(terser@5.15.1)
+        specifier: ^3.2.8
+        version: 3.2.8(@types/node@18.11.2)(terser@5.15.1)
       vite-plugin-html:
         specifier: ^3.2.0
-        version: 3.2.0(vite@3.2.4)
+        version: 3.2.0(vite@3.2.8)
 
 packages:
 
@@ -2823,14 +2823,14 @@ packages:
       eslint-visitor-keys: 3.3.0
     dev: true
 
-  /@vitejs/plugin-vue@3.2.0(vite@3.2.4)(vue@3.2.41):
+  /@vitejs/plugin-vue@3.2.0(vite@3.2.8)(vue@3.2.41):
     resolution: {integrity: sha512-E0tnaL4fr+qkdCNxJ+Xd0yM31UwMkQje76fsDVBBUCoGOUPexu2VDUYHL8P4CwV+zMvWw6nlRw19OnRKmYAJpw==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
       vite: ^3.0.0
       vue: ^3.2.25
     dependencies:
-      vite: 3.2.4(@types/node@18.11.2)(terser@5.15.1)
+      vite: 3.2.8(@types/node@18.11.2)(terser@5.15.1)
       vue: 3.2.41
 
   /@vitest/coverage-c8@0.22.1(jsdom@20.0.3)(terser@5.15.1):
@@ -9062,7 +9062,7 @@ packages:
       extsprintf: 1.3.0
     dev: true
 
-  /vite-plugin-html@3.2.0(vite@3.2.4):
+  /vite-plugin-html@3.2.0(vite@3.2.8):
     resolution: {integrity: sha512-2VLCeDiHmV/BqqNn5h2V+4280KRgQzCFN47cst3WiNK848klESPQnzuC3okH5XHtgwHH/6s1Ho/YV6yIO0pgoQ==}
     peerDependencies:
       vite: '>=2.0.0'
@@ -9079,11 +9079,11 @@ packages:
       html-minifier-terser: 6.1.0
       node-html-parser: 5.4.2
       pathe: 0.2.0
-      vite: 3.2.4(@types/node@18.11.2)(terser@5.15.1)
+      vite: 3.2.8(@types/node@18.11.2)(terser@5.15.1)
     dev: true
 
-  /vite@3.2.4(@types/node@18.11.2)(terser@5.15.1):
-    resolution: {integrity: sha512-Z2X6SRAffOUYTa+sLy3NQ7nlHFU100xwanq1WDwqaiFiCe+25zdxP1TfCS5ojPV2oDDcXudHIoPnI1Z/66B7Yw==}
+  /vite@3.2.8(@types/node@18.11.2)(terser@5.15.1):
+    resolution: {integrity: sha512-EtQU16PLIJpAZol2cTLttNP1mX6L0SyI0pgQB1VOoWeQnMSvtiwovV3D6NcjN8CZQWWyESD2v5NGnpz5RvgOZA==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
     peerDependencies:
@@ -9122,12 +9122,12 @@ packages:
     dependencies:
       '@docsearch/css': 3.3.0
       '@docsearch/js': 3.3.0(@algolia/client-search@4.14.2)
-      '@vitejs/plugin-vue': 3.2.0(vite@3.2.4)(vue@3.2.41)
+      '@vitejs/plugin-vue': 3.2.0(vite@3.2.8)(vue@3.2.41)
       '@vue/devtools-api': 6.4.5
       '@vueuse/core': 9.5.0(vue@3.2.41)
       body-scroll-lock: 4.0.0-beta.0
       shiki: 0.11.1
-      vite: 3.2.4(@types/node@18.11.2)(terser@5.15.1)
+      vite: 3.2.8(@types/node@18.11.2)(terser@5.15.1)
       vue: 3.2.41
     transitivePeerDependencies:
       - '@algolia/client-search'
@@ -9173,7 +9173,7 @@ packages:
       local-pkg: 0.4.2
       tinypool: 0.2.4
       tinyspy: 1.0.2
-      vite: 3.2.4(@types/node@18.11.2)(terser@5.15.1)
+      vite: 3.2.8(@types/node@18.11.2)(terser@5.15.1)
     transitivePeerDependencies:
       - less
       - sass
@@ -9216,7 +9216,7 @@ packages:
       tinybench: 2.3.1
       tinypool: 0.3.0
       tinyspy: 1.0.2
-      vite: 3.2.4(@types/node@18.11.2)(terser@5.15.1)
+      vite: 3.2.8(@types/node@18.11.2)(terser@5.15.1)
     transitivePeerDependencies:
       - less
       - sass
