@@ -248,6 +248,13 @@ export default class Field {
 
   public contains(lon: number, lat: number) {
     const [xmin, xmax] = this.getWrappedLongitudes();
+    
+    if (xmax > 180 && lon >= -180 && lon <= xmax - 360) {
+      lon += 360;
+    } else if (xmin < -180 && lon <= 180 && lon >= xmin + 360) {
+      lon -= 360;
+    }
+    
     const longitudeIn = lon >= xmin && lon <= xmax;
     let latitudeIn;
     if (this.deltaY >= 0) {
