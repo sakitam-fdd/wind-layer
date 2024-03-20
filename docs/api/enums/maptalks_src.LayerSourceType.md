@@ -22,16 +22,6 @@ packages/gl-core/dist/index.d.ts:77
 
 ___
 
-### jsonArray
-
-• **jsonArray** = ``"jsonArray"``
-
-#### Defined in
-
-packages/gl-core/dist/index.d.ts:80
-
-___
-
 ### tile
 
 • **tile** = ``"tile"``

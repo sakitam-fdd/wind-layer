@@ -28,7 +28,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-[packages/amap/src/index.ts:19](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/amap/src/index.ts#L19)
+[packages/amap/src/index.ts:19](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/amap/src/index.ts#L19)
 
 ___
 
@@ -52,7 +52,7 @@ ___
 
 #### Defined in
 
-[packages/amap/src/index.ts:20](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/amap/src/index.ts#L20)
+[packages/amap/src/index.ts:20](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/amap/src/index.ts#L20)
 
 ___
 
@@ -160,7 +160,7 @@ ___
 
 #### Defined in
 
-[packages/amap/src/index.ts:16](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/amap/src/index.ts#L16)
+[packages/amap/src/index.ts:16](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/amap/src/index.ts#L16)
 
 ___
 
@@ -240,7 +240,7 @@ ___
 
 #### Defined in
 
-[packages/amap/src/index.ts:21](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/amap/src/index.ts#L21)
+[packages/amap/src/index.ts:21](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/amap/src/index.ts#L21)
 
 ___
 
@@ -250,7 +250,7 @@ ___
 
 #### Defined in
 
-[packages/amap/src/index.ts:17](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/amap/src/index.ts#L17)
+[packages/amap/src/index.ts:17](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/amap/src/index.ts#L17)
 
 ___
 
@@ -260,4 +260,4 @@ ___
 
 #### Defined in
 
-[packages/amap/src/index.ts:18](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/amap/src/index.ts#L18)
+[packages/amap/src/index.ts:18](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/amap/src/index.ts#L18)

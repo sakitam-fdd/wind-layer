@@ -18,7 +18,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-[packages/rbush/src/index.ts:30](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/rbush/src/index.ts#L30)
+[packages/rbush/src/index.ts:30](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/rbush/src/index.ts#L30)
 
 ___
 
@@ -28,4 +28,4 @@ ___
 
 #### Defined in
 
-[packages/rbush/src/index.ts:29](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/rbush/src/index.ts#L29)
+[packages/rbush/src/index.ts:29](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/rbush/src/index.ts#L29)

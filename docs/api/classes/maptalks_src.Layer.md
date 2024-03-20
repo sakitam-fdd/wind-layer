@@ -36,7 +36,7 @@ maptalks.TileLayer.constructor
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:261](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L261)
+[packages/maptalks/src/layer.ts:270](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L270)
 
 ## Properties
 
@@ -46,7 +46,7 @@ maptalks.TileLayer.constructor
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:256](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L256)
+[packages/maptalks/src/layer.ts:265](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L265)
 
 ___
 
@@ -56,7 +56,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:255](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L255)
+[packages/maptalks/src/layer.ts:264](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L264)
 
 ___
 
@@ -66,7 +66,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:257](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L257)
+[packages/maptalks/src/layer.ts:266](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L266)
 
 ___
 
@@ -76,7 +76,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:259](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L259)
+[packages/maptalks/src/layer.ts:268](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L268)
 
 ___
 
@@ -86,7 +86,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:258](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L258)
+[packages/maptalks/src/layer.ts:267](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L267)
 
 ___
 
@@ -96,7 +96,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:254](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L254)
+[packages/maptalks/src/layer.ts:263](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L263)
 
 ## Methods
 
@@ -117,7 +117,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:389](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L389)
+[packages/maptalks/src/layer.ts:427](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L427)
 
 ___
 
@@ -131,7 +131,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:678](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L678)
+[packages/maptalks/src/layer.ts:765](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L765)
 
 ___
 
@@ -145,7 +145,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:682](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L682)
+[packages/maptalks/src/layer.ts:769](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L769)
 
 ___
 
@@ -170,7 +170,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:655](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L655)
+[packages/maptalks/src/layer.ts:742](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L742)
 
 ___
 
@@ -196,7 +196,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:659](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L659)
+[packages/maptalks/src/layer.ts:746](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L746)
 
 ___
 
@@ -210,7 +210,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:696](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L696)
+[packages/maptalks/src/layer.ts:783](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L783)
 
 ___
 
@@ -224,7 +224,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:407](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L407)
+[packages/maptalks/src/layer.ts:445](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L445)
 
 ___
 
@@ -250,7 +250,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:749](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L749)
+[packages/maptalks/src/layer.ts:838](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L838)
 
 ___
 
@@ -264,7 +264,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:663](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L663)
+[packages/maptalks/src/layer.ts:750](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L750)
 
 ___
 
@@ -278,7 +278,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:704](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L704)
+[packages/maptalks/src/layer.ts:791](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L791)
 
 ___
 
@@ -292,7 +292,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:327](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L327)
+[packages/maptalks/src/layer.ts:365](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L365)
 
 ___
 
@@ -306,7 +306,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:647](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L647)
+[packages/maptalks/src/layer.ts:734](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L734)
 
 ___
 
@@ -320,7 +320,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:725](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L725)
+[packages/maptalks/src/layer.ts:812](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L812)
 
 ___
 
@@ -334,7 +334,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:296](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L296)
+[packages/maptalks/src/layer.ts:334](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L334)
 
 ___
 
@@ -348,7 +348,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:290](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L290)
+[packages/maptalks/src/layer.ts:328](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L328)
 
 ___
 
@@ -362,7 +362,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:283](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L283)
+[packages/maptalks/src/layer.ts:321](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L321)
 
 ___
 
@@ -376,7 +376,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:272](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L272)
+[packages/maptalks/src/layer.ts:310](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L310)
 
 ___
 
@@ -390,7 +390,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:279](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L279)
+[packages/maptalks/src/layer.ts:317](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L317)
 
 ___
 
@@ -404,7 +404,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:735](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L735)
+[packages/maptalks/src/layer.ts:824](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L824)
 
 ___
 
@@ -418,7 +418,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:302](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L302)
+[packages/maptalks/src/layer.ts:340](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L340)
 
 ___
 
@@ -432,7 +432,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:317](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L317)
+[packages/maptalks/src/layer.ts:355](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L355)
 
 ___
 
@@ -446,7 +446,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:306](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L306)
+[packages/maptalks/src/layer.ts:344](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L344)
 
 ___
 
@@ -460,7 +460,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:310](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L310)
+[packages/maptalks/src/layer.ts:348](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L348)
 
 ___
 
@@ -481,7 +481,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:488](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L488)
+[packages/maptalks/src/layer.ts:527](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L527)
 
 ___
 
@@ -495,7 +495,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:411](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L411)
+[packages/maptalks/src/layer.ts:449](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L449)
 
 ___
 
@@ -516,7 +516,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:712](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L712)
+[packages/maptalks/src/layer.ts:799](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L799)
 
 ___
 
@@ -536,7 +536,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:480](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L480)
+[packages/maptalks/src/layer.ts:518](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L518)
 
 ___
 
@@ -550,4 +550,4 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/layer.ts:321](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/layer.ts#L321)
+[packages/maptalks/src/layer.ts:359](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/layer.ts#L359)

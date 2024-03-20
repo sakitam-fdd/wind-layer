@@ -22,7 +22,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:197
+packages/gl-core/dist/index.d.ts:179
 
 ___
 
@@ -32,4 +32,4 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:196
+packages/gl-core/dist/index.d.ts:178

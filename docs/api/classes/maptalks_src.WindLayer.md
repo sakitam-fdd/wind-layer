@@ -36,7 +36,7 @@ CanvasLayer.constructor
 
 #### Defined in
 
-[packages/maptalks/src/Canvas.ts:192](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/Canvas.ts#L192)
+[packages/maptalks/src/Canvas.ts:192](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/Canvas.ts#L192)
 
 ## Properties
 
@@ -46,7 +46,7 @@ CanvasLayer.constructor
 
 #### Defined in
 
-[packages/maptalks/src/Canvas.ts:189](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/Canvas.ts#L189)
+[packages/maptalks/src/Canvas.ts:189](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/Canvas.ts#L189)
 
 ___
 
@@ -56,7 +56,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/Canvas.ts:187](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/Canvas.ts#L187)
+[packages/maptalks/src/Canvas.ts:187](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/Canvas.ts#L187)
 
 ___
 
@@ -66,7 +66,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/Canvas.ts:190](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/Canvas.ts#L190)
+[packages/maptalks/src/Canvas.ts:190](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/Canvas.ts#L190)
 
 ## Methods
 
@@ -80,7 +80,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/Canvas.ts:281](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/Canvas.ts#L281)
+[packages/maptalks/src/Canvas.ts:281](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/Canvas.ts#L281)
 
 ___
 
@@ -94,7 +94,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/Canvas.ts:266](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/Canvas.ts#L266)
+[packages/maptalks/src/Canvas.ts:266](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/Canvas.ts#L266)
 
 ___
 
@@ -108,7 +108,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/Canvas.ts:277](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/Canvas.ts#L277)
+[packages/maptalks/src/Canvas.ts:277](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/Canvas.ts#L277)
 
 ___
 
@@ -124,7 +124,7 @@ get wind layer data
 
 #### Defined in
 
-[packages/maptalks/src/Canvas.ts:222](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/Canvas.ts#L222)
+[packages/maptalks/src/Canvas.ts:222](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/Canvas.ts#L222)
 
 ___
 
@@ -138,7 +138,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/Canvas.ts:262](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/Canvas.ts#L262)
+[packages/maptalks/src/Canvas.ts:262](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/Canvas.ts#L262)
 
 ___
 
@@ -152,7 +152,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/Canvas.ts:207](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/Canvas.ts#L207)
+[packages/maptalks/src/Canvas.ts:207](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/Canvas.ts#L207)
 
 ___
 
@@ -166,7 +166,7 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/Canvas.ts:273](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/Canvas.ts#L273)
+[packages/maptalks/src/Canvas.ts:273](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/Canvas.ts#L273)
 
 ___
 
@@ -189,7 +189,7 @@ set layer data
 
 #### Defined in
 
-[packages/maptalks/src/Canvas.ts:232](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/Canvas.ts#L232)
+[packages/maptalks/src/Canvas.ts:232](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/Canvas.ts#L232)
 
 ___
 
@@ -209,4 +209,4 @@ ___
 
 #### Defined in
 
-[packages/maptalks/src/Canvas.ts:249](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/maptalks/src/Canvas.ts#L249)
+[packages/maptalks/src/Canvas.ts:249](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/maptalks/src/Canvas.ts#L249)

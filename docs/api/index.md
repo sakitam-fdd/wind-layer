@@ -10,6 +10,7 @@ Class Docs
 - [gl-core/src](modules/gl_core_src.md)
 - [leaflet/src](modules/leaflet_src.md)
 - [mapbox-gl/src](modules/mapbox_gl_src.md)
+- [maplibre-gl/src](modules/maplibre_gl_src.md)
 - [maptalks/src](modules/maptalks_src.md)
 - [ol5/src](modules/ol5_src.md)
 - [openlayers/src](modules/openlayers_src.md)

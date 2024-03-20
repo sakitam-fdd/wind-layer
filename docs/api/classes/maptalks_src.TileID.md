@@ -29,7 +29,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:279
+packages/gl-core/dist/index.d.ts:261
 
 ## Properties
 
@@ -41,7 +41,7 @@ packages/gl-core/dist/index.d.ts:279
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:270
+packages/gl-core/dist/index.d.ts:252
 
 ___
 
@@ -51,7 +51,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:266
+packages/gl-core/dist/index.d.ts:248
 
 ___
 
@@ -63,7 +63,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:249
+packages/gl-core/dist/index.d.ts:231
 
 ___
 
@@ -75,7 +75,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:265
+packages/gl-core/dist/index.d.ts:247
 
 ___
 
@@ -87,7 +87,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:261
+packages/gl-core/dist/index.d.ts:243
 
 ___
 
@@ -99,7 +99,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:253
+packages/gl-core/dist/index.d.ts:235
 
 ___
 
@@ -111,7 +111,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:257
+packages/gl-core/dist/index.d.ts:239
 
 ___
 
@@ -123,7 +123,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:245
+packages/gl-core/dist/index.d.ts:227
 
 ___
 
@@ -135,7 +135,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:229
+packages/gl-core/dist/index.d.ts:211
 
 ___
 
@@ -147,7 +147,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:237
+packages/gl-core/dist/index.d.ts:219
 
 ___
 
@@ -159,7 +159,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:225
+packages/gl-core/dist/index.d.ts:207
 
 ___
 
@@ -171,7 +171,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:233
+packages/gl-core/dist/index.d.ts:215
 
 ___
 
@@ -183,7 +183,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:241
+packages/gl-core/dist/index.d.ts:223
 
 ## Methods
 
@@ -205,7 +205,7 @@ packages/gl-core/dist/index.d.ts:241
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:302
+packages/gl-core/dist/index.d.ts:284
 
 ___
 
@@ -227,7 +227,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:283
+packages/gl-core/dist/index.d.ts:265
 
 ___
 
@@ -250,7 +250,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:287
+packages/gl-core/dist/index.d.ts:269
 
 ___
 
@@ -273,7 +273,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:318
+packages/gl-core/dist/index.d.ts:300
 
 ___
 
@@ -289,7 +289,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:323
+packages/gl-core/dist/index.d.ts:305
 
 ___
 
@@ -312,7 +312,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:312
+packages/gl-core/dist/index.d.ts:294
 
 ___
 
@@ -326,7 +326,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:288
+packages/gl-core/dist/index.d.ts:270
 
 ___
 
@@ -342,7 +342,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:297
+packages/gl-core/dist/index.d.ts:279
 
 ___
 
@@ -364,7 +364,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:293
+packages/gl-core/dist/index.d.ts:275
 
 ___
 
@@ -380,4 +380,4 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:306
+packages/gl-core/dist/index.d.ts:288

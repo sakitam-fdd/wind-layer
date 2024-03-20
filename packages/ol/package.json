@@ -72,7 +72,7 @@
   },
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
   "dependencies": {
-    "wind-core": "^1.1.5"
+    "wind-core": "workspace:*"
   },
   "peerDependencies": {
     "ol": ">=6.0.0"

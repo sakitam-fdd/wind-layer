@@ -41,12 +41,9 @@
 
   let layer;
 
-  fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
+  fetch('https://blog.sakitam.com/wind-layer/data/wind.json')
     .then(res => res.json())
     .then(res => {
-      // const range = vectorField.range || [0.02, 28.21618329965979];
-      // const scale = chroma.scale('OrRd').domain(range);
-
       const windLayer = new OlWind.WindLayer(res, {
         windOptions: {
           colorScale: (m) => {
@@ -58,16 +55,15 @@
           paths: 3000,
           // particleMultiplier: 0.3 * 10,
         },
-        map: map,
       });
 
       console.log(map, windLayer);
 
       layer = windLayer;
 
-      // layer.appendTo(map);
+      layer.appendTo(map);
 
-      map.addLayer(windLayer);
+      // map.addLayer(windLayer);
     });
 </script>
 </body>

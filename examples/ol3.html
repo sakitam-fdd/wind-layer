@@ -42,7 +42,7 @@
 
   let layer;
 
-  fetch('./data/wind.json')
+  fetch('https://blog.sakitam.com/wind-layer/data/wind.json')
     .then(res => res.json())
     .then(res => {
       res = res.map((item, idx) => {

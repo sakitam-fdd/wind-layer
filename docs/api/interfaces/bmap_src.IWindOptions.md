@@ -42,7 +42,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:15](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L15)
+[packages/bmap/src/index.ts:7](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/bmap/src/index.ts#L7)
 
 ___
 
@@ -150,7 +150,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:13](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L13)
+[packages/bmap/src/index.ts:5](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/bmap/src/index.ts#L5)
 
 ___
 
@@ -230,7 +230,7 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:16](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L16)
+[packages/bmap/src/index.ts:8](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/bmap/src/index.ts#L8)
 
 ___
 
@@ -240,4 +240,4 @@ ___
 
 #### Defined in
 
-[packages/bmap/src/index.ts:14](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/bmap/src/index.ts#L14)
+[packages/bmap/src/index.ts:6](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/bmap/src/index.ts#L6)

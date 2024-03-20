@@ -30,7 +30,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:81](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L81)
+[packages/gl-core/src/tile/Tile.ts:81](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L81)
 
 ## Properties
 
@@ -40,7 +40,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:75](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L75)
+[packages/gl-core/src/tile/Tile.ts:75](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L75)
 
 ___
 
@@ -52,7 +52,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:22](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L22)
+[packages/gl-core/src/tile/Tile.ts:22](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L22)
 
 ___
 
@@ -64,7 +64,7 @@ worker 执行器
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:32](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L32)
+[packages/gl-core/src/tile/Tile.ts:32](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L32)
 
 ___
 
@@ -76,17 +76,17 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:47](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L47)
+[packages/gl-core/src/tile/Tile.ts:47](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L47)
 
 ___
 
-### geometry
+### geometries
 
-• **geometry**: `Plane`
+• **geometries**: `Map`<`string`, `Geometry`\>
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:71](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L71)
+[packages/gl-core/src/tile/Tile.ts:71](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L71)
 
 ___
 
@@ -98,7 +98,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:52](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L52)
+[packages/gl-core/src/tile/Tile.ts:52](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L52)
 
 ___
 
@@ -110,7 +110,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:27](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L27)
+[packages/gl-core/src/tile/Tile.ts:27](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L27)
 
 ___
 
@@ -120,7 +120,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:73](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L73)
+[packages/gl-core/src/tile/Tile.ts:73](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L73)
 
 ___
 
@@ -132,7 +132,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:42](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L42)
+[packages/gl-core/src/tile/Tile.ts:42](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L42)
 
 ___
 
@@ -144,7 +144,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:57](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L57)
+[packages/gl-core/src/tile/Tile.ts:57](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L57)
 
 ___
 
@@ -156,7 +156,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:37](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L37)
+[packages/gl-core/src/tile/Tile.ts:37](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L37)
 
 ___
 
@@ -166,7 +166,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:69](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L69)
+[packages/gl-core/src/tile/Tile.ts:69](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L69)
 
 ___
 
@@ -178,7 +178,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:62](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L62)
+[packages/gl-core/src/tile/Tile.ts:62](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L62)
 
 ___
 
@@ -190,7 +190,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:67](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L67)
+[packages/gl-core/src/tile/Tile.ts:67](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L67)
 
 ## Accessors
 
@@ -204,7 +204,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:120](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L120)
+[packages/gl-core/src/tile/Tile.ts:120](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L120)
 
 ___
 
@@ -218,7 +218,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:124](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L124)
+[packages/gl-core/src/tile/Tile.ts:124](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L124)
 
 ## Methods
 
@@ -238,7 +238,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:290](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L290)
+[packages/gl-core/src/tile/Tile.ts:295](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L295)
 
 ___
 
@@ -250,13 +250,13 @@ ___
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `passId` | `string` |
-| `bbox` | [`ProjTileBounds`](../interfaces/gl_core_src.ProjTileBounds.md) |
-| `renderer` | `Renderer` |
-| `program` | `Program` |
-| `force?` | `boolean` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `passId` | `string` | 在多个 render pass 共享 tile 时我们可能需要针对多个 pass 创建渲染资源 在 mapbox 这种共享 gl 上下文的一般我们不需要重建，但是对于 maptalks 这种每个图层一个 gl 上下文的我们需要针对每个 gl上下文绑定资源 |
+| `bbox` | [`ProjTileBounds`](../interfaces/gl_core_src.ProjTileBounds.md) |  |
+| `renderer` | `Renderer` |  |
+| `program` | `Program` |  |
+| `force?` | `boolean` |  |
 
 #### Returns
 
@@ -264,7 +264,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:191](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L191)
+[packages/gl-core/src/tile/Tile.ts:199](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L199)
 
 ___
 
@@ -280,7 +280,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:302](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L302)
+[packages/gl-core/src/tile/Tile.ts:307](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L307)
 
 ___
 
@@ -296,7 +296,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:286](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L286)
+[packages/gl-core/src/tile/Tile.ts:291](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L291)
 
 ___
 
@@ -316,7 +316,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:116](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L116)
+[packages/gl-core/src/tile/Tile.ts:116](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L116)
 
 ___
 
@@ -332,7 +332,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:94](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L94)
+[packages/gl-core/src/tile/Tile.ts:94](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L94)
 
 ___
 
@@ -348,7 +348,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:108](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L108)
+[packages/gl-core/src/tile/Tile.ts:108](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L108)
 
 ___
 
@@ -374,13 +374,13 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:221](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L221)
+[packages/gl-core/src/tile/Tile.ts:226](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L226)
 
 ___
 
 ### updateGeometry
 
-▸ **updateGeometry**(`bbox`, `renderer`, `force?`): `void`
+▸ **updateGeometry**(`passId`, `bbox`, `renderer`, `force?`): `undefined` \| `Geometry`
 
 更新瓦片顶点信息
 
@@ -388,17 +388,18 @@ ___
 
 | Name | Type |
 | :------ | :------ |
+| `passId` | `string` |
 | `bbox` | [`ProjTileBounds`](../interfaces/gl_core_src.ProjTileBounds.md) |
 | `renderer` | `Renderer` |
 | `force?` | `boolean` |
 
 #### Returns
 
-`void`
+`undefined` \| `Geometry`
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:138](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L138)
+[packages/gl-core/src/tile/Tile.ts:139](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L139)
 
 ___
 
@@ -414,4 +415,4 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/tile/Tile.ts:101](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/tile/Tile.ts#L101)
+[packages/gl-core/src/tile/Tile.ts:101](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/tile/Tile.ts#L101)

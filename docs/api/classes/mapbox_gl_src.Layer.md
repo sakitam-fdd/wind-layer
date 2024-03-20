@@ -22,11 +22,11 @@ sidebarDepth: 4
 | :------ | :------ |
 | `id` | `string` |
 | `source` | `SourceType` |
-| `options?` | `ILayerOptions` |
+| `options?` | `LayerOptions` |
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:33](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L33)
+[packages/mapbox-gl/src/layer.ts:31](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L31)
 
 ## Properties
 
@@ -36,7 +36,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:20](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L20)
+[packages/mapbox-gl/src/layer.ts:18](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L18)
 
 ___
 
@@ -46,7 +46,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:22](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L22)
+[packages/mapbox-gl/src/layer.ts:20](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L20)
 
 ___
 
@@ -56,7 +56,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:31](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L31)
+[packages/mapbox-gl/src/layer.ts:29](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L29)
 
 ___
 
@@ -66,7 +66,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:21](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L21)
+[packages/mapbox-gl/src/layer.ts:19](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L19)
 
 ___
 
@@ -76,7 +76,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:29](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L29)
+[packages/mapbox-gl/src/layer.ts:27](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L27)
 
 ___
 
@@ -86,7 +86,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:27](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L27)
+[packages/mapbox-gl/src/layer.ts:25](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L25)
 
 ___
 
@@ -96,7 +96,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:28](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L28)
+[packages/mapbox-gl/src/layer.ts:26](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L26)
 
 ___
 
@@ -106,7 +106,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:24](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L24)
+[packages/mapbox-gl/src/layer.ts:22](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L22)
 
 ___
 
@@ -116,7 +116,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:26](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L26)
+[packages/mapbox-gl/src/layer.ts:24](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L24)
 
 ___
 
@@ -126,7 +126,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:30](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L30)
+[packages/mapbox-gl/src/layer.ts:28](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L28)
 
 ___
 
@@ -136,7 +136,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:25](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L25)
+[packages/mapbox-gl/src/layer.ts:23](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L23)
 
 ___
 
@@ -146,7 +146,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:23](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L23)
+[packages/mapbox-gl/src/layer.ts:21](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L21)
 
 ## Accessors
 
@@ -160,7 +160,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:50](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L50)
+[packages/mapbox-gl/src/layer.ts:48](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L48)
 
 ## Methods
 
@@ -174,7 +174,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:399](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L399)
+[packages/mapbox-gl/src/layer.ts:407](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L407)
 
 ___
 
@@ -188,7 +188,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:101](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L101)
+[packages/mapbox-gl/src/layer.ts:99](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L99)
 
 ___
 
@@ -202,7 +202,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:73](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L73)
+[packages/mapbox-gl/src/layer.ts:71](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L71)
 
 ___
 
@@ -216,7 +216,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:85](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L85)
+[packages/mapbox-gl/src/layer.ts:83](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L83)
 
 ___
 
@@ -230,7 +230,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:67](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L67)
+[packages/mapbox-gl/src/layer.ts:65](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L65)
 
 ___
 
@@ -244,7 +244,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:61](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L61)
+[packages/mapbox-gl/src/layer.ts:59](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L59)
 
 ___
 
@@ -265,7 +265,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:180](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L180)
+[packages/mapbox-gl/src/layer.ts:178](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L178)
 
 ___
 
@@ -279,7 +279,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:428](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L428)
+[packages/mapbox-gl/src/layer.ts:436](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L436)
 
 ___
 
@@ -299,7 +299,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:455](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L455)
+[packages/mapbox-gl/src/layer.ts:463](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L463)
 
 ___
 
@@ -313,7 +313,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:443](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L443)
+[packages/mapbox-gl/src/layer.ts:451](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L451)
 
 ___
 
@@ -327,7 +327,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:105](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L105)
+[packages/mapbox-gl/src/layer.ts:103](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L103)
 
 ___
 
@@ -341,7 +341,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:468](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L468)
+[packages/mapbox-gl/src/layer.ts:476](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L476)
 
 ___
 
@@ -361,7 +361,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:172](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L172)
+[packages/mapbox-gl/src/layer.ts:170](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L170)
 
 ___
 
@@ -375,7 +375,7 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:54](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L54)
+[packages/mapbox-gl/src/layer.ts:52](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L52)
 
 ___
 
@@ -387,7 +387,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `options` | `Partial`<`ILayerOptions`\> |
+| `options` | `Partial`<`LayerOptions`\> |
 
 #### Returns
 
@@ -395,4 +395,4 @@ ___
 
 #### Defined in
 
-[packages/mapbox-gl/src/layer.ts:91](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/mapbox-gl/src/layer.ts#L91)
+[packages/mapbox-gl/src/layer.ts:89](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/mapbox-gl/src/layer.ts#L89)

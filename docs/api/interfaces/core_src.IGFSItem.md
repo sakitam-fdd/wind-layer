@@ -18,7 +18,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-[packages/core/src/utils.ts:211](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L211)
+[packages/core/src/utils.ts:204](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L204)
 
 ___
 
@@ -47,4 +47,4 @@ ___
 
 #### Defined in
 
-[packages/core/src/utils.ts:198](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L198)
+[packages/core/src/utils.ts:191](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L191)

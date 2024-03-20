@@ -20,7 +20,7 @@ top left, top right, bottom right, bottom left
 
 #### Defined in
 
-[packages/gl-core/src/type.ts:121](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L121)
+[packages/gl-core/src/type.ts:120](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/type.ts#L120)
 
 ___
 
@@ -30,7 +30,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/type.ts:123](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L123)
+[packages/gl-core/src/type.ts:122](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/type.ts#L122)
 
 ___
 
@@ -42,7 +42,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/type.ts:127](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L127)
+[packages/gl-core/src/type.ts:126](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/type.ts#L126)
 
 ___
 
@@ -52,7 +52,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/type.ts:133](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L133)
+[packages/gl-core/src/type.ts:132](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/type.ts#L132)
 
 ___
 
@@ -62,7 +62,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/type.ts:122](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L122)
+[packages/gl-core/src/type.ts:121](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/type.ts#L121)
 
 ___
 
@@ -72,16 +72,16 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/type.ts:117](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L117)
+[packages/gl-core/src/type.ts:116](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/type.ts#L116)
 
 ___
 
 ### wrapX
 
-• `Optional` **wrapX**: `number`
+• `Optional` **wrapX**: `boolean`
 
 是否跨世界渲染
 
 #### Defined in
 
-[packages/gl-core/src/type.ts:132](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L132)
+[packages/gl-core/src/type.ts:131](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/type.ts#L131)

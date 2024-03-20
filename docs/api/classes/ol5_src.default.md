@@ -35,7 +35,7 @@ ImageLayer.constructor
 
 #### Defined in
 
-[packages/ol5/src/index.ts:48](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L48)
+[packages/ol5/src/index.ts:48](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L48)
 
 ## Properties
 
@@ -45,7 +45,7 @@ ImageLayer.constructor
 
 #### Defined in
 
-[packages/ol5/src/index.ts:42](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L42)
+[packages/ol5/src/index.ts:42](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L42)
 
 ___
 
@@ -55,7 +55,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:44](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L44)
+[packages/ol5/src/index.ts:44](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L44)
 
 ___
 
@@ -65,7 +65,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:41](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L41)
+[packages/ol5/src/index.ts:41](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L41)
 
 ___
 
@@ -75,7 +75,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:45](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L45)
+[packages/ol5/src/index.ts:45](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L45)
 
 ___
 
@@ -99,7 +99,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:46](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L46)
+[packages/ol5/src/index.ts:46](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L46)
 
 ___
 
@@ -109,7 +109,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:43](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L43)
+[packages/ol5/src/index.ts:43](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L43)
 
 ## Methods
 
@@ -156,7 +156,7 @@ append layer to map
 
 #### Defined in
 
-[packages/ol5/src/index.ts:88](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L88)
+[packages/ol5/src/index.ts:88](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L88)
 
 ___
 
@@ -180,7 +180,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:108](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L108)
+[packages/ol5/src/index.ts:108](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L108)
 
 ___
 
@@ -296,7 +296,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:130](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L130)
+[packages/ol5/src/index.ts:130](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L130)
 
 ___
 
@@ -312,7 +312,7 @@ get wind layer data
 
 #### Defined in
 
-[packages/ol5/src/index.ts:214](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L214)
+[packages/ol5/src/index.ts:210](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L210)
 
 ___
 
@@ -454,7 +454,7 @@ get map
 
 #### Defined in
 
-[packages/ol5/src/index.ts:298](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L298)
+[packages/ol5/src/index.ts:294](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L294)
 
 ___
 
@@ -522,7 +522,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:249](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L249)
+[packages/ol5/src/index.ts:245](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L245)
 
 ___
 
@@ -536,7 +536,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:270](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L270)
+[packages/ol5/src/index.ts:266](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L266)
 
 ___
 
@@ -626,7 +626,7 @@ ImageLayer.getType
 
 #### Defined in
 
-[packages/ol5/src/index.ts:302](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L302)
+[packages/ol5/src/index.ts:298](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L298)
 
 ___
 
@@ -658,7 +658,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:266](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L266)
+[packages/ol5/src/index.ts:262](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L262)
 
 ___
 
@@ -720,7 +720,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:184](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L184)
+[packages/ol5/src/index.ts:183](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L183)
 
 ___
 
@@ -1355,7 +1355,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:199](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L199)
+[packages/ol5/src/index.ts:195](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L195)
 
 ___
 
@@ -1375,7 +1375,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:169](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L169)
+[packages/ol5/src/index.ts:169](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L169)
 
 ___
 
@@ -1422,7 +1422,7 @@ render windy layer
 
 #### Defined in
 
-[packages/ol5/src/index.ts:140](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L140)
+[packages/ol5/src/index.ts:140](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L140)
 
 ___
 
@@ -1471,7 +1471,7 @@ set layer data
 
 #### Defined in
 
-[packages/ol5/src/index.ts:224](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L224)
+[packages/ol5/src/index.ts:220](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L220)
 
 ___
 
@@ -1521,7 +1521,7 @@ ImageLayer.setMap
 
 #### Defined in
 
-[packages/ol5/src/index.ts:286](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L286)
+[packages/ol5/src/index.ts:282](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L282)
 
 ___
 
@@ -1686,7 +1686,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:254](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L254)
+[packages/ol5/src/index.ts:250](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L250)
 
 ___
 
@@ -1724,7 +1724,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:96](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L96)
+[packages/ol5/src/index.ts:96](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L96)
 
 ___
 
@@ -1738,7 +1738,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:102](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L102)
+[packages/ol5/src/index.ts:102](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L102)
 
 ___
 
@@ -2056,7 +2056,7 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:178](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L178)
+[packages/ol5/src/index.ts:177](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L177)
 
 ___
 
@@ -2101,4 +2101,4 @@ ___
 
 #### Defined in
 
-[packages/ol5/src/index.ts:243](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L243)
+[packages/ol5/src/index.ts:239](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L239)

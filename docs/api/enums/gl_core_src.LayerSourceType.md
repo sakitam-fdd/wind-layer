@@ -18,17 +18,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-[packages/gl-core/src/type.ts:98](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L98)
-
-___
-
-### jsonArray
-
-• **jsonArray** = ``"jsonArray"``
-
-#### Defined in
-
-[packages/gl-core/src/type.ts:101](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L101)
+[packages/gl-core/src/type.ts:98](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/type.ts#L98)
 
 ___
 
@@ -38,7 +28,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/type.ts:99](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L99)
+[packages/gl-core/src/type.ts:99](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/type.ts#L99)
 
 ___
 
@@ -48,4 +38,4 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/type.ts:100](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L100)
+[packages/gl-core/src/type.ts:100](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/type.ts#L100)

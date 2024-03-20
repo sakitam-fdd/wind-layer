@@ -30,4 +30,4 @@ Re-exports [Field](../classes/maptalks_src.Field.md)
 
 #### Defined in
 
-[packages/ol5/src/index.ts:307](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/ol5/src/index.ts#L307)
+[packages/ol5/src/index.ts:303](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/ol5/src/index.ts#L303)

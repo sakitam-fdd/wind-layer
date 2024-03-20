@@ -10,15 +10,25 @@ sidebarDepth: 4
 
 [gl-core/src](../modules/gl_core_src.md).BaseLayerOptions
 
+## Hierarchy
+
+- [`UserOptions`](gl_core_src.UserOptions.md)
+
+  ↳ **`BaseLayerOptions`**
+
 ## Properties
 
 ### displayRange
 
 • `Optional` **displayRange**: [`number`, `number`]
 
+#### Inherited from
+
+[UserOptions](gl_core_src.UserOptions.md).[displayRange](gl_core_src.UserOptions.md#displayrange)
+
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:86](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L86)
+[packages/gl-core/src/renderer/index.ts:65](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L65)
 
 ___
 
@@ -26,9 +36,13 @@ ___
 
 • `Optional` **flipY**: `boolean`
 
+#### Overrides
+
+[UserOptions](gl_core_src.UserOptions.md).[flipY](gl_core_src.UserOptions.md#flipy)
+
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:91](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L91)
+[packages/gl-core/src/renderer/index.ts:116](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L116)
 
 ___
 
@@ -46,17 +60,17 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:83](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L83)
+[packages/gl-core/src/renderer/index.ts:114](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L114)
 
 ___
 
 ### getGridTiles
 
-• **getGridTiles**: (`tileSize`: `number`) => [`TileID`](../classes/gl_core_src.TileID.md)[]
+• **getGridTiles**: (`source`: [`SourceType`](../modules/gl_core_src.md#sourcetype)) => [`TileID`](../classes/gl_core_src.TileID.md)[]
 
 #### Type declaration
 
-▸ (`tileSize`): [`TileID`](../classes/gl_core_src.TileID.md)[]
+▸ (`source`): [`TileID`](../classes/gl_core_src.TileID.md)[]
 
 这里我们 Mock 一个瓦片图层，用于获取视野内的所有可渲染瓦片，与getViewTiles不同的是
 此方法不会限制层级，方便我们在大层级时也能合理采样
@@ -65,7 +79,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `tileSize` | `number` |
+| `source` | [`SourceType`](../modules/gl_core_src.md#sourcetype) |
 
 ##### Returns
 
@@ -73,7 +87,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:33](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L33)
+[packages/gl-core/src/renderer/index.ts:95](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L95)
 
 ___
 
@@ -93,7 +107,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:49](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L49)
+[packages/gl-core/src/renderer/index.ts:111](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L111)
 
 ___
 
@@ -113,7 +127,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:44](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L44)
+[packages/gl-core/src/renderer/index.ts:106](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L106)
 
 ___
 
@@ -140,7 +154,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:39](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L39)
+[packages/gl-core/src/renderer/index.ts:101](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L101)
 
 ___
 
@@ -167,7 +181,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:27](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L27)
+[packages/gl-core/src/renderer/index.ts:89](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L89)
 
 ___
 
@@ -185,7 +199,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:82](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L82)
+[packages/gl-core/src/renderer/index.ts:113](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L113)
 
 ___
 
@@ -203,7 +217,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:93](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L93)
+[packages/gl-core/src/renderer/index.ts:118](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L118)
 
 ___
 
@@ -211,9 +225,13 @@ ___
 
 • `Optional` **heightSegments**: `number`
 
+#### Inherited from
+
+[UserOptions](gl_core_src.UserOptions.md).[heightSegments](gl_core_src.UserOptions.md#heightsegments)
+
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:88](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L88)
+[packages/gl-core/src/renderer/index.ts:67](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L67)
 
 ___
 
@@ -230,9 +248,13 @@ ___
 | `data` | `Attributes`[] |
 | `type` | [`MaskType`](../enums/gl_core_src.MaskType.md) |
 
+#### Inherited from
+
+[UserOptions](gl_core_src.UserOptions.md).[mask](gl_core_src.UserOptions.md#mask)
+
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:102](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L102)
+[packages/gl-core/src/renderer/index.ts:79](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L79)
 
 ___
 
@@ -257,17 +279,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:106](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L106)
-
-___
-
-### opacity
-
-• `Optional` **opacity**: `number`
-
-#### Defined in
-
-[packages/gl-core/src/renderer/index.ts:84](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L84)
+[packages/gl-core/src/renderer/index.ts:120](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L120)
 
 ___
 
@@ -277,9 +289,13 @@ ___
 
 是否开启拾取
 
+#### Inherited from
+
+[UserOptions](gl_core_src.UserOptions.md).[picking](gl_core_src.UserOptions.md#picking)
+
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:98](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L98)
+[packages/gl-core/src/renderer/index.ts:75](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L75)
 
 ___
 
@@ -289,9 +305,13 @@ ___
 
 指定渲染通道
 
+#### Inherited from
+
+[UserOptions](gl_core_src.UserOptions.md).[renderFrom](gl_core_src.UserOptions.md#renderfrom)
+
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:62](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L62)
+[packages/gl-core/src/renderer/index.ts:44](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L44)
 
 ___
 
@@ -305,9 +325,13 @@ ___
 1：气象数据的色斑图渲染
 2：风等 vector 数据的粒子渲染
 
+#### Inherited from
+
+[UserOptions](gl_core_src.UserOptions.md).[renderType](gl_core_src.UserOptions.md#rendertype)
+
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:58](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L58)
+[packages/gl-core/src/renderer/index.ts:40](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L40)
 
 ___
 
@@ -329,9 +353,13 @@ ___
 | `space?` | `number` \| `any`[] | arrow space |
 | `speedFactor?` | `number` \| `any`[] | - |
 
+#### Inherited from
+
+[UserOptions](gl_core_src.UserOptions.md).[styleSpec](gl_core_src.UserOptions.md#stylespec)
+
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:63](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L63)
+[packages/gl-core/src/renderer/index.ts:45](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L45)
 
 ___
 
@@ -349,7 +377,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:85](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L85)
+[packages/gl-core/src/renderer/index.ts:115](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L115)
 
 ___
 
@@ -357,9 +385,13 @@ ___
 
 • `Optional` **widthSegments**: `number`
 
+#### Inherited from
+
+[UserOptions](gl_core_src.UserOptions.md).[widthSegments](gl_core_src.UserOptions.md#widthsegments)
+
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:87](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L87)
+[packages/gl-core/src/renderer/index.ts:66](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L66)
 
 ___
 
@@ -367,6 +399,28 @@ ___
 
 • `Optional` **wireframe**: `boolean`
 
+#### Inherited from
+
+[UserOptions](gl_core_src.UserOptions.md).[wireframe](gl_core_src.UserOptions.md#wireframe)
+
 #### Defined in
 
-[packages/gl-core/src/renderer/index.ts:89](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/renderer/index.ts#L89)
+[packages/gl-core/src/renderer/index.ts:68](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L68)
+
+___
+
+### zoomScale
+
+• `Optional` **zoomScale**: () => `number`
+
+#### Type declaration
+
+▸ (): `number`
+
+##### Returns
+
+`number`
+
+#### Defined in
+
+[packages/gl-core/src/renderer/index.ts:119](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/renderer/index.ts#L119)

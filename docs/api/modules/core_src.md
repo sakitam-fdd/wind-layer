@@ -42,7 +42,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-[packages/core/src/index.ts:6](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/index.ts#L6)
+[packages/core/src/index.ts:6](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/index.ts#L6)
 
 ## Functions
 
@@ -62,7 +62,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-[packages/core/src/utils.ts:34](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L34)
+[packages/core/src/utils.ts:35](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L35)
 
 ___
 
@@ -85,7 +85,7 @@ assign object
 
 #### Defined in
 
-[packages/core/src/utils.ts:149](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L149)
+[packages/core/src/utils.ts:142](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L142)
 
 ___
 
@@ -106,7 +106,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/utils.ts:521](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L521)
+[packages/core/src/utils.ts:511](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L511)
 
 ___
 
@@ -131,7 +131,7 @@ create canvas
 
 #### Defined in
 
-[packages/core/src/utils.ts:278](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L278)
+[packages/core/src/utils.ts:267](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L267)
 
 ___
 
@@ -158,7 +158,7 @@ See http://en.wikipedia.org/wiki/Modulo_operation.
 
 #### Defined in
 
-[packages/core/src/utils.ts:184](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L184)
+[packages/core/src/utils.ts:177](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L177)
 
 ___
 
@@ -181,7 +181,7 @@ format gfs json to vector
 
 #### Defined in
 
-[packages/core/src/utils.ts:219](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L219)
+[packages/core/src/utils.ts:212](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L212)
 
 ___
 
@@ -201,7 +201,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/utils.ts:468](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L468)
+[packages/core/src/utils.ts:458](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L458)
 
 ___
 
@@ -223,7 +223,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/utils.ts:140](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L140)
+[packages/core/src/utils.ts:133](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L133)
 
 ___
 
@@ -245,7 +245,7 @@ is array buffer
 
 #### Defined in
 
-[packages/core/src/utils.ts:84](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L84)
+[packages/core/src/utils.ts:82](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L82)
 
 ___
 
@@ -267,7 +267,7 @@ is date value
 
 #### Defined in
 
-[packages/core/src/utils.ts:75](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L75)
+[packages/core/src/utils.ts:73](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L73)
 
 ___
 
@@ -281,7 +281,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `object` | `Object` |
+| `object` | `any` |
 
 #### Returns
 
@@ -289,7 +289,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/utils.ts:119](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L119)
+[packages/core/src/utils.ts:112](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L112)
 
 ___
 
@@ -311,7 +311,7 @@ value is Function
 
 #### Defined in
 
-[packages/core/src/utils.ts:46](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L46)
+[packages/core/src/utils.ts:44](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L44)
 
 ___
 
@@ -333,7 +333,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/utils.ts:132](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L132)
+[packages/core/src/utils.ts:125](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L125)
 
 ___
 
@@ -355,7 +355,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/utils.ts:108](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L108)
+[packages/core/src/utils.ts:103](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L103)
 
 ___
 
@@ -377,7 +377,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/utils.ts:65](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L65)
+[packages/core/src/utils.ts:63](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L63)
 
 ___
 
@@ -399,7 +399,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/utils.ts:93](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L93)
+[packages/core/src/utils.ts:91](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L91)
 
 ___
 
@@ -421,7 +421,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/utils.ts:193](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L193)
+[packages/core/src/utils.ts:186](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L186)
 
 ___
 
@@ -443,7 +443,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/utils.ts:301](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L301)
+[packages/core/src/utils.ts:290](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L290)
 
 ___
 
@@ -466,7 +466,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/utils.ts:158](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L158)
+[packages/core/src/utils.ts:151](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L151)
 
 ___
 
@@ -489,4 +489,4 @@ ___
 
 #### Defined in
 
-[packages/core/src/utils.ts:169](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/core/src/utils.ts#L169)
+[packages/core/src/utils.ts:162](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/core/src/utils.ts#L162)

@@ -69,7 +69,7 @@
 
   let layer;
 
-  fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
+  fetch('https://blog.sakitam.com/wind-layer/data/wind.json')
     .then(res => res.json())
     .then(res => {
       // const range = vectorField.range || [0.02, 28.21618329965979];
@@ -86,16 +86,13 @@
           paths: 5000,
           // particleMultiplier: 0.3 * 10,
         },
-        map: map,
       });
 
       console.log(map, windLayer);
 
       layer = windLayer;
 
-      // layer.appendTo(map);
-
-      map.addLayer(windLayer);
+      layer.appendTo(map);
     });
 </script>
 </body>

@@ -22,7 +22,7 @@ sidebarDepth: 4
 
 #### Defined in
 
-[packages/gl-core/src/type.ts:236](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L236)
+[packages/gl-core/src/type.ts:217](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/type.ts#L217)
 
 ___
 
@@ -32,4 +32,4 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/type.ts:235](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/type.ts#L235)
+[packages/gl-core/src/type.ts:216](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/type.ts#L216)

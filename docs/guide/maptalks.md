@@ -14,4 +14,3 @@ order: 3
 基础使用。
 :::
 
-<<<@/components/maptalks.vue

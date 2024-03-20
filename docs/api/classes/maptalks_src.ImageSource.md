@@ -35,7 +35,7 @@ EventEmitter.constructor
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:483
+packages/gl-core/dist/index.d.ts:468
 
 ## Properties
 
@@ -45,7 +45,7 @@ packages/gl-core/dist/index.d.ts:483
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:441
+packages/gl-core/dist/index.d.ts:426
 
 ___
 
@@ -57,7 +57,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:478
+packages/gl-core/dist/index.d.ts:463
 
 ___
 
@@ -67,7 +67,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:472
+packages/gl-core/dist/index.d.ts:457
 
 ___
 
@@ -79,7 +79,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:445
+packages/gl-core/dist/index.d.ts:430
 
 ___
 
@@ -89,7 +89,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:473
+packages/gl-core/dist/index.d.ts:458
 
 ___
 
@@ -101,7 +101,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:457
+packages/gl-core/dist/index.d.ts:442
 
 ___
 
@@ -113,7 +113,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:453
+packages/gl-core/dist/index.d.ts:438
 
 ___
 
@@ -125,7 +125,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:469
+packages/gl-core/dist/index.d.ts:454
 
 ___
 
@@ -135,7 +135,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:474
+packages/gl-core/dist/index.d.ts:459
 
 ___
 
@@ -145,7 +145,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:471
+packages/gl-core/dist/index.d.ts:456
 
 ___
 
@@ -157,7 +157,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:461
+packages/gl-core/dist/index.d.ts:446
 
 ___
 
@@ -169,7 +169,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:465
+packages/gl-core/dist/index.d.ts:450
 
 ___
 
@@ -181,7 +181,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:449
+packages/gl-core/dist/index.d.ts:434
 
 ___
 
@@ -191,7 +191,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:470
+packages/gl-core/dist/index.d.ts:455
 
 ___
 
@@ -203,7 +203,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:482
+packages/gl-core/dist/index.d.ts:467
 
 ## Accessors
 
@@ -217,7 +217,7 @@ packages/gl-core/dist/index.d.ts:482
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:484
+packages/gl-core/dist/index.d.ts:469
 
 ## Methods
 
@@ -238,7 +238,7 @@ packages/gl-core/dist/index.d.ts:484
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:502
+packages/gl-core/dist/index.d.ts:487
 
 ___
 
@@ -259,7 +259,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:490
+packages/gl-core/dist/index.d.ts:475
 
 ___
 
@@ -293,7 +293,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:504
+packages/gl-core/dist/index.d.ts:489
 
 ___
 
@@ -334,7 +334,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:501
+packages/gl-core/dist/index.d.ts:486
 
 ___
 
@@ -354,7 +354,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:498
+packages/gl-core/dist/index.d.ts:483
 
 ___
 
@@ -398,7 +398,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:500
+packages/gl-core/dist/index.d.ts:485
 
 ___
 
@@ -420,7 +420,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:495
+packages/gl-core/dist/index.d.ts:480
 
 ___
 
@@ -441,7 +441,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:499
+packages/gl-core/dist/index.d.ts:484
 
 ___
 
@@ -455,7 +455,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:496
+packages/gl-core/dist/index.d.ts:481
 
 ___
 
@@ -532,7 +532,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:485
+packages/gl-core/dist/index.d.ts:470
 
 ___
 
@@ -582,7 +582,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:486
+packages/gl-core/dist/index.d.ts:471
 
 ___
 
@@ -602,7 +602,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:497
+packages/gl-core/dist/index.d.ts:482
 
 ___
 
@@ -622,7 +622,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:489
+packages/gl-core/dist/index.d.ts:474
 
 ___
 
@@ -643,7 +643,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:503
+packages/gl-core/dist/index.d.ts:488
 
 ___
 
@@ -664,7 +664,7 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:487
+packages/gl-core/dist/index.d.ts:472
 
 ___
 
@@ -685,4 +685,4 @@ ___
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:488
+packages/gl-core/dist/index.d.ts:473

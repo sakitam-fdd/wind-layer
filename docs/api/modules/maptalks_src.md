@@ -27,17 +27,27 @@ sidebarDepth: 4
 - [WindCore](../classes/maptalks_src.WindCore.md)
 - [WindLayer](../classes/maptalks_src.WindLayer.md)
 
-## Variables
+## Functions
 
 ### configDeps
 
-• `Const` **configDeps**: `any`
+▸ **configDeps**(`d`): `void`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `d` | `any` |
+
+#### Returns
+
+`void`
 
 #### Defined in
 
-packages/gl-core/dist/index.d.ts:1158
+packages/gl-core/dist/index.d.ts:1146
 
-## Functions
+___
 
 ### formatData
 

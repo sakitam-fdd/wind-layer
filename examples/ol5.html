@@ -40,7 +40,7 @@
 
   let layer;
 
-  fetch('https://sakitam.oss-cn-beijing.aliyuncs.com/codepen/wind-layer/json/wind.json')
+  fetch('https://blog.sakitam.com/wind-layer/data/wind.json')
     .then(res => res.json())
     .then(res => {
 
@@ -73,15 +73,10 @@
           // particleMultiplier: 0.3 * 10,
         },
         fieldOptions: {
-          wrapX: true,
+          wrapX: false,
         },
-        map: map,
       });
-      console.log(map, windLayer);
-      //
-      // windLayer.appendTo(map);
-
-      // map.addLayer(windLayer);
+      windLayer.appendTo(map);
     });
 </script>
 </body>

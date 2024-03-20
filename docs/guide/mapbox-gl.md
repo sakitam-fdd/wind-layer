@@ -14,4 +14,3 @@ order: 7
 基础使用。
 :::
 
-<<<@/components/mapbox-gl.vue

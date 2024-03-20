@@ -35,7 +35,7 @@ EventEmitter.constructor
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:78](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L78)
+[packages/gl-core/src/source/image.ts:78](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L78)
 
 ## Properties
 
@@ -45,7 +45,7 @@ EventEmitter.constructor
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:74](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L74)
+[packages/gl-core/src/source/image.ts:74](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L74)
 
 ___
 
@@ -55,7 +55,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:75](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L75)
+[packages/gl-core/src/source/image.ts:75](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L75)
 
 ___
 
@@ -65,7 +65,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:76](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L76)
+[packages/gl-core/src/source/image.ts:76](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L76)
 
 ___
 
@@ -77,7 +77,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:67](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L67)
+[packages/gl-core/src/source/image.ts:67](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L67)
 
 ___
 
@@ -87,7 +87,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:58](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L58)
+[packages/gl-core/src/source/image.ts:58](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L58)
 
 ___
 
@@ -99,7 +99,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:22](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L22)
+[packages/gl-core/src/source/image.ts:22](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L22)
 
 ___
 
@@ -109,7 +109,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:60](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L60)
+[packages/gl-core/src/source/image.ts:60](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L60)
 
 ___
 
@@ -121,7 +121,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:37](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L37)
+[packages/gl-core/src/source/image.ts:37](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L37)
 
 ___
 
@@ -133,7 +133,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:32](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L32)
+[packages/gl-core/src/source/image.ts:32](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L32)
 
 ___
 
@@ -145,7 +145,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:52](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L52)
+[packages/gl-core/src/source/image.ts:52](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L52)
 
 ___
 
@@ -155,7 +155,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:62](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L62)
+[packages/gl-core/src/source/image.ts:62](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L62)
 
 ___
 
@@ -165,7 +165,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:56](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L56)
+[packages/gl-core/src/source/image.ts:56](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L56)
 
 ___
 
@@ -177,7 +177,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:42](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L42)
+[packages/gl-core/src/source/image.ts:42](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L42)
 
 ___
 
@@ -189,7 +189,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:47](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L47)
+[packages/gl-core/src/source/image.ts:47](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L47)
 
 ___
 
@@ -201,7 +201,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:27](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L27)
+[packages/gl-core/src/source/image.ts:27](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L27)
 
 ___
 
@@ -211,7 +211,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:54](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L54)
+[packages/gl-core/src/source/image.ts:54](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L54)
 
 ___
 
@@ -223,7 +223,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:72](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L72)
+[packages/gl-core/src/source/image.ts:72](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L72)
 
 ## Accessors
 
@@ -237,7 +237,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:102](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L102)
+[packages/gl-core/src/source/image.ts:102](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L102)
 
 ## Methods
 
@@ -258,7 +258,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:249](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L249)
+[packages/gl-core/src/source/image.ts:249](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L249)
 
 ___
 
@@ -279,7 +279,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:135](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L135)
+[packages/gl-core/src/source/image.ts:135](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L135)
 
 ___
 
@@ -313,7 +313,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:281](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L281)
+[packages/gl-core/src/source/image.ts:281](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L281)
 
 ___
 
@@ -354,7 +354,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:245](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L245)
+[packages/gl-core/src/source/image.ts:245](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L245)
 
 ___
 
@@ -374,7 +374,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:185](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L185)
+[packages/gl-core/src/source/image.ts:185](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L185)
 
 ___
 
@@ -418,7 +418,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:241](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L241)
+[packages/gl-core/src/source/image.ts:241](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L241)
 
 ___
 
@@ -440,7 +440,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:161](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L161)
+[packages/gl-core/src/source/image.ts:161](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L161)
 
 ___
 
@@ -461,7 +461,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:193](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L193)
+[packages/gl-core/src/source/image.ts:193](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L193)
 
 ___
 
@@ -475,7 +475,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:169](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L169)
+[packages/gl-core/src/source/image.ts:169](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L169)
 
 ___
 
@@ -552,7 +552,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:106](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L106)
+[packages/gl-core/src/source/image.ts:106](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L106)
 
 ___
 
@@ -602,7 +602,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:111](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L111)
+[packages/gl-core/src/source/image.ts:111](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L111)
 
 ___
 
@@ -622,7 +622,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:173](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L173)
+[packages/gl-core/src/source/image.ts:173](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L173)
 
 ___
 
@@ -642,7 +642,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:130](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L130)
+[packages/gl-core/src/source/image.ts:130](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L130)
 
 ___
 
@@ -663,7 +663,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:279](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L279)
+[packages/gl-core/src/source/image.ts:279](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L279)
 
 ___
 
@@ -684,7 +684,7 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:117](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L117)
+[packages/gl-core/src/source/image.ts:117](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L117)
 
 ___
 
@@ -705,4 +705,4 @@ ___
 
 #### Defined in
 
-[packages/gl-core/src/source/image.ts:122](https://github.com/sakitam-fdd/wind-layer/blob/a0de2bd/packages/gl-core/src/source/image.ts#L122)
+[packages/gl-core/src/source/image.ts:122](https://github.com/sakitam-fdd/wind-layer/blob/fa9bdd2/packages/gl-core/src/source/image.ts#L122)
