@@ -3,12 +3,10 @@
 </template>
 
 <script setup lang="ts">
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { onMounted, ref } from 'vue';
 // import { Repl, ReplStore } from '@vue/repl';
 import mapboxgl from 'mapbox-gl';
 import { Layer, ImageSource, RenderType } from '@sakitam-gis/mapbox-wind';
-import { config } from '../../../const';
 
 defineOptions({
   name: 'SampleRaster',
@@ -30,7 +28,7 @@ const emits = defineEmits(['mount']);
 let map;
 
 function initMap() {
-  mapboxgl.accessToken = config.mbglToken;
+  mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94LWdsLWpzIiwiYSI6ImNram9ybGI1ajExYjQyeGxlemppb2pwYjIifQ.LGy5UGNIsXUZdYMvfYRiAQ';
   map = new mapboxgl.Map({
     container: mapRef.value,
     center: { lng: 105.70150033978689, lat: 22.76021405309811 }, // starting position [lng, lat]
@@ -101,4 +99,11 @@ defineExpose({
 });
 </script>
 
-<style></style>
+<style>
+@import "https://esm.sh/mapbox-gl/dist/mapbox-gl.css";
+
+.playground-content {
+  width: 100%;
+  height: 450px;
+}
+</style>

@@ -36,7 +36,7 @@ function nav() {
     { text: 'Guide', link: '/guide/getting-started', activeMatch: '/guide/' },
     {
       text: 'Playgrounds',
-      link: '/playgrounds/mapbox-gl/raster/sample',
+      link: '/playgrounds/mapbox-gl/raster',
       target: '',
       activeMatch: '/playgrounds/',
     },
