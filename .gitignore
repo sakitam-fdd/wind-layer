@@ -40,3 +40,4 @@ coverage
 # others
 .env
 .env.local
+/docs/api/

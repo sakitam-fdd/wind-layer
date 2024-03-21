@@ -14,6 +14,23 @@ type SidebarItem = {
   }[];
 }[];
 
+const pkgs = [
+  { text: 'wind-core', link: '/api/wind-core/' },
+  { text: 'wind-gl-core', link: '/api/wind-gl-core/' },
+  { text: '@sakitam-gis/mapbox-wind', link: '/api/mapbox-wind/' },
+  { text: '@sakitam-gis/maplibre-wind', link: '/api/maplibre-wind/' },
+  { text: '@sakitam-gis/maptalks-wind', link: '/api/maptalks-wind/' },
+  { text: 'ol-wind', link: '/api/ol-wind/' },
+  { text: 'ol5-wind', link: '/api/ol5-wind/' },
+  { text: 'openlayers-wind', link: '/api/openlayers-wind/' },
+  { text: 'leaflet-wind', link: '/api/leaflet-wind/' },
+  { text: 'wind-gl-worker', link: '/api/wind-gl-worker/' },
+  { text: 'amap-wind', link: '/api/amap-wind/' },
+  { text: 'bmap-wind', link: '/api/bmap-wind/' },
+  { text: '@sakitam-gis/rbush', link: '/api/rbush/' },
+  { text: 'particles-poc', link: '/api/particles-poc/' },
+];
+
 function nav() {
   return [
     { text: 'Guide', link: '/guide/getting-started', activeMatch: '/guide/' },
@@ -28,11 +45,7 @@ function nav() {
       items: [
         {
           text: 'wind-layer',
-          items: [
-            { text: 'all', link: '/api/' },
-            { text: 'gl-core', link: '/api/modules/gl_core_src' },
-            { text: 'mapbox-gl 插件', link: '/api/modules/mapbox_gl_src' },
-          ],
+          items: pkgs,
         },
       ],
     },
@@ -41,7 +54,7 @@ function nav() {
       items: [
         {
           text: 'Changelog',
-          link: 'https://github.com/sakitam-fdd/wind-layer/blob/master/CHANGELOG.md'
+          link: 'https://github.com/sakitam-fdd/wind-layer/releases'
         },
         {
           text: 'Contributing',
@@ -156,9 +169,9 @@ function autoSidebar(dirs: string[]): SidebarItem[] {
   return getSidebarItems(dirs, root, root);
 }
 
-function sidebar(root = '', packages: string) {
+function sidebar(root = '', packagesPath: string) {
   const index: { [key: string]: { text: string; link: string }[] } = {};
-  const mds = readFileSync(`${__dirname}/../${packages}/index.md`, 'utf-8').match(/.*.(\n|\r)/g) as string[];
+  const mds = readFileSync(`${__dirname}/../${packagesPath}/index.md`, 'utf-8').match(/.*.(\n|\r)/g) as string[];
   let lastTitle = '';
   for (const line of mds) {
     if (line.match(/# @/)) continue;
@@ -171,7 +184,7 @@ function sidebar(root = '', packages: string) {
       if (md && text) {
         index[lastTitle].push({
           text: text[0],
-          link: `${root}/${packages}/${md[0]}`,
+          link: `${root}/${packagesPath}/${md[0]}`,
         });
       }
     }
@@ -180,14 +193,11 @@ function sidebar(root = '', packages: string) {
   const s: SidebarItem = [
     {
       text: 'Packages',
-      items: [
-        {
-          text: '@sakitam-gis/core',
-          link: '/core/',
-        },
-      ],
+      // items: pkgs.filter(p => p.link === `/${packagesPath}/`),
+      items: pkgs,
     },
   ];
+
   for (const i in index) {
     s.push({
       text: i,
@@ -248,7 +258,20 @@ export default defineConfig({
     sidebar: {
       '/guide/': sidebarGuide(),
       '/playgrounds/': autoSidebar(['playgrounds'])[0],
-      '/api/': sidebar('', 'api'),
+      '/api/wind-core/': sidebar('', 'api/wind-core'),
+      '/api/wind-gl-core/': sidebar('', 'api/wind-gl-core'),
+      '/api/mapbox-wind/': sidebar('', 'api/mapbox-wind'),
+      '/api/maplibre-wind/': sidebar('', 'api/maplibre-wind'),
+      '/api/maptalks-wind/': sidebar('', 'api/maptalks-wind'),
+      '/api/ol-wind/': sidebar('', 'api/ol-wind'),
+      '/api/ol5-wind/': sidebar('', 'api/ol5-wind'),
+      '/api/openlayers-wind/': sidebar('', 'api/openlayers-wind'),
+      '/api/leaflet-wind/': sidebar('', 'api/leaflet-wind'),
+      '/api/wind-gl-worker/': sidebar('', 'api/wind-gl-worker'),
+      '/api/amap-wind/': sidebar('', 'api/amap-wind'),
+      '/api/bmap-wind/': sidebar('', 'api/bmap-wind'),
+      '/api/rbush/': sidebar('', 'api/rbush'),
+      '/api/particles-poc/': sidebar('', 'api/particles-poc'),
     },
     footer: {
       message: 'Released under the MIT License.',

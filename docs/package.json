@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "api": "node scripts/generate-docs.cjs",
     "dev": "vitepress dev --base /",
     "build": "vitepress build --base /wind-layer/",
     "serve": "vitepress serve docs"

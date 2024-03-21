@@ -57,6 +57,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
+    "api": "typedoc",
     "clean": "rimraf dist",
     "dev": "cross-env NODE_ENV=development rollup -wm -c rollup.config.ts --configPlugin esbuild",
     "build": "rollup --c rollup.config.ts --configPlugin esbuild",

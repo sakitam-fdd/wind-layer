@@ -25,6 +25,8 @@
       "cache": false,
       "dependsOn": ["build"]
     },
-    "docs": {}
+    "api": {
+      "cache": false
+    }
   }
 }

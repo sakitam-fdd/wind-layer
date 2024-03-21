@@ -1,0 +1,25 @@
+{
+  "entryPoints": [
+    "./src/index.ts"
+  ],
+  "gitRevision": "master",
+  "sourceLinkTemplate": "https://github.com/sakitam-fdd/wind-layer/blob/{gitRevision}/{path}#L{line}",
+  "excludeExternals": true,
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "excludeProtected": true,
+  "hideGenerator": true,
+  "includeVersion": true,
+  "hideBreadcrumbs": true,
+  "allReflectionsHaveOwnDocument": true,
+  "sort": ["source-order"],
+  "plugin": [
+    "typedoc-plugin-markdown",
+    "typedoc-plugin-not-exported"
+  ],
+  "name": "wind-gl-worker",
+  "out": "../../docs/api/wind-gl-worker",
+  "readme": "none",
+  "entryDocument": "index.md",
+  "tsconfig": "./tsconfig.docs.json"
+}

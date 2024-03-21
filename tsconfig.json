@@ -1,35 +1,29 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "forceConsistentCasingInFileNames": true,
+    "strict": false,
     "allowJs": true,
     "sourceMap": true,
     "esModuleInterop": true,
+    "declaration": true,
     "declarationMap": true,
     "experimentalDecorators": true,
     "strictNullChecks": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "noUnusedLocals": true,
+    "isolatedModules": true,
+    "removeComments": false,
     "moduleResolution": "node",
     "module": "esnext",
     "target": "esnext",
     "jsx": "preserve",
-    "lib": [
-      "esnext",
-      "dom"
-    ],
     "types": ["node", "vitest"],
-    "allowSyntheticDefaultImports": true
+    "lib": ["esnext", "dom", "webworker"],
+    "useDefineForClassFields": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true
   },
-  "include": [
-    "packages/*/src/**/*.ts",
-    "packages/*/typings.d.ts",
-    "packages/*/__tests__/**/*.ts"
-  ],
-  "exclude": [
-    "**/node_modules/**",
-    "**/dist/**",
-    "packages/*/src/**/*.glsl"
-  ]
+  "include": ["packages/*/src/**/*.ts", "packages/*/typings.d.ts", "packages/*/__tests__/**/*.ts"],
+  "exclude": ["**/node_modules/**", "**/dist/**", "packages/*/src/**/*.glsl"]
 }
