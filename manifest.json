@@ -1,0 +1,11 @@
+{
+  "name": "wind-layer",
+  "short_name": "wind-layer",
+  "description": "a openlayers && maptalks && amap && bmap && leaflet && mapbox-gl && maplibre-gl extension like windy.com",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#1e1e20",
+  "theme_color": "#1e1e20",
+  "icons": [],
+  "lang": "zh"
+}
