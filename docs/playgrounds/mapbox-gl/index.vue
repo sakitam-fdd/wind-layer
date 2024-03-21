@@ -6,7 +6,6 @@
 import { onMounted, ref } from 'vue';
 // import { Repl, ReplStore } from '@vue/repl';
 import mapboxgl from 'mapbox-gl';
-import { Layer, ImageSource, RenderType } from '@sakitam-gis/mapbox-wind';
 
 defineOptions({
   name: 'SampleRaster',
@@ -51,39 +50,42 @@ function initMap() {
   });
 
   map.on('load', () => {
-    const source = new ImageSource('carto', {
-      url: 'https://a.basemaps.cartocdn.com/light_all/0/0/0.png',
-      coordinates: [
-        [-180, 85.051129],
-        [180, 85.051129],
-        [180, -85.051129],
-        [-180, -85.051129],
-      ],
-      wrapX: true,
-    });
+    import('@sakitam-gis/mapbox-wind')
+      .then(({ Layer, ImageSource, RenderType }) => {
+        const source = new ImageSource('carto', {
+          url: 'https://a.basemaps.cartocdn.com/light_all/0/0/0.png',
+          coordinates: [
+            [-180, 85.051129],
+            [180, 85.051129],
+            [180, -85.051129],
+            [-180, -85.051129],
+          ],
+          wrapX: true,
+        });
 
-    const layer = new Layer('carto', source, {
-      styleSpec: {
-        'opacity': [
-          'interpolate',
-          ['exponential', 0.5],
-          ['zoom'],
-          1,
-          1,
-          2,
-          1
-        ],
-      },
-      renderType: RenderType.image,
-      picking: true,
-      // mask: {
-      //   data: clip,
-      //   // type: mapboxWind.MaskType.outside,
-      //   type: MaskType.inside, // 默认是 inside，即只显示范围内的
-      // }
-    });
+        const layer = new Layer('carto', source, {
+          styleSpec: {
+            'opacity': [
+              'interpolate',
+              ['exponential', 0.5],
+              ['zoom'],
+              1,
+              1,
+              2,
+              1
+            ],
+          },
+          renderType: RenderType.image,
+          picking: true,
+          // mask: {
+          //   data: clip,
+          //   // type: mapboxWind.MaskType.outside,
+          //   type: MaskType.inside, // 默认是 inside，即只显示范围内的
+          // }
+        });
 
-    map.addLayer(layer);
+        map.addLayer(layer);
+      })
   });
 
   emits('mount');

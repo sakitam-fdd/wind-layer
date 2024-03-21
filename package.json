@@ -47,6 +47,7 @@
     "@rollup/plugin-replace": "^5.0.1",
     "@rollup/plugin-eslint": "^9.0.0",
     "@rollup/plugin-json": "^5.0.1",
+    "@vitest/coverage-v8": "^1.4.0",
     "canvas": "^2.10.2",
     "jsdom": "^20.0.3",
     "cross-env": "^7.0.3",

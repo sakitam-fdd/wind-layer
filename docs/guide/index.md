@@ -208,5 +208,3 @@ export interface IField {
 | `frameRate` | 帧率（ms） | `number` | `20` |
 
 ## @sakitam-gis/mapbox-wind 参数说明
-
-<sfc-playground src="./index.vue" language="vue" title="" desc="plotty渲染"></sfc-playground>

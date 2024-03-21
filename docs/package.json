@@ -8,7 +8,7 @@
     "serve": "vitepress serve docs"
   },
   "dependencies": {
-    "@sakitam-gis/vitepress-playground": "^1.1.2",
+    "@sakitam-gis/vitepress-playground": "^1.1.3",
     "@sakitam-gis/maptalks-wind": "workspace:*",
     "@sakitam-gis/mapbox-wind": "workspace:*",
     "@sakitam-gis/maplibre-wind": "workspace:*",

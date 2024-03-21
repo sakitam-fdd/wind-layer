@@ -114,7 +114,7 @@ jobs:
       - run: npm i -g pnpm@8.6.5
       - run: pnpm i --no-frozen-lockfile
       - run: pnpm build
-      - run: pnpm docs:api
+      - run: pnpm run api
       - run: pnpm docs:build
 
       - name: Deploy
