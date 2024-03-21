@@ -1,5 +1,14 @@
 # @sakitam-gis/maptalks-wind
 
+## 2.0.2
+
+### Patch Changes
+
+- [`9089371`](https://github.com/sakitam-fdd/wind-layer/commit/9089371bd2f7afdd074f500cb73fd532695e20b8) Thanks [@sakitam-fdd](https://github.com/sakitam-fdd)! - bump version
+
+- Updated dependencies [[`9089371`](https://github.com/sakitam-fdd/wind-layer/commit/9089371bd2f7afdd074f500cb73fd532695e20b8)]:
+  - wind-core@1.1.6
+
 ## 2.0.1
 
 ### Patch Changes
