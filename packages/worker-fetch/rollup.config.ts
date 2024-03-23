@@ -2,7 +2,8 @@ import fs from 'fs';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
-import { RollupOptions, defineConfig } from 'rollup';
+import type { RollupOptions } from 'rollup';
+import { defineConfig } from 'rollup';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import esbuild from 'rollup-plugin-esbuild';
@@ -28,9 +29,7 @@ const external = [];
 
 const plugins = [
   alias({
-    entries: [
-      { find: '@', replacement: r('./src') },
-    ],
+    entries: [{ find: '@', replacement: r('./src') }],
   }),
   replace({
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
@@ -52,7 +51,7 @@ const amdBuild: RollupOptions = {
     dir: 'dist/build/wgw',
     sourcemap: 'inline',
     indent: false,
-    chunkFileNames: 'shared.js'
+    chunkFileNames: 'shared.js',
   },
   external,
   plugins,
@@ -72,9 +71,7 @@ const esmBuild: RollupOptions = {
     intro: fs.readFileSync('./bundle/prelude.js', 'utf8'),
   },
   external,
-  plugins: [
-    sourcemaps(),
-  ],
+  plugins: [sourcemaps()],
   treeshake: false,
   onwarn(warning, warn) {
     if (warning.code !== 'EVAL') warn(warning);
@@ -91,13 +88,11 @@ const cjsBuild: RollupOptions = {
     intro: fs.readFileSync('./bundle/prelude.js', 'utf8'),
   },
   external,
-  plugins: [
-    sourcemaps(),
-  ],
+  plugins: [sourcemaps()],
   onwarn(warning, warn) {
     if (warning.code !== 'EVAL') warn(warning);
   },
-}
+};
 
 const umdBuild: RollupOptions = {
   input: r('bundle/index.js'),
@@ -106,19 +101,18 @@ const umdBuild: RollupOptions = {
     dir: undefined,
     name: pkg.namespace,
     sourcemap: !MINIFY,
-    globals: {
-    },
-    file: MINIFY ? pkg.main.split('.').splice(pkg.main.split('.').length - 1, 0, 'min').join('.') : pkg.main,
+    globals: {},
+    file: MINIFY
+      ? pkg.main
+          .split('.')
+          .splice(pkg.main.split('.').length - 1, 0, 'min')
+          .join('.')
+      : pkg.main,
     indent: false,
     intro: fs.readFileSync('./bundle/prelude.js', 'utf8'),
   },
   external,
-  plugins: [
-    sourcemaps(),
-    ...(MINIFY ? [
-      terser(),
-    ] : []),
-  ],
+  plugins: [sourcemaps(), ...(MINIFY ? [terser()] : [])],
   onwarn(warning, warn) {
     if (warning.code !== 'EVAL') warn(warning);
   },
@@ -131,14 +125,10 @@ const typesBuild: RollupOptions = {
     file: pkg.types,
   },
   external,
-  plugins: [
-    dts({ respectExternal: true }),
-  ],
+  plugins: [dts({ respectExternal: true })],
 };
 
-const config = defineConfig([
-  amdBuild,
-]);
+const config = defineConfig([amdBuild]);
 
 config.push(esmBuild);
 config.push(umdBuild);

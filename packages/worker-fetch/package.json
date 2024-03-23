@@ -28,18 +28,6 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "node": {
-        "import": {
-          "production": "./dist/index.esm.js",
-          "development": "./dist/index.esm.js",
-          "default": "./dist/index.esm.js"
-        },
-        "require": {
-          "production": "./dist/index.cjs.js",
-          "development": "./dist/index.cjs.js",
-          "default": "./dist/index.cjs.js"
-        }
-      },
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js"
     },

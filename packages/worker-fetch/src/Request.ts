@@ -1,16 +1,9 @@
-import { parse } from 'exifr';
+import { parse } from 'exifr/dist/lite.esm';
 import RequestScheduler from './RequestScheduler';
-import {
-  arrayBufferToImageBitmap,
-  getReferrer,
-  isWorker,
-  warnOnce,
-  parseMetedata,
-  isImageBitmap,
-} from './util';
+import { arrayBufferToImageBitmap, getReferrer, isWorker, warnOnce, parseMetedata, isImageBitmap } from './util';
 import { decode, toRGBA8 } from './UPNG';
 
-export type RequestParameters = {
+export interface RequestParameters {
   url: string;
   headers?: any;
   method?: 'GET' | 'POST' | 'PUT';
@@ -18,7 +11,7 @@ export type RequestParameters = {
   type?: 'string' | 'json' | 'arrayBuffer';
   credentials?: 'same-origin' | 'include';
   collectResourceTiming?: boolean;
-};
+}
 
 export type ResponseCallback<T> = (
   error?: Error | null,
@@ -65,13 +58,9 @@ export class AJAXError extends Error {
   }
 }
 
-const isFileURL = (url) =>
-  /^file:/.test(url) || (/^file:/.test(getReferrer()) && !/^\w+:/.test(url));
+const isFileURL = (url) => /^file:/.test(url) || (/^file:/.test(getReferrer()) && !/^\w+:/.test(url));
 
-function makeFetchRequest(
-  requestParameters: RequestParameters,
-  callback: ResponseCallback<any>,
-): Cancelable {
+function makeFetchRequest(requestParameters: RequestParameters, callback: ResponseCallback<any>): Cancelable {
   const controller = new AbortController();
   const request = new Request(requestParameters.url, {
     method: requestParameters.method || 'GET',
@@ -117,11 +106,7 @@ function makeFetchRequest(
         } else {
           return response
             .blob()
-            .then((body) =>
-              callback(
-                new AJAXError(response.status, response.statusText, requestParameters.url, body),
-              ),
-            );
+            .then((body) => callback(new AJAXError(response.status, response.statusText, requestParameters.url, body)));
         }
       })
       .catch((error) => {
@@ -137,18 +122,13 @@ function makeFetchRequest(
     (requestParameters.type === 'arrayBuffer'
       ? response.arrayBuffer()
       : requestParameters.type === 'json'
-      ? response.json()
-      : response.text()
+        ? response.json()
+        : response.text()
     )
       .then((result) => {
         if (aborted) return;
         complete = true;
-        callback(
-          null,
-          result,
-          response.headers.get('Cache-Control'),
-          response.headers.get('Expires'),
-        );
+        callback(null, result, response.headers.get('Cache-Control'), response.headers.get('Expires'));
       })
       .catch((err) => {
         if (!aborted) callback(new Error(err.message));
@@ -165,10 +145,7 @@ function makeFetchRequest(
   };
 }
 
-function makeXMLHttpRequest(
-  requestParameters: RequestParameters,
-  callback: ResponseCallback<any>,
-): Cancelable {
+function makeXMLHttpRequest(requestParameters: RequestParameters, callback: ResponseCallback<any>): Cancelable {
   const xhr: XMLHttpRequest = new XMLHttpRequest();
 
   xhr.open(requestParameters.method || 'GET', requestParameters.url, true);
@@ -197,12 +174,7 @@ function makeXMLHttpRequest(
           return callback(err);
         }
       }
-      callback(
-        null,
-        data,
-        xhr.getResponseHeader('Cache-Control'),
-        xhr.getResponseHeader('Expires'),
-      );
+      callback(null, data, xhr.getResponseHeader('Cache-Control'), xhr.getResponseHeader('Expires'));
     } else {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -246,13 +218,7 @@ export const makeRequest = function (
     }
     if (isWorker() && (self as any).worker && (self as any).worker.actor) {
       const queueOnMainThread = true;
-      return (self as any).worker.actor.send(
-        'getResource',
-        requestParameters,
-        callback,
-        undefined,
-        queueOnMainThread,
-      );
+      return (self as any).worker.actor.send('getResource', requestParameters, callback, undefined, queueOnMainThread);
     }
   }
   return makeXMLHttpRequest(requestParameters, callback);
@@ -277,11 +243,7 @@ export class RequestAdapter {
     this.requestScheduler = new RequestScheduler(options);
   }
 
-  getResource(
-    mapId: string,
-    params: RequestParameters,
-    callback: ResponseCallback<any>,
-  ): Cancelable {
+  getResource(mapId: string, params: RequestParameters, callback: ResponseCallback<any>): Cancelable {
     return makeRequest(params, callback);
   }
 
@@ -325,9 +287,7 @@ export class RequestAdapter {
   arrayBuffer2tiff(data: ArrayBuffer, callback: any) {
     // @ts-ignore
     if (!self.GeoTIFF) {
-      throw new Error(
-        'Must config [geotiff](https://github.com/geotiffjs/geotiff.js) dep use `configDeps`',
-      );
+      throw new Error('Must config [geotiff](https://github.com/geotiffjs/geotiff.js) dep use `configDeps`');
     }
     // @ts-ignore
     self.GeoTIFF.fromArrayBuffer(data)
@@ -357,9 +317,7 @@ export class RequestAdapter {
             result.ymax = originY;
             result.ymin = result.ymax - height * result.pixelHeight;
 
-            result.noDataValue = fileDirectory.GDAL_NODATA
-              ? parseFloat(fileDirectory.GDAL_NODATA)
-              : null;
+            result.noDataValue = fileDirectory.GDAL_NODATA ? parseFloat(fileDirectory.GDAL_NODATA) : null;
 
             result.numberOfRasters = fileDirectory.SamplesPerPixel;
 

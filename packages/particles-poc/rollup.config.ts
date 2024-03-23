@@ -11,7 +11,6 @@ import replace from '@rollup/plugin-replace';
 import alias from '@rollup/plugin-alias';
 import dts from 'rollup-plugin-dts';
 import { terser } from 'rollup-plugin-terser';
-import worker from 'rollup-plugin-web-worker-loader';
 import sourcemaps from 'rollup-plugin-sourcemaps';
 
 const rq = createRequire(import.meta.url);
@@ -40,11 +39,6 @@ const plugins = [
   glslify(),
   json({
     namedExports: true,
-  }),
-  worker({
-    sourcemap: true,
-    inline: true,
-    extensions: ['.js', 'ts'],
   }),
   commonjs(),
   nodeResolve({ preferBuiltins: false }),

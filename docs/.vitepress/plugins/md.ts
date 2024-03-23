@@ -32,7 +32,7 @@ function getDemoComponent(md: any, env, { title, desc, path, code, ...props }: a
       desc="${desc ?? ''}"
       importMap="${encodeURIComponent(importMap)}"
     >
-        <${componentName}></${componentName}>
+      <${componentName}></${componentName}>
     </${DemoTag}>
   `.trim();
 }

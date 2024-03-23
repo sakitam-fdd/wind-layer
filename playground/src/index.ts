@@ -16,75 +16,75 @@ import { WindLayer } from 'ol-wind';
 const image = new CircleStyle({
   radius: 5,
   fill: undefined,
-  stroke: new Stroke({color: 'red', width: 1})
+  stroke: new Stroke({ color: 'red', width: 1 }),
 });
 
 const styles = {
-  'Point': new Style({
-    image: image
+  Point: new Style({
+    image,
   }),
-  'LineString': new Style({
+  LineString: new Style({
     stroke: new Stroke({
       color: 'green',
-      width: 1
-    })
+      width: 1,
+    }),
   }),
-  'MultiLineString': new Style({
+  MultiLineString: new Style({
     stroke: new Stroke({
       color: 'green',
-      width: 1
-    })
+      width: 1,
+    }),
   }),
-  'MultiPoint': new Style({
-    image: image
+  MultiPoint: new Style({
+    image,
   }),
-  'MultiPolygon': new Style({
+  MultiPolygon: new Style({
     stroke: new Stroke({
       color: 'yellow',
-      width: 1
+      width: 1,
     }),
     fill: new Fill({
-      color: 'rgba(255, 255, 0, 0.1)'
-    })
+      color: 'rgba(255, 255, 0, 0.1)',
+    }),
   }),
-  'Polygon': new Style({
+  Polygon: new Style({
     stroke: new Stroke({
       color: 'blue',
       lineDash: [4],
-      width: 3
+      width: 3,
     }),
     fill: new Fill({
-      color: 'rgba(0, 0, 255, 0.1)'
-    })
+      color: 'rgba(0, 0, 255, 0.1)',
+    }),
   }),
-  'GeometryCollection': new Style({
+  GeometryCollection: new Style({
     stroke: new Stroke({
       color: 'magenta',
-      width: 2
+      width: 2,
     }),
     fill: new Fill({
-      color: 'magenta'
+      color: 'magenta',
     }),
     image: new CircleStyle({
       radius: 10,
       fill: undefined,
       stroke: new Stroke({
-        color: 'magenta'
-      })
-    })
+        color: 'magenta',
+      }),
+    }),
   }),
-  'Circle': new Style({
+  Circle: new Style({
     stroke: new Stroke({
       color: 'red',
-      width: 2
+      width: 2,
     }),
     fill: new Fill({
-      color: 'rgba(255,0,0,0.2)'
-    })
-  })
+      color: 'rgba(255,0,0,0.2)',
+    }),
+  }),
 };
 
-const styleFunction = function(feature) {
+const styleFunction = function (feature) {
   return styles[feature.getGeometry().getType()];
 };
 
@@ -97,76 +97,142 @@ function initMap() {
   });
 
   const vectorSource = new VectorSource({
-    features: (new GeoJSON()).readFeatures({
-      'type': 'FeatureCollection',
-      'crs': {
-        'type': 'name',
-        'properties': {
-          'name': 'EPSG:3857'
-        }
+    features: new GeoJSON().readFeatures({
+      type: 'FeatureCollection',
+      crs: {
+        type: 'name',
+        properties: {
+          name: 'EPSG:3857',
+        },
       },
-      'features': [{
-        'type': 'Feature',
-        'geometry': {
-          'type': 'Point',
-          'coordinates': [0, 0]
-        }
-      }, {
-        'type': 'Feature',
-        'geometry': {
-          'type': 'LineString',
-          'coordinates': [[4e6, -2e6], [8e6, 2e6]]
-        }
-      }, {
-        'type': 'Feature',
-        'geometry': {
-          'type': 'LineString',
-          'coordinates': [[4e6, 2e6], [8e6, -2e6]]
-        }
-      }, {
-        'type': 'Feature',
-        'geometry': {
-          'type': 'Polygon',
-          'coordinates': [[[-5e6, -1e6], [-4e6, 1e6], [-3e6, -1e6]]]
-        }
-      }, {
-        'type': 'Feature',
-        'geometry': {
-          'type': 'MultiLineString',
-          'coordinates': [
-            [[-1e6, -7.5e5], [-1e6, 7.5e5]],
-            [[1e6, -7.5e5], [1e6, 7.5e5]],
-            [[-7.5e5, -1e6], [7.5e5, -1e6]],
-            [[-7.5e5, 1e6], [7.5e5, 1e6]]
-          ]
-        }
-      }, {
-        'type': 'Feature',
-        'geometry': {
-          'type': 'MultiPolygon',
-          'coordinates': [
-            [[[-5e6, 6e6], [-5e6, 8e6], [-3e6, 8e6], [-3e6, 6e6]]],
-            [[[-2e6, 6e6], [-2e6, 8e6], [0, 8e6], [0, 6e6]]],
-            [[[1e6, 6e6], [1e6, 8e6], [3e6, 8e6], [3e6, 6e6]]]
-          ]
-        }
-      }, {
-        'type': 'Feature',
-        'geometry': {
-          'type': 'GeometryCollection',
-          'geometries': [{
-            'type': 'LineString',
-            'coordinates': [[-5e6, -5e6], [0, -5e6]]
-          }, {
-            'type': 'Point',
-            'coordinates': [4e6, -5e6]
-          }, {
-            'type': 'Polygon',
-            'coordinates': [[[1e6, -6e6], [2e6, -4e6], [3e6, -6e6]]]
-          }]
-        }
-      }]
-    })
+      features: [
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [0, 0],
+          },
+        },
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: [
+              [4e6, -2e6],
+              [8e6, 2e6],
+            ],
+          },
+        },
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: [
+              [4e6, 2e6],
+              [8e6, -2e6],
+            ],
+          },
+        },
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [
+              [
+                [-5e6, -1e6],
+                [-4e6, 1e6],
+                [-3e6, -1e6],
+              ],
+            ],
+          },
+        },
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'MultiLineString',
+            coordinates: [
+              [
+                [-1e6, -7.5e5],
+                [-1e6, 7.5e5],
+              ],
+              [
+                [1e6, -7.5e5],
+                [1e6, 7.5e5],
+              ],
+              [
+                [-7.5e5, -1e6],
+                [7.5e5, -1e6],
+              ],
+              [
+                [-7.5e5, 1e6],
+                [7.5e5, 1e6],
+              ],
+            ],
+          },
+        },
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'MultiPolygon',
+            coordinates: [
+              [
+                [
+                  [-5e6, 6e6],
+                  [-5e6, 8e6],
+                  [-3e6, 8e6],
+                  [-3e6, 6e6],
+                ],
+              ],
+              [
+                [
+                  [-2e6, 6e6],
+                  [-2e6, 8e6],
+                  [0, 8e6],
+                  [0, 6e6],
+                ],
+              ],
+              [
+                [
+                  [1e6, 6e6],
+                  [1e6, 8e6],
+                  [3e6, 8e6],
+                  [3e6, 6e6],
+                ],
+              ],
+            ],
+          },
+        },
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'GeometryCollection',
+            geometries: [
+              {
+                type: 'LineString',
+                coordinates: [
+                  [-5e6, -5e6],
+                  [0, -5e6],
+                ],
+              },
+              {
+                type: 'Point',
+                coordinates: [4e6, -5e6],
+              },
+              {
+                type: 'Polygon',
+                coordinates: [
+                  [
+                    [1e6, -6e6],
+                    [2e6, -4e6],
+                    [3e6, -6e6],
+                  ],
+                ],
+              },
+            ],
+          },
+        },
+      ],
+    }),
   });
 
   vectorSource.addFeature(new Feature(new Circle([5e6, 7e6], 1e6)));
@@ -174,16 +240,16 @@ function initMap() {
   const vectorLayer = new VectorLayer({
     source: vectorSource,
     // @ts-ignore
-    style: styleFunction
+    style: styleFunction,
   });
 
   const image = new ImageLayer({
     source: new ImageStatic({
       url: 'https://imgs.xkcd.com/comics/online_communities.png',
       projection: 'EPSG:4326',
-      imageExtent: [-180, -90, 180, 90].map(i => i / 4),
+      imageExtent: [-180, -90, 180, 90].map((i) => i / 4),
     }),
-  })
+  });
 
   const map = new Map({
     layers: [layer, vectorLayer],
@@ -204,7 +270,7 @@ function initMap() {
     source: drawSource,
   });
 
-  const modify = new Modify({source: drawSource});
+  const modify = new Modify({ source: drawSource });
   map.addInteraction(modify);
 
   function addInteractions() {
@@ -213,7 +279,7 @@ function initMap() {
       type: 'LineString',
     });
     map.addInteraction(draw);
-    snap = new Snap({source: drawSource});
+    snap = new Snap({ source: drawSource });
     map.addInteraction(snap);
   }
 
@@ -236,7 +302,7 @@ function initMap() {
 
     // @ts-ignore
     const gui = new dat.GUI();
-    gui.add(config, 'addLayer').onChange(function () {
+    gui.add(config, 'addLayer').onChange(() => {
       if (config.addLayer) {
         // windLayer.setMap(map);
         // @ts-ignore
@@ -247,30 +313,30 @@ function initMap() {
         window.map.removeLayer(windLayer);
       }
     });
-    gui.add(config, 'globalAlpha', 0.01, 1).onChange(function () {
+    gui.add(config, 'globalAlpha', 0.01, 1).onChange(() => {
       windLayer.setWindOptions({
         globalAlpha: config.globalAlpha,
       });
     });
-    gui.add(config, 'maxAge', 1, 200).onChange(function () {
+    gui.add(config, 'maxAge', 1, 200).onChange(() => {
       windLayer.setWindOptions({
         maxAge: config.maxAge,
       });
     });
 
-    gui.add(config, 'paths', 500, 8000).onChange(function () {
+    gui.add(config, 'paths', 500, 8000).onChange(() => {
       windLayer.setWindOptions({
         paths: config.paths,
       });
     });
 
-    gui.add(config, 'lineWidth', 1, 10).onChange(function () {
+    gui.add(config, 'lineWidth', 1, 10).onChange(() => {
       windLayer.setWindOptions({
         lineWidth: config.lineWidth,
       });
     });
 
-    gui.add(config, 'velocityScale', 0.001, 0.1).onChange(function () {
+    gui.add(config, 'velocityScale', 0.001, 0.1).onChange(() => {
       windLayer.setWindOptions({
         velocityScale: config.velocityScale,
       });
@@ -279,8 +345,8 @@ function initMap() {
 
   // fetch('https://sakitam-fdd.github.io/wind-layer/data/wind.json')
   fetch('https://sakitam.oss-cn-beijing.aliyuncs.com/codepen/wind-layer/json/wind.json')
-    .then(res => res.json())
-    .then(res => {
+    .then((res) => res.json())
+    .then((res) => {
       const windLayer = new WindLayer(res, {
         forceRender: false,
         windOptions: {
@@ -289,21 +355,21 @@ function initMap() {
           paths: 3200,
           // eslint-disable-next-line no-unused-vars
           colorScale: [
-            "rgb(36,104, 180)",
-            "rgb(60,157, 194)",
-            "rgb(128,205,193 )",
-            "rgb(151,218,168 )",
-            "rgb(198,231,181)",
-            "rgb(238,247,217)",
-            "rgb(255,238,159)",
-            "rgb(252,217,125)",
-            "rgb(255,182,100)",
-            "rgb(252,150,75)",
-            "rgb(250,112,52)",
-            "rgb(245,64,32)",
-            "rgb(237,45,28)",
-            "rgb(220,24,32)",
-            "rgb(180,0,35)"
+            'rgb(36,104, 180)',
+            'rgb(60,157, 194)',
+            'rgb(128,205,193 )',
+            'rgb(151,218,168 )',
+            'rgb(198,231,181)',
+            'rgb(238,247,217)',
+            'rgb(255,238,159)',
+            'rgb(252,217,125)',
+            'rgb(255,182,100)',
+            'rgb(252,150,75)',
+            'rgb(250,112,52)',
+            'rgb(245,64,32)',
+            'rgb(237,45,28)',
+            'rgb(220,24,32)',
+            'rgb(180,0,35)',
           ],
           lineWidth: 3,
           // colorScale: scale,
@@ -344,7 +410,7 @@ function initMap() {
 
       setTimeout(() => {
         // map.removeLayer(windLayer1);
-        windLayer.setData(res)
+        windLayer.setData(res);
       }, 5 * 1000);
 
       map.addLayer(image);

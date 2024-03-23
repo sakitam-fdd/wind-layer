@@ -143,7 +143,7 @@ export interface TileSourceOptions {
   dataRange?: DataRange | [DataRange, DataRange];
   scheme?: 'xyz' | 'tms';
   subdomains?: (string | number)[];
-  roundZoom?: number;
+  roundZoom?: boolean;
   /**
    * 指定数据解析类型
    */

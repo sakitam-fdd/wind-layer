@@ -1,7 +1,8 @@
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
-import { RollupOptions, defineConfig } from 'rollup';
+import type { RollupOptions } from 'rollup';
+import { defineConfig } from 'rollup';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import esbuild from 'rollup-plugin-esbuild';
@@ -11,7 +12,6 @@ import replace from '@rollup/plugin-replace';
 import alias from '@rollup/plugin-alias';
 import dts from 'rollup-plugin-dts';
 import { terser } from 'rollup-plugin-terser';
-import worker from 'rollup-plugin-web-worker-loader';
 import sourcemaps from 'rollup-plugin-sourcemaps';
 
 const rq = createRequire(import.meta.url);
@@ -23,15 +23,11 @@ const PROD = !DEV;
 
 const r = (p: string) => resolve(ROOT, '..', p);
 
-const external = [
-  ...Object.keys(pkg.dependencies),
-];
+const external = [...Object.keys(pkg.dependencies).filter((k) => k !== 'wind-gl-worker')];
 
 const plugins = [
   alias({
-    entries: [
-      { find: '@', replacement: r('./src') },
-    ],
+    entries: [{ find: '@', replacement: r('./src') }],
   }),
   replace({
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
@@ -40,11 +36,6 @@ const plugins = [
   glslify(),
   json({
     namedExports: true,
-  }),
-  worker({
-    sourcemap: true,
-    inline: true,
-    extensions: ['.js', 'ts'],
   }),
   commonjs(),
   nodeResolve({ preferBuiltins: false }),
@@ -78,7 +69,7 @@ const cjsBuild: RollupOptions = {
   onwarn(warning, warn) {
     if (warning.code !== 'EVAL') warn(warning);
   },
-}
+};
 
 const umdBuild: RollupOptions = {
   input: r('src/index.ts'),
@@ -90,15 +81,15 @@ const umdBuild: RollupOptions = {
     globals: {
       '@sakitam-gis/vis-engine': 've',
     },
-    file: MINIFY ? pkg.main.split('.').splice(pkg.main.split('.').length - 1, 0, 'min').join('.') : pkg.main,
+    file: MINIFY
+      ? pkg.main
+          .split('.')
+          .splice(pkg.main.split('.').length - 1, 0, 'min')
+          .join('.')
+      : pkg.main,
   },
   external,
-  plugins: [
-    ...plugins,
-    ...(MINIFY ? [
-      terser(),
-    ] : []),
-  ],
+  plugins: [...plugins, ...(MINIFY ? [terser()] : [])],
   onwarn(warning, warn) {
     if (warning.code !== 'EVAL') warn(warning);
   },
@@ -111,9 +102,7 @@ const typesBuild: RollupOptions = {
     file: pkg.types,
   },
   external,
-  plugins: [
-    dts({ respectExternal: true }),
-  ],
+  plugins: [dts({ respectExternal: true })],
 };
 
 const config = defineConfig([]);

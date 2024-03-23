@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "vitepress dev --base /",
-    "build": "vitepress build --base /wind-layer/",
-    "serve": "vitepress serve docs"
+    "build": "vitepress build --base /",
+    "serve": "vitepress preview"
   },
   "dependencies": {
     "@sakitam-gis/vitepress-playground": "^1.1.3",
@@ -33,7 +33,9 @@
     "fs-extra": "^11.2.0",
     "markdown-it": "^14.0.0",
     "markdown-it-container": "^4.0.0",
-    "vitepress": "^1.0.0-rc.45",
-    "vue": "^3.3.7"
+    "vitepress": "^1.0.2",
+    "vite": "^5.1.3",
+    "vue": "^3.3.7",
+    "vite-plugin-external": "^4.3.0"
   }
 }

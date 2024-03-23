@@ -1,18 +1,19 @@
 /* eslint-disable no-restricted-globals */
 import { asyncAll, isWorker } from './util';
 import Actor from './Actor';
-import getRequest, { RequestAdapter } from './Request';
+import type { RequestAdapter } from './Request';
+import getRequest from './Request';
 
 export default class Worker {
-  self: any;
+  public self: any;
 
-  actor: Actor;
+  public actor: Actor;
 
-  referrer: string;
+  public referrer: string;
 
-  request: RequestAdapter;
+  public request: RequestAdapter;
 
-  cancelMap: Map<any, any> = new Map();
+  public cancelMap: Map<any, any> = new Map();
 
   constructor(self: any) {
     this.self = self;

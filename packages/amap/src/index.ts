@@ -262,7 +262,7 @@ class AMapWind {
       removeDomNode(this.canvas);
     }
     delete this.map;
-    // @ts-ignore
+    // @ts-ignore with undef
     delete this.canvas;
   }
 

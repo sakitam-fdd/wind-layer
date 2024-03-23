@@ -54,15 +54,15 @@ function nav() {
       items: [
         {
           text: 'Changelog',
-          link: 'https://github.com/sakitam-fdd/wind-layer/releases'
+          link: 'https://github.com/sakitam-fdd/wind-layer/releases',
         },
         {
           text: 'Contributing',
-          link: 'https://github.com/sakitam-fdd/wind-layer/blob/master/.github/contributing.md'
-        }
-      ]
-    }
-  ]
+          link: 'https://github.com/sakitam-fdd/wind-layer/blob/master/.github/contributing.md',
+        },
+      ],
+    },
+  ];
 }
 
 function sidebarGuide() {
@@ -70,9 +70,7 @@ function sidebarGuide() {
     {
       text: 'Introduction',
       collapsible: true,
-      items: [
-        { text: 'Getting Started', link: '/guide/getting-started' },
-      ]
+      items: [{ text: 'Getting Started', link: '/guide/getting-started' }],
     },
     {
       text: 'Cookbook',
@@ -88,29 +86,28 @@ function sidebarGuide() {
         { text: 'ol5', link: '/guide/ol5' },
         { text: 'ol3-4', link: '/guide/openlayers' },
         { text: 'amap', link: '/guide/amap' },
-        { text: 'bmap', link: '/guide/bmap' }
-      ]
+        { text: 'bmap', link: '/guide/bmap' },
+      ],
     },
-  ]
+  ];
 }
 
 const position = {
   false: 'push',
   true: 'unshift',
-}
+};
 
 const renderPermalink = (slug, opts, state, permalink) => {
   try {
-    const tokens = state.tokens
-    const token = tokens[permalink]
+    const tokens = state.tokens;
+    const token = tokens[permalink];
     const title = tokens[permalink + 1].children
       .filter((token) => token.type === 'text' || token.type === 'code_inline')
-      .reduce((acc, t) => acc + t.content, '')
-    const match = /^.+(\s*\{#([a-z0-9\-_]+?)\}\s*)$/.exec(title)
-    slug = match ? match[2] : slug
-    token.attrSet('id', slug)
-    const space = () =>
-      Object.assign(new state.Token('text', '', 0), { content: ' ' })
+      .reduce((acc, t) => acc + t.content, '');
+    const match = /^.+(\s*\{#([a-z0-9\-_]+?)\}\s*)$/.exec(title);
+    slug = match ? match[2] : slug;
+    token.attrSet('id', slug);
+    const space = () => Object.assign(new state.Token('text', '', 0), { content: ' ' });
 
     const linkTokens = [
       Object.assign(new state.Token('link_open', 'a', 1), {
@@ -124,16 +121,14 @@ const renderPermalink = (slug, opts, state, permalink) => {
         content: opts.permalinkSymbol,
       }),
       new state.Token('link_close', 'a', -1),
-    ]
+    ];
     if (opts.permalinkSpace) {
       // @ts-ignore
-      linkTokens[position[!opts.permalinkBefore]](space())
+      linkTokens[position[!opts.permalinkBefore]](space());
     }
-    state.tokens[permalink + 1].children[position[opts.permalinkBefore]](
-      ...linkTokens
-    )
+    state.tokens[permalink + 1].children[position[opts.permalinkBefore]](...linkTokens);
   } catch (e) {}
-}
+};
 
 function getSidebarItems(dir: string[], currentRoot: string | undefined, root: string | undefined): any[] {
   return dir
@@ -145,11 +140,11 @@ function getSidebarItems(dir: string[], currentRoot: string | undefined, root: s
         const fileName = e.split('/').pop() ?? '';
         return items.length
           ? {
-            text: (fileName.charAt(0).toUpperCase() + fileName.slice(1)).replaceAll('-', ' '),
-            collapsible: true,
-            collapsed: true,
-            items,
-          }
+              text: (fileName.charAt(0).toUpperCase() + fileName.slice(1)).replaceAll('-', ' '),
+              collapsible: true,
+              collapsed: true,
+              items,
+            }
           : null!;
       }
       if (e.endsWith('.md') && e[0] !== '_') {
@@ -252,7 +247,7 @@ export default defineConfig({
   themeConfig: {
     editLink: {
       pattern: 'https://github.com/sakitam-fdd/wind-layer/edit/master/docs/:path',
-      text: '在 Github 编辑此页'
+      text: '在 Github 编辑此页',
     },
     nav: nav(),
     sidebar: {
@@ -275,7 +270,7 @@ export default defineConfig({
     },
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright © 2022-Present <a href="mailto:smilefdd@gmail.com">sakitam-fdd</a>'
+      copyright: 'Copyright © 2022-Present <a href="mailto:smilefdd@gmail.com">sakitam-fdd</a>',
     },
 
     socialLinks: [
@@ -345,5 +340,17 @@ export default defineConfig({
       prev: '上一篇',
       next: '下一篇',
     },
-  }
-})
+  },
+  // async transformHead(context) {
+  //   // ...
+  //
+  //   console.log(context)
+  // },
+  // transformPageData(pageData) {
+  //   pageData.frontmatter.head ??= []
+  //   pageData.frontmatter.head.push([
+  //     'script',
+  //     { src: '//cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js' }
+  //   ])
+  // },
+});
