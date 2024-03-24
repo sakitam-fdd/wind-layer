@@ -1,12 +1,8 @@
-import { TileBounds, TileID, mod, Bounds } from 'wind-gl-core';
+import type { TileBounds, Bounds } from 'wind-gl-core';
+import { TileID, mod } from 'wind-gl-core';
 import { utils } from '@sakitam-gis/vis-engine';
 import RBush, { type NodeItem } from '@sakitam-gis/rbush';
-import {
-  mercatorXfromLng,
-  mercatorYfromLat,
-  latFromMercatorY,
-  lngFromMercatorX,
-} from './mercatorCoordinate';
+import { mercatorXfromLng, mercatorYfromLat, latFromMercatorY, lngFromMercatorX } from './mercatorCoordinate';
 
 export function zoomScale(z) {
   return Math.pow(2, z);
@@ -28,9 +24,7 @@ export function scaleZoom(scale) {
  * @returns {number}
  */
 function coveringZoomLevel(options) {
-  const z = (options.roundZoom ? Math.round : Math.floor)(
-    options.zoom + scaleZoom(512 / options.tileSize),
-  );
+  const z = (options.roundZoom ? Math.round : Math.floor)(options.zoom + scaleZoom(512 / options.tileSize));
   return Math.max(0, z);
 }
 

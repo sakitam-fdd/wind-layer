@@ -16,7 +16,7 @@ describe('amap', async () => {
     const layer = new WindLayer([], {
       // projection: 'EPSG:4326',
       zIndex: 20,
-      colorScale: "rgb(255, 255, 255)",
+      colorScale: 'rgb(255, 255, 255)',
       velocityScale: 1 / 30,
       paths: 1000,
       // bounds: map.getBounds(),

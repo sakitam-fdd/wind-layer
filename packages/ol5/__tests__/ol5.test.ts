@@ -13,7 +13,7 @@ describe('ol5', async () => {
   test('instance', async () => {
     const layer = new OlWind([], {
       zIndex: 20,
-      colorScale: "rgb(255, 255, 255)",
+      colorScale: 'rgb(255, 255, 255)',
       velocityScale: 1 / 30,
       paths: 1000,
     });

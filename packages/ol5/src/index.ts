@@ -1,22 +1,16 @@
-import { Map } from 'ol';
-import { Coordinate } from 'ol/coordinate';
-import { containsCoordinate, Extent as IExtent } from 'ol/extent';
+import type { Map } from 'ol';
+import type { Coordinate } from 'ol/coordinate';
+import type { Extent as IExtent } from 'ol/extent';
+import { containsCoordinate } from 'ol/extent';
 import { Image as ImageLayer } from 'ol/layer';
-import LayerType from 'ol/LayerType';
-import { Pixel as IPixel } from 'ol/pixel';
-import { ProjectionLike as IProjection, transform } from 'ol/proj';
-import { Size as ISize } from 'ol/size';
-import ImageCanvas, { Options as ImageCanvasOptions } from 'ol/source/ImageCanvas';
-import {
-  WindCore,
-  assign,
-  createCanvas,
-  defaultOptions,
-  Field,
-  formatData,
-  isArray,
-  warnLog,
-} from 'wind-core';
+import type LayerType from 'ol/LayerType';
+import type { Pixel as IPixel } from 'ol/pixel';
+import type { ProjectionLike as IProjection } from 'ol/proj';
+import { transform } from 'ol/proj';
+import type { Size as ISize } from 'ol/size';
+import type { Options as ImageCanvasOptions } from 'ol/source/ImageCanvas';
+import ImageCanvas from 'ol/source/ImageCanvas';
+import { WindCore, assign, createCanvas, defaultOptions, Field, formatData, isArray, warnLog } from 'wind-core';
 
 import type { IOptions, IField } from 'wind-core';
 
@@ -47,7 +41,7 @@ class OlWind extends ImageLayer {
 
   constructor(data: any, options: Partial<IWindOptions> = {}) {
     const opt = assign({}, _options, options);
-    // @ts-ignore
+    // @ts-ignore todo need resolve
     super(options);
     this.options = opt;
 
@@ -168,9 +162,7 @@ class OlWind extends ImageLayer {
 
   public project(coordinate: Coordinate): [number, number] {
     const map = this.getMap();
-    const pixel = map.getPixelFromCoordinate(
-      transform(coordinate, 'EPSG:4326', this.viewProjection),
-    );
+    const pixel = map.getPixelFromCoordinate(transform(coordinate, 'EPSG:4326', this.viewProjection));
     return [pixel[0] * this.pixelRatio, pixel[1] * this.pixelRatio];
   }
 
@@ -198,7 +190,7 @@ class OlWind extends ImageLayer {
         if (this.options.windOptions === undefined) {
           this.options.windOptions = {};
         }
-        // @ts-ignore
+        // @ts-ignore todo need resolve
         this.options.windOptions[key] = this.options[key];
       }
     });

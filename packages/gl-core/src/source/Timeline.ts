@@ -1,21 +1,16 @@
-import { EventEmitter, Renderer, utils } from '@sakitam-gis/vis-engine';
-import SourceCache from './cahce';
-import Layer from '../renderer';
-import ImageSource, { ImageSourceInterval } from './image';
-import TileSource, { TileSourceInterval } from './tile';
-import {
-  Bounds,
-  Coordinates,
-  DataRange,
-  DecodeType,
-  LayerSourceType,
-  ParseOptionsType,
-  TileSize,
-  TileSourceOptions,
-  TileState,
-} from '../type';
-import Tile from '../tile/Tile';
-import Track, { defaultTrackOptions, TrackOptions } from '../utils/Track';
+import type { Renderer } from '@sakitam-gis/vis-engine';
+import { EventEmitter, utils } from '@sakitam-gis/vis-engine';
+import type SourceCache from './cahce';
+import type Layer from '../renderer';
+import type { ImageSourceInterval } from './image';
+import ImageSource from './image';
+import type { TileSourceInterval } from './tile';
+import TileSource from './tile';
+import type { Bounds, Coordinates, DataRange, ParseOptionsType, TileSize, TileSourceOptions } from '../type';
+import { DecodeType, LayerSourceType, TileState } from '../type';
+import type Tile from '../tile/Tile';
+import type { TrackOptions } from '../utils/Track';
+import Track, { defaultTrackOptions } from '../utils/Track';
 
 const sourceImpl = {
   tile: TileSource,
@@ -363,8 +358,7 @@ class TimelineSource extends EventEmitter {
   load(cb?: any) {
     this.#loaded = true;
     this.#track = new Track({
-      duration:
-        (this.options.duration as number) * utils.clamp(this.intervals.length - 1, 0, Infinity),
+      duration: (this.options.duration as number) * utils.clamp(this.intervals.length - 1, 0, Infinity),
       endDelay: this.options.endDelay,
       repeat: this.options.repeat,
       autoplay: this.options.autoplay,

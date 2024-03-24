@@ -1,6 +1,6 @@
 import earcut from 'earcut';
 import { utils, type Attributes } from '@sakitam-gis/vis-engine';
-import { Bounds } from '../type';
+import type { Bounds } from '../type';
 
 export function calcMinMax(array: number[]): [number, number] {
   let min = Infinity;
@@ -137,12 +137,7 @@ export function keysDifference(obj, other) {
  * @param extent2
  */
 export function intersects(extent1: Bounds, extent2: Bounds) {
-  return (
-    extent1[0] <= extent2[2] &&
-    extent1[2] >= extent2[0] &&
-    extent1[1] <= extent2[3] &&
-    extent1[3] >= extent2[1]
-  );
+  return extent1[0] <= extent2[2] && extent1[2] >= extent2[0] && extent1[1] <= extent2[3] && extent1[3] >= extent2[1];
 }
 
 /**
@@ -164,12 +159,7 @@ export function intersects(extent1: Bounds, extent2: Bounds) {
  * @param extent2
  */
 export function containsExtent(extent1: Bounds, extent2: Bounds) {
-  return (
-    extent1[0] <= extent2[0] &&
-    extent2[2] <= extent1[2] &&
-    extent1[1] <= extent2[1] &&
-    extent2[3] <= extent1[3]
-  );
+  return extent1[0] <= extent2[0] && extent2[2] <= extent1[2] && extent1[1] <= extent2[1] && extent2[3] <= extent1[3];
 }
 
 /**
@@ -266,8 +256,7 @@ export function polygon2buffer(features: any[]) {
         const indexData = earcut(polygon.vertices, polygon.holes, polygon.dimensions);
         geometries.push({
           index: {
-            data:
-              indexData.length < 65536 ? new Uint16Array(indexData) : new Uint32Array(indexData),
+            data: indexData.length < 65536 ? new Uint16Array(indexData) : new Uint32Array(indexData),
           },
           position: {
             data: positions,

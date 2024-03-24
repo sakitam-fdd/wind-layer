@@ -264,12 +264,7 @@ export function formatData(data: IGFSItem[], options: Partial<IField> = {}) {
  * @param Canvas
  * @returns {HTMLCanvasElement}
  */
-export function createCanvas(
-  width: number,
-  height: number,
-  retina: number,
-  Canvas?: any,
-): HTMLCanvasElement {
+export function createCanvas(width: number, height: number, retina: number, Canvas?: any): HTMLCanvasElement {
   if (typeof document !== 'undefined') {
     const canvas = document.createElement('canvas');
     canvas.width = width * retina;
@@ -300,8 +295,7 @@ export function removeDomNode(node: HTMLElement | HTMLCanvasElement) {
 const keyword = /(\D+)/;
 const hex = /^#([a-f0-9]{6})([a-f0-9]{2})?$/i;
 // eslint-disable-next-line no-useless-escape
-const rgba =
-  /^rgba?\(\s*([+-]?\d+)\s*,\s*([+-]?\d+)\s*,\s*([+-]?\d+)\s*(?:,\s*([+-]?[\d.]+)\s*)?\)$/;
+const rgba = /^rgba?\(\s*([+-]?\d+)\s*,\s*([+-]?\d+)\s*,\s*([+-]?\d+)\s*(?:,\s*([+-]?[\d.]+)\s*)?\)$/;
 const colorNames: {
   [key: string]: number[];
 } = {

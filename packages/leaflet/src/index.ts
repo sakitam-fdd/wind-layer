@@ -1,13 +1,5 @@
 import * as L from 'leaflet';
-import {
-  WindCore,
-  Field,
-  assign,
-  defaultOptions,
-  formatData,
-  isArray,
-  createCanvas,
-} from 'wind-core';
+import { WindCore, Field, assign, defaultOptions, formatData, isArray, createCanvas } from 'wind-core';
 import type { IField, IOptions } from 'wind-core';
 
 const WindLayer = L.Layer.extend({
@@ -87,11 +79,7 @@ const WindLayer = L.Layer.extend({
   _animateZoom(event: L.ZoomAnimEvent) {
     const scale = this._map.getZoomScale(event.zoom);
 
-    const offset = this._map._latLngToNewLayerPoint(
-      this._map.getBounds().getNorthWest(),
-      event.zoom,
-      event.center,
-    );
+    const offset = this._map._latLngToNewLayerPoint(this._map.getBounds().getNorthWest(), event.zoom, event.center);
 
     L.DomUtil.setTransform(this.canvas, offset, scale);
   },

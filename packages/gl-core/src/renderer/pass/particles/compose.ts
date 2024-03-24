@@ -1,12 +1,13 @@
-import { Program, Renderer, RenderTarget } from '@sakitam-gis/vis-engine';
+import type { Renderer } from '@sakitam-gis/vis-engine';
+import { Program, RenderTarget } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import vert from '../../../shaders/common.vert.glsl';
 import frag from '../../../shaders/compose.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import { RenderFrom, BandType } from '../../../type';
+import type { RenderFrom, BandType } from '../../../type';
 import { littleEndian } from '../../../utils/common';
-import TileID from '../../../tile/TileID';
-import { SourceType } from '../../../source';
+import type TileID from '../../../tile/TileID';
+import type { SourceType } from '../../../source';
 
 export interface ParticlesComposePassOptions {
   id: string;
@@ -168,8 +169,7 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
       rendererState.sharedState.u_tiles_size = [width, height];
 
       const maxTextureSize = this.renderer.gl.getParameter(this.renderer.gl.MAX_TEXTURE_SIZE) * 0.5;
-      const maxRenderBufferSize =
-        this.renderer.gl.getParameter(this.renderer.gl.MAX_RENDERBUFFER_SIZE) * 0.5;
+      const maxRenderBufferSize = this.renderer.gl.getParameter(this.renderer.gl.MAX_RENDERBUFFER_SIZE) * 0.5;
       const maxSize = Math.max(width, height);
       if (maxSize > maxTextureSize) {
         width = (maxTextureSize / maxSize) * width;
@@ -230,16 +230,8 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
           if (stencilMode.stencil) {
             this.renderer.state.enable(this.renderer.gl.STENCIL_TEST);
 
-            this.renderer.state.setStencilFunc(
-              stencilMode.func?.cmp,
-              stencilMode.func?.ref,
-              stencilMode.func?.mask,
-            );
-            this.renderer.state.setStencilOp(
-              stencilMode.op?.fail,
-              stencilMode.op?.zfail,
-              stencilMode.op?.zpass,
-            );
+            this.renderer.state.setStencilFunc(stencilMode.func?.cmp, stencilMode.func?.ref, stencilMode.func?.mask);
+            this.renderer.state.setStencilOp(stencilMode.op?.fail, stencilMode.op?.zfail, stencilMode.op?.zpass);
           } else {
             this.renderer.state.disable(this.renderer.gl.STENCIL_TEST);
           }

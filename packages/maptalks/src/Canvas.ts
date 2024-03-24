@@ -3,7 +3,8 @@ import { CanvasLayer, renderer, Coordinate, Point } from 'maptalks';
 import { WindCore, Field, isArray, formatData, assign, defaultOptions } from 'wind-core';
 import type { IField, IOptions } from 'wind-core';
 
-import { containsCoordinate, Extent, transformExtent } from './utils';
+import type { Extent } from './utils';
+import { containsCoordinate, transformExtent } from './utils';
 
 export interface IWindOptions extends IOptions {
   windOptions: Partial<IOptions>;

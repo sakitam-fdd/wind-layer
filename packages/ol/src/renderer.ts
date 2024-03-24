@@ -1,12 +1,7 @@
-import { FrameState } from 'ol/PluggableMap';
-import { Coordinate } from 'ol/coordinate';
-import { Pixel } from 'ol/pixel';
-import {
-  fromUserExtent,
-  fromUserCoordinate,
-  toUserCoordinate,
-  transform as transformProj,
-} from 'ol/proj';
+import type { FrameState } from 'ol/PluggableMap';
+import type { Coordinate } from 'ol/coordinate';
+import type { Pixel } from 'ol/pixel';
+import { fromUserExtent, fromUserCoordinate, toUserCoordinate, transform as transformProj } from 'ol/proj';
 import CanvasLayerRenderer from 'ol/renderer/canvas/Layer';
 import {
   toString as transformToString,
@@ -16,26 +11,20 @@ import {
   create as createTransform,
   type Transform,
 } from 'ol/transform';
-import {
-  containsExtent,
-  intersects,
-  containsCoordinate,
-  getIntersection,
-  isEmpty,
-} from 'ol/extent';
+import { containsExtent, intersects, containsCoordinate, getIntersection, isEmpty } from 'ol/extent';
 import type { Extent } from 'ol/extent';
 
-import { WindCore, Field } from 'wind-core';
-import type { IOptions } from 'wind-core';
+import { WindCore } from 'wind-core';
+import type { IOptions, Field } from 'wind-core';
 
-import { WindLayer } from './index';
+import type { WindLayer } from './index';
 
 const ViewHint = {
   ANIMATING: 0,
   INTERACTING: 1,
 };
 
-// @ts-ignore
+// @ts-ignore todo need resolve
 export default class WindLayerRender extends CanvasLayerRenderer {
   private readonly context: CanvasRenderingContext2D;
   private readonly containerReused: boolean;
@@ -52,7 +41,7 @@ export default class WindLayerRender extends CanvasLayerRenderer {
 
     this.container = null;
 
-    this.renderedResolution;
+    this.renderedResolution = NaN;
     this.tempTransform = createTransform();
     this.pixelTransform = createTransform();
     this.inversePixelTransform = createTransform();
@@ -88,7 +77,7 @@ export default class WindLayerRender extends CanvasLayerRenderer {
       }
       return true;
     } else {
-      // @ts-ignore
+      // @ts-ignore todo need resolve
       const layer = this.getLayer() as unknown as WindLayer;
       return layer.get('forceRender');
     }
@@ -114,14 +103,14 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     const context = this.context;
     const canvas = context.canvas;
 
-    if (canvas.width != width || canvas.height != height) {
+    if (canvas.width !== width || canvas.height !== height) {
       canvas.width = width;
       canvas.height = height;
     } else if (!this.containerReused) {
       context.globalCompositeOperation = 'source-over';
     }
 
-    // @ts-ignore
+    // @ts-ignore todo need resolve
     this.preRender(context, frameState);
 
     // clipped rendering if layer extent is set
@@ -132,7 +121,7 @@ export default class WindLayerRender extends CanvasLayerRenderer {
       render = intersects(layerExtent, frameState.extent as Extent);
       clipped = render && !containsExtent(layerExtent, frameState.extent as Extent);
       if (clipped) {
-        // @ts-ignore
+        // @ts-ignore todo need resolve
         this.clipUnrotated(context, frameState, layerExtent);
       }
     }
@@ -141,25 +130,17 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     const resolution = viewState.resolution;
     const rotation = viewState.rotation;
 
-    // @ts-ignore
+    // @ts-ignore todo need resolve
     const layer = this.getLayer() as unknown as WindLayer;
     const opt = layer.getWindOptions();
     const data = layer.getData();
 
-    // @ts-ignore
-    const transformOrigin = this.getRenderTransform(
-      center,
-      resolution,
-      rotation,
-      pixelRatio,
-      width,
-      height,
-      0,
-    );
+    // @ts-ignore todo need resolve
+    const transformOrigin = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, 0);
 
     this.execute(this.context, frameState, transformOrigin, transformOrigin, opt, data);
 
-    // @ts-ignore
+    // @ts-ignore todo need resolve
     this.postRender(context, frameState);
 
     if (clipped) {
@@ -209,7 +190,7 @@ export default class WindLayerRender extends CanvasLayerRenderer {
   }
 
   private getPixelFromCoordinateInternal(coordinate: Coordinate): [number, number] | null {
-    // @ts-ignore
+    // @ts-ignore todo need resolve
     const frameState = this.frameState;
     const viewState = frameState.viewState;
     const pixelRatio = frameState.pixelRatio;
@@ -219,25 +200,19 @@ export default class WindLayerRender extends CanvasLayerRenderer {
     if (!frameState) {
       return null;
     } else {
-      const pixel = applyTransform(
-        frameState.coordinateToPixelTransform,
-        viewCoordinate.slice(0, 2),
-      );
+      const pixel = applyTransform(frameState.coordinateToPixelTransform, viewCoordinate.slice(0, 2));
       return [pixel[0] * pixelRatio, pixel[1] * pixelRatio];
     }
   }
 
   private getCoordinateFromPixel(pixel: Pixel): [number, number] | null {
-    // @ts-ignore
+    // @ts-ignore todo need resolve
     const frameState = this.frameState;
     const viewState = frameState.viewState;
     if (!frameState) {
       return null;
     } else {
-      const viewCoordinate = applyTransform(
-        frameState.pixelToCoordinateTransform,
-        pixel.slice(0, 2),
-      );
+      const viewCoordinate = applyTransform(frameState.pixelToCoordinateTransform, pixel.slice(0, 2));
       const coordinate = toUserCoordinate(viewCoordinate, viewState.projection);
       const point = transformProj(coordinate, viewState.projection, 'EPSG:4326');
       return [point[0], point[1]];
@@ -245,7 +220,7 @@ export default class WindLayerRender extends CanvasLayerRenderer {
   }
 
   private intersectsCoordinate(coordinate: Coordinate): boolean {
-    // @ts-ignore
+    // @ts-ignore todo need resolve
     const frameState = this.frameState;
     const viewState = frameState.viewState;
     const point = transformProj(coordinate, 'EPSG:4326', viewState.projection);

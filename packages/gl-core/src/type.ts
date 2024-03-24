@@ -203,9 +203,9 @@ export interface ProjTileBounds {
   bottom: number;
 }
 
-export type ParseOptionsType = {
+export interface ParseOptionsType {
   renderFrom: RenderFrom;
-};
+}
 
 /**
  * 图层掩膜类型

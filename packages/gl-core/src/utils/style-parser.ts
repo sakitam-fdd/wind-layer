@@ -170,12 +170,7 @@ export function createLinearGradient(
   }
 }
 
-function exponentialInterpolation(
-  input: number,
-  base: number,
-  lowerValue: number,
-  upperValue: number,
-) {
+function exponentialInterpolation(input: number, base: number, lowerValue: number, upperValue: number) {
   const difference = upperValue - lowerValue;
   const progress = input - lowerValue;
 
@@ -193,12 +188,7 @@ export type InterpolationType =
   | { name: 'exponential'; base: number }
   | { name: 'cubic-bezier'; controlPoints: [number, number, number, number] };
 
-export function interpolationFactor(
-  interpolation: InterpolationType,
-  input: number,
-  lower: number,
-  upper: number,
-) {
+export function interpolationFactor(interpolation: InterpolationType, input: number, lower: number, upper: number) {
   let t = 0;
   if (interpolation.name === 'exponential') {
     t = exponentialInterpolation(input, interpolation.base, lower, upper);
@@ -226,13 +216,7 @@ const cachedStyle: {
   [key: string]: CachedStyleItem;
 } = {};
 
-export function createZoom(
-  uid: string,
-  zoom: number,
-  key: string,
-  styles: any,
-  clearCache?: boolean,
-): number {
+export function createZoom(uid: string, zoom: number, key: string, styles: any, clearCache?: boolean): number {
   const ukey = `${uid}_${key}`;
   const styleAttrField = styles[key] as any[] | number;
 

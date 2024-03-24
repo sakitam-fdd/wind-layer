@@ -1,21 +1,13 @@
-import {
-  Program,
-  Renderer,
-  Mesh,
-  Geometry,
-  Texture,
-  Vector2,
-  RenderTarget,
-  BlendType,
-} from '@sakitam-gis/vis-engine';
+import type { Renderer, Texture } from '@sakitam-gis/vis-engine';
+import { Program, Mesh, Geometry, Vector2, RenderTarget, BlendType } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
 import vert from '../../../shaders/particles/draw.vert.glsl';
 import frag from '../../../shaders/particles/draw.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import { BandType } from '../../../type';
-import { SourceType } from '../../../source';
-import MaskPass from '../mask';
+import type { BandType } from '../../../type';
+import type { SourceType } from '../../../source';
+import type MaskPass from '../mask';
 
 export interface ParticlesPassOptions {
   source: SourceType;
@@ -45,11 +37,7 @@ export default class Particles extends Pass<ParticlesPassOptions> {
   #screenTexture: WithNull<RenderTarget>;
   #backgroundTexture: WithNull<RenderTarget>;
 
-  constructor(
-    id: string,
-    renderer: Renderer,
-    options: ParticlesPassOptions = {} as ParticlesPassOptions,
-  ) {
+  constructor(id: string, renderer: Renderer, options: ParticlesPassOptions = {} as ParticlesPassOptions) {
     super(id, renderer, options);
 
     this.initializeRenderTarget();

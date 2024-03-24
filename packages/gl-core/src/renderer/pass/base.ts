@@ -1,4 +1,4 @@
-import { Renderer } from '@sakitam-gis/vis-engine';
+import type { Renderer } from '@sakitam-gis/vis-engine';
 
 const ERR_PASS_METHOD_UNDEFINED = 'Pass subclass must define virtual methods';
 

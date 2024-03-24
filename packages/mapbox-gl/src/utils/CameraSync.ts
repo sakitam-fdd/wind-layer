@@ -1,10 +1,10 @@
+import type { Scene } from '@sakitam-gis/vis-engine';
 import {
   Matrix4,
   Vector3,
   ProjectionMatrix,
   OrthographicCamera,
   PerspectiveCamera,
-  Scene,
   utils,
   highPrecision,
 } from '@sakitam-gis/vis-engine';
@@ -117,11 +117,8 @@ export default class CameraSync {
     if (compareVersion(this.map.version, '2.0.0') >= 0) {
       // Adjust distance to MSL by the minimum possible elevation visible on screen,
       // this way the far plane is pushed further in the case of negative elevation.
-      const minElevationInPixels = elevation
-        ? elevation.getMinElevationBelowMSL() * pixelsPerMeter
-        : 0;
-      const cameraToSeaLevelDistance =
-        (_camera.position[2] * worldSize - minElevationInPixels) / Math.cos(pitchRad);
+      const minElevationInPixels = elevation ? elevation.getMinElevationBelowMSL() * pixelsPerMeter : 0;
+      const cameraToSeaLevelDistance = (_camera.position[2] * worldSize - minElevationInPixels) / Math.cos(pitchRad);
       // eslint-disable-next-line max-len
       topHalfSurfaceDistance =
         (Math.sin(fovAboveCenter) * cameraToSeaLevelDistance) /
@@ -140,9 +137,7 @@ export default class CameraSync {
       farZ = furthestDistance * 1.01;
     }
 
-    this.mercatorMatrix = new Matrix4().scale(
-      new Vector3(worldSize, worldSize, worldSize / pixelsPerMeter),
-    );
+    this.mercatorMatrix = new Matrix4().scale(new Vector3(worldSize, worldSize, worldSize / pixelsPerMeter));
 
     const may = new Matrix4().fromTranslation(new Vector3(0, 0, this.cameraToCenterDistance));
 
@@ -159,14 +154,7 @@ export default class CameraSync {
     this.cameraTranslateZ = this.cameraToCenterDistance;
 
     if (this.camera instanceof OrthographicCamera) {
-      this.camera.projectionMatrix.orthographic(
-        -width / 2,
-        width / 2,
-        height / 2,
-        -height / 2,
-        nearZ,
-        farZ,
-      );
+      this.camera.projectionMatrix.orthographic(-width / 2, width / 2, height / 2, -height / 2, nearZ, farZ);
     } else {
       this.camera.projectionMatrix.perspective(fovRad, width / height, nearZ, farZ);
     }

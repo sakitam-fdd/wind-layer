@@ -1,9 +1,9 @@
 import { isImageBitmap, isArrayBuffer } from './util';
 import { AJAXError } from './Request';
 
-type SerializedObject<S extends Serialized = any> = {
+interface SerializedObject<S extends Serialized = any> {
   [_: string]: S;
-};
+}
 
 export type Serialized =
   | null
@@ -24,7 +24,7 @@ export type Serialized =
   | Array<Serialized>
   | SerializedObject;
 
-type Registry = {
+interface Registry {
   [_: string]: {
     klass: {
       new (...args: any): any;
@@ -33,12 +33,12 @@ type Registry = {
     omit: ReadonlyArray<string>;
     shallow: ReadonlyArray<string>;
   };
-};
+}
 
-type RegisterOptions<T> = {
+interface RegisterOptions<T> {
   omit?: ReadonlyArray<keyof T>;
   shallow?: ReadonlyArray<keyof T>;
-};
+}
 
 const registry: Registry = {};
 
@@ -171,8 +171,7 @@ export function serialize(input: unknown, transferables?: Array<Transferable> | 
         // eslint-disable-next-line no-continue
         if (registry[name].omit.indexOf(key) >= 0) continue;
         const property = (input as any)[key];
-        properties[key] =
-          registry[name].shallow.indexOf(key) >= 0 ? property : serialize(property, transferables);
+        properties[key] = registry[name].shallow.indexOf(key) >= 0 ? property : serialize(property, transferables);
       }
       if (input instanceof Error) {
         properties.message = input.message;

@@ -1,9 +1,11 @@
 import { test, expect, describe, beforeAll, afterAll, vi } from 'vitest';
 
-vi.stubGlobal('BMap', vi.mocked({
-  Overlay: class {
-  }
-}));
+vi.stubGlobal(
+  'BMap',
+  vi.mocked({
+    Overlay: class {},
+  }),
+);
 
 beforeAll(async () => {
   console.log(`[bmap-wind]: start testing...`);
@@ -18,7 +20,7 @@ describe('bmap', async () => {
     const { WindLayer } = await import('../src');
     const layer = new WindLayer([], {
       zIndex: 20,
-      colorScale: "rgb(255, 255, 255)",
+      colorScale: 'rgb(255, 255, 255)',
       velocityScale: 1 / 30,
       paths: 1000,
       // bounds: map.getBounds(),
@@ -26,4 +28,3 @@ describe('bmap', async () => {
     expect(layer).toBeInstanceOf(WindLayer);
   });
 });
-

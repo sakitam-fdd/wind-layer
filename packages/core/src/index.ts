@@ -37,13 +37,7 @@ export interface IOptions {
 
 function indexFor(m: number, min: number, max: number, colorScale: string[]) {
   // map velocity speed to a style
-  return Math.max(
-    0,
-    Math.min(
-      colorScale.length - 1,
-      Math.round(((m - min) / (max - min)) * (colorScale.length - 1)),
-    ),
-  );
+  return Math.max(0, Math.min(colorScale.length - 1, Math.round(((m - min) / (max - min)) * (colorScale.length - 1))));
 }
 
 class WindCore {
@@ -90,11 +84,7 @@ class WindCore {
       this.options.maxAge = this.options.particleAge;
     }
 
-    if (
-      'particleMultiplier' in options &&
-      !('paths' in options) &&
-      isNumber(this.options.particleMultiplier)
-    ) {
+    if ('particleMultiplier' in options && !('paths' in options) && isNumber(this.options.particleMultiplier)) {
       this.options.paths = Math.round(width * height * (this.options.particleMultiplier as number));
     }
 
@@ -279,9 +269,7 @@ class WindCore {
 
     this.ctx.fillStyle = `rgba(0, 0, 0, ${this.options.globalAlpha})`;
     this.ctx.lineWidth = (isNumber(this.options.lineWidth) ? this.options.lineWidth : 1) as number;
-    this.ctx.strokeStyle = (
-      isString(this.options.colorScale) ? this.options.colorScale : '#fff'
-    ) as string;
+    this.ctx.strokeStyle = (isString(this.options.colorScale) ? this.options.colorScale : '#fff') as string;
 
     let i = 0;
     const len = particles.length;
@@ -297,11 +285,7 @@ class WindCore {
         [min, max] = this.field.range as [number, number];
       }
       for (; i < len; i++) {
-        this[this.options.useCoordsDraw ? 'drawCoordsParticle' : 'drawPixelParticle'](
-          particles[i],
-          min,
-          max,
-        );
+        this[this.options.useCoordsDraw ? 'drawCoordsParticle' : 'drawPixelParticle'](particles[i], min, max);
       }
     }
   }
@@ -406,8 +390,7 @@ class WindCore {
   private prepareParticlePaths() {
     // 由用户自行处理，不再自动修改粒子数
     const { width, height } = this.ctx.canvas;
-    const particleCount =
-      typeof this.options.paths === 'function' ? this.options.paths(this) : this.options.paths;
+    const particleCount = typeof this.options.paths === 'function' ? this.options.paths(this) : this.options.paths;
     const particles: any[] = [];
     if (!this.field) {
       return [];

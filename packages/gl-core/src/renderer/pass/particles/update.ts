@@ -1,21 +1,12 @@
-import {
-  BlendType,
-  Geometry,
-  Mesh,
-  Program,
-  Renderer,
-  RenderTarget,
-  Texture,
-  utils,
-  Vector2,
-} from '@sakitam-gis/vis-engine';
+import type { Renderer, Texture } from '@sakitam-gis/vis-engine';
+import { BlendType, Geometry, Mesh, Program, RenderTarget, utils, Vector2 } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
 import vert from '../../../shaders/common.vert.glsl';
 import frag from '../../../shaders/particles/update.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import { BandType } from '../../../type';
-import { SourceType } from '../../../source';
+import type { BandType } from '../../../type';
+import type { SourceType } from '../../../source';
 
 export interface UpdatePassOptions {
   source: SourceType;
@@ -39,11 +30,7 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
 
   #particleRes: number;
 
-  constructor(
-    id: string,
-    renderer: Renderer,
-    options: UpdatePassOptions = {} as UpdatePassOptions,
-  ) {
+  constructor(id: string, renderer: Renderer, options: UpdatePassOptions = {} as UpdatePassOptions) {
     super(id, renderer, options);
 
     this.initializeRenderTarget();

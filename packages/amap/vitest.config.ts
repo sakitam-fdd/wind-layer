@@ -5,7 +5,7 @@ const config: { test: UserConfig } = {
     testTimeout: 50000,
     coverage: {
       reporter: ['lcov', 'html'],
-    },
+    } as any,
   },
 }
 

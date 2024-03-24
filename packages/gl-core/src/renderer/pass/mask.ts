@@ -1,4 +1,5 @@
-import { Program, Renderer, Mesh, Geometry, Attributes } from '@sakitam-gis/vis-engine';
+import type { Renderer, Attributes } from '@sakitam-gis/vis-engine';
+import { Program, Mesh, Geometry } from '@sakitam-gis/vis-engine';
 import Pass from './base';
 import maskVert from '../../shaders/mask.vert.glsl';
 import maskFrag from '../../shaders/mask.frag.glsl';
@@ -82,11 +83,7 @@ export default class MaskPass extends Pass<MaskPassOptions> {
     }
 
     this.renderer.gl.stencilFunc(this.renderer.gl.ALWAYS, 1, 0xff);
-    this.renderer.gl.stencilOp(
-      this.renderer.gl.REPLACE,
-      this.renderer.gl.REPLACE,
-      this.renderer.gl.REPLACE,
-    );
+    this.renderer.gl.stencilOp(this.renderer.gl.REPLACE, this.renderer.gl.REPLACE, this.renderer.gl.REPLACE);
     this.renderer.gl.stencilMask(0xff); // 模板允许写入
 
     this.renderer.gl.clearStencil(0); // 置为 0

@@ -1,4 +1,5 @@
-import { Program, Mesh, Geometry } from '@sakitam-gis/vis-engine';
+import type { Program } from '@sakitam-gis/vis-engine';
+import { Mesh, Geometry } from '@sakitam-gis/vis-engine';
 
 export default class TileMesh {
   public id: string;

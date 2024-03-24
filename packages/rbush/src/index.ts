@@ -53,10 +53,7 @@ function bboxMargin(a: NodeItem) {
 }
 
 function enlargedArea(a: BBoxLike, b: NodeItem) {
-  return (
-    (Math.max(b.maxX, a.maxX) - Math.min(b.minX, a.minX)) *
-    (Math.max(b.maxY, a.maxY) - Math.min(b.minY, a.minY))
-  );
+  return (Math.max(b.maxX, a.maxX) - Math.min(b.minX, a.minX)) * (Math.max(b.maxY, a.maxY) - Math.min(b.minY, a.minY));
 }
 
 function intersectionArea(a: NodeItem, b: NodeItem) {

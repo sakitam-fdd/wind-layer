@@ -10,8 +10,8 @@ import json from '@rollup/plugin-json';
 import glslify from 'rollup-plugin-glslify';
 import replace from '@rollup/plugin-replace';
 import alias from '@rollup/plugin-alias';
+import terser from '@rollup/plugin-terser';
 import dts from 'rollup-plugin-dts';
-import { terser } from 'rollup-plugin-terser';
 import sourcemaps from 'rollup-plugin-sourcemaps';
 
 const rq = createRequire(import.meta.url);

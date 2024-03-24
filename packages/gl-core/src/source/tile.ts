@@ -1,16 +1,12 @@
-import { Renderer, utils, EventEmitter } from '@sakitam-gis/vis-engine';
+import type { Renderer } from '@sakitam-gis/vis-engine';
+import { utils, EventEmitter } from '@sakitam-gis/vis-engine';
 import SourceCache from './cahce';
-import {
-  DecodeType,
-  LayerSourceType,
-  ParseOptionsType,
-  TileSourceOptions,
-  TileState,
-} from '../type';
+import type { ParseOptionsType, TileSourceOptions } from '../type';
+import { DecodeType, LayerSourceType, TileState } from '../type';
 import { containTile, resolveURL } from '../utils/common';
-import TileID from '../tile/TileID';
-import Tile from '../tile/Tile';
-import Layer from '../renderer';
+import type TileID from '../tile/TileID';
+import type Tile from '../tile/Tile';
+import type Layer from '../renderer';
 
 const URL_PATTERN = /\{ *([\w_]+) *\}/g;
 

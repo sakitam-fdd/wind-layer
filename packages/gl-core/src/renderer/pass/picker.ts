@@ -1,9 +1,10 @@
-import { Program, Renderer, Mesh, Geometry, Texture, RenderTarget } from '@sakitam-gis/vis-engine';
+import type { Renderer, Texture } from '@sakitam-gis/vis-engine';
+import { Program, Mesh, Geometry, RenderTarget } from '@sakitam-gis/vis-engine';
 import Pass from './base';
 import vert from '../../shaders/picker.vert.glsl';
 import frag from '../../shaders/picker.frag.glsl';
 import * as shaderLib from '../../shaders/shaderLib';
-import { SourceType } from '../../source';
+import type { SourceType } from '../../source';
 
 export interface PickerPassOptions {
   source: SourceType;
@@ -26,11 +27,7 @@ export default class PickerPass extends Pass<PickerPassOptions> {
   #rendererParams: any;
   #rendererState: any;
 
-  constructor(
-    id: string,
-    renderer: Renderer,
-    options: PickerPassOptions = {} as PickerPassOptions,
-  ) {
+  constructor(id: string, renderer: Renderer, options: PickerPassOptions = {} as PickerPassOptions) {
     super(id, renderer, options);
 
     this.#program = new Program(renderer, {
@@ -73,7 +70,7 @@ export default class PickerPass extends Pass<PickerPassOptions> {
     });
 
     // @link https://webgl2fundamentals.org/webgl/lessons/webgl-data-textures.html
-    const opt = {
+    const opt: any = {
       width: this.renderer.width,
       height: this.renderer.height,
       minFilter: renderer.gl.NEAREST,
@@ -110,10 +107,8 @@ export default class PickerPass extends Pass<PickerPassOptions> {
   render(rendererParams = this.#rendererParams, rendererState = this.#rendererState, pixel) {
     return new Promise((resolve) => {
       if (!this.#picker || !this.#mesh) return resolve(null);
-      this.#rendererParams =
-        this.#rendererParams !== rendererParams ? rendererParams : this.#rendererParams;
-      this.#rendererState =
-        this.#rendererState !== rendererState ? rendererState : this.#rendererState;
+      this.#rendererParams = this.#rendererParams !== rendererParams ? rendererParams : this.#rendererParams;
+      this.#rendererState = this.#rendererState !== rendererState ? rendererState : this.#rendererState;
       const camera = rendererParams.cameras.planeCamera;
       this.#picker.clear();
       this.#picker.bind();

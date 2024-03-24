@@ -1,18 +1,9 @@
-import {
-  WindCore,
-  Field,
-  isArray,
-  formatData,
-  warnLog,
-  assign,
-  defaultOptions,
-  createCanvas,
-} from 'wind-core';
+import { WindCore, Field, isArray, formatData, warnLog, assign, defaultOptions, createCanvas } from 'wind-core';
 
 import type { IOptions, IField } from 'wind-core';
 
 import * as ol from 'openlayers';
-import { olx } from 'openlayers';
+import type { olx } from 'openlayers';
 
 export interface IWindOptions extends IOptions {
   opacity?: number;
@@ -42,7 +33,7 @@ class OlWind extends ol.layer.Image {
 
   constructor(data: any, options: Partial<IWindOptions> = {}) {
     const opt = assign({}, _options, options);
-    // @ts-ignore
+    // @ts-ignore todo need resolve
     super(options);
     this.options = opt;
 
@@ -70,10 +61,10 @@ class OlWind extends ol.layer.Image {
 
     const source = new ol.source.ImageCanvas(sourceOptions);
 
-    // @ts-ignore
+    // @ts-ignore todo need resolve
     if (!source.getAttributions2) {
       // FIXED: when use webpack throw exception
-      // @ts-ignore
+      // @ts-ignore todo need resolve
       source.getAttributions2 = () => source.getAttributions();
     }
 
@@ -173,9 +164,7 @@ class OlWind extends ol.layer.Image {
 
   public project(coordinate: [number, number]): [number, number] {
     const map = this.getMap();
-    const pixel = map.getPixelFromCoordinate(
-      ol.proj.transform(coordinate, 'EPSG:4326', this.viewProjection),
-    );
+    const pixel = map.getPixelFromCoordinate(ol.proj.transform(coordinate, 'EPSG:4326', this.viewProjection));
     return [pixel[0] * this.pixelRatio, pixel[1] * this.pixelRatio];
   }
 
@@ -196,10 +185,7 @@ class OlWind extends ol.layer.Image {
     const size = map.getSize();
     if (view && size) {
       const extent = view.calculateExtent([size[0] * this.pixelRatio, size[1] * this.pixelRatio]);
-      return ol.extent.containsCoordinate(
-        extent,
-        ol.proj.transform(coordinate, 'EPSG:4326', this.viewProjection),
-      );
+      return ol.extent.containsCoordinate(extent, ol.proj.transform(coordinate, 'EPSG:4326', this.viewProjection));
     }
     return false;
   }
@@ -210,7 +196,7 @@ class OlWind extends ol.layer.Image {
         if (this.options.windOptions === undefined) {
           this.options.windOptions = {};
         }
-        // @ts-ignore
+        // @ts-ignore todo need resolve
         this.options.windOptions[key] = this.options[key];
       }
     });

@@ -23,7 +23,7 @@ export interface IWindOptions extends IOptions {
 }
 
 const G = typeof window === 'undefined' ? global : window;
-// @ts-ignore
+// @ts-ignore 使用全局变量
 const AMap = G?.AMap;
 
 if (!AMap) {
@@ -133,8 +133,7 @@ class AMapWind {
         this.wind.unproject = this.unproject.bind(this);
         this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
         this.wind.postrender = () => {
-          // @ts-ignore
-          // this.setCanvasUpdated();
+          //
         };
       }
     }

@@ -10,12 +10,7 @@ export function containsCoordinate(extent: Extent, coordinate: Coordinates): boo
 }
 
 export function containsExtent(extent1: Extent, extent2: Extent): boolean {
-  return (
-    extent1[0] <= extent2[0] &&
-    extent2[2] <= extent1[2] &&
-    extent1[1] <= extent2[1] &&
-    extent2[3] <= extent1[3]
-  );
+  return extent1[0] <= extent2[0] && extent2[2] <= extent1[2] && extent1[1] <= extent2[1] && extent2[3] <= extent1[3];
 }
 
 export function getWidth(extent: Extent): number {
@@ -66,13 +61,7 @@ export function transform(input: number[], opt_output: number[], opt_dimension: 
   return output;
 }
 
-export function createOrUpdate(
-  minX: number,
-  minY: number,
-  maxX: number,
-  maxY: number,
-  opt_extent: Extent | undefined,
-) {
+export function createOrUpdate(minX: number, minY: number, maxX: number, maxY: number, opt_extent: Extent | undefined) {
   if (opt_extent) {
     opt_extent[0] = minX;
     opt_extent[1] = minY;
@@ -115,16 +104,7 @@ export function applyTransform(
       );
     }
   } else {
-    coordinates = [
-      extent[0],
-      extent[1],
-      extent[2],
-      extent[1],
-      extent[2],
-      extent[3],
-      extent[0],
-      extent[3],
-    ];
+    coordinates = [extent[0], extent[1], extent[2], extent[1], extent[2], extent[3], extent[0], extent[3]];
   }
   transformFn(coordinates, coordinates, 2);
   const xs: number[] = [];

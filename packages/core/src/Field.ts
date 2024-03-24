@@ -97,10 +97,7 @@ export default class Field {
     this.isContinuous = Math.floor(this.cols * params.deltaX) >= 360;
     this.translateX = 'translateX' in params ? params.translateX : this.xmax > 180; // [0, 360] --> [-180, 180];
     if ('wrappedX' in params) {
-      warnOnce(
-        '[wind-core]: ',
-        '`wrappedX` namespace will deprecated please use `translateX` instead！',
-      );
+      warnOnce('[wind-core]: ', '`wrappedX` namespace will deprecated please use `translateX` instead！');
     }
 
     this.wrapX = Boolean(params.wrapX);
@@ -248,13 +245,13 @@ export default class Field {
 
   public contains(lon: number, lat: number) {
     const [xmin, xmax] = this.getWrappedLongitudes();
-    
+
     if (xmax > 180 && lon >= -180 && lon <= xmax - 360) {
       lon += 360;
     } else if (xmin < -180 && lon <= 180 && lon >= xmin + 360) {
       lon -= 360;
     }
-    
+
     const longitudeIn = lon >= xmin && lon <= xmax;
     let latitudeIn;
     if (this.deltaY >= 0) {

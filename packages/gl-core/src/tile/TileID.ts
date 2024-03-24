@@ -1,4 +1,4 @@
-import { TileBounds, ProjTileBounds } from '../type';
+import type { TileBounds, ProjTileBounds } from '../type';
 import { isFunction } from '../utils/common';
 
 export interface TileIDOptions {
@@ -134,14 +134,7 @@ export default class TileID {
     if (targetZ > this.z) {
       return new TileID(targetZ, this.wrap, this.z, this.x, this.y, this.options);
     } else {
-      return new TileID(
-        targetZ,
-        this.wrap,
-        targetZ,
-        this.x >> zDifference,
-        this.y >> zDifference,
-        this.options,
-      );
+      return new TileID(targetZ, this.wrap, targetZ, this.x >> zDifference, this.y >> zDifference, this.options);
     }
   }
 
@@ -149,8 +142,7 @@ export default class TileID {
    * 获取父级瓦片
    */
   parent() {
-    if (this.z > 0)
-      return new TileID(this.z - 1, this.wrap, this.z - 1, this.x >> 1, this.y >> 1, this.options);
+    if (this.z > 0) return new TileID(this.z - 1, this.wrap, this.z - 1, this.x >> 1, this.y >> 1, this.options);
     else return new TileID(this.z, this.wrap, this.z, this.x, this.y, this.options);
   }
 

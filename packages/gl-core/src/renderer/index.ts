@@ -1,12 +1,5 @@
-import {
-  Attributes,
-  DataTexture,
-  Raf,
-  Renderer,
-  Scene,
-  utils,
-  Vector2,
-} from '@sakitam-gis/vis-engine';
+import type { Attributes, Renderer, Scene } from '@sakitam-gis/vis-engine';
+import { DataTexture, Raf, utils, Vector2 } from '@sakitam-gis/vis-engine';
 import wgw from 'wind-gl-worker';
 import Pipelines from './Pipelines';
 import ColorizeComposePass from './pass/color/compose';
@@ -20,10 +13,11 @@ import ParticlesPass from './pass/particles/particles';
 import PickerPass from './pass/picker';
 import { isFunction, resolveURL } from '../utils/common';
 import { createLinearGradient, createZoom } from '../utils/style-parser';
-import { getBandType, MaskType, RenderFrom, RenderType } from '../type';
-import { SourceType } from '../source';
-import Tile from '../tile/Tile';
-import TileID from '../tile/TileID';
+import type { MaskType } from '../type';
+import { getBandType, RenderFrom, RenderType } from '../type';
+import type { SourceType } from '../source';
+import type Tile from '../tile/Tile';
+import type TileID from '../tile/TileID';
 import MaskPass from './pass/mask';
 import ArrowComposePass from './pass/arrow/compose';
 import ArrowPass from './pass/arrow/arrow';
@@ -202,11 +196,7 @@ export default class BaseLayer {
   #nextStencilID: number;
   #maskPass: MaskPass;
 
-  constructor(
-    source: SourceType,
-    rs: { renderer: Renderer; scene: Scene },
-    options?: Partial<BaseLayerOptions>,
-  ) {
+  constructor(source: SourceType, rs: { renderer: Renderer; scene: Scene }, options?: Partial<BaseLayerOptions>) {
     this.renderer = rs.renderer;
     this.scene = rs.scene;
     this.source = source;
@@ -522,19 +512,11 @@ export default class BaseLayer {
       const zoom = this.options.getZoom();
       this.setOpacity(createZoom(this.uid, zoom, 'opacity', this.options.styleSpec, clear));
       if (this.options.renderType === RenderType.particles) {
-        this.setNumParticles(
-          createZoom(this.uid, zoom, 'numParticles', this.options.styleSpec, clear),
-        );
-        this.setFadeOpacity(
-          createZoom(this.uid, zoom, 'fadeOpacity', this.options.styleSpec, clear),
-        );
-        this.setSpeedFactor(
-          createZoom(this.uid, zoom, 'speedFactor', this.options.styleSpec, clear),
-        );
+        this.setNumParticles(createZoom(this.uid, zoom, 'numParticles', this.options.styleSpec, clear));
+        this.setFadeOpacity(createZoom(this.uid, zoom, 'fadeOpacity', this.options.styleSpec, clear));
+        this.setSpeedFactor(createZoom(this.uid, zoom, 'speedFactor', this.options.styleSpec, clear));
         this.setDropRate(createZoom(this.uid, zoom, 'dropRate', this.options.styleSpec, clear));
-        this.setDropRateBump(
-          createZoom(this.uid, zoom, 'dropRateBump', this.options.styleSpec, clear),
-        );
+        this.setDropRateBump(createZoom(this.uid, zoom, 'dropRateBump', this.options.styleSpec, clear));
       }
 
       if (this.options.renderType === RenderType.arrow) {
@@ -556,10 +538,7 @@ export default class BaseLayer {
    */
   buildColorRamp() {
     if (!this.options.styleSpec?.['fill-color']) return;
-    const { data, colorRange } = createLinearGradient(
-      [],
-      this.options.styleSpec?.['fill-color'] as any[],
-    );
+    const { data, colorRange } = createLinearGradient([], this.options.styleSpec?.['fill-color'] as any[]);
 
     if (colorRange) {
       this.#colorRange = new Vector2(...colorRange);

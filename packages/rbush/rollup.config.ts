@@ -1,7 +1,8 @@
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
-import { RollupOptions, defineConfig } from 'rollup';
+import type { RollupOptions } from 'rollup';
+import { defineConfig } from 'rollup';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import esbuild from 'rollup-plugin-esbuild';
@@ -9,8 +10,8 @@ import json from '@rollup/plugin-json';
 import glslify from 'rollup-plugin-glslify';
 import replace from '@rollup/plugin-replace';
 import alias from '@rollup/plugin-alias';
+import terser from '@rollup/plugin-terser';
 import dts from 'rollup-plugin-dts';
-import { terser } from 'rollup-plugin-terser';
 import sourcemaps from 'rollup-plugin-sourcemaps';
 
 const rq = createRequire(import.meta.url);
@@ -24,16 +25,11 @@ const r = (p: string) => resolve(ROOT, '..', p);
 
 const umdExternal = [];
 
-const external = [
-  ...umdExternal,
-  ...Object.keys(pkg.dependencies),
-];
+const external = [...umdExternal, ...Object.keys(pkg.dependencies)];
 
 const plugins = [
   alias({
-    entries: [
-      { find: '@', replacement: r('./src') },
-    ],
+    entries: [{ find: '@', replacement: r('./src') }],
   }),
   replace({
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
@@ -75,7 +71,7 @@ const cjsBuild: RollupOptions = {
   onwarn(warning, warn) {
     if (warning.code !== 'EVAL') warn(warning);
   },
-}
+};
 
 const umdBuild: RollupOptions = {
   input: r('src/index.ts'),
@@ -84,7 +80,12 @@ const umdBuild: RollupOptions = {
     dir: undefined,
     name: pkg.namespace,
     sourcemap: !MINIFY,
-    file: MINIFY ? pkg.main.split('.').splice(pkg.main.split('.').length - 1, 0, 'min').join('.') : pkg.main,
+    file: MINIFY
+      ? pkg.main
+          .split('.')
+          .splice(pkg.main.split('.').length - 1, 0, 'min')
+          .join('.')
+      : pkg.main,
     globals: {
       maptalks: 'maptalks',
     },
@@ -103,15 +104,10 @@ if (G && G.mtkWind) {
   window.MaptalksWind = window.mtkWind;
   __warnOnce('MaptalksWind namespace will deprecated please use mtkWind instead！');
 }
-    `
+    `,
   },
   external: umdExternal,
-  plugins: [
-    ...plugins,
-    ...(MINIFY ? [
-      terser(),
-    ] : []),
-  ],
+  plugins: [...plugins, ...(MINIFY ? [terser()] : [])],
   onwarn(warning, warn) {
     if (warning.code !== 'EVAL') warn(warning);
   },
@@ -124,9 +120,7 @@ const typesBuild: RollupOptions = {
     file: pkg.types,
   },
   external,
-  plugins: [
-    dts({ respectExternal: true }),
-  ],
+  plugins: [dts({ respectExternal: true })],
 };
 
 const config = defineConfig([]);

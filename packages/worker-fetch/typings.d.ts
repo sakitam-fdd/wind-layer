@@ -7,6 +7,6 @@ declare module 'web-worker:*' {
 
 type WithNull<T> = T | null;
 type Callback<T> = (error?: Error | null, result?: T | null) => void;
-type Cancelable = {
+interface Cancelable {
   cancel: () => void;
-};
+}

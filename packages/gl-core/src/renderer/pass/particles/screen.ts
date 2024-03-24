@@ -1,12 +1,13 @@
-import { BlendType, Geometry, Mesh, Program, Renderer } from '@sakitam-gis/vis-engine';
+import type { Renderer } from '@sakitam-gis/vis-engine';
+import { BlendType, Geometry, Mesh, Program } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
 import vert from '../../../shaders/common.vert.glsl';
 import frag from '../../../shaders/particles/screen.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import { BandType } from '../../../type';
-import { SourceType } from '../../../source';
-import ParticlesPass from './particles';
+import type { BandType } from '../../../type';
+import type { SourceType } from '../../../source';
+import type ParticlesPass from './particles';
 
 export interface ScreenPassOptions {
   source: SourceType;
@@ -23,11 +24,7 @@ export default class ScreenPass extends Pass<ScreenPassOptions> {
   #mesh: WithNull<Mesh>;
   #geometry: WithNull<Geometry>;
 
-  constructor(
-    id: string,
-    renderer: Renderer,
-    options: ScreenPassOptions = {} as ScreenPassOptions,
-  ) {
+  constructor(id: string, renderer: Renderer, options: ScreenPassOptions = {} as ScreenPassOptions) {
     super(id, renderer, options);
     this.prerender = Boolean(options.prerender);
 
@@ -102,10 +99,7 @@ export default class ScreenPass extends Pass<ScreenPassOptions> {
     if (rendererState && this.#mesh) {
       const camera = rendererParams.cameras.planeCamera;
       this.#mesh.program.setUniform('u_fade', 1);
-      this.#mesh.program.setUniform(
-        'u_opacity',
-        this.prerender ? rendererState.fadeOpacity : rendererState.opacity,
-      );
+      this.#mesh.program.setUniform('u_opacity', this.prerender ? rendererState.fadeOpacity : rendererState.opacity);
       this.#mesh.program.setUniform(
         'u_screen',
         this.prerender

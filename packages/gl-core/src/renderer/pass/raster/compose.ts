@@ -1,12 +1,13 @@
-import { Program, Renderer, RenderTarget, utils } from '@sakitam-gis/vis-engine';
+import type { Renderer } from '@sakitam-gis/vis-engine';
+import { Program, RenderTarget, utils } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import vert from '../../../shaders/compose.vert.glsl';
 import frag from '../../../shaders/raster-texture.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import { RenderFrom, BandType } from '../../../type';
-import TileID from '../../../tile/TileID';
-import { SourceType } from '../../../source';
-import MaskPass from '../mask';
+import type { RenderFrom, BandType } from '../../../type';
+import type TileID from '../../../tile/TileID';
+import type { SourceType } from '../../../source';
+import type MaskPass from '../mask';
 
 export interface ComposePassOptions {
   source: SourceType;
@@ -27,11 +28,7 @@ export default class ComposePass extends Pass<ComposePassOptions> {
   #current: WithNull<RenderTarget>;
   #next: WithNull<RenderTarget>;
   #uid: string;
-  constructor(
-    id: string,
-    renderer: Renderer,
-    options: ComposePassOptions = {} as ComposePassOptions,
-  ) {
+  constructor(id: string, renderer: Renderer, options: ComposePassOptions = {} as ComposePassOptions) {
     super(id, renderer, options);
 
     this.#uid = utils.uid('ComposePass');

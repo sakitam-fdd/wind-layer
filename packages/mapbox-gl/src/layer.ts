@@ -241,9 +241,7 @@ export default class Layer {
           const wrapTiles: TileID[] = [];
           if (type === LayerSourceType.image) {
             // @ts-ignore
-            const cornerCoords = source.coordinates.map((c: any) =>
-              mapboxgl.MercatorCoordinate.fromLngLat(c),
-            );
+            const cornerCoords = source.coordinates.map((c: any) => mapboxgl.MercatorCoordinate.fromLngLat(c));
             const tileID = getCoordinatesCenterTileID(cornerCoords);
             if (source.wrapX) {
               transform.getVisibleUnwrappedCoordinates(tileID).forEach((unwrapped) => {
@@ -290,9 +288,7 @@ export default class Layer {
             }
           } else if (type === LayerSourceType.tile) {
             const opts = {
-              tileSize: utils.isNumber(this.source.tileSize)
-                ? source.tileSize
-                : source.tileSize?.[0] || 512,
+              tileSize: utils.isNumber(this.source.tileSize) ? source.tileSize : source.tileSize?.[0] || 512,
               // for mapbox
               minzoom: source.minZoom,
               maxzoom: source.maxZoom,
@@ -339,14 +335,8 @@ export default class Layer {
           const ymin = bounds[0][1];
           const xmax = bounds[1][0];
           const ymax = bounds[1][1];
-          const minY = Math.max(
-            ymin,
-            map.transform.latRange ? map.transform.latRange[0] : map.transform.minLat,
-          );
-          const maxY = Math.min(
-            ymax,
-            map.transform.latRange ? map.transform.latRange[1] : map.transform.maxLat,
-          );
+          const minY = Math.max(ymin, map.transform.latRange ? map.transform.latRange[0] : map.transform.minLat);
+          const maxY = Math.min(ymax, map.transform.latRange ? map.transform.latRange[1] : map.transform.maxLat);
           const p0 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmin, maxY));
           const p1 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(xmax, minY));
           return [p0.x, p0.y, p1.x, p1.y];

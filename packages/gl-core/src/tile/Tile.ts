@@ -1,8 +1,10 @@
-import { Geometry, Program, Renderer, Texture } from '@sakitam-gis/vis-engine';
+import type { Program, Renderer } from '@sakitam-gis/vis-engine';
+import { Geometry, Texture } from '@sakitam-gis/vis-engine';
 import TileMesh from './TileMesh';
-import { ParseOptionsType, ProjTileBounds, RenderFrom, TileBounds, TileState } from '../type';
+import type { ParseOptionsType, ProjTileBounds, TileBounds } from '../type';
+import { RenderFrom, TileState } from '../type';
 import { isImageBitmap, parseRange } from '../utils/common';
-import TileID from './TileID';
+import type TileID from './TileID';
 
 export interface TileOptions {
   tileBounds?: TileBounds;
@@ -106,11 +108,7 @@ export default class Tile {
    * 瓦片是否加载完成
    */
   isLoaded() {
-    return (
-      this.state === TileState.loaded ||
-      this.state === TileState.reloading ||
-      this.state === TileState.errored
-    );
+    return this.state === TileState.loaded || this.state === TileState.reloading || this.state === TileState.errored;
   }
 
   getMesh(passId) {
@@ -122,11 +120,7 @@ export default class Tile {
   }
 
   get tileCenter() {
-    return [
-      (this.tileBounds.left + this.tileBounds.right) / 2,
-      (this.tileBounds.top + this.tileBounds.bottom) / 2,
-      0,
-    ];
+    return [(this.tileBounds.left + this.tileBounds.right) / 2, (this.tileBounds.top + this.tileBounds.bottom) / 2, 0];
   }
 
   /**
@@ -196,13 +190,7 @@ export default class Tile {
    * @param program
    * @param force
    */
-  createMesh(
-    passId: string,
-    bbox: ProjTileBounds,
-    renderer: Renderer,
-    program: Program,
-    force?: boolean,
-  ) {
+  createMesh(passId: string, bbox: ProjTileBounds, renderer: Renderer, program: Program, force?: boolean) {
     const geometry = this.updateGeometry(passId, bbox, renderer, force);
     if (!this.tileMeshs.get(passId) || force) {
       this.uses++;
@@ -223,13 +211,7 @@ export default class Tile {
    * @param parseOptions
    * @param userData
    */
-  setTextures(
-    renderer: Renderer,
-    index: number,
-    image: any,
-    parseOptions: ParseOptionsType,
-    userData?: any,
-  ) {
+  setTextures(renderer: Renderer, index: number, image: any, parseOptions: ParseOptionsType, userData?: any) {
     const texture = this.#textures.get(index);
     const iib = isImageBitmap(image) || image instanceof Image;
 
@@ -264,10 +246,7 @@ export default class Tile {
           wrapT: renderer.gl.CLAMP_TO_EDGE,
           flipY: false, // 注意，对 ImageBitmap 无效
           premultiplyAlpha: false, // 禁用 `Alpha` 预乘
-          type:
-            parseOptions.renderFrom === RenderFrom.float
-              ? renderer.gl.FLOAT
-              : renderer.gl.UNSIGNED_BYTE,
+          type: parseOptions.renderFrom === RenderFrom.float ? renderer.gl.FLOAT : renderer.gl.UNSIGNED_BYTE,
           format:
             parseOptions.renderFrom === RenderFrom.float
               ? renderer.isWebGL2

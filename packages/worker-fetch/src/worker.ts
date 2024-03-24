@@ -44,9 +44,7 @@ export default class Worker {
                   done(err, false);
                   return console.error(err);
                 }
-                const url = URL.createObjectURL(
-                  new Blob([data], { type: 'application/javascript' }),
-                );
+                const url = URL.createObjectURL(new Blob([data], { type: 'application/javascript' }));
                 self.importScripts(url);
                 // Mobile Safari
                 setTimeout(() => {

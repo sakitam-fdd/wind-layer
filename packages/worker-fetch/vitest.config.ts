@@ -6,8 +6,7 @@ const config: { test: UserConfig } = {
     // setupFiles: '../../vitest/setupTest.ts',
     coverage: {
       reporter: ['lcov', 'html'],
-    },
-    threads: false,
+    } as any,
   },
 }
 

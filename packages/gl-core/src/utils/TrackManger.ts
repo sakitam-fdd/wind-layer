@@ -1,5 +1,5 @@
 import { Raf } from '@sakitam-gis/vis-engine';
-import Track from './Track';
+import type Track from './Track';
 
 class TrackManger {
   public raf: Raf;

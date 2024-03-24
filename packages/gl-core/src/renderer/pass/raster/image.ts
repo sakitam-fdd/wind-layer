@@ -1,10 +1,11 @@
-import { Program, Renderer, Mesh, Geometry, Texture, utils } from '@sakitam-gis/vis-engine';
+import type { Renderer, Texture } from '@sakitam-gis/vis-engine';
+import { Program, Mesh, Geometry, utils } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import vert from '../../../shaders/common.vert.glsl';
 import frag from '../../../shaders/common.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import { BandType } from '../../../type';
-import { SourceType } from '../../../source';
+import type { BandType } from '../../../type';
+import type { SourceType } from '../../../source';
 
 export interface RasterPassOptions {
   source: SourceType;
@@ -22,11 +23,7 @@ export default class RasterPass extends Pass<RasterPassOptions> {
   #geometry: WithNull<Geometry>;
   readonly prerender = false;
 
-  constructor(
-    id: string,
-    renderer: Renderer,
-    options: RasterPassOptions = {} as RasterPassOptions,
-  ) {
+  constructor(id: string, renderer: Renderer, options: RasterPassOptions = {} as RasterPassOptions) {
     super(id, renderer, options);
 
     this.#program = new Program(renderer, {

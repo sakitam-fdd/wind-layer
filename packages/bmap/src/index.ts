@@ -268,7 +268,7 @@ class BMapWind extends BMap.Overlay {
   private projectInner(coordinate: [number, number]): [number, number] {
     const map = this.map;
     let scale = 1;
-    if (this.context != '2d') {
+    if (this.context !== '2d') {
       scale = window.devicePixelRatio;
     }
 

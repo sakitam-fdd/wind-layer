@@ -141,10 +141,7 @@ export default class Track extends EventEmitter {
       return 1;
     }
 
-    return Math.max(
-      0,
-      Math.min(1, (this.#elapsedTime - this.#options.delay) / this.#options.duration),
-    );
+    return Math.max(0, Math.min(1, (this.#elapsedTime - this.#options.delay) / this.#options.duration));
   }
 
   /**
@@ -224,9 +221,7 @@ export default class Track extends EventEmitter {
    */
   advance(position, e = true) {
     const p = utils.clamp(position, 0, 1);
-    this.#elapsedTime = e
-      ? this.totalDuration * p
-      : this.#options.delay + this.#options.duration * p;
+    this.#elapsedTime = e ? this.totalDuration * p : this.#options.delay + this.#options.duration * p;
     this.#options?.track?.(this.position);
     this.emit('track', {
       position: this.position,

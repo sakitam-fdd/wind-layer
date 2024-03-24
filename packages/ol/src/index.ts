@@ -2,9 +2,9 @@ import { Layer } from 'ol/layer';
 import type { PluggableMap } from 'ol';
 import WindLayerRender from './renderer';
 
-import { isArray, formatData, assign, defaultOptions, Field } from 'wind-core';
+import { isArray, formatData, assign, defaultOptions } from 'wind-core';
 
-import type { IOptions, IField } from 'wind-core';
+import type { IOptions, IField, Field } from 'wind-core';
 
 const _options = {
   forceRender: true,
@@ -32,8 +32,7 @@ export class WindLayer extends Layer<any, any> {
 
     this.options = opt;
 
-    // @tip overwrite for layer className and disable containerReused
-    // @ts-ignore
+    // @ts-ignore @tip overwrite for layer className and disable containerReused
     this.className_ = options.className !== undefined ? options.className : 'wind-layer';
 
     this.pickWindOptions();
@@ -54,7 +53,7 @@ export class WindLayer extends Layer<any, any> {
   }
 
   protected createRenderer(): any {
-    // @ts-ignore
+    // @ts-ignore need resolve
     return new WindLayerRender(this);
   }
 
@@ -72,7 +71,7 @@ export class WindLayer extends Layer<any, any> {
   /**
    * get wind layer data
    */
-  // @ts-ignore
+  // @ts-ignore overwrite base layer
   public getData() {
     return this.field;
   }

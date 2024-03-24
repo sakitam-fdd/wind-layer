@@ -1,15 +1,11 @@
-import { EventEmitter, Renderer, utils } from '@sakitam-gis/vis-engine';
+import type { Renderer } from '@sakitam-gis/vis-engine';
+import { EventEmitter, utils } from '@sakitam-gis/vis-engine';
 import SourceCache from './cahce';
-import {
-  DecodeType,
-  ImageSourceOptions,
-  LayerSourceType,
-  ParseOptionsType,
-  TileState,
-} from '../type';
+import type { ImageSourceOptions, ParseOptionsType } from '../type';
+import { DecodeType, LayerSourceType, TileState } from '../type';
 import { resolveURL } from '../utils/common';
-import Tile from '../tile/Tile';
-import Layer from '../renderer';
+import type Tile from '../tile/Tile';
+import type Layer from '../renderer';
 
 export interface ImageSourceInterval {
   url: ImageSourceOptions['url'];

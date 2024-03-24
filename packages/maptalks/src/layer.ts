@@ -10,15 +10,8 @@ import {
   utils,
 } from '@sakitam-gis/vis-engine';
 
-import {
-  BaseLayer,
-  ImageSource,
-  LayerSourceType,
-  polygon2buffer,
-  SourceType,
-  TileID,
-  UserOptions,
-} from 'wind-gl-core';
+import type { ImageSource, SourceType, UserOptions } from 'wind-gl-core';
+import { BaseLayer, LayerSourceType, polygon2buffer, TileID } from 'wind-gl-core';
 
 highPrecision(true);
 
@@ -136,10 +129,7 @@ class VeRenderer extends maptalks.renderer.CanvasLayerRenderer {
     const r = map.getDevicePixelRatio ? map.getDevicePixelRatio() : maptalks.Browser.retina ? 2 : 1;
     const canvas = this.canvas;
     const { width, height, cssWidth, cssHeight } = maptalks.Util.calCanvasSize(size, r);
-    if (
-      this.layer._canvas &&
-      (canvas.style.width !== cssWidth || canvas.style.height !== cssHeight)
-    ) {
+    if (this.layer._canvas && (canvas.style.width !== cssWidth || canvas.style.height !== cssHeight)) {
       canvas.style.width = cssWidth;
       canvas.style.height = cssHeight;
     }
@@ -370,15 +360,9 @@ class Layer extends maptalks.TileLayer {
     const extent = [projExtent.xmin, projExtent.ymin, projExtent.xmax, projExtent.ymax];
     const worldWidth = projectionExtent[2] - projectionExtent[0];
     const res = getGLRes(map);
-    const p1 = map._prjToPointAtRes(
-      new maptalks.Coordinate([projectionExtent[0], projectionExtent[3]]),
-      res,
-    );
+    const p1 = map._prjToPointAtRes(new maptalks.Coordinate([projectionExtent[0], projectionExtent[3]]), res);
 
-    const p2 = map._prjToPointAtRes(
-      new maptalks.Coordinate([projectionExtent[2], projectionExtent[1]]),
-      res,
-    );
+    const p2 = map._prjToPointAtRes(new maptalks.Coordinate([projectionExtent[2], projectionExtent[1]]), res);
     const projWorldWidth = Math.abs(p1.x - p2.x);
 
     let startX = projectionExtent[0];
@@ -561,10 +545,7 @@ class Layer extends maptalks.TileLayer {
         getTileProjSize: (z: number, tiles: TileID[]) => {
           const t = tiles.find((tile: TileID) => tile.z === z);
           if (t) {
-            return [
-              t.projTileBounds.right - t.projTileBounds.left,
-              t.projTileBounds.top - t.projTileBounds.bottom,
-            ];
+            return [t.projTileBounds.right - t.projTileBounds.left, t.projTileBounds.top - t.projTileBounds.bottom];
           }
 
           return [this.projWorldWidth, this.projWorldWidth];

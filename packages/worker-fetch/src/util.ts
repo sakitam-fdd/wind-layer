@@ -41,11 +41,7 @@ export function asyncAll<Item, Result>(
  * @returns {boolean}
  */
 export function isWorker(): boolean {
-  return (
-    typeof WorkerGlobalScope !== 'undefined' &&
-    typeof self !== 'undefined' &&
-    self instanceof WorkerGlobalScope
-  );
+  return typeof WorkerGlobalScope !== 'undefined' && typeof self !== 'undefined' && self instanceof WorkerGlobalScope;
 }
 
 /**
@@ -71,8 +67,7 @@ export function isArrayBuffer(value: any): value is ArrayBuffer {
   return (
     value &&
     typeof ArrayBuffer !== 'undefined' &&
-    (value instanceof ArrayBuffer ||
-      (value.constructor && value.constructor.name === 'ArrayBuffer'))
+    (value instanceof ArrayBuffer || (value.constructor && value.constructor.name === 'ArrayBuffer'))
   );
 }
 
@@ -98,8 +93,7 @@ export function isSafari(scope: any): boolean {
       !!scope.safari ||
       !!(
         userAgent &&
-        (/\b(iPad|iPhone|iPod)\b/.test(userAgent) ||
-          (!!userAgent.match('Safari') && !userAgent.match('Chrome')))
+        (/\b(iPad|iPhone|iPod)\b/.test(userAgent) || (!!userAgent.match('Safari') && !userAgent.match('Chrome')))
       );
   }
   return _isSafari;

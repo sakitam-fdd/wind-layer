@@ -363,9 +363,7 @@ test('#remove removes items correctly', () => {
 });
 
 test('#remove does nothing if nothing found', () => {
-  expect(new RBush().load(data)).toEqual(
-    new RBush().load(data).remove(arrToBBox([13, 13, 13, 13]) as any),
-  );
+  expect(new RBush().load(data)).toEqual(new RBush().load(data).remove(arrToBBox([13, 13, 13, 13]) as any));
 });
 
 test('#remove does nothing if given undefined', () => {

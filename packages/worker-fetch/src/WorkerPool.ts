@@ -63,7 +63,6 @@ export default class WorkerPool {
   }
 }
 
-const hardwareConcurrency =
-  (typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 4;
+const hardwareConcurrency = (typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 4;
 const availableLogicalProcessors = Math.floor(hardwareConcurrency / 2);
 WorkerPool.workerCount = Math.max(Math.min(availableLogicalProcessors, 6), 1);

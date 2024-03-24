@@ -1,4 +1,5 @@
-import REGL, { DrawCommand, Framebuffer2D, Regl, Texture2D } from 'regl';
+import type { DrawCommand, Framebuffer2D, Regl, Texture2D } from 'regl';
+import REGL from 'regl';
 import mapboxgl from 'mapbox-gl';
 import particleUpdateVert from './shaders/particle-update.vert.glsl';
 import particleUpdateFrag from './shaders/particle-update.frag.glsl';
@@ -282,11 +283,7 @@ export default class ParticlesLayer {
     this.quadBuffer = new Float32Array([0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1]);
     this.backgroundBuffer = new Float32Array([0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]);
 
-    this.updateCommand = this.regl<
-      UpdateCommand.Uniforms,
-      UpdateCommand.Attributes,
-      UpdateCommand.Props
-    >({
+    this.updateCommand = this.regl<UpdateCommand.Uniforms, UpdateCommand.Attributes, UpdateCommand.Props>({
       frag: particleUpdateFrag,
       vert: particleUpdateVert,
       attributes: {
@@ -300,9 +297,7 @@ export default class ParticlesLayer {
         u_wind_res: this.regl.prop<UpdateCommand.Props, 'u_wind_res'>('u_wind_res'),
         u_drop_rate: this.regl.prop<UpdateCommand.Props, 'u_drop_rate'>('u_drop_rate'),
         u_speed_factor: this.regl.prop<UpdateCommand.Props, 'u_speed_factor'>('u_speed_factor'),
-        u_drop_rate_bump: this.regl.prop<UpdateCommand.Props, 'u_drop_rate_bump'>(
-          'u_drop_rate_bump',
-        ),
+        u_drop_rate_bump: this.regl.prop<UpdateCommand.Props, 'u_drop_rate_bump'>('u_drop_rate_bump'),
         u_wind_min: this.regl.prop<UpdateCommand.Props, 'u_wind_min'>('u_wind_min'),
         u_wind_max: this.regl.prop<UpdateCommand.Props, 'u_wind_max'>('u_wind_max'),
         u_bbox: this.regl.prop<UpdateCommand.Props, 'u_bbox'>('u_bbox'),
@@ -349,16 +344,10 @@ export default class ParticlesLayer {
       uniforms: {
         u_wind: this.regl.prop<DrawParticlesCommand.Props, 'u_wind'>('u_wind'),
         u_particles: this.regl.prop<DrawParticlesCommand.Props, 'u_particles'>('u_particles'),
-        u_particles_next: this.regl.prop<DrawParticlesCommand.Props, 'u_particles_next'>(
-          'u_particles_next',
-        ),
+        u_particles_next: this.regl.prop<DrawParticlesCommand.Props, 'u_particles_next'>('u_particles_next'),
         u_color_ramp: this.regl.prop<DrawParticlesCommand.Props, 'u_color_ramp'>('u_color_ramp'),
-        u_particles_res: this.regl.prop<DrawParticlesCommand.Props, 'u_particles_res'>(
-          'u_particles_res',
-        ),
-        u_dateline_offset: this.regl.prop<DrawParticlesCommand.Props, 'u_dateline_offset'>(
-          'u_dateline_offset',
-        ),
+        u_particles_res: this.regl.prop<DrawParticlesCommand.Props, 'u_particles_res'>('u_particles_res'),
+        u_dateline_offset: this.regl.prop<DrawParticlesCommand.Props, 'u_dateline_offset'>('u_dateline_offset'),
         u_wind_min: this.regl.prop<DrawParticlesCommand.Props, 'u_wind_min'>('u_wind_min'),
         u_wind_max: this.regl.prop<DrawParticlesCommand.Props, 'u_wind_max'>('u_wind_max'),
         u_matrix: (_, { u_matrix }) => u_matrix,
@@ -412,24 +401,15 @@ export default class ParticlesLayer {
       uniforms: {
         u_wind: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_wind'>('u_wind'),
         u_particles: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_particles'>('u_particles'),
-        u_particles_next: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_particles_next'>(
-          'u_particles_next',
-        ),
-        u_color_ramp: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_color_ramp'>(
-          'u_color_ramp',
-        ),
-        u_particles_res: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_particles_res'>(
-          'u_particles_res',
-        ),
-        u_dateline_offset: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_dateline_offset'>(
-          'u_dateline_offset',
-        ),
+        u_particles_next: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_particles_next'>('u_particles_next'),
+        u_color_ramp: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_color_ramp'>('u_color_ramp'),
+        u_particles_res: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_particles_res'>('u_particles_res'),
+        u_dateline_offset: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_dateline_offset'>('u_dateline_offset'),
         u_wind_min: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_wind_min'>('u_wind_min'),
         u_wind_max: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_wind_max'>('u_wind_max'),
         u_matrix: (_, { u_matrix }) => u_matrix,
         u_globeToMercMatrix: (_, { u_globeToMercMatrix }) => u_globeToMercMatrix,
-        u_globeToMercatorTransition: (_, { u_globeToMercatorTransition }) =>
-          u_globeToMercatorTransition,
+        u_globeToMercatorTransition: (_, { u_globeToMercatorTransition }) => u_globeToMercatorTransition,
         u_centerInMerc: (_, { u_centerInMerc }) => u_centerInMerc,
         u_pixelsPerMeterRatio: (_, { u_pixelsPerMeterRatio }) => u_pixelsPerMeterRatio,
         u_bbox: this.regl.prop<GlobalDrawParticlesCommand.Props, 'u_bbox'>('u_bbox'),
@@ -467,11 +447,7 @@ export default class ParticlesLayer {
       primitive: 'points',
     });
 
-    this.textureCommand = this.regl<
-      TextureCommand.Uniforms,
-      TextureCommand.Attributes,
-      TextureCommand.Props
-    >({
+    this.textureCommand = this.regl<TextureCommand.Uniforms, TextureCommand.Attributes, TextureCommand.Props>({
       frag: screenFrag,
       vert: screenVert,
       attributes: {
@@ -543,12 +519,8 @@ export default class ParticlesLayer {
       map.transform.latRange ? map.transform.latRange[1] : map.transform.maxLat,
     ]);
 
-    const p0 = mapboxgl.MercatorCoordinate.fromLngLat(
-      new mapboxgl.LngLat(mapBounds[0], mapBounds[3]),
-    );
-    const p1 = mapboxgl.MercatorCoordinate.fromLngLat(
-      new mapboxgl.LngLat(mapBounds[2], mapBounds[1]),
-    );
+    const p0 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(mapBounds[0], mapBounds[3]));
+    const p1 = mapboxgl.MercatorCoordinate.fromLngLat(new mapboxgl.LngLat(mapBounds[2], mapBounds[1]));
 
     return [p0.x, p0.y, p1.x, p1.y];
   }
@@ -637,10 +609,7 @@ export default class ParticlesLayer {
 
     this.initialized = false;
 
-    [this.particleStateTexture0, this.particleStateTexture1] = [
-      this.particleStateTexture1,
-      this.particleStateTexture0,
-    ];
+    [this.particleStateTexture0, this.particleStateTexture1] = [this.particleStateTexture1, this.particleStateTexture0];
   }
 
   drawTexture(matrix, dateLineOffset, isGlobal, params) {
@@ -719,15 +688,7 @@ export default class ParticlesLayer {
   //   return false;
   // }
 
-  prerender(
-    gl,
-    projectionMatrix,
-    projection,
-    globeToMercMatrix,
-    transition,
-    centerInMercator,
-    pixelsPerMeterRatio,
-  ) {
+  prerender(gl, projectionMatrix, projection, globeToMercMatrix, transition, centerInMercator, pixelsPerMeterRatio) {
     if (this.windData) {
       this.regl._refresh();
       this.update();
@@ -742,15 +703,7 @@ export default class ParticlesLayer {
     }
   }
 
-  render(
-    gl,
-    projectionMatrix,
-    projection,
-    globeToMercMatrix,
-    transition,
-    centerInMercator,
-    pixelsPerMeterRatio,
-  ) {
+  render(gl, projectionMatrix, projection, globeToMercMatrix, transition, centerInMercator, pixelsPerMeterRatio) {
     if (this.windData) {
       if (!this.pointing) {
         this.drawScreen();

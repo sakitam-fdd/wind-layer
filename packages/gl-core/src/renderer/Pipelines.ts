@@ -1,4 +1,4 @@
-import { Renderer } from '@sakitam-gis/vis-engine';
+import type { Renderer } from '@sakitam-gis/vis-engine';
 
 export default class Pipelines {
   #passes: any[] = [];

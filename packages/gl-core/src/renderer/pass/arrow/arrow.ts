@@ -1,21 +1,14 @@
-import {
-  Program,
-  Renderer,
-  Mesh,
-  Geometry,
-  Texture,
-  utils,
-  Vector2,
-} from '@sakitam-gis/vis-engine';
+import type { Renderer, Texture } from '@sakitam-gis/vis-engine';
+import { Program, Mesh, Geometry, utils, Vector2 } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
 import vert from '../../../shaders/arrow.vert.glsl';
 import frag from '../../../shaders/arraw.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import { BandType } from '../../../type';
-import { SourceType } from '../../../source';
-import TileID from '../../../tile/TileID';
-import MaskPass from '../mask';
+import type { BandType } from '../../../type';
+import type { SourceType } from '../../../source';
+import type TileID from '../../../tile/TileID';
+import type MaskPass from '../mask';
 
 export interface ArrowPassOptions {
   source: SourceType;

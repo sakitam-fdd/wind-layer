@@ -1,19 +1,12 @@
-import {
-  Program,
-  Renderer,
-  Mesh,
-  Geometry,
-  Texture,
-  utils,
-  Vector2,
-} from '@sakitam-gis/vis-engine';
+import type { Renderer, Texture } from '@sakitam-gis/vis-engine';
+import { Program, Mesh, Geometry, utils, Vector2 } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
 import { littleEndian } from '../../../utils/common';
 import vert from '../../../shaders/common.vert.glsl';
 import frag from '../../../shaders/color.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
-import { BandType } from '../../../type';
-import { SourceType } from '../../../source';
+import type { BandType } from '../../../type';
+import type { SourceType } from '../../../source';
 
 export interface ColorizePassOptions {
   source: SourceType;
@@ -31,11 +24,7 @@ export default class ColorizePass extends Pass<ColorizePassOptions> {
   #geometry: WithNull<Geometry>;
   readonly prerender = false;
 
-  constructor(
-    id: string,
-    renderer: Renderer,
-    options: ColorizePassOptions = {} as ColorizePassOptions,
-  ) {
+  constructor(id: string, renderer: Renderer, options: ColorizePassOptions = {} as ColorizePassOptions) {
     super(id, renderer, options);
 
     this.#program = new Program(renderer, {

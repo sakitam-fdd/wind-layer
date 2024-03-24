@@ -1,11 +1,11 @@
 import { EventEmitter } from '@sakitam-gis/vis-engine';
 import LRUCache from '../utils/LRUCache';
-import TileSource from './tile';
-import ImageSource from './image';
+import type TileSource from './tile';
+import type ImageSource from './image';
 import Tile from '../tile/Tile';
 import { keysDifference } from '../utils/common';
 import { TileState } from '../type';
-import TileID from '../tile/TileID';
+import type TileID from '../tile/TileID';
 
 function compareTileId(a: TileID, b: TileID) {
   const aWrap = Math.abs(a.wrap * 2) - +(a.wrap < 0);
@@ -219,12 +219,7 @@ export default class SourceCache extends EventEmitter {
       let tile = this.cacheTiles[id];
 
       // only consider renderable tiles up to maxCoveringZoom
-      if (
-        retain[id] ||
-        !tile.hasData() ||
-        tile.tileID.overscaledZ <= zoom ||
-        tile.tileID.overscaledZ > maxCoveringZoom
-      )
+      if (retain[id] || !tile.hasData() || tile.tileID.overscaledZ <= zoom || tile.tileID.overscaledZ > maxCoveringZoom)
         continue;
 
       // loop through parents and retain the topmost loaded one if found
@@ -357,11 +352,7 @@ export default class SourceCache extends EventEmitter {
       // in order to determine if we need to request its parent.
       let parentWasRequested = tile.wasRequested();
 
-      for (
-        let overscaledZ = tileID.overscaledZ - 1;
-        overscaledZ >= minCoveringZoom;
-        --overscaledZ
-      ) {
+      for (let overscaledZ = tileID.overscaledZ - 1; overscaledZ >= minCoveringZoom; --overscaledZ) {
         const parentId = tileID.scaledTo(overscaledZ);
 
         // Break parent tile ascent if this route has been previously checked by another child.
@@ -494,9 +485,7 @@ export default class SourceCache extends EventEmitter {
     }
 
     this.updateLoadedParentTileCache();
-    const currentLength = Object.keys(this.cacheTiles).filter((k) =>
-      this.cacheTiles[k]?.wasRequested(),
-    ).length;
+    const currentLength = Object.keys(this.cacheTiles).filter((k) => this.cacheTiles[k]?.wasRequested()).length;
     const retainLength = Object.keys(retain).length;
     if (currentLength < retainLength) {
       this.emit('tilesLoading', {

@@ -1,10 +1,10 @@
+import type { Scene } from '@sakitam-gis/vis-engine';
 import {
   Matrix4,
   Vector3,
   ProjectionMatrix,
   OrthographicCamera,
   PerspectiveCamera,
-  Scene,
   utils,
   highPrecision,
 } from '@sakitam-gis/vis-engine';
@@ -88,9 +88,7 @@ export default class CameraSync {
     const furthestDistance = pitchAngle * topHalfSurfaceDistance + this.cameraToCenterDistance;
     const farZ = furthestDistance * 1.01;
 
-    this.mercatorMatrix = new Matrix4().scale(
-      new Vector3(worldSize, worldSize, worldSize / pixelsPerMeter),
-    );
+    this.mercatorMatrix = new Matrix4().scale(new Vector3(worldSize, worldSize, worldSize / pixelsPerMeter));
 
     const may = new Matrix4().fromTranslation(new Vector3(0, 0, this.cameraToCenterDistance));
 
@@ -107,14 +105,7 @@ export default class CameraSync {
     this.cameraTranslateZ = this.cameraToCenterDistance;
 
     if (this.camera instanceof OrthographicCamera) {
-      this.camera.projectionMatrix.orthographic(
-        -width / 2,
-        width / 2,
-        height / 2,
-        -height / 2,
-        nearZ,
-        farZ,
-      );
+      this.camera.projectionMatrix.orthographic(-width / 2, width / 2, height / 2, -height / 2, nearZ, farZ);
     } else {
       this.camera.projectionMatrix.perspective(fovRad, width / height, nearZ, farZ);
     }
