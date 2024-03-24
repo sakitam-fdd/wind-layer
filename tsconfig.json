@@ -20,7 +20,7 @@
     "jsx": "preserve",
     "types": ["node", "vitest"],
     "lib": ["esnext", "dom", "webworker"],
-    "useDefineForClassFields": true,
+    "useDefineForClassFields": false,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true
   },
