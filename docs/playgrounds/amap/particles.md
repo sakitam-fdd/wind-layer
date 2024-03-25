@@ -6,6 +6,6 @@ importMap: {
 }
 ---
 
-## 添加栅格数据 - 单张
+## 添加风场图层
 
-<sfc-playground src="./image.vue" language="vue" title="栅格数据" desc="添加栅格数据 - 单张"></sfc-playground>
+<sfc-playground src="./amap.vue" language="vue" title="风场" desc="添加风场图层"></sfc-playground>
