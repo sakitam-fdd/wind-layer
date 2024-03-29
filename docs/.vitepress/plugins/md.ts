@@ -10,7 +10,7 @@ const scriptLangTsRE = /<\s*script[^>]*\blang=['"]ts['"][^>]*/;
 const scriptSetupRE = /<\s*script[^>]*\bsetup\b[^>]*/;
 const scriptClientRE = /<\s*script[^>]*\bclient\b[^>]*/;
 let index = 1;
-function getDemoComponent(md: any, env, { title, desc, path, code, ...props }: any) {
+function getDemoComponent(md: any, env: any, { title, desc, path, code, enableIntersectionObserver, ...props }: any) {
   const componentName = `DemoComponent${index++}`;
   path = normalizePath(path);
   injectImportStatement(env, componentName, path);
@@ -30,6 +30,7 @@ function getDemoComponent(md: any, env, { title, desc, path, code, ...props }: a
       src="${path}"
       title="${title ?? ''}"
       desc="${desc ?? ''}"
+      enableIntersectionObserver="${enableIntersectionObserver ?? 'true'}"
       importMap="${encodeURIComponent(importMap)}"
     >
       <${componentName}></${componentName}>
@@ -58,31 +59,26 @@ function genDemoByCode(md: any, env: any, path: string, code: string) {
 }
 
 function injectImportStatement(env: any, componentName: string, path: string) {
-  const componentRegistStatement =
-    `import ${componentName} from '${path}'`.trim()
+  const componentRegistStatement = `import ${componentName} from '${path}'`.trim();
 
   if (!env?.sfcBlocks?.scripts) {
-    env.sfcBlocks.scripts = []
+    env.sfcBlocks.scripts = [];
   }
-  const tags = env.sfcBlocks.scripts as { content: string }[]
+  const tags = env.sfcBlocks.scripts as { content: string }[];
 
-  const isUsingTS = tags.findIndex(tag => scriptLangTsRE.test(tag.content)) > -1
-  const existingSetupScriptIndex = tags?.findIndex(tag => {
-    return (
-      scriptRE.test(tag.content) &&
-      scriptSetupRE.test(tag.content) &&
-      !scriptClientRE.test(tag.content)
-    )
-  })
+  const isUsingTS = tags.findIndex((tag) => scriptLangTsRE.test(tag.content)) > -1;
+  const existingSetupScriptIndex = tags?.findIndex(
+    (tag) => scriptRE.test(tag.content) && scriptSetupRE.test(tag.content) && !scriptClientRE.test(tag.content),
+  );
 
   if (existingSetupScriptIndex > -1) {
-    const tagSrc = tags[existingSetupScriptIndex]
+    const tagSrc = tags[existingSetupScriptIndex];
     tags[existingSetupScriptIndex].content = tagSrc.content.replace(
       scriptRE,
       `${componentRegistStatement}
 
       </script>`,
-    )
+    );
   } else {
     tags.unshift({
       content: `
@@ -90,7 +86,7 @@ function injectImportStatement(env: any, componentName: string, path: string) {
           ${componentRegistStatement}
         </script>
       `.trim(),
-    })
+    });
   }
 }
 
@@ -102,7 +98,7 @@ function demoBlockPlugin(md: any) {
   const addRenderRule = (type: string) => {
     const defaultRender = md.renderer.rules[type];
 
-    md.renderer.rules[type] = (tokens: any, idx: string, options, env, ...args: any[]) => {
+    md.renderer.rules[type] = (tokens: any, idx: string, options: any, env: any, ...args: any[]) => {
       const token = tokens[idx];
       const content = token.content.trim();
       if (!content.startsWith(`<${DemoTag} `)) {
@@ -117,7 +113,7 @@ function demoBlockPlugin(md: any) {
         return defaultRender(tokens, idx, options, env, ...args);
       }
 
-      const frontmatter = env.frontmatter
+      const frontmatter = env.frontmatter;
 
       const mdDir = dirname(frontmatter.realPath ?? path);
       const srcPath = resolve(mdDir, props.src);
@@ -127,13 +123,14 @@ function demoBlockPlugin(md: any) {
         title: props.title,
         desc: props.desc,
         path: srcPath,
+        enableIntersectionObserver: props.enableIntersectionObserver,
         code,
       });
     };
-  }
+  };
 
-  addRenderRule('html_block')
-  addRenderRule('html_inline')
+  addRenderRule('html_block');
+  addRenderRule('html_inline');
 }
 
 function getPropsMap(attrs: any) {
@@ -147,14 +144,14 @@ function getPropsMap(attrs: any) {
 
 export function parseProps(content: string) {
   const ast = baseParse(content);
-  const demoElement = ast.children[0];
+  const demoElement = ast.children[0] as any;
 
   return getPropsMap(demoElement.props as any[]);
 }
 
 function fencePlugin(md: any) {
   const defaultRender = md.renderer.rules.fence;
-  md.renderer.rules.fence = (tokens: any, idx: number, options, env, ...args: any[]) => {
+  md.renderer.rules.fence = (tokens: any, idx: number, options: any, env: any, ...args: any[]) => {
     const token = tokens[idx];
     if (token.info.trim() !== FenceDemoTag) {
       return defaultRender(tokens, idx, options, env, ...args);

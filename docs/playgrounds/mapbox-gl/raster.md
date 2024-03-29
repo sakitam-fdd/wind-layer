@@ -2,7 +2,8 @@
 aside: false
 importMap: {
   "mapbox-gl": "https://esm.sh/mapbox-gl",
-  "@sakitam-gis/mapbox-wind": "https://esm.sh/@sakitam-gis/mapbox-wind"
+  "@sakitam-gis/mapbox-wind": "https://esm.sh/@sakitam-gis/mapbox-wind",
+  "tweakpane": "https://esm.sh/tweakpane"
 }
 ---
 

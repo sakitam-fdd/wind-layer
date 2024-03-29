@@ -1,8 +1,6 @@
 ---
 title: openlayers 3-4
-lang: cn-ZH
 description: 
-order: 2
 ---
 # openlayers
 
@@ -19,7 +17,7 @@ order: 2
 <html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ol5 wind-layer</title>
+<title>openlayers wind-layer</title>
 <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/openlayers@3.10.0/dist/ol.css">
 <style type="text/css">
   html, body {
@@ -36,7 +34,7 @@ order: 2
 
 <div id="map" class="container"></div>
 <script src="//cdn.jsdelivr.net/npm/openlayers@3.10.0/dist/ol-debug.js"></script>
-<script src="../packages/ol5/dist/ol-wind.js"></script>
+<script src="//cdn.jsdelivr.net/npm/openlayers-wind/dist/ol-wind.js"></script>
 <script>
   const map = new ol.Map({
     target: 'map',
@@ -100,30 +98,3 @@ order: 2
 </html>
 
 ```
-### 投影变换
-
-此处用于展示各类投影下的风场效果。
-
-#### epsg:4326
-
-::: tip
-投影变换，地图投影默认为 `EPSG:4326`, 可以看到地图两极有明显变形;
-:::
-
-请参照 ol [文档](./ol.md)
-
-#### epsg:3413 极投影
-
-::: tip
-投影变换，地图投影默认为 `EPSG:3413` 极投影;
-:::
-
-请参照 ol [文档](./ol.md)
-
-#### ESRI:53009 moll
-
-::: tip
-投影变换，地图投影默认为 `ESRI:53009`;
-:::
-
-请参照 ol [文档](./ol.md)

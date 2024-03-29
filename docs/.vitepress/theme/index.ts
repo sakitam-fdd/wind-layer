@@ -1,4 +1,3 @@
-// @ts-nocheck
 // import { defineClientComponent } from 'vitepress';
 import DefaultTheme from 'vitepress/theme';
 import { SfcPlayground } from '@sakitam-gis/vitepress-playground';

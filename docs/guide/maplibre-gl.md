@@ -1,9 +1,9 @@
 ---
-title: mapbox-gl
+title: maplibre-gl
 description:
 importMap: {
-  "mapbox-gl": "https://esm.sh/mapbox-gl",
-  "@sakitam-gis/mapbox-wind": "https://esm.sh/@sakitam-gis/mapbox-wind"
+  "maplibre-gl": "https://esm.sh/maplibre-gl",
+  "@sakitam-gis/maplibre-wind": "https://esm.sh/@sakitam-gis/maplibre-wind"
 }
 ---
 
@@ -14,19 +14,19 @@ importMap: {
 ::: code-group
 
 ```sh [npm]
-$ npm add @sakitam-gis/mapbox-wind
+$ npm add @sakitam-gis/maplibre-wind
 ```
 
 ```sh [pnpm]
-$ pnpm add @sakitam-gis/mapbox-wind
+$ pnpm add @sakitam-gis/maplibre-wind
 ```
 
 ```sh [yarn]
-$ yarn add @sakitam-gis/mapbox-wind
+$ yarn add @sakitam-gis/maplibre-wind
 ```
 
 ```html [script]
-<script src="https://unpkg.com/@sakitam-gis/mapbox-wind/dist/mapbox-wind.js"></script>
+<script src="https://unpkg.com/@sakitam-gis/maplibre-wind/dist/maplibre-wind.js"></script>
 ```
 
 :::
@@ -38,11 +38,9 @@ $ yarn add @sakitam-gis/mapbox-wind
 ::: code-group
 
 ```ts
-import mapboxgl from 'mapbox-gl';
+import maplibregl from 'maplibre-gl';
 
-mapboxgl.accessToken =
-    'pk.eyJ1IjoibWFwYm94LWdsLWpzIiwiYSI6ImNram9ybGI1ajExYjQyeGxlemppb2pwYjIifQ.LGy5UGNIsXUZdYMvfYRiAQ';
-const map = new mapboxgl.Map({
+const map = new maplibregl.Map({
     container: mapRef.value,
     center: { lng: 105.70150033978689, lat: 22.76021405309811 }, // starting position [lng, lat]
     zoom: 0,
@@ -153,7 +151,7 @@ export function encodeFloat(v) {
 以下是一个简单的创建数据源的代码片段
 
 ```ts
-import { Layer, TileSource, RenderType, DecodeType, RenderFrom } from '@sakitam-gis/mapbox-wind';
+import { Layer, TileSource, RenderType, DecodeType, RenderFrom } from '@sakitam-gis/maplibre-wind';
 
 const source = new TileSource('wind', {
     url: 'https://blog.sakitam.com/wind-layer/data/tiles/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
@@ -175,7 +173,7 @@ const source = new TileSource('wind', {
 Vector 数据。
 
 ```ts
-import { Layer, TileSource, RenderType, DecodeType, RenderFrom } from '@sakitam-gis/mapbox-wind';
+import { Layer, TileSource, RenderType, DecodeType, RenderFrom } from '@sakitam-gis/maplibre-wind';
 
 const layer = new Layer('wind', source, {
     styleSpec: {
@@ -196,4 +194,4 @@ map.addLayer(layer);
 灰度图瓦片数据
 :::
 
-<sfc-playground src="../playgrounds/mapbox-gl/colorize-tile.vue" language="vue" title="灰度图数据" desc="添加灰度图数据 - 瓦片"></sfc-playground>
+<sfc-playground src="../playgrounds/maplibre-gl/colorize-tile.vue" language="vue" title="灰度图数据" desc="添加灰度图数据 - 瓦片"></sfc-playground>

@@ -1,7 +1,6 @@
 ---
 title: 高德地图
 description: 
-order: 4
 ---
 
 # 高德地图
@@ -21,4 +20,3 @@ title="wind-layer-for-amap"
 allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
 sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"></iframe>
 
-<<<@/components/amap.vue

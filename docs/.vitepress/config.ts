@@ -81,9 +81,9 @@ function sidebarGuide() {
         { text: 'data', link: '/guide/data' },
         { text: 'maptalks', link: '/guide/maptalks' },
         { text: 'mapbox-gl', link: '/guide/mapbox-gl' },
+        { text: 'maplibre-gl', link: '/guide/maplibre-gl' },
         { text: 'leaflet', link: '/guide/leaflet' },
         { text: 'ol', link: '/guide/ol' },
-        { text: 'ol5', link: '/guide/ol5' },
         { text: 'ol3-4', link: '/guide/openlayers' },
         { text: 'amap', link: '/guide/amap' },
         { text: 'bmap', link: '/guide/bmap' },
@@ -102,7 +102,7 @@ const renderPermalink = (slug, opts, state, permalink) => {
     const tokens = state.tokens;
     const token = tokens[permalink];
     const title = tokens[permalink + 1].children
-      .filter((token) => token.type === 'text' || token.type === 'code_inline')
+      .filter((t: any) => t.type === 'text' || t.type === 'code_inline')
       .reduce((acc, t) => acc + t.content, '');
     const match = /^.+(\s*\{#([a-z0-9\-_]+?)\}\s*)$/.exec(title);
     slug = match ? match[2] : slug;
@@ -123,11 +123,13 @@ const renderPermalink = (slug, opts, state, permalink) => {
       new state.Token('link_close', 'a', -1),
     ];
     if (opts.permalinkSpace) {
-      // @ts-ignore
+      // @ts-ignore ignore error
       linkTokens[position[!opts.permalinkBefore]](space());
     }
     state.tokens[permalink + 1].children[position[opts.permalinkBefore]](...linkTokens);
-  } catch (e) {}
+  } catch (e) {
+    //
+  }
 };
 
 function getSidebarItems(dir: string[], currentRoot: string | undefined, root: string | undefined): any[] {
@@ -140,6 +142,7 @@ function getSidebarItems(dir: string[], currentRoot: string | undefined, root: s
         const fileName = e.split('/').pop() ?? '';
         return items.length
           ? {
+              // @ts-ignore ignore error
               text: (fileName.charAt(0).toUpperCase() + fileName.slice(1)).replaceAll('-', ' '),
               collapsible: true,
               collapsed: true,
@@ -149,6 +152,7 @@ function getSidebarItems(dir: string[], currentRoot: string | undefined, root: s
       }
       if (e.endsWith('.md') && e[0] !== '_') {
         return {
+          // @ts-ignore ignore error
           text: (e.charAt(0).toUpperCase() + e.slice(1)).slice(0, -3).replaceAll('-', ' '),
           link: childDir.replace(root ?? '', ''),
         };
@@ -164,10 +168,11 @@ function autoSidebar(dirs: string[]): SidebarItem[] {
   return getSidebarItems(dirs, root, root);
 }
 
-function sidebar(root = '', packagesPath: string) {
+function sidebar(root = '', packagesPath = '') {
   const index: { [key: string]: { text: string; link: string }[] } = {};
   const mds = readFileSync(`${__dirname}/../${packagesPath}/index.md`, 'utf-8').match(/.*.(\n|\r)/g) as string[];
   let lastTitle = '';
+  // eslint-disable-next-line no-restricted-syntax
   for (const line of mds) {
     if (line.match(/# @/)) continue;
     else if (line.match(/##\s\w+/)) {
@@ -193,6 +198,7 @@ function sidebar(root = '', packagesPath: string) {
     },
   ];
 
+  // eslint-disable-next-line no-restricted-syntax
   for (const i in index) {
     s.push({
       text: i,
@@ -286,7 +292,7 @@ export default defineConfig({
       provider: 'algolia',
       options: {
         appId: '7HSJME72X5',
-        apiKey: 'b7a68c2706d9d2053ce96743b17c829b',
+        apiKey: 'f907bba98e6918b124db4596143784dd',
         indexName: 'wind-layer',
         searchParameters: {
           facetFilters: ['tags:latest'],

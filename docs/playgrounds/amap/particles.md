@@ -1,8 +1,8 @@
 ---
 aside: false
 importMap: {
-  "maptalks": "https://esm.sh/maptalks",
-  "@sakitam-gis/maptalks-wind": "https://esm.sh/@sakitam-gis/maptalks-wind"
+  "amap-wind": "https://esm.sh/amap-wind",
+  "@amap/amap-jsapi-loader": "https://esm.sh/@amap/amap-jsapi-loader"
 }
 ---
 

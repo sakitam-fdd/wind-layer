@@ -12,7 +12,7 @@ import ScreenPass from './pass/particles/screen';
 import ParticlesPass from './pass/particles/particles';
 import PickerPass from './pass/picker';
 import { isFunction, resolveURL } from '../utils/common';
-import { createLinearGradient, createZoom } from '../utils/style-parser';
+import {createLinearGradient, createZoom, isRasterize} from '../utils/style-parser';
 import type { MaskType } from '../type';
 import { getBandType, RenderFrom, RenderType } from '../type';
 import type { SourceType } from '../source';
@@ -195,6 +195,7 @@ export default class BaseLayer {
   #colorRampTexture: DataTexture;
   #nextStencilID: number;
   #maskPass: MaskPass;
+  #isRasterize: boolean;
 
   constructor(source: SourceType, rs: { renderer: Renderer; scene: Scene }, options?: Partial<BaseLayerOptions>) {
     this.renderer = rs.renderer;
@@ -309,6 +310,7 @@ export default class BaseLayer {
         renderFrom: this.options.renderFrom ?? RenderFrom.r,
         maskPass: this.#maskPass,
         stencilConfigForOverlap: this.stencilConfigForOverlap.bind(this),
+        isRasterize: () => this.#isRasterize,
       });
       const colorizePass = new ColorizePass('ColorizePass', this.renderer, {
         bandType,
@@ -424,6 +426,7 @@ export default class BaseLayer {
 
     this.buildColorRamp();
     this.parseStyleSpec(true);
+    this.options?.triggerRepaint?.();
   }
 
   resize(width: number, height: number) {
@@ -539,6 +542,7 @@ export default class BaseLayer {
   buildColorRamp() {
     if (!this.options.styleSpec?.['fill-color']) return;
     const { data, colorRange } = createLinearGradient([], this.options.styleSpec?.['fill-color'] as any[]);
+    this.#isRasterize = isRasterize(this.options.styleSpec?.['fill-color']);
 
     if (colorRange) {
       this.#colorRange = new Vector2(...colorRange);

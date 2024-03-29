@@ -216,6 +216,16 @@ const cachedStyle: {
   [key: string]: CachedStyleItem;
 } = {};
 
+export function isRasterize(styleAttrField) {
+  if (Array.isArray(styleAttrField) && styleAttrField.length > 3) {
+    const type = styleAttrField[0]; // interpolate
+    return type === 'rasterize';
+  } else {
+    console.warn('[wind-core]: style-parser style config invalid');
+    return false;
+  }
+}
+
 export function createZoom(uid: string, zoom: number, key: string, styles: any, clearCache?: boolean): number {
   const ukey = `${uid}_${key}`;
   const styleAttrField = styles[key] as any[] | number;

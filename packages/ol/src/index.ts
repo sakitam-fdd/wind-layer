@@ -44,6 +44,10 @@ export class WindLayer extends Layer<any, any> {
     }
   }
 
+  public appendTo(map: any) {
+    map.addLayer(this);
+  }
+
   public unrender() {
     super.unrender();
     const renderer = this.getRenderer();

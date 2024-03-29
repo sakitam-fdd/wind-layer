@@ -14,6 +14,7 @@ export interface ComposePassOptions {
   source: SourceType;
   bandType: BandType;
   renderFrom: RenderFrom;
+  isRasterize?: () => boolean;
   maskPass?: MaskPass;
   stencilConfigForOverlap: (tiles: any[]) => [{ [_: number]: any }, TileID[]];
 }
@@ -138,6 +139,17 @@ export default class ComposePass extends Pass<ComposePassOptions> {
           if (texture.userData?.dataRange && Array.isArray(texture.userData?.dataRange)) {
             dataRange.push(...texture.userData.dataRange);
           }
+
+          if (
+            this.options.isRasterize?.() &&
+            (texture.options.minFilter !== this.renderer.gl.NEAREST ||
+              texture.options.magFilter !== this.renderer.gl.NEAREST)
+          ) {
+            texture.setOptions({
+              minFilter: this.renderer.gl.NEAREST,
+              magFilter: this.renderer.gl.NEAREST,
+            });
+          }
           mesh.program.setUniform(`u_image${index}`, texture);
         }
 
@@ -177,6 +189,16 @@ export default class ComposePass extends Pass<ComposePassOptions> {
           ...rendererParams,
           camera,
         });
+
+        // reset texture
+        if (this.options.isRasterize?.()) {
+          for (const [_, texture] of tile.textures) {
+            texture.setOptions({
+              minFilter: this.renderer.gl.LINEAR,
+              magFilter: this.renderer.gl.LINEAR,
+            });
+          }
+        }
       }
 
       this.renderer.clear(false, false, true);

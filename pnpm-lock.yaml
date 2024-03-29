@@ -134,9 +134,12 @@ importers:
       '@sakitam-gis/maptalks-wind':
         specifier: workspace:*
         version: link:../packages/maptalks
+      '@sakitam-gis/ol5':
+        specifier: ^5.3.3
+        version: 5.3.3
       '@sakitam-gis/vitepress-playground':
-        specifier: ^1.1.3
-        version: 1.1.3(typescript@5.4.4)
+        specifier: ^1.1.7
+        version: 1.1.7(typescript@5.4.4)
       '@vue/repl':
         specifier: ^4.1.1
         version: 4.1.1
@@ -167,13 +170,19 @@ importers:
       ol-wind:
         specifier: workspace:*
         version: link:../packages/ol
+      ol5-wind:
+        specifier: workspace:*
+        version: link:../packages/ol5
       proj4:
-        specifier: ^2.8.0
-        version: 2.9.0
+        specifier: 2.6.0
+        version: 2.6.0
       tweakpane:
         specifier: ^4.0.0
         version: 4.0.0
     devDependencies:
+      '@types/leaflet':
+        specifier: ^1.9.9
+        version: 1.9.9
       '@types/mapbox-gl':
         specifier: ^2.7.19
         version: 2.7.19
@@ -1392,6 +1401,22 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
 
+  /@floating-ui/core@1.6.0:
+    resolution: {integrity: sha512-PcF++MykgmTj3CIyOQbKA/hDzOAiqI3mhuoN44WRCopIs1sgoDoU4oty4Jtqaj/y3oDU6fnVSm4QG0a3t5i0+g==}
+    dependencies:
+      '@floating-ui/utils': 0.2.1
+    dev: false
+
+  /@floating-ui/dom@1.1.1:
+    resolution: {integrity: sha512-TpIO93+DIujg3g7SykEAGZMDtbJRrmnYRCNYSjJlvIbGhBjRSNTLVbNeDQBrzy9qDgUbiWdc7KA0uZHZ2tJmiw==}
+    dependencies:
+      '@floating-ui/core': 1.6.0
+    dev: false
+
+  /@floating-ui/utils@0.2.1:
+    resolution: {integrity: sha512-9TANp6GPoMtYzQdt54kfAyMmz1+osLlXdg2ENroU7zzrtflTLrrC/lgrIfaSe+Wu0b89GKccT7vxXA0MoAIO+Q==}
+    dev: false
+
   /@html-eslint/parser@0.19.1:
     resolution: {integrity: sha512-dpAw6UX0ZSVNnsAzl9ULHZX7CvAGKF5uta4iebbhSDvGE1o9NX6BoOofD/6WucTvs/qnoKojc3Y2LG6vy4afiQ==}
     engines: {node: '>=8.10.0'}
@@ -1911,6 +1936,14 @@ packages:
     dev: true
     optional: true
 
+  /@sakitam-gis/ol5@5.3.3:
+    resolution: {integrity: sha512-ljX/XMJO82acHAp6sTiff2ebUJ471ipW0UAUQourfKaO5DE74vrd0/z4rka18snuEID4gv+aYtcb3Sgls5fJNw==}
+    dependencies:
+      pbf: 3.1.0
+      pixelworks: 1.1.0
+      rbush: 2.0.2
+    dev: false
+
   /@sakitam-gis/vis-engine@1.5.3:
     resolution: {integrity: sha512-IpuZwi0XRflJiP1mNTwOSjlAJZRCczOuVh6s/feVOpXctiAoSWrAuhK0HVITLpCWAQF1bN6CRKA3LW0z1nCr0g==}
     engines: {node: '>= 14.18.1', npm: '>= 6.14.15'}
@@ -1919,13 +1952,15 @@ packages:
       gl-matrix: 3.4.3
     dev: false
 
-  /@sakitam-gis/vitepress-playground@1.1.3(typescript@5.4.4):
-    resolution: {integrity: sha512-KLa3rwr0BMih8CiBPl2sQEE1Ruzd1pfMcaW4Cjqnirol5Kc8QRlc7WhZOcDVEUKY3xsycVQN/rS+9xRWIkdMDg==}
+  /@sakitam-gis/vitepress-playground@1.1.7(typescript@5.4.4):
+    resolution: {integrity: sha512-UFpL392kgkGD7Cng8Tstzm+0tbhScA3i0eLLgbUkjD+IqMQ/IAuEPZ4GS5eBV/ieNU/HgmOU5TLe0x3AvTqzJA==}
     dependencies:
       '@stackblitz/sdk': 1.9.0
       codesandbox: 2.2.3
+      floating-vue: 5.2.2(vue@3.4.21)
       vue: 3.4.21(typescript@5.4.4)
     transitivePeerDependencies:
+      - '@nuxt/kit'
       - supports-color
       - typescript
     dev: false
@@ -2018,6 +2053,12 @@ packages:
     resolution: {integrity: sha512-Caa1lYOgKVqDkDZVWkto2Z5JtVo09spEaUt2S69LiugbBpoqQu92HYFMGUbYezZbnBkyOxMNPXHSgRrRY5UyIA==}
     dependencies:
       '@types/geojson': 7946.0.10
+    dev: true
+
+  /@types/leaflet@1.9.9:
+    resolution: {integrity: sha512-o0qD9ReJzWpGNIAY0O32NkpfM6rhV4sxnwVkz7x7Ah4Zy9sP+2T9Q3byccL5la1ZX416k+qiyvt8ksBavPPY7A==}
+    dependencies:
+      '@types/geojson': 7946.0.14
     dev: true
 
   /@types/linkify-it@3.0.5:
@@ -2293,7 +2334,7 @@ packages:
       vite: ^5.0.0
       vue: ^3.2.25
     dependencies:
-      vite: 5.2.2(@types/node@18.11.2)(terser@5.30.3)
+      vite: 5.2.2(@types/node@18.19.26)(less@4.2.0)(terser@5.30.3)
       vue: 3.4.21(typescript@5.4.4)
     dev: true
 
@@ -5118,7 +5159,7 @@ packages:
     engines: {node: '>=0.4.0'}
     dependencies:
       acorn: 7.4.1
-      isarray: 2.0.1
+      isarray: 2.0.5
     dev: true
 
   /fast-deep-equal@3.1.3:
@@ -5240,6 +5281,20 @@ packages:
   /flatted@3.2.7:
     resolution: {integrity: sha512-5nqDSxl8nn5BSNxyR3n4I6eDmbolI6WT+QqR547RwxQapgjQBmtktdP+HTBb/a/zLsbzERTONyUB5pefh5TtjQ==}
     dev: true
+
+  /floating-vue@5.2.2(vue@3.4.21):
+    resolution: {integrity: sha512-afW+h2CFafo+7Y9Lvw/xsqjaQlKLdJV7h1fCHfcYQ1C4SVMlu7OAekqWgu5d4SgvkBVU0pVpLlVsrSTBURFRkg==}
+    peerDependencies:
+      '@nuxt/kit': ^3.2.0
+      vue: ^3.2.0
+    peerDependenciesMeta:
+      '@nuxt/kit':
+        optional: true
+    dependencies:
+      '@floating-ui/dom': 1.1.1
+      vue: 3.4.21(typescript@5.4.4)
+      vue-resize: 2.0.0-alpha.1(vue@3.4.21)
+    dev: false
 
   /flush-write-stream@1.1.1:
     resolution: {integrity: sha512-3Z4XhFZ3992uIq0XOqb9AreonueSYphE6oYbpt5+3u06JWklbsPkNv3ZKkP9Bz/r+1MWCaMoSQ28P85+1Yc77w==}
@@ -8305,7 +8360,6 @@ packages:
     dependencies:
       ieee754: 1.2.1
       resolve-protobuf-schema: 2.1.0
-    dev: true
 
   /pbf@3.2.1:
     resolution: {integrity: sha512-ClrV7pNOn7rtmoQVF4TS1vyU0WhYRnP92fzbfF75jAIwpnzdJXf8iTd4CMEqO4yUenH6NDqLiwjqlh6QgZzgLQ==}
@@ -8348,7 +8402,6 @@ packages:
 
   /pixelworks@1.1.0:
     resolution: {integrity: sha512-nDqeyp0pvOvCihLsyc9GHWKP4THUtcfQ+qs61uiVaZdlNv0j7y6PWNyPfnTtuxMJ+MTAqff2QbbM/1DyCcRdOQ==}
-    dev: true
 
   /pkg-dir@4.2.0:
     resolution: {integrity: sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==}
@@ -8453,8 +8506,8 @@ packages:
   /process-nextick-args@2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
 
-  /proj4@2.9.0:
-    resolution: {integrity: sha512-BoDXEzCVnRJVZoOKA0QHTFtYoE8lUxtX1jST38DJ8U+v1ixY70Kpwi0Llu6YqSWEH2xqu4XMEBNGcgeRIEywoA==}
+  /proj4@2.6.0:
+    resolution: {integrity: sha512-ll2WyehUFOyzEZtN8hAiOTmZpuDCN5V+4A/HjhPbhlwVwlsFKnIHSZ3l3uhzgDndHjoL2MyERFGe9VmXN4rYUg==}
     dependencies:
       mgrs: 1.0.0
       wkt-parser: 1.3.2
@@ -9838,7 +9891,7 @@ packages:
     resolution: {integrity: sha512-Vhf+bUa//YSTYKseDiiEuQmhGCoIF3CVBhunm3r/DQnYiGT4JssmnKQc44BIyOZRK2pKjXXAgbhfmbeoC9CJpA==}
     engines: {node: '>=12.20'}
     dependencies:
-      tslib: 2.4.0
+      tslib: 2.6.2
     dev: true
 
   /synckit@0.8.8:
@@ -10861,6 +10914,14 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /vue-resize@2.0.0-alpha.1(vue@3.4.21):
+    resolution: {integrity: sha512-7+iqOueLU7uc9NrMfrzbG8hwMqchfVfSzpVlCMeJQe4pyibqyoifDNbKTZvwxZKDvGkB+PdFeKvnGZMoEb8esg==}
+    peerDependencies:
+      vue: ^3.0.0
+    dependencies:
+      vue: 3.4.21(typescript@5.4.4)
+    dev: false
 
   /vue@3.2.41:
     resolution: {integrity: sha512-uuuvnrDXEeZ9VUPljgHkqB5IaVO8SxhPpqF2eWOukVrBnRBx2THPSGQBnVRt0GrIG1gvCmFXMGbd7FqcT1ixNQ==}
