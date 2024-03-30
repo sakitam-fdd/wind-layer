@@ -1,17 +1,22 @@
 <template>
-  <div class="playground-content" ref="mapRef"></div>
+  <div class="playground-content">
+    <div class="map" ref="mapRef"></div>
+    <div ref="tpRef" class="tp-panel"></div>
+  </div>
 </template>
 
 <script setup lang="ts">
-  import { onMounted, ref } from 'vue';
+  import { onMounted, onUnmounted, ref } from 'vue';
   import mapboxgl from 'mapbox-gl';
+  import { Pane } from 'tweakpane';
   import { Layer, ImageSource, RenderType, DecodeType, RenderFrom } from '@sakitam-gis/mapbox-wind';
 
   defineOptions({
-    name: 'ColorizeImage',
+    name: 'MapboxColorizeImage',
   });
 
   const mapRef = ref<HTMLDivElement>();
+  const tpRef = ref<HTMLDivElement>();
   const emits = defineEmits(['mount']);
 
   let map;
@@ -62,67 +67,122 @@
       },
     });
 
-    map.on('load', () => {
-      const source = new ImageSource('wind', {
-        url: 'https://blog.sakitam.com/wind-layer/data/tiles/2023111700/2023111703/0/0/0/wind-surface.jpeg',
-        coordinates: [
-          [-180, 85.051129],
-          [180, 85.051129],
-          [180, -85.051129],
-          [-180, -85.051129],
-        ],
-        decodeType: DecodeType.imageWithExif,
-        wrapX: true,
+    if (!import.meta.env.SSR) {
+      map.on('load', () => {
+        const source = new ImageSource('wind', {
+          url: 'https://blog.sakitam.com/wind-layer/data/tiles/2023111700/2023111703/0/0/0/wind-surface.jpeg',
+          coordinates: [
+            [-180, 85.051129],
+            [180, 85.051129],
+            [180, -85.051129],
+            [-180, -85.051129],
+          ],
+          decodeType: DecodeType.imageWithExif,
+          wrapX: true,
+        });
+
+        const windColor = [
+          [0, [98, 113, 183, 255]],
+          [1, [57, 97, 159, 255]],
+          [3, [74, 148, 169, 255]],
+          [5, [77, 141, 123, 255]],
+          [7, [83, 165, 83, 255]],
+          [9, [53, 159, 53, 255]],
+          [11, [167, 157, 81, 255]],
+          [13, [159, 127, 58, 255]],
+          [15, [161, 108, 92, 255]],
+          [17, [129, 58, 78, 255]],
+          [19, [175, 80, 136, 255]],
+          [21, [117, 74, 147, 255]],
+          [24, [109, 97, 163, 255]],
+          [27, [68, 105, 141, 255]],
+          [29, [92, 144, 152, 255]],
+          [36, [125, 68, 165, 255]],
+          [46, [231, 215, 215, 256]],
+          [51, [219, 212, 135, 256]],
+          [77, [205, 202, 112, 256]],
+          [104, [128, 128, 128, 255]],
+        ];
+
+        const interpolateColor = windColor.reduce(
+          (result: any[], item: any[], key) => result.concat(item[0], `rgba(${item[1].join(',')})`),
+          [],
+        );
+
+        const layer = new Layer('wind', source, {
+          styleSpec: {
+            'fill-color': ['interpolate', ['linear'], ['get', 'value'], ...interpolateColor],
+            opacity: 1,
+          },
+          renderFrom: RenderFrom.rg,
+          widthSegments: 1,
+          heightSegments: 1,
+          displayRange: [0, 104],
+          renderType: RenderType.colorize,
+        });
+
+        const f = new Pane({
+          container: tpRef.value,
+        });
+
+        const panel = f.addFolder({
+          title: 'mapbox-gl-colorize',
+          expanded: true,
+        });
+
+        panel.addBinding({ add: true }, 'add').on('change', (ev) => {
+          if (!ev.value) {
+            map.removeLayer(layer.id);
+          } else {
+            map.addLayer(layer);
+          }
+        });
+
+        panel.addBinding({ rasterize: true }, 'rasterize').on('change', (ev) => {
+          if (ev.value) {
+            layer.updateOptions({
+              styleSpec: {
+                'fill-color': ['rasterize', ['linear'], ['get', 'value'], ...interpolateColor],
+              },
+            });
+          } else {
+            layer.updateOptions({
+              styleSpec: {
+                'fill-color': ['interpolate', ['linear'], ['get', 'value'], ...interpolateColor],
+              },
+            });
+          }
+        });
+
+        panel
+          .addBinding({ opacity: 1 }, 'opacity', {
+            min: 0,
+            max: 1,
+            step: 0.1,
+          })
+          .on('change', (ev) => {
+            layer.updateOptions({
+              styleSpec: {
+                opacity: ev.value,
+              },
+            });
+          });
+
+        map.addLayer(layer);
       });
-
-      const windColor = [
-        [0, [98, 113, 183, 255]],
-        [1, [57, 97, 159, 255]],
-        [3, [74, 148, 169, 255]],
-        [5, [77, 141, 123, 255]],
-        [7, [83, 165, 83, 255]],
-        [9, [53, 159, 53, 255]],
-        [11, [167, 157, 81, 255]],
-        [13, [159, 127, 58, 255]],
-        [15, [161, 108, 92, 255]],
-        [17, [129, 58, 78, 255]],
-        [19, [175, 80, 136, 255]],
-        [21, [117, 74, 147, 255]],
-        [24, [109, 97, 163, 255]],
-        [27, [68, 105, 141, 255]],
-        [29, [92, 144, 152, 255]],
-        [36, [125, 68, 165, 255]],
-        [46, [231, 215, 215, 256]],
-        [51, [219, 212, 135, 256]],
-        [77, [205, 202, 112, 256]],
-        [104, [128, 128, 128, 255]],
-      ];
-
-      const interpolateColor = windColor.reduce(
-        (result: any[], item: any[], key) => result.concat(item[0], `rgba(${item[1].join(',')})`),
-        [],
-      );
-
-      const layer = new Layer('wind', source, {
-        styleSpec: {
-          'fill-color': ['interpolate', ['linear'], ['get', 'value'], ...interpolateColor],
-          opacity: 1,
-        },
-        renderFrom: RenderFrom.rg,
-        widthSegments: 1,
-        heightSegments: 1,
-        displayRange: [0, 104],
-        renderType: RenderType.colorize,
-      });
-
-      map.addLayer(layer);
-    });
+    }
 
     emits('mount');
   }
 
   onMounted(() => {
-    // initMap();
+    initMap();
+  });
+
+  onUnmounted(() => {
+    if (map) {
+      map.remove();
+    }
   });
 
   defineExpose({
@@ -137,5 +197,17 @@
   .playground-content {
     width: 100%;
     height: 450px;
+    position: relative;
+  }
+
+  .map {
+    width: 100%;
+    height: 100%;
+  }
+
+  .tp-panel {
+    position: absolute;
+    top: 10px;
+    right: 10px;
   }
 </style>

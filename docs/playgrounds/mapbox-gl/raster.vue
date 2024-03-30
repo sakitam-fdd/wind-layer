@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-  import { onMounted, ref } from 'vue';
+  import { onMounted, onUnmounted, ref } from 'vue';
   import mapboxgl from 'mapbox-gl';
   import { Layer, TileSource, RenderType } from '@sakitam-gis/mapbox-wind';
 
@@ -39,38 +39,46 @@
       },
     });
 
-    map.on('load', () => {
-      const source = new TileSource('carto', {
-        tileSize: 256,
-        url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-        minZoom: 0,
-        maxZoom: 18,
-        roundZoom: true,
-        subdomains: ['a', 'b', 'c', 'd'],
-        wrapX: true,
-      });
+    if (!import.meta.env.SSR) {
+      map.on('load', () => {
+        const source = new TileSource('carto', {
+          tileSize: 256,
+          url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+          minZoom: 0,
+          maxZoom: 18,
+          roundZoom: true,
+          subdomains: ['a', 'b', 'c', 'd'],
+          wrapX: true,
+        });
 
-      const layer = new Layer('carto', source, {
-        styleSpec: {
-          opacity: ['interpolate', ['exponential', 0.5], ['zoom'], 1, 1, 2, 1],
-        },
-        renderType: RenderType.image,
-        picking: true,
-        // mask: {
-        //   data: clip,
-        //   // type: mapboxWind.MaskType.outside,
-        //   type: MaskType.inside, // 默认是 inside，即只显示范围内的
-        // }
-      });
+        const layer = new Layer('carto', source, {
+          styleSpec: {
+            opacity: ['interpolate', ['exponential', 0.5], ['zoom'], 1, 1, 2, 1],
+          },
+          renderType: RenderType.image,
+          picking: true,
+          // mask: {
+          //   data: clip,
+          //   // type: mapboxWind.MaskType.outside,
+          //   type: MaskType.inside, // 默认是 inside，即只显示范围内的
+          // }
+        });
 
-      map.addLayer(layer);
-    });
+        map.addLayer(layer);
+      });
+    }
 
     emits('mount');
   }
 
   onMounted(() => {
-    // initMap();
+    initMap();
+  });
+
+  onUnmounted(() => {
+    if (map) {
+      map.remove();
+    }
   });
 
   defineExpose({
