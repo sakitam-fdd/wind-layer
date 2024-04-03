@@ -10,7 +10,7 @@
     "ol-wind": "workspace:*"
   },
   "devDependencies": {
-    "vite": "^5.2.2",
+    "vite": "^5.2.6",
     "vite-plugin-html": "^3.2.2"
   }
 }
