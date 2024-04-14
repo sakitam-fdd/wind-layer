@@ -1,0 +1,1 @@
+function f(n){return n[0]>0&&n[1]>0}function a(n,r,u){return u===void 0&&(u=[0,0]),u[0]=n[0]*r+.5|0,u[1]=n[1]*r+.5|0,u}function c(n,r){return Array.isArray(n)?n:(r===void 0?r=[n,n]:(r[0]=n,r[1]=n),r)}export{f as h,a as s,c as t};
