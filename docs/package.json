@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vitepress dev --base /",
-    "build": "vitepress build --base /",
+    "build": "vitepress build --base /wind-layer/",
     "serve": "vitepress preview"
   },
   "dependencies": {
