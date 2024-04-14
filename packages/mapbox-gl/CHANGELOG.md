@@ -1,5 +1,16 @@
 # @sakitam-gis/mapbox-wind
 
+## 2.0.3
+
+### Patch Changes
+
+- [`0b59e55`](https://github.com/sakitam-fdd/wind-layer/commit/0b59e554db71039b1f73a30e80cd4a0c423967b8) Thanks [@sakitam-fdd](https://github.com/sakitam-fdd)! - bump version
+
+- Updated dependencies [[`0b59e55`](https://github.com/sakitam-fdd/wind-layer/commit/0b59e554db71039b1f73a30e80cd4a0c423967b8)]:
+  - wind-core@1.1.7
+  - wind-gl-core@2.0.2
+  - @sakitam-gis/rbush@3.1.2
+
 ## 2.0.2
 
 ### Patch Changes
