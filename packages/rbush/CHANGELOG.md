@@ -1,5 +1,11 @@
 # @sakitam-gis/rbush
 
+## 3.1.2
+
+### Patch Changes
+
+- [`0b59e55`](https://github.com/sakitam-fdd/wind-layer/commit/0b59e554db71039b1f73a30e80cd4a0c423967b8) Thanks [@sakitam-fdd](https://github.com/sakitam-fdd)! - bump version
+
 ## 3.1.1
 
 ### Patch Changes
