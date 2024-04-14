@@ -41,6 +41,7 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@vitest/coverage-v8": "^1.4.0",
     "canvas": "^2.10.2",
+    "jsdom": "^22.1.0",
     "cross-env": "^7.0.3",
     "esbuild": "^0.20.2",
     "eslint": "^8.57.0",
