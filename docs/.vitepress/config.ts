@@ -292,11 +292,11 @@ export default defineConfig({
       provider: 'algolia',
       options: {
         appId: 'SXDYLUMPP7',
-        apiKey: 'd5d95dfcc2d9c6d13942793e8b15aa87',
+        apiKey: '6418f78a1988ef893a199f924b32ea0b',
         indexName: 'sakitam',
-        searchParameters: {
-          facetFilters: ['tags:latest'],
-        },
+        // searchParameters: {
+        //   facetFilters: ['tags:latest'],
+        // },
         placeholder: '搜索文档',
         translations: {
           button: {
