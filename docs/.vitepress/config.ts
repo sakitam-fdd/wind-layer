@@ -291,9 +291,9 @@ export default defineConfig({
     search: {
       provider: 'algolia',
       options: {
-        appId: '7HSJME72X5',
-        apiKey: 'f907bba98e6918b124db4596143784dd',
-        indexName: 'wind-layer',
+        appId: 'SXDYLUMPP7',
+        apiKey: 'd5d95dfcc2d9c6d13942793e8b15aa87',
+        indexName: 'sakitam',
         searchParameters: {
           facetFilters: ['tags:latest'],
         },
