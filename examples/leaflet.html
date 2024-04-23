@@ -18,7 +18,12 @@
 </style>
 <body>
 
-<div id="map" class="container"></div>
+<div id="map" class="container">
+  <div style="position: absolute; z-index: 9999; right: 20px; top: 20px">
+    <button onclick="handleAdd()">添加</button>
+    <button onclick="handleRemove()">移除</button>
+  </div>
+</div>
 <script src="//cdn.jsdelivr.net/npm/leaflet/dist/leaflet-src.js"></script>
 <script src="//cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
 <script src="../packages/leaflet/dist/leaflet-wind.js"></script>
@@ -40,7 +45,7 @@
   fetch('./data/wind.json')
     .then(res => res.json())
     .then(res => {
-      data = res.map((item, idx) => {
+      const data = res.map((item, idx) => {
         item.header = Object.assign(item.header, {
           parameterCategory: 1,
           parameterNumber: idx === 0 ? 2 : 3,
@@ -91,10 +96,20 @@
         }
       });
 
-      console.log(map, windLayer);
+      window.windLayer = windLayer;
 
       map.addLayer(windLayer);
     });
+
+  function handleAdd () {
+    map.addLayer(window.windLayer);
+    // map.addLayer(layer);
+  }
+
+  function handleRemove () {
+    map.removeLayer(window.windLayer);
+    // map.removeLayer(layer);
+  }
 </script>
 </body>
 </html>

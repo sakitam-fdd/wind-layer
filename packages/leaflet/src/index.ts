@@ -12,7 +12,7 @@ class WindLayer extends L.Layer {
   _height: number;
   canvas: HTMLCanvasElement | null;
   layer: HTMLDivElement;
-  wind: WindCore;
+  wind: WindCore | null;
 
   constructor(id: string | number, data: any, options: any) {
     // @ts-ignore 原始 leaflet 定义不对 https://github.com/Leaflet/Leaflet/blob/main/src/core/Class.js#L81C2-L81C13
@@ -121,9 +121,9 @@ class WindLayer extends L.Layer {
       };
     }
 
-    this.wind.prerender();
+    this.wind!.prerender();
 
-    this.wind.render();
+    this.wind!.render();
   }
 
   project(coordinate: [number, number]): [number, number] {
@@ -164,6 +164,7 @@ class WindLayer extends L.Layer {
   onRemove() {
     if (this.wind) {
       this.wind.stop();
+      this.wind = null
     }
     this._map.getPanes().overlayPane.removeChild(this.layer);
 
