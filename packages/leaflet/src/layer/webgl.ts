@@ -1,8 +1,9 @@
 import * as L from 'leaflet';
+import rewind from '@mapbox/geojson-rewind';
 import { OrthographicCamera, Renderer, Scene, utils } from '@sakitam-gis/vis-engine';
-import type { SourceType, RenderType } from 'wind-gl-core';
-import { LayerSourceType, TileID, BaseLayer as Layer } from 'wind-gl-core';
-import CameraSync from './utils/CameraSync';
+import type { SourceType, RenderType, UserOptions } from 'wind-gl-core';
+import { LayerSourceType, TileID, BaseLayer as Layer, polygon2buffer } from 'wind-gl-core';
+import CameraSync from '../utils/CameraSync';
 import {
   MAX_MERCATOR_LATITUDE,
   mercatorXfromLng,
@@ -12,8 +13,8 @@ import {
   fromLngLat,
   mercatorZfromAltitude,
   getCoordinatesCenterTileID,
-} from './utils/mercatorCoordinate';
-import { getTileBounds, getTileProjBounds, getExtent, getClampZoom } from './utils/tile';
+} from '../utils/mercatorCoordinate';
+import { getTileBounds, getTileProjBounds, getExtent, getClampZoom } from '../utils/tile';
 import { BaseLayer } from './Base';
 
 class ViewState {
@@ -24,10 +25,10 @@ class ViewState {
   _center: any;
 
   zoom: number;
-  tileSize: 512;
-  maxPitch: 0;
+  tileSize = 512;
+  maxPitch = 60;
   elevation: any;
-  _horizonShift: 0.1;
+  _horizonShift = 0.1;
 
   get width() {
     return this._width;
@@ -42,7 +43,7 @@ class ViewState {
   }
 
   get worldSize() {
-    const scale = Math.pow(2, this.zoom);
+    const scale = Math.pow(2, this.zoom - 1);
     return this.tileSize * scale;
   }
 
@@ -72,7 +73,7 @@ class ViewState {
 
     const x = mercatorXfromLng(lnglat.lng);
     const y = mercatorYfromLat(lat);
-    return { x, y, z: 0 };
+    return { x: x * this.worldSize, y: y * this.worldSize, z: 0 };
   }
 
   get pixelsPerMeter(): number {
@@ -84,6 +85,10 @@ class ViewState {
     const lat = latFromMercatorY(p[1]);
     return [lng, lat];
   }
+}
+
+export interface LayerOptions extends UserOptions {
+  renderingMode?: '2d' | '3d';
 }
 
 export class WebglLayer extends BaseLayer {
@@ -108,6 +113,12 @@ export class WebglLayer extends BaseLayer {
 
   _resizeCanvas(scale: number) {
     super._resizeCanvas(scale);
+
+    this.renderer.setSize(this._width, this._height);
+
+    if (this.proxyLayer) {
+      this.proxyLayer.resize(this._width, this._height);
+    }
 
     this._render();
   }
@@ -136,20 +147,13 @@ export class WebglLayer extends BaseLayer {
       ];
     }
 
-    if (this.sync) {
-      this.sync.update();
-    }
-
-    if (this.proxyLayer) {
-      this.proxyLayer.update();
-    }
-
     if (!this.gl) {
       this.gl = utils.getContext(
         this.canvas!,
         {
-          preserveDrawingBuffer: true,
+          preserveDrawingBuffer: false,
           antialias: true, // https://bugs.webkit.org/show_bug.cgi?id=237906
+          stencil: true,
         },
         true,
       );
@@ -183,10 +187,10 @@ export class WebglLayer extends BaseLayer {
           heightSegments: this.options.heightSegments,
           wireframe: this.options.wireframe,
           picking: this.options.picking,
-          // mask: this.processMask(),
+          mask: this.processMask(),
           getZoom: () => this.viewState.zoom as number,
           triggerRepaint: () => {
-            // this.map?.triggerRepaint();
+            requestAnimationFrame(() => this._render());
           },
           getTileProjSize: (z: number) => {
             const w = 1 / Math.pow(2, z);
@@ -334,6 +338,14 @@ export class WebglLayer extends BaseLayer {
       );
     }
 
+    if (this.sync) {
+      this.sync.update();
+    }
+
+    if (this.proxyLayer) {
+      this.proxyLayer.update();
+    }
+
     this.glPrerender();
     this.glRender();
   }
@@ -362,13 +374,24 @@ export class WebglLayer extends BaseLayer {
     });
   }
 
+  async picker(coordinates) {
+    if (!this.options.picking) {
+      console.warn('[Layer]: please enable picking options!');
+      return null;
+    }
+    if (!this.layer || !coordinates || !this._map) {
+      console.warn('[Layer]: layer not initialized!');
+      return null;
+    }
+    const point = this._map.project(coordinates);
+    return this.proxyLayer.picker([point.x, point.y]);
+  }
+
   calcWrappedWorlds() {
     return [0];
   }
 
-  _setView() {
-
-  }
+  _setView() {}
 
   _tileCoordsToBounds(coords) {
     // const bp = this._tileCoordsToNwSe(coords);
@@ -449,7 +472,7 @@ export class WebglLayer extends BaseLayer {
     return queue;
   }
 
-  calcTileZoom(zoom) {
+  calcTileZoom(zoom: number) {
     const tileZoom = Math.round(zoom);
     if (
       (this.options.maxZoom !== undefined && tileZoom > this.options.maxZoom) ||
@@ -481,6 +504,13 @@ export class WebglLayer extends BaseLayer {
     return new L.Bounds(bounds.min.unscaleBy(tileSize).floor(), bounds.max.unscaleBy(tileSize).ceil().subtract([1, 1]));
   }
 
+  handleZoom() {
+    if (this.proxyLayer) {
+      this.proxyLayer.handleZoom();
+    }
+    this._render();
+  }
+
   onMoveEnd() {
     if (this.proxyLayer) {
       this.proxyLayer.moveEnd();
@@ -497,16 +527,19 @@ export class WebglLayer extends BaseLayer {
     this._render();
   }
 
+  _animateZoom(event: L.ZoomAnimEvent) {
+    super._animateZoom(event);
+    this.handleZoom();
+  }
+
   getEvents() {
-    const events: {
-      [key: string]: any;
-    } = {
+    const events: Record<string, any> = {
       resize: this._onResize,
       viewreset: this._render,
       moveend: this.onMoveEnd,
       movestart: this.onMoveStart,
-      zoomEnd: this._render,
-      // zoomanim: undefined,
+      zoom: this.handleZoom,
+      zoomend: this._render,
     };
 
     if (this._map.options.zoomAnimation && L.Browser.any3d) {
@@ -516,7 +549,103 @@ export class WebglLayer extends BaseLayer {
     return events;
   }
 
+  updateOptions(options: Partial<LayerOptions>) {
+    this.options = {
+      ...this.options,
+      ...(options || {}),
+    };
+    if (this.proxyLayer) {
+      this.proxyLayer.updateOptions(options);
+    }
+  }
+
+  public getMask() {
+    return this.options.mask;
+  }
+
+  private processMask() {
+    if (this.options.mask) {
+      const mask = this.options.mask;
+      const data = mask.data;
+      // @link https://github.com/mapbox/geojson-rewind
+      rewind(data, true);
+
+      const tr = (coords) => {
+        const mercatorCoordinates: any[] = [];
+        for (let i = 0; i < coords.length; i++) {
+          const coord = coords[i];
+          const p = fromLngLat(coord);
+          mercatorCoordinates.push([p.x, p.y]);
+        }
+
+        return mercatorCoordinates;
+      };
+
+      const features = data.features;
+      const len = features.length;
+      let i = 0;
+      const fs: any[] = [];
+      for (; i < len; i++) {
+        const feature = features[i];
+
+        const coordinates = feature.geometry.coordinates;
+        const type = feature.geometry.type;
+
+        if (type === 'Polygon') {
+          fs.push({
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'Polygon',
+              coordinates: feature.geometry.coordinates.map((c) => tr(c)),
+            },
+          });
+        } else if (type === 'MultiPolygon') {
+          const css: any[] = [];
+          for (let k = 0; k < coordinates.length; k++) {
+            const coordinate = coordinates[k];
+            const cs: any[] = [];
+            for (let n = 0; n < coordinate.length; n++) {
+              cs.push(tr(coordinates[k][n]));
+            }
+
+            css.push(cs);
+          }
+
+          fs.push({
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'MultiPolygon',
+              coordinates: css,
+            },
+          });
+        }
+      }
+
+      return {
+        data: polygon2buffer(fs),
+        type: mask.type,
+      };
+    }
+  }
+
+  public setMask(mask) {
+    this.options.mask = Object.assign({}, this.options.mask, mask);
+
+    if (this.proxyLayer) {
+      this.proxyLayer.setMask(this.processMask());
+    }
+  }
+
   onRemove() {
+    if (this.proxyLayer) {
+      this.proxyLayer.destroy();
+      this.proxyLayer = null as any;
+    }
+
+    this.gl = null;
+
     return super.onRemove();
   }
 }

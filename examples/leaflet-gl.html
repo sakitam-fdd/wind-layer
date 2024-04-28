@@ -30,38 +30,113 @@
 <script>
   const map = new L.map('map', {
     // center: [113.53450137499999, 34.44104525],
-    zoom: 5,
-    center: [113.53450137499999, 34.44104525].reverse(),
+    zoom: 2,
+    center: [112.24731445312501, 35.34257486000643].reverse(),
     // zoom: 4
   });
 
-  const layer = L.tileLayer('//{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+  const layer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
     subdomains: ['a', 'b', 'c', 'd'],
   });
 
   map.addLayer(layer);
 
-  const source = new leafletWind.TileSource('temp', {
-    tileSize: 256,
-    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-    minZoom: 0,
-    maxZoom: 18,
-    roundZoom: true,
-    subdomains: ['a', 'b', 'c', 'd'],
-    wrapX: true,
-    // tileBounds: [-90, -45, 90, 45],
-  });
+  async function add () {
+    const clip = await fetch('./data/china.geojson').then(res => res.json());
 
-  const wind = new leafletWind.WebglLayer('wind', source, {
-    renderType: leafletWind.RenderType.image,
-  });
+    const rasterSource = new leafletWind.TileSource('raster', {
+      tileSize: 256,
+      url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+      minZoom: 0,
+      maxZoom: 18,
+      roundZoom: true,
+      subdomains: ['a', 'b', 'c', 'd'],
+      wrapX: true,
+      // tileBounds: [-90, -45, 90, 45],
+    });
 
-  function handleAdd () {
+    const raster = new leafletWind.WebglLayer('wind', rasterSource, {
+      renderType: leafletWind.RenderType.image,
+      styleSpec: {
+        'opacity': [
+          'interpolate',
+          ['exponential', 0.5],
+          ['zoom'],
+          1,
+          1,
+          7,
+          0.3
+        ],
+      },
+      picking: true,
+      mask: {
+        data: clip,
+        type: leafletWind.MaskType.outside,
+        // type: leafletWind.MaskType.inside, // 默认是 inside，即只显示范围内的
+      }
+    });
+
+    const source = new leafletWind.TileSource('wind', {
+      url: 'https://blog.sakitam.com/wind-layer/data/tiles/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
+      tileSize: 256,
+      minZoom: 0,
+      maxZoom: 10,
+      roundZoom: true,
+      decodeType: leafletWind.DecodeType.imageWithExif,
+      wrapX: true,
+    });
+
+    const windColor = [
+      [0, [98, 113, 183, 255]],
+      [1, [57, 97, 159, 255]],
+      [3, [74, 148, 169, 255]],
+      [5, [77, 141, 123, 255]],
+      [7, [83, 165, 83, 255]],
+      [9, [53, 159, 53, 255]],
+      [11, [167, 157, 81, 255]],
+      [13, [159, 127, 58, 255]],
+      [15, [161, 108, 92, 255]],
+      [17, [129, 58, 78, 255]],
+      [19, [175, 80, 136, 255]],
+      [21, [117, 74, 147, 255]],
+      [24, [109, 97, 163, 255]],
+      [27, [68, 105, 141, 255]],
+      [29, [92, 144, 152, 255]],
+      [36, [125, 68, 165, 255]],
+      [46, [231, 215, 215, 256]],
+      [51, [219, 212, 135, 256]],
+      [77, [205, 202, 112, 256]],
+      [104, [128, 128, 128, 255]],
+    ];
+
+    const interpolateColor = windColor.reduce(
+      (result, item, key) => result.concat(item[0], `rgba(${item[1].join(',')})`),
+      [],
+    );
+
+    const wind = new leafletWind.WebglLayer('wind', source, {
+      styleSpec: {
+        'fill-color': ['interpolate', ['linear'], ['get', 'value'], ...interpolateColor],
+        opacity: 1,
+      },
+      renderFrom: leafletWind.RenderFrom.rg,
+      displayRange: [0, 104],
+      renderType: leafletWind.RenderType.colorize,
+    });
+
+    window.wind = wind;
+
     map.addLayer(wind);
   }
 
+  add();
+
+  function handleAdd () {
+    map.addLayer(window.wind);
+  }
+
   function handleRemove () {
-    map.removeLayer(wind);
+    map.removeLayer(window.wind);
   }
 </script>
 </body>

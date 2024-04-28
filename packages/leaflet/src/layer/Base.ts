@@ -149,8 +149,8 @@ export class BaseLayer extends L.Layer {
       viewreset: this._render,
       moveend: this._render,
       // movestart: this._moveStart,
-      // zoomStart: this._zoomStart,
-      zoomEnd: this._render,
+      zoomstart: this._render,
+      zoomend: this._render,
       // zoomanim: undefined,
     };
 

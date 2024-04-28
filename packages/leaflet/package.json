@@ -70,6 +70,7 @@
   "homepage": "https://github.com/sakitam-fdd/wind-layer#readme",
   "dependencies": {
     "@sakitam-gis/vis-engine": "^1.5.3",
+    "@mapbox/geojson-rewind": "^0.5.2",
     "wind-core": "workspace:*",
     "wind-gl-core": "workspace:*",
     "gl-matrix": "^3.4.3"
