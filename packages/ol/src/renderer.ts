@@ -4,8 +4,8 @@ import type { Pixel } from 'ol/pixel';
 import { fromUserExtent, fromUserCoordinate, toUserCoordinate, transform as transformProj } from 'ol/proj';
 import CanvasLayerRenderer from 'ol/renderer/canvas/Layer';
 import {
-  toString as transformToString,
-  makeScale,
+  toString as toTransformString,
+  compose,
   makeInverse,
   apply as applyTransform,
   create as createTransform,
@@ -24,32 +24,33 @@ const ViewHint = {
   INTERACTING: 1,
 };
 
-// @ts-ignore todo need resolve
-export default class WindLayerRender extends CanvasLayerRenderer {
-  private readonly context: CanvasRenderingContext2D;
-  private readonly containerReused: boolean;
-  protected container: WithNull<HTMLDivElement | HTMLCanvasElement>;
+export default class WindLayerRender extends CanvasLayerRenderer<any> {
+  protected container: HTMLElement;
   protected inversePixelTransform: Transform;
   protected pixelTransform: Transform;
-  protected renderedResolution: number;
-  protected tempTransform: Transform;
 
   public wind: WindCore;
 
   constructor(layer) {
     super(layer);
 
-    this.container = null;
-
-    this.renderedResolution = NaN;
-    this.tempTransform = createTransform();
     this.pixelTransform = createTransform();
     this.inversePixelTransform = createTransform();
   }
 
-  useContainer(target: HTMLElement | null, transform: string, opacity: number) {
+  // useContainer(target: HTMLElement, transform: string, backgroundColor: number) 这里在 v6.3.0 后有 break change
+  useContainer(target: HTMLElement, transform: string, backgroundColor?: string) {
     // 此处强制新建 canvas
-    super.useContainer(null, transform, opacity);
+    super.useContainer(null as any, transform, backgroundColor);
+  }
+
+  getBackground(frameState: FrameState) {
+    // @ts-ignore 6.3.0 之前无此函数
+    if (super.getBackground) {
+      return super.getBackground(frameState)
+    }
+
+    return ''
   }
 
   prepareFrame(frameState: FrameState) {
@@ -77,40 +78,60 @@ export default class WindLayerRender extends CanvasLayerRenderer {
       }
       return true;
     } else {
-      // @ts-ignore todo need resolve
       const layer = this.getLayer() as unknown as WindLayer;
       return layer.get('forceRender');
     }
   }
 
-  renderFrame(frameState: FrameState, target: HTMLDivElement) {
-    const layerState = frameState.layerStatesArray[frameState.layerIndex];
-    const pixelRatio = frameState.pixelRatio;
-    const viewState = frameState.viewState;
+  prepareContainer(frameState: FrameState, target: HTMLElement) {
     const size = frameState.size;
-
+    const rotation = frameState.viewState.rotation;
+    const pixelRatio = frameState.pixelRatio;
     const width = Math.round(size[0] * pixelRatio);
     const height = Math.round(size[1] * pixelRatio);
-
     // set forward and inverse pixel transforms
-    makeScale(this.pixelTransform, 1 / pixelRatio, 1 / pixelRatio);
+    compose(
+      this.pixelTransform,
+      frameState.size[0] / 2,
+      frameState.size[1] / 2,
+      1 / pixelRatio,
+      1 / pixelRatio,
+      rotation,
+      -width / 2,
+      -height / 2,
+    );
     makeInverse(this.inversePixelTransform, this.pixelTransform);
 
-    const canvasTransform = transformToString(this.pixelTransform);
+    const canvasTransform = toTransformString(this.pixelTransform);
+    this.useContainer(target, canvasTransform, this.getBackground(frameState));
 
-    this.useContainer(target, canvasTransform, layerState.opacity);
-
-    const context = this.context;
-    const canvas = context.canvas;
-
-    if (canvas.width !== width || canvas.height !== height) {
-      canvas.width = width;
-      canvas.height = height;
-    } else if (!this.containerReused) {
-      context.globalCompositeOperation = 'source-over';
+    if (!this.containerReused) {
+      const canvas = this.context.canvas;
+      if (canvas.width != width || canvas.height != height) {
+        canvas.width = width;
+        canvas.height = height;
+      } else {
+        this.getRenderContext(frameState).clearRect(0, 0, width, height);
+      }
+      if (canvasTransform !== canvas.style.transform) {
+        canvas.style.transform = canvasTransform;
+      }
     }
+  }
 
-    // @ts-ignore todo need resolve
+  getRenderContext(frameState: FrameState) {
+    return this.context;
+  }
+
+  renderFrame(frameState: FrameState, target: HTMLElement) {
+    const layerState = frameState.layerStatesArray[frameState.layerIndex];
+    const viewState = frameState.viewState;
+
+    this.prepareContainer(frameState, target);
+
+    const context = this.getRenderContext(frameState);
+
+    context.imageSmoothingEnabled = false;
     this.preRender(context, frameState);
 
     // clipped rendering if layer extent is set
@@ -121,35 +142,23 @@ export default class WindLayerRender extends CanvasLayerRenderer {
       render = intersects(layerExtent, frameState.extent as Extent);
       clipped = render && !containsExtent(layerExtent, frameState.extent as Extent);
       if (clipped) {
-        // @ts-ignore todo need resolve
         this.clipUnrotated(context, frameState, layerExtent);
       }
     }
 
-    const center = viewState.center;
-    const resolution = viewState.resolution;
-    const rotation = viewState.rotation;
-
-    // @ts-ignore todo need resolve
-    const layer = this.getLayer() as unknown as WindLayer;
+    const layer = this.getLayer();
     const opt = layer.getWindOptions();
     const data = layer.getData();
 
-    // @ts-ignore todo need resolve
-    const transformOrigin = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, 0);
+    this.execute(this.context, frameState, opt, data);
 
-    this.execute(this.context, frameState, transformOrigin, transformOrigin, opt, data);
-
-    // @ts-ignore todo need resolve
-    this.postRender(context, frameState);
+    this.postRender(this.context, frameState);
 
     if (clipped) {
       context.restore();
     }
 
-    if (canvasTransform !== canvas.style.transform) {
-      canvas.style.transform = canvasTransform;
-    }
+    context.imageSmoothingEnabled = true;
 
     return this.container;
   }
@@ -164,15 +173,12 @@ export default class WindLayerRender extends CanvasLayerRenderer {
   public setData(field: Field) {
     if (this.wind) {
       this.wind.updateData(field);
-      // wind.prerender();
     }
   }
 
   execute(
     context: CanvasRenderingContext2D,
     frameState: FrameState,
-    transform: number[],
-    renderedTransform: number[],
     opt: Partial<IOptions>,
     data: any,
   ) {
@@ -190,28 +196,25 @@ export default class WindLayerRender extends CanvasLayerRenderer {
   }
 
   private getPixelFromCoordinateInternal(coordinate: Coordinate): [number, number] | null {
-    // @ts-ignore todo need resolve
     const frameState = this.frameState;
-    const viewState = frameState.viewState;
-    const pixelRatio = frameState.pixelRatio;
-    const point = transformProj(coordinate, 'EPSG:4326', viewState.projection);
-    const viewCoordinate = fromUserCoordinate(point, viewState.projection);
-
     if (!frameState) {
       return null;
     } else {
+      const viewState = frameState.viewState;
+      const pixelRatio = frameState.pixelRatio;
+      const point = transformProj(coordinate, 'EPSG:4326', viewState.projection);
+      const viewCoordinate = fromUserCoordinate(point, viewState.projection);
       const pixel = applyTransform(frameState.coordinateToPixelTransform, viewCoordinate.slice(0, 2));
       return [pixel[0] * pixelRatio, pixel[1] * pixelRatio];
     }
   }
 
   private getCoordinateFromPixel(pixel: Pixel): [number, number] | null {
-    // @ts-ignore todo need resolve
     const frameState = this.frameState;
-    const viewState = frameState.viewState;
     if (!frameState) {
       return null;
     } else {
+      const viewState = frameState.viewState;
       const viewCoordinate = applyTransform(frameState.pixelToCoordinateTransform, pixel.slice(0, 2));
       const coordinate = toUserCoordinate(viewCoordinate, viewState.projection);
       const point = transformProj(coordinate, viewState.projection, 'EPSG:4326');
@@ -220,12 +223,15 @@ export default class WindLayerRender extends CanvasLayerRenderer {
   }
 
   private intersectsCoordinate(coordinate: Coordinate): boolean {
-    // @ts-ignore todo need resolve
     const frameState = this.frameState;
-    const viewState = frameState.viewState;
-    const point = transformProj(coordinate, 'EPSG:4326', viewState.projection);
-    const viewCoordinate = fromUserCoordinate(point, viewState.projection);
-    // const extent = getForViewAndSize(viewState.center, viewState.resolution, viewState.rotation, frameState.size.map((item) => item * frameState.pixelRatio));
-    return containsCoordinate(frameState.extent as Extent, viewCoordinate.slice(0, 2));
+    if (frameState) {
+      const viewState = frameState.viewState;
+      const point = transformProj(coordinate, 'EPSG:4326', viewState.projection);
+      const viewCoordinate = fromUserCoordinate(point, viewState.projection);
+      // const extent = getForViewAndSize(viewState.center, viewState.resolution, viewState.rotation, frameState.size.map((item) => item * frameState.pixelRatio));
+      return containsCoordinate(frameState.extent as Extent, viewCoordinate.slice(0, 2));
+    }
+
+    return true;
   }
 }

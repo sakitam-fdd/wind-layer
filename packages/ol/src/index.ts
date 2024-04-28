@@ -1,5 +1,6 @@
 import { Layer } from 'ol/layer';
-import type { PluggableMap } from 'ol';
+import type { PluggableMap} from 'ol';
+import { FrameState } from 'ol/PluggableMap';
 import WindLayerRender from './renderer';
 
 import { isArray, formatData, assign, defaultOptions } from 'wind-core';
@@ -20,7 +21,7 @@ export interface IWindOptions extends IOptions {
   [key: string]: any;
 }
 
-export class WindLayer extends Layer<any, any> {
+export class WindLayer extends Layer {
   private field: Field | undefined;
   public _map: any;
   private options: IWindOptions;
@@ -44,12 +45,22 @@ export class WindLayer extends Layer<any, any> {
     }
   }
 
+  /**
+   * 兼容旧版调用方式
+   * @param map
+   */
   public appendTo(map: any) {
     map.addLayer(this);
   }
 
-  public unrender() {
-    super.unrender();
+  private onAdd() {
+    const renderer = this.getRenderer();
+    if (renderer) {
+      renderer.wind?.start();
+    }
+  }
+
+  private onRemove() {
     const renderer = this.getRenderer();
     if (renderer) {
       renderer.wind.stop();
@@ -59,6 +70,10 @@ export class WindLayer extends Layer<any, any> {
   protected createRenderer(): any {
     // @ts-ignore need resolve
     return new WindLayerRender(this);
+  }
+
+  protected getRenderer() {
+    return super.getRenderer() as WindLayerRender;
   }
 
   private pickWindOptions() {
@@ -73,6 +88,7 @@ export class WindLayer extends Layer<any, any> {
   }
 
   /**
+   * 获取图层现有数据
    * get wind layer data
    */
   // @ts-ignore overwrite base layer
@@ -81,6 +97,7 @@ export class WindLayer extends Layer<any, any> {
   }
 
   /**
+   * 设置图层数据
    * set layer data
    * @param data
    * @param options
@@ -100,9 +117,15 @@ export class WindLayer extends Layer<any, any> {
       renderer.setData(this.field);
     }
 
+    this.changed();
+
     return this;
   }
 
+  /**
+   * 设置风场图层的配置项
+   * @param options
+   */
   public setWindOptions(options: Partial<IOptions>) {
     const beforeOptions = this.options.windOptions || {};
     this.options = assign(this.options, {
@@ -114,32 +137,48 @@ export class WindLayer extends Layer<any, any> {
       const windOptions = this.options.windOptions;
       renderer.setOptions(windOptions);
     }
+
+    this.changed();
   }
 
+  /**
+   * 获取风场图层渲染的配置项
+   */
   public getWindOptions() {
     return this.options.windOptions || {};
   }
 
-  render(frameState, target) {
+  render(frameState: FrameState, target: HTMLElement): any {
     const layerRenderer = this.getRenderer();
 
-    if (layerRenderer.prepareFrame(frameState)) {
+    if (layerRenderer && layerRenderer.prepareFrame(frameState)) {
       this.rendered = true;
       return layerRenderer.renderFrame(frameState, target);
     }
     return null;
   }
 
+  // since v6
+  setMapInternal(map: PluggableMap) {
+    super.setMapInternal(map);
+
+    if (!map) {
+      this.onRemove();
+    } else {
+      this.onAdd()
+    }
+  }
+
+  /**
+   * 支持以 setMap 方式添加图层
+   * @param map
+   */
   public setMap(map: PluggableMap) {
     super.setMap(map);
-    // * 支持以 setMap 方式添加图层
     if (!map) {
-      this.unrender();
+      this.onRemove();
     } else {
-      const renderer = this.getRenderer();
-      if (renderer) {
-        renderer.wind?.start();
-      }
+      this.onAdd()
     }
   }
 }

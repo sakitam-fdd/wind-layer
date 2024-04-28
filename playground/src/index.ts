@@ -348,7 +348,6 @@ function initMap() {
     .then((res) => res.json())
     .then((res) => {
       const windLayer = new WindLayer(res, {
-        forceRender: false,
         windOptions: {
           // colorScale: scale,
           velocityScale: 0.05,
@@ -378,12 +377,10 @@ function initMap() {
           wrapX: true,
           // flipY: true,
         },
-        // map: map,
-        // projection: 'EPSG:4326'
       });
 
       const windLayer1 = new WindLayer(res, {
-        className: 'ol-wind',
+        // className: 'ol-wind',
         forceRender: false,
         windOptions: {
           // colorScale: scale,
@@ -397,16 +394,12 @@ function initMap() {
         fieldOptions: {
           wrapX: true,
         },
-        // map: map,
-        // projection: 'EPSG:4326'
       });
 
       console.log(map, windLayer);
 
-      // @ts-ignore
       map.addLayer(windLayer);
-      // windLayer.setMap(map)
-      map.addLayer(windLayer1);
+      // map.addLayer(windLayer1);
 
       setTimeout(() => {
         // map.removeLayer(windLayer1);

@@ -6,7 +6,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "ol": "^6.15.1",
+    "ol": "^9.1.0",
     "ol-wind": "workspace:*",
     "mapbox-gl": "^2.15.0",
     "@sakitam-gis/mapbox-wind": "workspace:*"

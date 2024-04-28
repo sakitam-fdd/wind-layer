@@ -30,12 +30,10 @@ const umdExternal = [
   'ol/PluggableMap',
   'ol/coordinate',
   'ol/proj',
+  'ol/pixel',
   'ol/transform',
   'ol/extent',
-  'ol/renderer/canvas/Layer',
-  'ol/source/ImageCanvas',
-  'ol/renderer/Map',
-  'ol/renderer/canvas/ImageLayer',
+  'ol/renderer/canvas/Layer'
 ];
 
 const external = [...umdExternal, ...Object.keys(pkg.dependencies)];
@@ -102,15 +100,14 @@ const umdBuild: RollupOptions = {
     globals: {
       ol: 'ol',
       'ol/size': 'ol.size',
+      'ol/pixel': 'ol.pixel',
       'ol/layer': 'ol.layer',
       'ol/proj': 'ol.proj',
       'ol/transform': 'ol.transform',
-      'ol/source/ImageCanvas': 'ol.source.ImageCanvas',
       'ol/PluggableMap': 'ol.PluggableMap',
       'ol/coordinate': 'ol.coordinate',
       'ol/extent': 'ol.extent',
       'ol/renderer/canvas/Layer': 'ol.renderer.canvas.ImageLayer', // CanvasLayer is not export
-      'ol/renderer/Map': 'ol.renderer.canvas.Map',
       'ol/renderer/canvas/ImageLayer': 'ol.renderer.canvas.ImageLayer',
     },
   },
