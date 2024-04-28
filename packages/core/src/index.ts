@@ -14,25 +14,70 @@ export const defaultOptions = {
   paths: 800,
   frameRate: 20,
   useCoordsDraw: true,
-  gpet: true, // generate particle every times
 };
 
 type emptyFunc = (v?: any) => number;
 
 export interface IOptions {
+  /**
+   * 全局透明度，主要影响粒子拖尾效果，默认 0.9
+   */
   globalAlpha: number; // 全局透明度
-  lineWidth: number | emptyFunc; // 线条宽度
+
+  /**
+   * 线条宽度
+   */
+  lineWidth: number | emptyFunc;
+
+  /**
+   * 粒子颜色配置, 默认#fff，当为回调函数时，参数 function(m:对应点风速值) => string
+   */
   colorScale: string | string[] | emptyFunc;
+
+  /**
+   * 对于粒子路径步长的乘积系数，默认 1 / 25
+   */
   velocityScale: number | emptyFunc;
+
+  /**
+   * 粒子路径能够生成的最大帧数，默认是 90
+   */
   particleAge?: number; // 粒子在重新生成之前绘制的最大帧数
+
+  /**
+   * 粒子路径能够生成的最大帧数，默认是 90；他代表的是我们的 `paths` 数量的粒子的消亡控制，最小值是 0，最大值是 `maxAge`，在运行到 age 数时会消失然后进行重启
+   */
   maxAge: number; // alias for particleAge
+
+  /**
+   * 粒子路径数量的系数，不推荐使用（视野宽度 * 高度 * 系数）
+   */
   particleMultiplier?: number; // TODO: PATHS = Math.round(width * height * that.particleMultiplier);
+
+  /**
+   * 生成的粒子数量
+   */
   paths: number | emptyFunc;
+
+  /**
+   * 用户自定义的帧率，默认是 20ms, 大概接近 50fps 帧，我们可能在某些场景需要降低帧率一保证渲染稳定性；注意此配置还会影响粒子运动的速度
+   */
   frameRate: number;
+
+  /**
+   * 用户配置的风速最小值，如果未配置会从传入的数据中计算
+   */
   minVelocity?: number;
+
+  /**
+   * 用户配置的风速最大值，如果未配置会从传入的数据中计算
+   */
   maxVelocity?: number;
+
+  /**
+   * 使用外部传入的坐标系统，默认是 `true`；某些场景下我们可能直接使用像素坐标。
+   */
   useCoordsDraw?: boolean;
-  gpet?: boolean;
 }
 
 function indexFor(m: number, min: number, max: number, colorScale: string[]) {

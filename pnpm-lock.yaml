@@ -258,6 +258,12 @@ importers:
 
   packages/leaflet:
     dependencies:
+      '@sakitam-gis/vis-engine':
+        specifier: ^1.5.3
+        version: 1.5.3
+      gl-matrix:
+        specifier: ^3.4.3
+        version: 3.4.3
       wind-core:
         specifier: workspace:*
         version: link:../core
@@ -265,6 +271,9 @@ importers:
         specifier: workspace:*
         version: link:../gl-core
     devDependencies:
+      '@types/gl-matrix':
+        specifier: ^3.2.0
+        version: 3.2.0
       '@types/leaflet':
         specifier: ^1.5.12
         version: 1.9.9
@@ -1843,6 +1852,13 @@ packages:
 
   /@types/geojson@7946.0.14:
     resolution: {integrity: sha512-WCfD5Ht3ZesJUsONdhvm84dmzWOiOzOAqOncN0++w0lBw1o8OuDNJF2McvvCef/yBqb/HYRahp1BYtODFQ8bRg==}
+
+  /@types/gl-matrix@3.2.0:
+    resolution: {integrity: sha512-CY4JAtSOGQX7rVgqVuOk7ZfaLv8VeadDMPj3smMOy8Hp/YiHONa3Mr0mEUgbo0eEwV7+Owpf6BwspcA7hv4NXg==}
+    deprecated: This is a stub types definition. gl-matrix provides its own type definitions, so you do not need this installed.
+    dependencies:
+      gl-matrix: 3.4.3
+    dev: true
 
   /@types/is-ci@3.0.4:
     resolution: {integrity: sha512-AkCYCmwlXeuH89DagDCzvCAyltI2v9lh3U3DqSg/GrBYoReAaWwxfXCqMx9UV5MajLZ4ZFwZzV4cABGIxk2XRw==}

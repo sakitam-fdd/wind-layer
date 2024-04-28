@@ -1,6 +1,6 @@
 import { Layer } from 'ol/layer';
 import type { PluggableMap} from 'ol';
-import { FrameState } from 'ol/PluggableMap';
+import type { FrameState } from 'ol/PluggableMap';
 import WindLayerRender from './renderer';
 
 import { isArray, formatData, assign, defaultOptions } from 'wind-core';
@@ -15,15 +15,26 @@ const _options = {
 export { Field } from 'wind-core';
 
 export interface IWindOptions extends IOptions {
+  /**
+   * 配置是否强制渲染；ol 对图层有一定的优化策略，在地图拖动，缩放等交互会隐藏图层，如果我们期望在拖动缩放
+   * 也需要保持图层显示，那么可以开启器配置（默认开启）
+   */
   forceRender: boolean;
+
+  /**
+   * 风场渲染相关配置
+   */
   windOptions: Partial<IOptions>;
+
+  /**
+   * 风场数据相关配置
+   */
   fieldOptions: Partial<IField>;
   [key: string]: any;
 }
 
 export class WindLayer extends Layer {
   private field: Field | undefined;
-  public _map: any;
   private options: IWindOptions;
 
   constructor(data: any, options: any) {
@@ -38,15 +49,25 @@ export class WindLayer extends Layer {
 
     this.pickWindOptions();
 
-    this._map = opt.map || null;
-
     if (data) {
       this.setData(data, options.fieldOptions);
     }
   }
 
   /**
-   * 兼容旧版调用方式
+   * 兼容旧版调用方式，现在可以使用以下方式添加图层：
+   * ```ts
+   * 1. 常规方式
+   * map.addLayer(windLayer);
+   *
+   * 2. setMap 会脱离 ol 地图的图层管理
+   *
+   * layer.setMap(map);
+   *
+   * 3. 调用 appendTo
+   *
+   * layer.appendTo(map);
+   * ```
    * @param map
    */
   public appendTo(map: any) {

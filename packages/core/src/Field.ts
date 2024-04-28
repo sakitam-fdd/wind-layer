@@ -3,25 +3,78 @@ import Vector from './Vector';
 
 export interface IField {
   /* 一般格点数据是按照矩形范围来切割，所以定义其经纬度范围 */
-  xmin: number; // 经度最小值
-  ymin: number; // 纬度最小值
-  xmax: number; // 经度最大值
-  ymax: number; // 纬度最大值
-  deltaX: number; // x（经度）增量
-  deltaY: number; // y（纬度）增量 (默认我们采用的数据和格点原始数据方向保持一致，数据从左上到右下) 但是需要注意的是此时 deltaY为 -(ymax-ymin) / rows
-  cols: number; // 列（可由 `(xmax - xmin) / deltaX` 得到）
-  rows: number; // 行
-  us: number[]; // U分量
-  vs: number[]; // V分量
-  flipY?: boolean; // 因为grib2json的问题，我们需要翻转 Y 轴数据
-  wrapX?: boolean; // 是否实现跨世界渲染
-  wrappedX?: boolean; // 当数据范围时按照 [0, 360] 时需要对x方向进行切割转换为 [-180, 180]，即将废弃
-  translateX?: boolean; // 当数据范围时按照 [0, 360] 时需要对x方向进行切割转换为 [-180, 180]
+
+  /**
+   * 经度最小值
+   */
+  xmin: number;
+
+  /**
+   * 纬度最小值
+   */
+  ymin: number;
+
+  /**
+   * 经度最大值
+   */
+  xmax: number;
+
+  /**
+   * 纬度最大值
+   */
+  ymax: number;
+
+  /**
+   * x（经度）增量
+   */
+  deltaX: number;
+
+  /**
+   * y（纬度）增量 (默认我们采用的数据和格点原始数据方向保持一致，数据从左上到右下) 但是需要注意的是此时 deltaY为 -(ymax-ymin) / rows
+   */
+  deltaY: number;
+
+  /**
+   * 列（可由 `(xmax - xmin) / deltaX` 得到）
+   */
+  cols: number;
+
+  /**
+   * 行
+   */
+  rows: number;
+
+  /**
+   * U分量
+   */
+  us: number[];
+
+  /**
+   * V分量
+   */
+  vs: number[];
+
+  /**
+   * 因为grib2json的问题，我们需要翻转 Y 轴数据
+   */
+  flipY?: boolean;
+
+  /**
+   * 是否实现跨世界渲染
+   */
+  wrapX?: boolean;
+
+  /**
+   * 当数据范围时按照 [0, 360] 时需要对x方向进行切割转换为 [-180, 180]，即将废弃
+   */
+  wrappedX?: boolean;
+
+  /**
+   * 当数据范围时按照 [0, 360] 时需要对x方向进行切割转换为 [-180, 180]
+   */
+  translateX?: boolean;
 }
 
-/**
- *
- */
 export interface IPosition {
   age?: number;
   x?: number;

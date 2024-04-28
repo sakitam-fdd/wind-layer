@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>leaflet wind</title>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/leaflet/dist/leaflet.css">
+<style type="text/css">
+  html, body {
+    margin: 0;
+    height: 100%;
+    width: 100%
+  }
+  .container {
+    width: 100%;
+    height: 100%
+  }
+</style>
+<body>
+
+<div id="map" class="container">
+  <div style="position: absolute; z-index: 9999; right: 20px; top: 20px">
+    <button onclick="handleAdd()">添加</button>
+    <button onclick="handleRemove()">移除</button>
+  </div>
+</div>
+<script src="//cdn.jsdelivr.net/npm/leaflet/dist/leaflet-src.js"></script>
+<script src="//cdn.jsdelivr.net/npm/dat.gui@0.7.6/build/dat.gui.js"></script>
+<script src="../packages/leaflet/dist/leaflet-wind.js"></script>
+<script>
+  const map = new L.map('map', {
+    // center: [113.53450137499999, 34.44104525],
+    zoom: 5,
+    center: [113.53450137499999, 34.44104525].reverse(),
+    // zoom: 4
+  });
+
+  const layer = L.tileLayer('//{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
+    subdomains: ['a', 'b', 'c', 'd'],
+  });
+
+  map.addLayer(layer);
+
+  const source = new leafletWind.TileSource('temp', {
+    tileSize: 256,
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+    minZoom: 0,
+    maxZoom: 18,
+    roundZoom: true,
+    subdomains: ['a', 'b', 'c', 'd'],
+    wrapX: true,
+    // tileBounds: [-90, -45, 90, 45],
+  });
+
+  const wind = new leafletWind.WebglLayer('wind', source, {
+    renderType: leafletWind.RenderType.image,
+  });
+
+  function handleAdd () {
+    map.addLayer(wind);
+  }
+
+  function handleRemove () {
+    map.removeLayer(wind);
+  }
+</script>
+</body>
+</html>
