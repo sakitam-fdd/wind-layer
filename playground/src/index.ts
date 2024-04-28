@@ -298,6 +298,7 @@ function initMap() {
       velocityScale: 0.005,
       globalAlpha: 0.9,
       maxAge: 90,
+      show: true,
     };
 
     // @ts-ignore
@@ -312,6 +313,9 @@ function initMap() {
         // @ts-ignore
         window.map.removeLayer(windLayer);
       }
+    });
+    gui.add(config, 'show').onChange(() => {
+      windLayer.setVisible(config.show);
     });
     gui.add(config, 'globalAlpha', 0.01, 1).onChange(() => {
       windLayer.setWindOptions({
@@ -399,10 +403,10 @@ function initMap() {
       console.log(map, windLayer);
 
       map.addLayer(windLayer);
-      // map.addLayer(windLayer1);
+      map.addLayer(windLayer1);
 
       setTimeout(() => {
-        // map.removeLayer(windLayer1);
+        map.removeLayer(windLayer1);
         windLayer.setData(res);
       }, 5 * 1000);
 

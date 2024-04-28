@@ -111,7 +111,7 @@ export default class WindLayerRender extends CanvasLayerRenderer<any> {
         canvas.width = width;
         canvas.height = height;
       } else {
-        this.getRenderContext(frameState).clearRect(0, 0, width, height);
+        // this.getRenderContext(frameState).globalCompositeOperation = 'source-over';
       }
       if (canvasTransform !== canvas.style.transform) {
         canvas.style.transform = canvasTransform;
