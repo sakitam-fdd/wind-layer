@@ -1,5 +1,12 @@
 # amap-wind
 
+## 1.2.4
+
+### Patch Changes
+
+- Updated dependencies [[`44c0d33`](https://github.com/sakitam-fdd/wind-layer/commit/44c0d33a0d937d586f3086dbb873007b9a826a53)]:
+  - wind-core@1.1.8
+
 ## 1.2.3
 
 ### Patch Changes
