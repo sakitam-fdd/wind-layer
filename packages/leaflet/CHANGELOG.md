@@ -1,5 +1,11 @@
 # leaflet-wind
 
+## 1.2.1
+
+### Patch Changes
+
+- [`33fe242`](https://github.com/sakitam-fdd/wind-layer/commit/33fe242e83539e61684dfd9b103f02c91dee6b53) Thanks [@sakitam-fdd](https://github.com/sakitam-fdd)! - fix gl layer
+
 ## 1.2.0
 
 ### Minor Changes
