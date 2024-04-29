@@ -1,5 +1,11 @@
 # leaflet-wind
 
+## 1.2.2
+
+### Patch Changes
+
+- [`5af6432`](https://github.com/sakitam-fdd/wind-layer/commit/5af6432ee776392d0fbbd4bd0956b21c9e988fa5) Thanks [@sakitam-fdd](https://github.com/sakitam-fdd)! - feat(leaflet): support arrow and gl particles renderer
+
 ## 1.2.1
 
 ### Patch Changes
