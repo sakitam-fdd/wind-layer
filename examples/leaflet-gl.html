@@ -30,7 +30,7 @@
 <script>
   const map = new L.map('map', {
     // center: [113.53450137499999, 34.44104525],
-    zoom: 2,
+    zoom: 0,
     center: [112.24731445312501, 35.34257486000643].reverse(),
     // zoom: 4
   });
@@ -65,7 +65,7 @@
           1,
           1,
           7,
-          0.3
+          1
         ],
       },
       picking: true,
@@ -80,7 +80,7 @@
       url: 'https://blog.sakitam.com/wind-layer/data/tiles/2023111700/2023111703/{z}/{x}/{y}/wind-surface.jpeg',
       tileSize: 256,
       minZoom: 0,
-      maxZoom: 10,
+      maxZoom: 3,
       roundZoom: true,
       decodeType: leafletWind.DecodeType.imageWithExif,
       wrapX: true,
@@ -124,7 +124,7 @@
       renderType: leafletWind.RenderType.colorize,
     });
 
-    window.wind = wind;
+    window.wind = raster;
 
     map.addLayer(wind);
   }

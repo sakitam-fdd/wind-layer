@@ -18,9 +18,11 @@ export class WindLayer extends BaseLayer {
     }
   }
 
-  _render() {
-    this._reset();
+  _redraw() {
+    this._render();
+  }
 
+  _render() {
     const opt = this.getWindOptions();
     if (!this.wind && this._map) {
       const ctx = this.canvas!.getContext('2d');

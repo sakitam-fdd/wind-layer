@@ -9,7 +9,6 @@ export class BaseLayer extends L.Layer {
   _width: number;
   _height: number;
   canvas: HTMLCanvasElement | null;
-  layer: HTMLDivElement;
 
   constructor(id: string | number, data: any, options: any) {
     // @ts-ignore 原始 leaflet 定义不对 https://github.com/Leaflet/Leaflet/blob/main/src/core/Class.js#L81C2-L81C13
@@ -32,31 +31,19 @@ export class BaseLayer extends L.Layer {
   }
 
   _createCanvas(id: string | number, zIndex: number) {
-    const layer = L.DomUtil.create('div', 'leaflet-canvas-layer');
-
     const canvas = createCanvas(this._width, this._height, this.devicePixelRatio);
     canvas.id = String(id);
-    canvas.style.position = 'absolute';
-    canvas.style.top = String(0);
-    canvas.style.left = String(0);
-    canvas.style.zIndex = String(zIndex);
-    canvas.style.willChange = 'transform';
-    canvas.style.width = this._width + 'px';
-    canvas.style.height = this._height + 'px';
 
-    layer.appendChild(canvas);
+    this._map.getPanes().overlayPane.appendChild(canvas);
 
-    this._map.getPanes().overlayPane.appendChild(layer);
-
-    return {
-      layer: layer,
-      canvas: canvas,
-    };
+    return canvas;
   }
 
   _reset() {
     const topLeft = this._map.containerPointToLayerPoint([0, 0]);
     L.DomUtil.setPosition(this.canvas!, topLeft);
+
+    this._redraw();
   }
 
   _onResize(resizeEvent: L.ResizeEvent) {
@@ -78,7 +65,7 @@ export class BaseLayer extends L.Layer {
   }
 
   _animateZoom(event: L.ZoomAnimEvent) {
-    const scale = this._map.getZoomScale(event.zoom);
+    const scale = this._map.getZoomScale(event.zoom, this._map.getZoom());
 
     // @ts-ignore 忽略错误
     const offset = this._map._latLngToNewLayerPoint(this._map.getBounds().getNorthWest(), event.zoom, event.center);
@@ -89,6 +76,10 @@ export class BaseLayer extends L.Layer {
   _resizeCanvas(scale: number) {
     this.canvas!.width = this._width * scale;
     this.canvas!.height = this._height * scale;
+  }
+
+  _redraw() {
+    this._render();
   }
 
   _render() {
@@ -112,26 +103,33 @@ export class BaseLayer extends L.Layer {
 
   onAdd(map: L.Map) {
     this._map = map;
-    this._width = map.getSize().x;
-    this._height = map.getSize().y;
+    const size = map.getSize();
+    this._width = size.x;
+    this._height = size.y;
 
-    const { layer, canvas } = this._createCanvas(this._layerId, this.options.zIndex || 1);
-
-    this.layer = layer;
-    this.canvas = canvas;
+    this.canvas = this._createCanvas(this._layerId, this.options.zIndex || 1);
 
     const animated = this._map.options.zoomAnimation && L.Browser.any3d;
     L.DomUtil.addClass(this.canvas, 'leaflet-zoom-' + (animated ? 'animated' : 'hide'));
 
     // @ts-ignore 忽略错误
     this._map.on(this.getEvents(), this);
+
+    this._resetView();
+
     this._render();
 
     return this;
   }
 
+  _resetView(e?: any) {}
+
+  onMoveEnd() {
+    this._reset();
+  }
+
   onRemove() {
-    this._map.getPanes().overlayPane.removeChild(this.layer);
+    this._map.getPanes().overlayPane.removeChild(this.canvas!);
 
     // @ts-ignore 忽略错误
     this._map.off(this.getEvents(), this);
@@ -147,7 +145,7 @@ export class BaseLayer extends L.Layer {
     } = {
       resize: this._onResize,
       viewreset: this._render,
-      moveend: this._render,
+      moveend: this.onMoveEnd,
       // movestart: this._moveStart,
       zoomstart: this._render,
       zoomend: this._render,

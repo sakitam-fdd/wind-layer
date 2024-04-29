@@ -91,14 +91,6 @@ export function toLngLat(mercatorCoordinate) {
   };
 }
 
-export function getTileCenter(x, y, z) {
-  const numTiles = Math.pow(2, z);
-  return {
-    x: (x * earthCircumference) / numTiles - halfEarthCircumference,
-    y: -((y * earthCircumference) / numTiles - halfEarthCircumference),
-  };
-}
-
 export function getCoordinatesCenterTileID(coords: Array<{ x: number; y: number }>) {
   let minX = Infinity;
   let minY = Infinity;

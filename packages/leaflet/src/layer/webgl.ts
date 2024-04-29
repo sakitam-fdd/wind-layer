@@ -30,10 +30,16 @@ class ViewState {
   elevation: any;
   _horizonShift = 0.1;
 
+  /**
+   * 获取 gl 宽度
+   */
   get width() {
     return this._width;
   }
 
+  /**
+   * 获取 gl 高度
+   */
   get height() {
     return this._height;
   }
@@ -85,10 +91,27 @@ class ViewState {
     const lat = latFromMercatorY(p[1]);
     return [lng, lat];
   }
+
+  update(state: Record<string, any>) {
+    this._center = state.center;
+    this._width = state.width;
+    this._height = state.height;
+    this.zoom = state.zoom;
+  }
 }
 
 export interface LayerOptions extends UserOptions {
   renderingMode?: '2d' | '3d';
+}
+
+export function wrapTile(x: number, range: number[], includeMax?: boolean) {
+  const max = range[1];
+  const min = range[0];
+  const d = max - min;
+  return {
+    x: x === max && includeMax ? x : ((x - min) % d + d) % d + min,
+    wrap: Math.floor(x / max),
+  };
 }
 
 export class WebglLayer extends BaseLayer {
@@ -98,9 +121,13 @@ export class WebglLayer extends BaseLayer {
   sync: CameraSync;
   planeCamera: OrthographicCamera;
   viewState: ViewState;
-  proxyLayer: Layer;
+  layer: Layer;
   _tileZoom: number | undefined;
-  wrapXNumber: number[];
+  _wrapX: undefined | false | number[];
+  _wrapY: undefined | false | number[];
+  _globalTileRange: any;
+  _currentTiles: any[];
+  _unLimitTiles: any[];
   private source: SourceType;
 
   initialize(id: string | number, source: any, options: any) {
@@ -108,16 +135,21 @@ export class WebglLayer extends BaseLayer {
 
     this.viewState = new ViewState();
 
+    this._currentTiles = [];
+    this._unLimitTiles = [];
+
     this.source = source;
   }
 
   _resizeCanvas(scale: number) {
     super._resizeCanvas(scale);
 
-    this.renderer.setSize(this._width, this._height);
+    if (this.renderer) {
+      this.renderer.setSize(this._width, this._height);
+    }
 
-    if (this.proxyLayer) {
-      this.proxyLayer.resize(this._width, this._height);
+    if (this.layer) {
+      this.layer.resize(this._width, this._height);
     }
 
     this._render();
@@ -127,24 +159,35 @@ export class WebglLayer extends BaseLayer {
     return this.sync.camera;
   }
 
+  getTileSize() {
+    const s = utils.isNumber(this.source.tileSize) ? this.source.tileSize : this.source.tileSize?.[0] || 512;
+    return new L.Point(s, s);
+  }
+
+  _redraw() {
+    if (this._map && this.source) {
+      const tileZoom = getClampZoom({
+        zoom: this._map.getZoom(),
+        minzoom: this.source.minZoom,
+        maxzoom: this.source.maxZoom,
+      });
+
+      if (tileZoom !== this._tileZoom) {
+        this._tileZoom = tileZoom;
+      }
+      this._update();
+    }
+    return this;
+  }
+
   _render() {
-    this._reset();
-
     if (this._map && this.viewState) {
-      this.viewState._center = this._map.getCenter();
-      this.viewState._width = this._width;
-      this.viewState._height = this._height;
-      this.viewState.zoom = this._map.getZoom();
-
-      this.calcTileZoom(this.viewState.zoom);
-
-      const map = this._map;
-      const crs = map.options.crs;
-
-      this.wrapXNumber = [
-        Math.floor(map.project([0, crs?.wrapLng?.[0] as number], this._tileZoom).x / this.source.tileSize),
-        Math.ceil(map.project([0, crs?.wrapLng?.[1] as number], this._tileZoom).x / this.source.tileSize),
-      ];
+      this.viewState.update({
+        center: this._map.getCenter(),
+        zoom: this._map.getZoom(),
+        width: this._width,
+        height: this._height,
+      });
     }
 
     if (!this.gl) {
@@ -172,7 +215,7 @@ export class WebglLayer extends BaseLayer {
       this.sync = new CameraSync(this.viewState, 'perspective', this.scene);
       this.planeCamera = new OrthographicCamera(0, 1, 1, 0, 0, 1);
 
-      this.proxyLayer = new Layer(
+      this.layer = new Layer(
         this.source,
         {
           renderer: this.renderer,
@@ -190,7 +233,7 @@ export class WebglLayer extends BaseLayer {
           mask: this.processMask(),
           getZoom: () => this.viewState.zoom as number,
           triggerRepaint: () => {
-            requestAnimationFrame(() => this._render());
+            requestAnimationFrame(() => this._update());
           },
           getTileProjSize: (z: number) => {
             const w = 1 / Math.pow(2, z);
@@ -259,17 +302,7 @@ export class WebglLayer extends BaseLayer {
                 );
               }
             } else if (type === LayerSourceType.tile) {
-              const opts = {
-                tileSize: utils.isNumber(this.source.tileSize) ? source.tileSize : source.tileSize?.[0] || 512,
-                // for mapbox
-                minzoom: source.minZoom,
-                maxzoom: source.maxZoom,
-                roundZoom: source.roundZoom,
-                zoom: this.viewState.zoom,
-                center: this.viewState.getCenter(),
-              };
-
-              const tiles = this.coveringTiles(opts);
+              const tiles = this._currentTiles;
 
               for (let i = 0; i < tiles.length; i++) {
                 const tile = tiles[i];
@@ -296,20 +329,10 @@ export class WebglLayer extends BaseLayer {
           },
           getExtent: () => getExtent(this._map),
           getGridTiles: (source: any) => {
-            const tileSize = source.tileSize;
             const wrapX = source.wrapX;
             if (!this._map) return [];
 
-            const opts = {
-              tileSize: tileSize ?? 256,
-              minzoom: this._map.getMinZoom(),
-              maxzoom: this._map.getMaxZoom(),
-              roundZoom: false,
-              zoom: this.viewState.zoom,
-              center: this.viewState.getCenter(),
-            };
-
-            const tiles = this.coveringTiles(opts);
+            const tiles = this._unLimitTiles;
             const wrapTiles: TileID[] = [];
 
             for (let i = 0; i < tiles.length; i++) {
@@ -342,8 +365,8 @@ export class WebglLayer extends BaseLayer {
       this.sync.update();
     }
 
-    if (this.proxyLayer) {
-      this.proxyLayer.update();
+    if (this.layer) {
+      this.layer.update();
     }
 
     this.glPrerender();
@@ -355,7 +378,7 @@ export class WebglLayer extends BaseLayer {
     this.scene.updateMatrixWorld();
     this.camera.updateMatrixWorld();
     const worlds = this.calcWrappedWorlds();
-    this.proxyLayer?.prerender({
+    this.layer?.prerender({
       worlds,
       camera: this.camera,
       planeCamera: this.planeCamera,
@@ -367,7 +390,7 @@ export class WebglLayer extends BaseLayer {
     this.scene.updateMatrixWorld();
     this.camera.updateMatrixWorld();
     const worlds = this.calcWrappedWorlds();
-    this.proxyLayer?.render({
+    this.layer?.render({
       worlds,
       camera: this.camera,
       planeCamera: this.planeCamera,
@@ -384,64 +407,140 @@ export class WebglLayer extends BaseLayer {
       return null;
     }
     const point = this._map.project(coordinates);
-    return this.proxyLayer.picker([point.x, point.y]);
+    return this.layer.picker([point.x, point.y]);
   }
 
   calcWrappedWorlds() {
     return [0];
   }
 
-  _setView() {}
+  _resetView(e?: any) {
+    const animating = e && (e.pinch || e.flyTo);
+    this._setView(this._map.getCenter(), this._map.getZoom(), animating, animating);
+  }
+
+  _resetGrid() {
+    const map = this._map;
+    const crs = map.options.crs;
+    const tileSize = this.getTileSize();
+    const tileZoom = this._tileZoom;
+
+    const bounds = this._map.getPixelWorldBounds(this._tileZoom);
+    if (bounds) {
+      this._globalTileRange = this._pxBoundsToTileRange(bounds);
+    }
+
+    // 无论任何时候都计算瓦片范围，我们需要用此参数计算瓦片在那个世界
+    this._wrapX = crs!.wrapLng && [
+        Math.floor(map.project([0, crs!.wrapLng[0]], tileZoom).x / tileSize.x),
+        Math.ceil(map.project([0, crs!.wrapLng[1]], tileZoom).x / tileSize.y),
+      ];
+    this._wrapY = crs!.wrapLat && [
+        Math.floor(map.project([crs!.wrapLat[0], 0], tileZoom).y / tileSize.x),
+        Math.ceil(map.project([crs!.wrapLat[1], 0], tileZoom).y / tileSize.y),
+      ];
+  }
+
+  _setView(center: L.LatLng, zoom: number, noPrune?: boolean, noUpdate?: boolean) {
+    let tileZoom: number | undefined = Math.round(zoom);
+    if (
+      (this.options.maxZoom !== undefined && tileZoom > this.options.maxZoom) ||
+      (this.options.minZoom !== undefined && tileZoom < this.options.minZoom)
+    ) {
+      tileZoom = undefined;
+    } else {
+      tileZoom = getClampZoom({
+        minzoom: this.source.minZoom,
+        maxzoom: this.source.maxZoom,
+        zoom: tileZoom,
+      });
+    }
+
+    const tileZoomChanged = this.options.updateWhenZooming && tileZoom !== this._tileZoom;
+
+    if (!noUpdate || tileZoomChanged) {
+      this._tileZoom = tileZoom;
+
+      this._resetGrid();
+
+      if (tileZoom !== undefined) {
+        this._update(center);
+      }
+    }
+  }
 
   _tileCoordsToBounds(coords) {
-    // const bp = this._tileCoordsToNwSe(coords);
-    // let bounds = new L.LatLngBounds(bp[0], bp[1]);
-    //
-    // if (!this.options.noWrap) {
-    //   bounds = this._map.wrapLatLngBounds(bounds);
-    // }
-    // return bounds;
+    const bp = this._tileCoordsToNwSe(coords);
+    let bounds = new L.LatLngBounds(bp[0], bp[1]);
+
+    if (!this.source.wrapX) {
+      bounds = this._map.wrapLatLngBounds(bounds);
+    }
+    return bounds;
+  }
+
+  _tileCoordsToNwSe(coords) {
+    const map = this._map,
+      tileSize = this.getTileSize(),
+      nwPoint = coords.scaleBy(tileSize),
+      sePoint = nwPoint.add(tileSize),
+      nw = map.unproject(nwPoint, coords.z),
+      se = map.unproject(sePoint, coords.z);
+    return [nw, se];
   }
 
   _isValidTile(coords) {
-    // const crs = this._map.options.crs as any;
-    //
-    // if (!crs.infinite) {
-    //   // don't load tile if it's out of bounds and not wrapped
-    //   const bounds = this._globalTileRange;
-    //   if (
-    //     (!crs.wrapLng && (coords.x < bounds.min.x || coords.x > bounds.max.x)) ||
-    //     (!crs.wrapLat && (coords.y < bounds.min.y || coords.y > bounds.max.y))
-    //   ) {
-    //     return false;
-    //   }
-    // }
+    const crs = this._map.options.crs as any;
 
-    if (!this.options.bounds) {
-      return true;
+    if (!crs.infinite) {
+      // don't load tile if it's out of bounds and not wrapped
+      const bounds = this._globalTileRange;
+      if (
+        (!crs.wrapLng && (coords.x < bounds.min.x || coords.x > bounds.max.x)) ||
+        (!crs.wrapLat && (coords.y < bounds.min.y || coords.y > bounds.max.y))
+      ) {
+        return false;
+      }
     }
 
-    // don't load tile if it doesn't intersect the bounds in options
-    // const tileBounds = this._tileCoordsToBounds(coords);
-    // return latLngBounds(this.options.bounds).overlaps(tileBounds);
+    return true;
   }
 
   _wrapCoords(coords) {
-    const newCoords = new L.Point(this.wrapXNumber ? L.Util.wrapNum(coords.x, this.wrapXNumber) : coords.x, coords.y);
+    const t = this._wrapX ? wrapTile(coords.x, this._wrapX) : { x: coords.x, wrap: 0 }
+    const newCoords = new L.Point(
+      t.x,
+      this._wrapY && !this.source.wrapX ? L.Util.wrapNum(coords.y, this._wrapY) : coords.y,
+    );
     (newCoords as any).z = coords.z;
+    (newCoords as any).wrap = t.wrap;
     return newCoords;
   }
 
-  coveringTiles(opts) {
-    const pixelBounds = this._getTiledPixelBounds(opts.center);
-    const tileRange = this._pxBoundsToTileRange(pixelBounds, opts);
+  _update(center?: L.LatLng) {
+    const map = this._map;
+    if (!map || !this.source) {
+      return;
+    }
+
+    const zoom = getClampZoom({
+      zoom: map.getZoom(),
+      minzoom: this.source.minZoom,
+      maxzoom: this.source.maxZoom,
+    });
+
+    if (center === undefined) {
+      center = map.getCenter();
+    }
+
+    if (this._tileZoom === undefined) {
+      return;
+    }
+
+    const pixelBounds = this._getTiledPixelBounds(center, this._tileZoom);
+    const tileRange = this._pxBoundsToTileRange(pixelBounds);
     const tileCenter = tileRange.getCenter();
     const queue: any[] = [];
-    // const margin = this.options.keepBuffer;
-    // const noPruneRange = new L.Bounds(
-    //   tileRange.getBottomLeft().subtract([margin, -margin]),
-    //   tileRange.getTopRight().add([margin, -margin]),
-    // );
 
     if (
       !(
@@ -454,14 +553,14 @@ export class WebglLayer extends BaseLayer {
       throw new Error('Attempted to load an infinite number of tiles');
     }
 
+    if (Math.abs(zoom - this._tileZoom) > 1) { this._setView(center, zoom); return; }
+
     for (let j = tileRange.min!.y; j <= tileRange.max!.y; j++) {
       for (let i = tileRange.min!.x; i <= tileRange.max!.x; i++) {
         const coords = new L.Point(i, j);
         (coords as any).z = this._tileZoom;
 
-        if (!this._isValidTile(coords)) {
-          continue;
-        }
+        if (!this._isValidTile(coords)) { continue; }
 
         queue.push(this._wrapCoords(coords));
       }
@@ -469,77 +568,92 @@ export class WebglLayer extends BaseLayer {
 
     queue.sort((a, b) => a.distanceTo(tileCenter) - b.distanceTo(tileCenter));
 
+    const z = map.getZoom();
+    const bounds = this._getTiledPixelBounds(center, z);
+    if (bounds) {
+      const unLimitTileRange = this._pxBoundsToTileRange(bounds);
+      const tileCenter = tileRange.getCenter();
+
+      const tileCoords: any[] = [];
+
+      for (let j = unLimitTileRange.min!.y; j <= unLimitTileRange.max!.y; j++) {
+        for (let i = unLimitTileRange.min!.x; i <= unLimitTileRange.max!.x; i++) {
+          const coords = new L.Point(i, j);
+          (coords as any).z = z;
+
+          if (!this._isValidTile(coords)) { continue; }
+
+          tileCoords.push(this._wrapCoords(coords));
+        }
+      }
+
+      tileCoords.sort((a, b) => a.distanceTo(tileCenter) - b.distanceTo(tileCenter));
+
+      this._unLimitTiles = tileCoords;
+    }
+
+    this._currentTiles = queue;
+
+    this._render();
+
     return queue;
   }
 
-  calcTileZoom(zoom: number) {
-    const tileZoom = Math.round(zoom);
-    if (
-      (this.options.maxZoom !== undefined && tileZoom > this.options.maxZoom) ||
-      (this.options.minZoom !== undefined && tileZoom < this.options.minZoom)
-    ) {
-      this._tileZoom = undefined;
-    } else {
-      this._tileZoom = getClampZoom({
-        minzoom: this.source.minZoom,
-        maxzoom: this.source.maxZoom,
-        zoom: this.viewState.zoom,
-      });
-    }
-  }
-
-  _getTiledPixelBounds(center) {
+  _getTiledPixelBounds(center: L.LatLng, zoom: number) {
     const map = this._map;
     // @ts-ignore 类型未暴露
     const mapZoom = map._animatingZoom ? Math.max(map._animateToZoom, map.getZoom()) : map.getZoom();
-    const scale = map.getZoomScale(mapZoom, this._tileZoom);
-    const pixelCenter = map.project(center, this._tileZoom).floor();
+    const scale = map.getZoomScale(mapZoom, zoom);
+    const pixelCenter = map.project(center, zoom).floor();
     const halfSize = map.getSize().divideBy(scale * 2);
 
     return new L.Bounds(pixelCenter.subtract(halfSize), pixelCenter.add(halfSize));
   }
 
-  _pxBoundsToTileRange(bounds, opts) {
-    const tileSize = new L.Point(opts.tileSize, opts.tileSize);
-    return new L.Bounds(bounds.min.unscaleBy(tileSize).floor(), bounds.max.unscaleBy(tileSize).ceil().subtract([1, 1]));
+  _pxBoundsToTileRange(bounds: L.Bounds) {
+    const tileSize = this.getTileSize();
+    return new L.Bounds(
+      bounds.min!.unscaleBy(tileSize).floor(),
+      bounds.max!.unscaleBy(tileSize).ceil().subtract([1, 1]),
+    );
   }
 
   handleZoom() {
-    if (this.proxyLayer) {
-      this.proxyLayer.handleZoom();
+    this._resetView();
+    if (this.layer) {
+      this.layer.handleZoom();
     }
-    this._render();
   }
 
   onMoveEnd() {
-    if (this.proxyLayer) {
-      this.proxyLayer.moveEnd();
-    }
+    this._reset();
+    if (!this._map || (this._map as any)._animatingZoom) { return; }
 
-    this._render();
+    if (this.layer) {
+      this.layer.moveEnd();
+    }
   }
 
   onMoveStart() {
-    if (this.proxyLayer) {
-      this.proxyLayer.moveStart();
+    if (this.layer) {
+      this.layer.moveStart();
     }
-
-    this._render();
   }
 
   _animateZoom(event: L.ZoomAnimEvent) {
     super._animateZoom(event);
+    this._setView(event.center, event.zoom, true, event.noUpdate);
     this.handleZoom();
   }
 
   getEvents() {
     const events: Record<string, any> = {
       resize: this._onResize,
-      viewreset: this._render,
+      viewreset: this._resetView,
       moveend: this.onMoveEnd,
       movestart: this.onMoveStart,
       zoom: this.handleZoom,
-      zoomend: this._render,
+      zoomend: this._reset,
     };
 
     if (this._map.options.zoomAnimation && L.Browser.any3d) {
@@ -554,9 +668,11 @@ export class WebglLayer extends BaseLayer {
       ...this.options,
       ...(options || {}),
     };
-    if (this.proxyLayer) {
-      this.proxyLayer.updateOptions(options);
+    if (this.layer) {
+      this.layer.updateOptions(options);
     }
+
+    this._redraw();
   }
 
   public getMask() {
@@ -633,18 +749,33 @@ export class WebglLayer extends BaseLayer {
   public setMask(mask) {
     this.options.mask = Object.assign({}, this.options.mask, mask);
 
-    if (this.proxyLayer) {
-      this.proxyLayer.setMask(this.processMask());
+    if (this.layer) {
+      this.layer.setMask(this.processMask());
     }
   }
 
   onRemove() {
-    if (this.proxyLayer) {
-      this.proxyLayer.destroy();
-      this.proxyLayer = null as any;
+    if (this.layer) {
+      this.layer.destroy();
+      this.layer = null as any;
     }
 
+    // 这里临时处理，现在图层之间无共享 gl 实例，也就是说我们暂时不能公用 source
+    if (this.source) {
+      if (Array.isArray(this.source.sourceCache)) {
+        this.source.sourceCache?.forEach(s => {
+          s?.clearTiles();
+        })
+      } else {
+        this.source.sourceCache?.clearTiles();
+      }
+    }
+
+    this._currentTiles = [];
+    this._unLimitTiles = [];
+
     this.gl = null;
+    this._tileZoom = undefined;
 
     return super.onRemove();
   }
