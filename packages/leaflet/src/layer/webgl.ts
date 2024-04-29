@@ -109,7 +109,7 @@ export function wrapTile(x: number, range: number[], includeMax?: boolean) {
   const min = range[0];
   const d = max - min;
   return {
-    x: x === max && includeMax ? x : ((x - min) % d + d) % d + min,
+    x: x === max && includeMax ? x : ((((x - min) % d) + d) % d) + min,
     wrap: Math.floor(x / max),
   };
 }
@@ -259,26 +259,27 @@ export class WebglLayer extends BaseLayer {
               const cornerCoords = (source as any).coordinates.map((c: any) => fromLngLat({ lng: c[0], lat: c[1] }));
               const tileID = getCoordinatesCenterTileID(cornerCoords);
               if (source.wrapX) {
-                // transform.getVisibleUnwrappedCoordinates(tileID).forEach((unwrapped) => {
-                //   const { canonical, wrap } = unwrapped;
-                //   const { x, y, z } = canonical;
-                //   wrapTiles.push(
-                //     new TileID(z, wrap, z, x, y, {
-                //       getTileBounds: () => [
-                //         (source as any).coordinates[0][0],
-                //         (source as any).coordinates[2][1],
-                //         (source as any).coordinates[1][0],
-                //         (source as any).coordinates[0][1],
-                //       ],
-                //       getTileProjBounds: () => ({
-                //         left: tileID.extent[0] + wrap,
-                //         top: tileID.extent[1],
-                //         right: tileID.extent[2] + wrap,
-                //         bottom: tileID.extent[3],
-                //       }),
-                //     }),
-                //   );
-                // });
+                // 暂时只允许单世界
+                const x = tileID.x;
+                const y = tileID.y;
+                const z = tileID.z;
+                const wrap = 0;
+                wrapTiles.push(
+                  new TileID(z, wrap, z, x, y, {
+                    getTileBounds: () => [
+                      (source as any).coordinates[0][0],
+                      (source as any).coordinates[2][1],
+                      (source as any).coordinates[1][0],
+                      (source as any).coordinates[0][1],
+                    ],
+                    getTileProjBounds: () => ({
+                      left: tileID.extent[0] + wrap,
+                      top: tileID.extent[1],
+                      right: tileID.extent[2] + wrap,
+                      bottom: tileID.extent[3],
+                    }),
+                  }),
+                );
               } else {
                 const x = tileID.x;
                 const y = tileID.y;
@@ -432,13 +433,13 @@ export class WebglLayer extends BaseLayer {
 
     // 无论任何时候都计算瓦片范围，我们需要用此参数计算瓦片在那个世界
     this._wrapX = crs!.wrapLng && [
-        Math.floor(map.project([0, crs!.wrapLng[0]], tileZoom).x / tileSize.x),
-        Math.ceil(map.project([0, crs!.wrapLng[1]], tileZoom).x / tileSize.y),
-      ];
+      Math.floor(map.project([0, crs!.wrapLng[0]], tileZoom).x / tileSize.x),
+      Math.ceil(map.project([0, crs!.wrapLng[1]], tileZoom).x / tileSize.y),
+    ];
     this._wrapY = crs!.wrapLat && [
-        Math.floor(map.project([crs!.wrapLat[0], 0], tileZoom).y / tileSize.x),
-        Math.ceil(map.project([crs!.wrapLat[1], 0], tileZoom).y / tileSize.y),
-      ];
+      Math.floor(map.project([crs!.wrapLat[0], 0], tileZoom).y / tileSize.x),
+      Math.ceil(map.project([crs!.wrapLat[1], 0], tileZoom).y / tileSize.y),
+    ];
   }
 
   _setView(center: L.LatLng, zoom: number, noPrune?: boolean, noUpdate?: boolean) {
@@ -480,12 +481,12 @@ export class WebglLayer extends BaseLayer {
   }
 
   _tileCoordsToNwSe(coords) {
-    const map = this._map,
-      tileSize = this.getTileSize(),
-      nwPoint = coords.scaleBy(tileSize),
-      sePoint = nwPoint.add(tileSize),
-      nw = map.unproject(nwPoint, coords.z),
-      se = map.unproject(sePoint, coords.z);
+    const map = this._map;
+    const tileSize = this.getTileSize();
+    const nwPoint = coords.scaleBy(tileSize);
+    const sePoint = nwPoint.add(tileSize);
+    const nw = map.unproject(nwPoint, coords.z);
+    const se = map.unproject(sePoint, coords.z);
     return [nw, se];
   }
 
@@ -507,7 +508,7 @@ export class WebglLayer extends BaseLayer {
   }
 
   _wrapCoords(coords) {
-    const t = this._wrapX ? wrapTile(coords.x, this._wrapX) : { x: coords.x, wrap: 0 }
+    const t = this._wrapX ? wrapTile(coords.x, this._wrapX) : { x: coords.x, wrap: 0 };
     const newCoords = new L.Point(
       t.x,
       this._wrapY && !this.source.wrapX ? L.Util.wrapNum(coords.y, this._wrapY) : coords.y,
@@ -553,14 +554,19 @@ export class WebglLayer extends BaseLayer {
       throw new Error('Attempted to load an infinite number of tiles');
     }
 
-    if (Math.abs(zoom - this._tileZoom) > 1) { this._setView(center, zoom); return; }
+    if (Math.abs(zoom - this._tileZoom) > 1) {
+      this._setView(center, zoom);
+      return;
+    }
 
     for (let j = tileRange.min!.y; j <= tileRange.max!.y; j++) {
       for (let i = tileRange.min!.x; i <= tileRange.max!.x; i++) {
         const coords = new L.Point(i, j);
         (coords as any).z = this._tileZoom;
 
-        if (!this._isValidTile(coords)) { continue; }
+        if (!this._isValidTile(coords)) {
+          continue;
+        }
 
         queue.push(this._wrapCoords(coords));
       }
@@ -572,7 +578,7 @@ export class WebglLayer extends BaseLayer {
     const bounds = this._getTiledPixelBounds(center, z);
     if (bounds) {
       const unLimitTileRange = this._pxBoundsToTileRange(bounds);
-      const tileCenter = tileRange.getCenter();
+      const tc = tileRange.getCenter();
 
       const tileCoords: any[] = [];
 
@@ -581,13 +587,15 @@ export class WebglLayer extends BaseLayer {
           const coords = new L.Point(i, j);
           (coords as any).z = z;
 
-          if (!this._isValidTile(coords)) { continue; }
+          if (!this._isValidTile(coords)) {
+            continue;
+          }
 
           tileCoords.push(this._wrapCoords(coords));
         }
       }
 
-      tileCoords.sort((a, b) => a.distanceTo(tileCenter) - b.distanceTo(tileCenter));
+      tileCoords.sort((a, b) => a.distanceTo(tc) - b.distanceTo(tc));
 
       this._unLimitTiles = tileCoords;
     }
@@ -627,7 +635,9 @@ export class WebglLayer extends BaseLayer {
 
   onMoveEnd() {
     this._reset();
-    if (!this._map || (this._map as any)._animatingZoom) { return; }
+    if (!this._map || (this._map as any)._animatingZoom) {
+      return;
+    }
 
     if (this.layer) {
       this.layer.moveEnd();
@@ -763,9 +773,9 @@ export class WebglLayer extends BaseLayer {
     // 这里临时处理，现在图层之间无共享 gl 实例，也就是说我们暂时不能公用 source
     if (this.source) {
       if (Array.isArray(this.source.sourceCache)) {
-        this.source.sourceCache?.forEach(s => {
+        this.source.sourceCache?.forEach((s) => {
           s?.clearTiles();
-        })
+        });
       } else {
         this.source.sourceCache?.clearTiles();
       }

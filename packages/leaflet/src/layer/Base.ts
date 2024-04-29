@@ -34,7 +34,10 @@ export class BaseLayer extends L.Layer {
     const canvas = createCanvas(this._width, this._height, this.devicePixelRatio);
     canvas.id = String(id);
 
-    this._map.getPanes().overlayPane.appendChild(canvas);
+    const panes = this._map.getPanes();
+    if (panes && panes.overlayPane) {
+      panes.overlayPane.appendChild(canvas);
+    }
 
     return canvas;
   }
@@ -129,7 +132,10 @@ export class BaseLayer extends L.Layer {
   }
 
   onRemove() {
-    this._map.getPanes().overlayPane.removeChild(this.canvas!);
+    const panes = this._map.getPanes();
+    if (panes && panes.overlayPane) {
+      panes.overlayPane.removeChild(this.canvas!);
+    }
 
     // @ts-ignore 忽略错误
     this._map.off(this.getEvents(), this);

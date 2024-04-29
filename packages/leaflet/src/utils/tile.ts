@@ -30,8 +30,8 @@ export function getExtent(map: any) {
 
   const [xmin, ymin, xmax, ymax] = [southWest.lng, southWest.lat, northEast.lng, northEast.lat];
 
-  const minY = Math.max(ymin, MAX_MERCATOR_LATITUDE);
-  const maxY = Math.min(ymax, -MAX_MERCATOR_LATITUDE);
+  const minY = Math.max(ymin, -MAX_MERCATOR_LATITUDE);
+  const maxY = Math.min(ymax, MAX_MERCATOR_LATITUDE);
   const p0 = fromLngLat({ lng: xmin, lat: maxY });
   const p1 = fromLngLat({ lng: xmax, lat: minY });
   return [p0.x, p0.y, p1.x, p1.y];

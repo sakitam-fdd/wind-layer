@@ -122,9 +122,17 @@
       renderFrom: leafletWind.RenderFrom.rg,
       displayRange: [0, 104],
       renderType: leafletWind.RenderType.colorize,
+      picking: true,
     });
 
     window.wind = raster;
+
+    map.on('click', (event) => {
+      wind.picker(event.latlng)
+        .then(res => {
+          console.log(res);
+        })
+    })
 
     map.addLayer(wind);
   }
