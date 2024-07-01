@@ -227,7 +227,7 @@ class AMapWind {
   _getBounds() {
     let [southWest, northEast] = [undefined, undefined];
     const bounds = this.map.getBounds();
-    if (compareVersion(AMap.version, '2.0') >= 0) {
+    if (compareVersion(AMap?.version ?? AMap.v, '2.0') >= 0) {
       // FIX: 高德地图3D模式和2D模式，map.getBounds接口已统一
       northEast = bounds.getNorthEast(); // xmax ymax
       southWest = bounds.getSouthWest(); // xmin ymin
