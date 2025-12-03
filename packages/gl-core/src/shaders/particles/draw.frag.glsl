@@ -69,14 +69,25 @@ void main() {
         uv = vec2(uv.x, 1.0 - uv.y);
     }
 
-    // Check if we have valid data at this position
-    if (calcTexture(uv).a == 0.0) {
+    // Check if we have valid data at this position (alpha > threshold)
+    // Use a threshold rather than exact comparison to handle floating point precision
+    vec4 texData = calcTexture(uv);
+    if (texData.a < 0.01) {
         discard;
     }
 
     vec2 velocity = bilinear(uv);
-
     float value = length(velocity);
+
+    // Discard particles over land/no-data areas.
+    // For RG-encoded velocity data (currents), no-data/land is encoded as PNG value 127
+    // which decodes to approximately 0 m/s for both U and V components.
+    // We discard particles where the velocity magnitude is very small (< 0.05 m/s).
+    // Real ocean currents typically have higher velocities; near-zero indicates land/no-data.
+    // Use a generous threshold to account for floating point precision and bilinear interpolation.
+    if (value < 0.05) {
+        discard;
+    }
 
     float value_t = (value - u_colorRange.x) / (u_colorRange.y - u_colorRange.x);
     vec2 ramp_pos = vec2(value_t, 0.5);

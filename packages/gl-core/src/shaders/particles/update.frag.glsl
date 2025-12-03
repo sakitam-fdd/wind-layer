@@ -89,18 +89,29 @@ vec2 update(vec2 pos) {
     float speed = 0.0;
     bool inDataBounds = uv.x >= 0.0 && uv.x <= 1.0 && uv.y >= 0.0 && uv.y <= 1.0;
 
+    // Flag to track if particle is over land/no-data
+    bool isOverLand = false;
+
     if (inDataBounds) {
         velocity = bilinear(uv);
         speed = length(velocity);
 
-        vec2 v = vec2(velocity.x, -velocity.y);
+        // For RG-encoded velocity data (currents), no-data/land is encoded as PNG value 127
+        // which decodes to approximately 0 m/s for both U and V components.
+        // We mark particles as over land when velocity magnitude is very small (< 0.05 m/s).
+        // Real ocean currents typically have higher velocities; near-zero indicates land/no-data.
+        if (speed < 0.05) {
+            isOverLand = true;
+        } else {
+            vec2 v = vec2(velocity.x, -velocity.y);
 
-        if (u_flip_y) {
-            v = vec2(velocity.x, velocity.y);
+            if (u_flip_y) {
+                v = vec2(velocity.x, velocity.y);
+            }
+
+            vec2 offset = v * 0.0001 * u_speed_factor * u_gl_scale;
+            pos = pos + offset;
         }
-
-        vec2 offset = v * 0.0001 * u_speed_factor * u_gl_scale;
-        pos = pos + offset;
     }
 
     // Skip drop logic if dropping is disabled (during initialization spread)
@@ -120,10 +131,10 @@ vec2 update(vec2 pos) {
     vec2 random_pos = vec2(rand(seed + 1.3), rand(seed + 2.1));
     random_pos = randomPosToGlobePos(random_pos);
 
-    // Only force-drop particles that have moved outside the VIEWPORT bounds.
-    // Do NOT drop particles just because they're outside data bounds - they should
-    // stay in place (invisible) until they naturally drop and respawn.
-    if (!containsXY(pos.xy, u_bbox)) {
+    // Force-drop particles that:
+    // 1. Have moved outside the VIEWPORT bounds
+    // 2. Are over land/no-data areas
+    if (!containsXY(pos.xy, u_bbox) || isOverLand) {
         drop = 1.0;
     }
 
