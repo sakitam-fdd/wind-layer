@@ -82,10 +82,8 @@ void main() {
     // Discard particles over land/no-data areas.
     // For RG-encoded velocity data (currents), no-data/land is encoded as PNG value 127
     // which decodes to approximately 0 m/s for both U and V components.
-    // We discard particles where the velocity magnitude is very small (< 0.05 m/s).
-    // Real ocean currents typically have higher velocities; near-zero indicates land/no-data.
-    // Use a generous threshold to account for floating point precision and bilinear interpolation.
-    if (value < 0.05) {
+    // We discard particles where the velocity magnitude is very small (< 0.02 m/s / ~0.04 knots).
+    if (value < 0.02) {
         discard;
     }
 

@@ -98,9 +98,8 @@ vec2 update(vec2 pos) {
 
         // For RG-encoded velocity data (currents), no-data/land is encoded as PNG value 127
         // which decodes to approximately 0 m/s for both U and V components.
-        // We mark particles as over land when velocity magnitude is very small (< 0.05 m/s).
-        // Real ocean currents typically have higher velocities; near-zero indicates land/no-data.
-        if (speed < 0.05) {
+        // We mark particles as over land when velocity magnitude is very small (< 0.02 m/s / ~0.04 knots).
+        if (speed < 0.02) {
             isOverLand = true;
         } else {
             vec2 v = vec2(velocity.x, -velocity.y);
