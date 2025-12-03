@@ -676,12 +676,18 @@ export default class BaseLayer {
         particlesPass.resetParticles();
       }
 
+      // Disable all particle rendering passes during pan/zoom.
+      // This prevents the "flash" of particles at stale positions.
       this.renderPipeline.passes.forEach((pass) => {
         if (pass.id === 'ParticlesTexturePass' || pass.id === 'ScreenPass') {
           pass.enabled = false;
         }
         if (pass.id === 'ParticlesPass') {
           pass.prerender = false;
+        }
+        // Also disable update pass to prevent stale positions from being used
+        if (pass.id === 'UpdatePass') {
+          pass.enabled = false;
         }
       });
     }
@@ -690,20 +696,30 @@ export default class BaseLayer {
   moveEnd() {
     if (this.renderPipeline && this.options.renderType === RenderType.particles) {
       const updatePass = this.renderPipeline.getPass('UpdatePass');
+      const particlesPass = this.renderPipeline.getPass('ParticlesPass');
 
+      // Re-initialize the particle position texture with fresh random values.
+      // This ensures particles start from clean random positions mapped to new data bounds.
       if (updatePass) {
-        // updatePass.initializeRenderTarget();
+        updatePass.initializeRenderTarget();
         updatePass.setInitialize(true);
       }
 
+      // Clear the screen textures to remove any residual particle trails
+      if (particlesPass) {
+        particlesPass.resetParticles();
+      }
+
+      // Re-enable all passes in the correct order
       this.renderPipeline.passes.forEach((pass) => {
+        if (pass.id === 'UpdatePass') {
+          pass.enabled = true;
+        }
         if (pass.id === 'ParticlesTexturePass' || pass.id === 'ScreenPass') {
           pass.enabled = true;
         }
-
         if (pass.id === 'ParticlesPass') {
           pass.prerender = true;
-          // pass.resetParticles();
         }
       });
     }

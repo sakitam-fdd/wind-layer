@@ -11,6 +11,7 @@ uniform vec4 u_bbox;
 uniform vec4 u_data_bbox;
 uniform float u_fade_t;
 uniform vec2 u_image_res;
+uniform bool u_flip_y;
 
 varying vec2 v_particle_pos;
 
@@ -55,11 +56,25 @@ bool containsXY(vec2 pos, vec4 bbox) {
 void main() {
     vec2 pos = v_particle_pos;
 
-    if (!containsXY(pos.xy, u_data_bbox) || !containsXY(pos.xy, u_bbox) || calcTexture(pos).a == 0.0) {
+    // First check if particle is within both data and viewport bounds
+    if (!containsXY(pos.xy, u_data_bbox) || !containsXY(pos.xy, u_bbox)) {
         discard;
     }
 
-    vec2 velocity = bilinear(pos);
+    // Convert world position to UV coordinates for texture sampling
+    vec2 uv = (pos.xy - u_data_bbox.xy) / (u_data_bbox.zw - u_data_bbox.xy);
+
+    // Apply Y-flip if needed (some map coordinate systems have inverted Y)
+    if (u_flip_y) {
+        uv = vec2(uv.x, 1.0 - uv.y);
+    }
+
+    // Check if we have valid data at this position
+    if (calcTexture(uv).a == 0.0) {
+        discard;
+    }
+
+    vec2 velocity = bilinear(uv);
 
     float value = length(velocity);
 
