@@ -89,19 +89,15 @@ vec2 update(vec2 pos) {
     float speed = 0.0;
     bool inDataBounds = uv.x >= 0.0 && uv.x <= 1.0 && uv.y >= 0.0 && uv.y <= 1.0;
 
-    // Flag to track if particle is over land/no-data
-    bool isOverLand = false;
-
     if (inDataBounds) {
         velocity = bilinear(uv);
         speed = length(velocity);
 
         // For RG-encoded velocity data (currents), no-data/land is encoded as PNG value 127
         // which decodes to approximately 0 m/s for both U and V components.
-        // We mark particles as over land when velocity magnitude is very small (< 0.02 m/s / ~0.04 knots).
-        if (speed < 0.02) {
-            isOverLand = true;
-        } else {
+        // Particles over land/no-data (speed < 0.02 m/s / ~0.04 knots) stay stationary.
+        // They will be hidden by the draw shader and naturally respawn via drop_rate.
+        if (speed >= 0.02) {
             vec2 v = vec2(velocity.x, -velocity.y);
 
             if (u_flip_y) {
@@ -130,10 +126,13 @@ vec2 update(vec2 pos) {
     vec2 random_pos = vec2(rand(seed + 1.3), rand(seed + 2.1));
     random_pos = randomPosToGlobePos(random_pos);
 
-    // Force-drop particles that:
-    // 1. Have moved outside the VIEWPORT bounds
-    // 2. Are over land/no-data areas
-    if (!containsXY(pos.xy, u_bbox) || isOverLand) {
+    // Force-drop particles that have moved outside the VIEWPORT bounds.
+    // NOTE: We do NOT force-drop particles over land/no-data areas.
+    // Particles over land are kept stationary (no position update) and hidden by the draw shader.
+    // Force-dropping them would cause clustering because respawned particles that land
+    // on land areas would immediately drop again, creating a feedback loop.
+    // Instead, the natural drop_rate gradually redistributes land particles over time.
+    if (!containsXY(pos.xy, u_bbox)) {
         drop = 1.0;
     }
 
