@@ -1,5 +1,11 @@
 # wind-gl-core
 
+## 2.0.3
+
+### Patch Changes
+
+- [`331b809`](https://github.com/sakitam-fdd/wind-layer/commit/331b8096c594b2d25314573a3056d37f5757daa9) Thanks [@sakitam-fdd](https://github.com/sakitam-fdd)! - fix imagesource compose
+
 ## 2.0.2
 
 ### Patch Changes
