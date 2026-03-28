@@ -1,7 +1,7 @@
 import type { Renderer, Texture } from '@sakitam-gis/vis-engine';
 import { BlendType, Geometry, Mesh, Program, RenderTarget, utils, Vector2 } from '@sakitam-gis/vis-engine';
 import Pass from '../base';
-import { littleEndian } from '../../../utils/common';
+import { littleEndian, getFloatTextureOptions } from '../../../utils/common';
 import vert from '../../../shaders/common.vert.glsl';
 import frag from '../../../shaders/particles/update.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
@@ -107,6 +107,11 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
 
   /**
    * 创建 RenderTarget
+   * 粒子位置存储在浮点纹理中，需要浮点 FBO 支持。
+   * 使用 getFloatTextureOptions 自动检测并启用所需扩展，
+   * 修复 iOS Safari 上 RGBA32F FBO 不完整导致粒子渲染静默失败的问题。
+   * 注：降级到 HALF_FLOAT 时粒子位置精度降低（约 3 位小数），可能出现轻微步进感，
+   * 但优于 iOS 上完全不渲染的现状。
    */
   initializeRenderTarget() {
     const particleRes = this.#getParticleRes();
@@ -119,17 +124,17 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
     }
 
     // @link https://webgl2fundamentals.org/webgl/lessons/webgl-data-textures.html
+    // 使用工具函数检测浮点纹理 FBO 支持，自动降级以兼容 iOS Safari
+    const floatOpts = getFloatTextureOptions(this.renderer);
     const opt = {
       data: particleState,
       width: particleRes,
       height: particleRes,
       minFilter: this.renderer.gl.NEAREST,
       magFilter: this.renderer.gl.NEAREST,
-      type: this.renderer.gl.FLOAT,
-      format: this.renderer.gl.RGBA,
-      internalFormat: this.renderer.isWebGL2
-        ? (this.renderer.gl as WebGL2RenderingContext).RGBA32F
-        : this.renderer.gl.RGBA,
+      type: floatOpts.type,
+      format: floatOpts.format,
+      internalFormat: floatOpts.internalFormat,
       stencil: false,
     };
 

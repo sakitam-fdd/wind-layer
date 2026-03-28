@@ -1,6 +1,83 @@
 import earcut from 'earcut';
-import { utils, type Attributes } from '@sakitam-gis/vis-engine';
+import { utils, type Attributes, type Renderer } from '@sakitam-gis/vis-engine';
 import type { Bounds } from '../type';
+
+/**
+ * 获取当前设备/浏览器支持的最佳浮点纹理配置，用于 RenderTarget (FBO)。
+ *
+ * 背景：将浮点纹理作为 FBO 颜色附件需要额外的 WebGL 扩展支持：
+ *  - WebGL2：必须调用 getExtension('EXT_color_buffer_float') 才能渲染到 RGBA32F 纹理。
+ *    iOS 15+ Safari 的 WebGL2 已支持此扩展，但必须显式启用，否则 FBO 处于
+ *    FRAMEBUFFER_INCOMPLETE_ATTACHMENT 状态，所有绘制调用静默失败且无任何 GL 报错。
+ *  - WebGL1：需要 OES_texture_float + WEBGL_color_buffer_float 扩展。
+ *    iOS Safari WebGL1 通常不支持 WEBGL_color_buffer_float，需要降级到 HALF_FLOAT 或 UNSIGNED_BYTE。
+ *
+ * 优先级：FLOAT (32-bit) → HALF_FLOAT (16-bit) → UNSIGNED_BYTE (8-bit)
+ */
+export function getFloatTextureOptions(renderer: Renderer): {
+  type: number;
+  format: number;
+  internalFormat: number;
+  supportFloat: boolean;
+} {
+  const gl = renderer.gl;
+
+  if (renderer.isWebGL2) {
+    const gl2 = gl as WebGL2RenderingContext;
+
+    // 尝试启用 32-bit 浮点颜色缓冲（iOS 15+ 支持但需显式调用 getExtension 激活）
+    if (gl2.getExtension('EXT_color_buffer_float')) {
+      return {
+        type: gl2.FLOAT,
+        format: gl2.RGBA,
+        internalFormat: gl2.RGBA32F,
+        supportFloat: true,
+      };
+    }
+
+    // 降级到 16-bit 半精度浮点
+    if (gl2.getExtension('EXT_color_buffer_half_float')) {
+      return {
+        type: gl2.HALF_FLOAT,
+        format: gl2.RGBA,
+        internalFormat: gl2.RGBA16F,
+        supportFloat: true,
+      };
+    }
+  } else {
+    // WebGL1
+    const floatExt = gl.getExtension('OES_texture_float');
+    const colorBufExt = gl.getExtension('WEBGL_color_buffer_float');
+    if (floatExt && colorBufExt) {
+      return {
+        type: gl.FLOAT,
+        format: gl.RGBA,
+        internalFormat: gl.RGBA,
+        supportFloat: true,
+      };
+    }
+
+    // 降级到 16-bit 半精度浮点（WebGL1）
+    const halfFloatExt = gl.getExtension('OES_texture_half_float');
+    const halfColorBufExt = gl.getExtension('EXT_color_buffer_half_float');
+    if (halfFloatExt && halfColorBufExt) {
+      return {
+        type: (halfFloatExt as any).HALF_FLOAT_OES,
+        format: gl.RGBA,
+        internalFormat: gl.RGBA,
+        supportFloat: true,
+      };
+    }
+  }
+
+  // 最终降级：使用 UNSIGNED_BYTE（精度有限，但在所有设备上保证可用）
+  return {
+    type: gl.UNSIGNED_BYTE,
+    format: gl.RGBA,
+    internalFormat: gl.RGBA,
+    supportFloat: false,
+  };
+}
 
 export function calcMinMax(array: number[]): [number, number] {
   let min = Infinity;

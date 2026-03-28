@@ -66,6 +66,9 @@ export default class Particles extends Pass<ParticlesPassOptions> {
         u_particlesRes: {
           value: 0,
         },
+        u_dpr: {
+          value: renderer.attributes.dpr ?? 1.0,
+        },
       },
       defines: [`RENDER_TYPE ${this.options.bandType}`, `LITTLE_ENDIAN ${littleEndian}`],
       includes: shaderLib,
@@ -125,6 +128,17 @@ export default class Particles extends Pass<ParticlesPassOptions> {
     this.#backgroundTexture?.clear();
   }
 
+  /**
+   * 响应窗口/画布尺寸变化（如移动端屏幕旋转）
+   * width/height 为物理像素尺寸
+   */
+  resize(width: number, height: number) {
+    this.#screenTexture?.resize(width, height);
+    this.#backgroundTexture?.resize(width, height);
+    // 尺寸变化后需要重置粒子轨迹，避免残留错误帧
+    this.resetParticles();
+  }
+
   getParticleBuffer() {
     const particleRes = Math.ceil(Math.sqrt(this.options.getParticleNumber()));
     this.particleStateResolution = particleRes;
@@ -145,12 +159,16 @@ export default class Particles extends Pass<ParticlesPassOptions> {
 
   /**
    * 创建 RenderTarget
+   * 注意：需要使用物理像素（CSS 像素 × DPR）来匹配实际屏幕分辨率，
+   * 否则在移动端高 DPR 设备上粒子轨迹纹理分辨率不足，画面模糊。
    */
   initializeRenderTarget() {
+    const attr = this.renderer.attributes;
+    const dpr = attr.dpr ?? 1;
     // @link https://webgl2fundamentals.org/webgl/lessons/webgl-data-textures.html
     const opt = {
-      width: this.renderer.width,
-      height: this.renderer.height,
+      width: this.renderer.width * dpr,
+      height: this.renderer.height * dpr,
       minFilter: this.renderer.gl.LINEAR,
       magFilter: this.renderer.gl.LINEAR,
       type: this.renderer.gl.UNSIGNED_BYTE,
@@ -219,6 +237,7 @@ export default class Particles extends Pass<ParticlesPassOptions> {
 
       this.#mesh.program.setUniform('u_flip_y', rendererState.u_flip_y);
       this.#mesh.program.setUniform('u_gl_scale', rendererState.u_gl_scale);
+      this.#mesh.program.setUniform('u_dpr', this.renderer.attributes.dpr ?? 1.0);
 
       this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;

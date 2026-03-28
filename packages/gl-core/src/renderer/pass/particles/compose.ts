@@ -5,7 +5,7 @@ import vert from '../../../shaders/common.vert.glsl';
 import frag from '../../../shaders/compose.frag.glsl';
 import * as shaderLib from '../../../shaders/shaderLib';
 import type { RenderFrom, BandType } from '../../../type';
-import { littleEndian } from '../../../utils/common';
+import { littleEndian, getFloatTextureOptions } from '../../../utils/common';
 import type TileID from '../../../tile/TileID';
 import type { SourceType } from '../../../source';
 
@@ -59,17 +59,18 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     });
 
     // @link https://webgl2fundamentals.org/webgl/lessons/webgl-data-textures.html
+    // 使用 getFloatTextureOptions 自动检测浮点纹理支持并启用对应 WebGL 扩展，
+    // 解决 iOS Safari 上 RGBA32F FBO 静默失败的问题（无报错但完全不渲染）。
+    const floatOpts = getFloatTextureOptions(renderer);
     const opt = {
       width: this.#width,
       height: this.#height,
       minFilter: renderer.gl.NEAREST,
       magFilter: renderer.gl.NEAREST,
-      type: this.renderer.gl.FLOAT,
-      format: this.renderer.gl.RGBA,
+      type: floatOpts.type,
+      format: floatOpts.format,
       // generateMipmaps: false,
-      internalFormat: this.renderer.isWebGL2
-        ? (this.renderer.gl as WebGL2RenderingContext).RGBA32F
-        : this.renderer.gl.RGBA,
+      internalFormat: floatOpts.internalFormat,
       stencil: true,
     };
 

@@ -23,7 +23,7 @@
 
   function initMap() {
     mapboxgl.accessToken =
-      'pk.eyJ1IjoibWFwYm94LWdsLWpzIiwiYSI6ImNram9ybGI1ajExYjQyeGxlemppb2pwYjIifQ.LGy5UGNIsXUZdYMvfYRiAQ';
+      'pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY203eXd1a3ZzMGV1ejJrcHRvdnVoYng0NCJ9.NzlqpAcLHejzezQqazzI-w';
     map = new mapboxgl.Map({
       container: mapRef.value,
       center: { lng: 105.70150033978689, lat: 22.76021405309811 }, // starting position [lng, lat]
