@@ -145,8 +145,8 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
     const dy = ymax - ymin;
 
     // 2. 计算 x 方向和 y 方向的行列数
-    const w = dx / zz[0];
-    const h = dy / zz[1];
+    const w = Math.max(dx / zz[0], 1);
+    const h = Math.max(dy / zz[1], 1);
 
     // TODO: 瓦片范围和行列数是否可以提到瓦片计算的时候获取，可以减少几次循环
 
