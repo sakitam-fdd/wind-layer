@@ -1,5 +1,12 @@
 # @sakitam-gis/maplibre-wind
 
+## 2.0.4
+
+### Patch Changes
+
+- Updated dependencies [[`331b809`](https://github.com/sakitam-fdd/wind-layer/commit/331b8096c594b2d25314573a3056d37f5757daa9)]:
+  - wind-gl-core@2.0.3
+
 ## 2.0.3
 
 ### Patch Changes
