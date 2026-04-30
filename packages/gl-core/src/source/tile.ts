@@ -7,8 +7,9 @@ import { containTile, resolveURL } from '../utils/common';
 import type TileID from '../tile/TileID';
 import type Tile from '../tile/Tile';
 import type Layer from '../renderer';
+import { DEFAULT_URL_DATA } from './urlData';
 
-const URL_PATTERN = /\{ *([\w_]+) *\}/g;
+const URL_PATTERN = /\{ *([\w_-]+) *\}/g;
 
 function formatUrl(url: string, data: any) {
   return url.replace(URL_PATTERN, (str, key) => {
@@ -190,6 +191,8 @@ export default class TileSource extends EventEmitter {
       y,
       z,
       s: domain,
+      ...DEFAULT_URL_DATA,             // Default url data. Ex : {bbox-epsg-3857} for WMS EPSG:3857 bbox (same name as in the MapLibre library)
+      ...(this.options?.urlData || {}) // Additional url data added using the TileSource constructor options
     };
 
     if (Array.isArray(this.url)) {
