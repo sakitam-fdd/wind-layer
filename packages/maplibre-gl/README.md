@@ -198,7 +198,7 @@ const tileSource = new maplibreWind.TileSource('wind', {
   dataRange: [
     [-21.381948471069336,23.992563247680664],
     [-20.644954681396484,21.251964569091797],
-  ]
+  ],
   wrapX: true,
   url: 'http://myWmsServer/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&TRANSPARENT=true&LAYERS=myWindLayer&STYLES=default&WIDTH=256&HEIGHT=256&FORMAT=image/png&BBOX={bbox-epsg-3857}&CRS=EPSG:3857',
 });
@@ -235,11 +235,6 @@ const layer = new maplibreWind.Layer('wind', tileSource, {
   renderFrom: maplibreWind.RenderFrom.rg,
   displayRange: [0, 104],
   renderType: maplibreWind.RenderType.particles,
-  // mask: {
-  //   data: clip,
-  //   // type: maplibreWind.MaskType.outside,
-  //   type: maplibreWind.MaskType.inside, // 默认是 inside，即只显示范围内的
-  // }
 });
 
 map.addLayer(layer);
