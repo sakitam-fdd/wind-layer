@@ -136,6 +136,7 @@ export type Bounds = [number, number, number, number];
 
 export interface TileSourceOptions {
   url: string | [string, string];
+  urlData?: Record<string, any>;
   type?: LayerSourceType.tile;
   minZoom?: number;
   maxZoom?: number;

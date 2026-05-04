@@ -186,6 +186,60 @@ const layer = new maplibreWind.Layer('wind', tileSource, {
 map.addLayer(layer);
 ```
 
+### Tile WMS
+
+```js
+const tileSource = new maplibreWind.TileSource('wind', {
+  tileSize: 256,
+  minZoom: 0,
+  maxZoom: 4,
+  roundZoom: true,
+  decodeType: maplibreWind.DecodeType.image,
+  dataRange: [
+    [-21.381948471069336,23.992563247680664],
+    [-20.644954681396484,21.251964569091797],
+  ],
+  wrapX: true,
+  url: 'http://myWmsServer/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&TRANSPARENT=true&LAYERS=myWindLayer&STYLES=default&WIDTH=256&HEIGHT=256&FORMAT=image/png&BBOX={bbox-epsg-3857}&CRS=EPSG:3857',
+});
+
+const layer = new maplibreWind.Layer('wind', tileSource, {
+  styleSpec: {
+    'fill-color': [
+      'interpolate',
+      ['step', 1],
+      ['get', 'value'],
+      0, '#fff',
+      104, '#fff',
+    ],
+    'opacity': [
+      'interpolate',
+      ['exponential', 0.5],
+      ['zoom'],
+      1,
+      1,
+      2,
+      1
+    ],
+    numParticles: [
+      'interpolate',
+      ['exponential', 0.5],
+      ['zoom'],
+      0, // zoom
+      65535 / 8, // numParticles
+      8, // zoom
+      65535 / 16 // numParticles
+    ],
+    ...particlesConfig,
+  },
+  renderFrom: maplibreWind.RenderFrom.rg,
+  displayRange: [0, 104],
+  renderType: maplibreWind.RenderType.particles,
+});
+
+map.addLayer(layer);
+```
+
 ## 数据源
 
 数据源支持 3 类
