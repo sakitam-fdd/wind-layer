@@ -17,7 +17,7 @@
   "main": "dist/wind-core.js",
   "module": "dist/wind-core.esm.js",
   "unpkg": "dist/wind-core.js",
-  "commonjs": "dist/wind-core.cjs.js",
+  "commonjs": "dist/wind-core.cjs",
   "namespace": "WindCore",
   "types": "dist/index.d.ts",
   "files": [
@@ -28,21 +28,28 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
       "node": {
         "import": {
+          "types": "./dist/index.d.ts",
           "production": "./dist/wind-core.esm.js",
           "development": "./dist/wind-core.esm.js",
           "default": "./dist/wind-core.esm.js"
         },
         "require": {
-          "production": "./dist/wind-core.cjs.js",
-          "development": "./dist/wind-core.cjs.js",
-          "default": "./dist/wind-core.cjs.js"
+          "types": "./dist/index.d.cts",
+          "production": "./dist/wind-core.cjs",
+          "development": "./dist/wind-core.cjs",
+          "default": "./dist/wind-core.cjs"
         }
       },
-      "import": "./dist/wind-core.esm.js",
-      "require": "./dist/wind-core.cjs.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/wind-core.esm.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/wind-core.cjs"
+      }
     },
     "./dist/*": "./dist/*",
     "./package.json": "./package.json"

@@ -92,10 +92,16 @@ const umdBuild: RollupOptions = {
 
 const typesBuild: RollupOptions = {
   input: r('src/index.ts'),
-  output: {
-    format: 'esm',
-    file: pkg.types,
-  },
+  output: [
+    {
+      format: 'esm',
+      file: pkg.types,
+    },
+    {
+      format: 'esm',
+      file: pkg.types.replace(/\.d\.ts$/, '.d.cts'),
+    },
+  ],
   external,
   plugins: [dts({ respectExternal: true })],
 };
