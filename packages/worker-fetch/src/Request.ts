@@ -372,6 +372,15 @@ export class RequestAdapter {
     // // @ts-ignore
     // self.exifr
     parse(data)
+      .then(
+        (res) => res,
+        (err) => {
+          // exif 解析失败（如 exifr lite 不支持 PNG）时降级为普通图片，但需要提示：
+          // 缺少 exif 时 Tile 无法得到 dataRange，数据可能会按错误的值域解码
+          warnOnce(`[wind-gl-worker]: parse exif failed, fallback to plain image: ${err?.message ?? err}`);
+          return null;
+        },
+      )
       .then((res) => {
         this.arrayBuffer2Image(data, (error, image) => {
           if (error) {
@@ -381,8 +390,8 @@ export class RequestAdapter {
               data: isImageBitmap(image) ? image : image.data,
               width: image.width,
               height: image.height,
-              exif: res,
-              withExif: true,
+              exif: res ?? undefined,
+              withExif: Boolean(res),
             });
           }
         });
