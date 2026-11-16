@@ -140,6 +140,7 @@ class VeRenderer extends maptalks.renderer.CanvasLayerRenderer {
     canvas.width = width;
     canvas.height = height;
     this.context.setSize(canvas.width, canvas.height);
+    this.layer.layer?.resize(canvas.width, canvas.height);
   }
 
   clearCanvas() {
@@ -333,6 +334,7 @@ class Layer extends maptalks.TileLayer {
 
   onZoomStart() {
     this.layer?.update();
+    this.layer?.moveStart();
   }
 
   onZooming() {
@@ -344,6 +346,8 @@ class Layer extends maptalks.TileLayer {
 
   onZoomEnd() {
     this.layer?.update();
+    this.layer?.handleZoom();
+    this.layer?.moveEnd();
   }
 
   update() {
@@ -788,6 +792,22 @@ class Layer extends maptalks.TileLayer {
       }
     }
     return this;
+  }
+
+  async picker(coordinates: any) {
+    if (!this.options.picking) {
+      console.warn('[Layer]: please enable picking options!');
+      return null;
+    }
+    const map = this.getMap();
+    if (!this.layer || !coordinates || !map) {
+      console.warn('[Layer]: layer not initialized!');
+      return null;
+    }
+    const coord = Array.isArray(coordinates) ? new maptalks.Coordinate(coordinates) : coordinates;
+    const point = map.coordinateToContainerPoint(coord);
+    const size = map.getSize();
+    return this.layer.picker([point.x, point.y], [size.width, size.height]);
   }
 
   onAdd() {

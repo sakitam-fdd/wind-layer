@@ -144,12 +144,15 @@ export class WebglLayer extends BaseLayer {
   _resizeCanvas(scale: number) {
     super._resizeCanvas(scale);
 
+    const width = this._width * scale;
+    const height = this._height * scale;
+
     if (this.renderer) {
-      this.renderer.setSize(this._width, this._height);
+      this.renderer.setSize(width, height);
     }
 
     if (this.layer) {
-      this.layer.resize(this._width, this._height);
+      this.layer.resize(width, height);
     }
 
     this._render();
@@ -398,7 +401,12 @@ export class WebglLayer extends BaseLayer {
     });
   }
 
-  async picker(coordinates) {
+  /**
+   * 拾取指定位置的数据
+   * @param coordinates 遵循 Leaflet 约定的 `L.LatLngExpression`：`L.LatLng`、`{ lat, lng }`（或 `{ lat, lon }`）、
+   * `[lat, lng]` 数组（与旧版本 `this._map.project(coordinates)` 的解析行为保持一致）
+   */
+  async picker(coordinates: L.LatLngExpression) {
     if (!this.options.picking) {
       console.warn('[Layer]: please enable picking options!');
       return null;
@@ -407,8 +415,15 @@ export class WebglLayer extends BaseLayer {
       console.warn('[Layer]: layer not initialized!');
       return null;
     }
-    const point = this._map.project(coordinates);
-    return this.layer.picker([point.x, point.y]);
+    // 与 Leaflet 的 map.project / latLngToContainerPoint 一致，使用 L.latLng 统一解析，数组按 [lat, lng] 处理
+    const latlng = L.latLng(coordinates as any);
+    if (!latlng) {
+      console.warn('[Layer]: invalid coordinates, expected L.LatLngExpression ([lat, lng] or { lat, lng })!');
+      return null;
+    }
+    const point = this._map.latLngToContainerPoint(latlng);
+    const size = this._map.getSize();
+    return this.layer.picker([point.x, point.y], [size.x, size.y]);
   }
 
   calcWrappedWorlds() {

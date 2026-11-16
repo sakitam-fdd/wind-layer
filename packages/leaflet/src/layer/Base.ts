@@ -33,6 +33,8 @@ export class BaseLayer extends L.Layer {
   _createCanvas(id: string | number, zIndex: number) {
     const canvas = createCanvas(this._width, this._height, this.devicePixelRatio);
     canvas.id = String(id);
+    canvas.style.width = `${this._width}px`;
+    canvas.style.height = `${this._height}px`;
 
     const panes = this._map.getPanes();
     if (panes && panes.overlayPane) {

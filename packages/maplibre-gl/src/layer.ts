@@ -460,7 +460,10 @@ export default class Layer {
       return null;
     }
     const point = this.map.project(coordinates);
-    return this.layer.picker([point.x, point.y]);
+    const canvas = this.map.getCanvas();
+    const width = canvas?.clientWidth || (this.map as any).transform?.width;
+    const height = canvas?.clientHeight || (this.map as any).transform?.height;
+    return this.layer.picker([point.x, point.y], [width, height]);
   }
 
   render() {
