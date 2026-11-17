@@ -11,6 +11,9 @@ uniform vec4 u_bbox;
 uniform vec4 u_data_bbox;
 uniform float u_fade_t;
 uniform vec2 u_image_res;
+uniform bool u_flip_y;
+uniform bool useDisplayRange;
+uniform vec2 displayRange;
 
 varying vec2 v_particle_pos;
 
@@ -28,8 +31,8 @@ vec2 decodeValue(const vec2 vc) {
     return rgba.rg;
 }
 #else
-float decodeValue(const vec2 vc) {
-    return calcTexture(vc).r;
+vec2 decodeValue(const vec2 vc) {
+    return vec2(calcTexture(vc).r, 0.0);
 }
 #endif
 
@@ -55,15 +58,29 @@ bool containsXY(vec2 pos, vec4 bbox) {
 void main() {
     vec2 pos = v_particle_pos;
 
-    if (!containsXY(pos.xy, u_data_bbox) || !containsXY(pos.xy, u_bbox) || calcTexture(pos).a == 0.0) {
+    if (!containsXY(pos.xy, u_data_bbox) || !containsXY(pos.xy, u_bbox)) {
         discard;
     }
 
-    vec2 velocity = bilinear(pos);
+    vec2 uv = (pos.xy - u_data_bbox.xy) / (u_data_bbox.zw - u_data_bbox.xy);
+    if (u_flip_y) {
+        uv = vec2(uv.x, 1.0 - uv.y);
+    }
+
+    if (calcTexture(uv).a == 0.0) {
+        discard;
+    }
+
+    vec2 velocity = bilinear(uv);
 
     float value = length(velocity);
 
-    float value_t = (value - u_colorRange.x) / (u_colorRange.y - u_colorRange.x);
+    if (useDisplayRange && (value > displayRange.y || value < displayRange.x)) {
+        discard;
+    }
+
+    float rangeSpan = max(u_colorRange.y - u_colorRange.x, 1e-6);
+    float value_t = clamp((value - u_colorRange.x) / rangeSpan, 0.0, 1.0);
     vec2 ramp_pos = vec2(value_t, 0.5);
 
     vec4 color = texture2D(u_colorRamp, ramp_pos);

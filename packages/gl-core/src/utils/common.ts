@@ -79,6 +79,59 @@ export function getFloatTextureOptions(renderer: Renderer): {
   };
 }
 
+const isPositiveSize = (size?: [number, number]) =>
+  Array.isArray(size) && Number.isFinite(size[0]) && Number.isFinite(size[1]) && size[0] > 0 && size[1] > 0;
+
+/**
+ * 将 CSS 视口像素坐标按比例映射为拾取 FBO 的物理像素坐标
+ *
+ * - 拾取 FBO 与画布同尺寸（物理像素），因此只需按 `targetSize / viewportSize` 比例缩放，
+ *   这样同时兼容 window.devicePixelRatio 与引擎自定义 pixelRatio（如 mapbox 的 `pixelRatio` 选项）
+ * - Y 轴不需要翻转：picker.vert 中 `vUv.y = 1 - uv.y` 已将屏幕空间纹理上下翻转写入 FBO，
+ *   FBO 第 r 行（自底向上）即对应屏幕第 r 行（自顶向下），可直接用自顶向下的 y 调用 readPixels
+ *
+ * @param pixel CSS 像素坐标 [x, y]（相对容器左上角）
+ * @param viewportSize CSS 视口尺寸 [width, height]
+ * @param targetSize FBO 物理像素尺寸 [width, height]
+ * @returns 越界或参数非法时返回 null
+ */
+export function resolvePickerPixel(
+  pixel: [number, number],
+  viewportSize: [number, number],
+  targetSize: [number, number],
+): [number, number] | null {
+  if (!pixel || !Number.isFinite(pixel[0]) || !Number.isFinite(pixel[1])) return null;
+  if (!isPositiveSize(viewportSize) || !isPositiveSize(targetSize)) return null;
+
+  const u = pixel[0] / viewportSize[0];
+  const v = pixel[1] / viewportSize[1];
+  if (u < 0 || u >= 1 || v < 0 || v >= 1) return null;
+
+  // u、v ∈ [0, 1)，floor 结果天然落在 [0, size - 1]，min 仅用于防御浮点误差
+  return [
+    Math.min(targetSize[0] - 1, Math.floor(u * targetSize[0])),
+    Math.min(targetSize[1] - 1, Math.floor(v * targetSize[1])),
+  ];
+}
+
+/**
+ * IEEE 754 binary16 (HALF_FLOAT) 转 float32
+ * @param val 16 位无符号整数编码值
+ */
+export function decodeHalfFloat(val: number): number {
+  const s = (val & 0x8000) >> 15;
+  const e = (val & 0x7c00) >> 10;
+  const f = val & 0x03ff;
+
+  if (e === 0) {
+    return (s ? -1 : 1) * Math.pow(2, -14) * (f / Math.pow(2, 10));
+  }
+  if (e === 0x1f) {
+    return f ? NaN : (s ? -1 : 1) * Infinity;
+  }
+  return (s ? -1 : 1) * Math.pow(2, e - 15) * (1 + f / Math.pow(2, 10));
+}
+
 export function calcMinMax(array: number[]): [number, number] {
   let min = Infinity;
   let max = Infinity;

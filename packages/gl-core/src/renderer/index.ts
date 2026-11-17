@@ -153,7 +153,7 @@ export const defaultOptions: BaseLayerOptions = {
     space: 20,
     size: [16, 16],
   },
-  displayRange: [Infinity, Infinity],
+  displayRange: [-Infinity, Infinity],
   widthSegments: 1,
   heightSegments: 1,
   wireframe: false,
@@ -533,6 +533,8 @@ export default class BaseLayer {
    * 处理地图缩放事件
    */
   handleZoom() {
+    // 注意：handleZoom 在缩放过程中会被逐帧调用，这里不能重置粒子，
+    // 粒子轨迹清理与重新初始化统一由 moveStart / moveEnd 负责
     this.parseStyleSpec(false);
   }
 
@@ -549,12 +551,18 @@ export default class BaseLayer {
     }
 
     if (data) {
+      if (this.#colorRampTexture) {
+        this.#colorRampTexture.destroy();
+      }
       this.#colorRampTexture = new DataTexture(this.renderer, {
         data,
         name: 'colorRampTexture',
         magFilter: this.renderer.gl.NEAREST,
         minFilter: this.renderer.gl.NEAREST,
-        width: 255,
+        wrapS: this.renderer.gl.CLAMP_TO_EDGE,
+        wrapT: this.renderer.gl.CLAMP_TO_EDGE,
+        generateMipmaps: false,
+        width: 256,
         height: 1,
       });
     }
@@ -709,15 +717,34 @@ export default class BaseLayer {
     }
   }
 
-  async picker(pixel = [0, 0]) {
+  async picker(pixel = [0, 0], viewportSize?: [number, number]) {
     if (!this.renderPipeline) return null;
     const pickerPass = this.renderPipeline.getPass('PickerPass');
     if (!pickerPass) return null;
-    return pickerPass.render(undefined, undefined, pixel);
+    return pickerPass.render(undefined, undefined, pixel, viewportSize);
+  }
+
+  /**
+   * 解析 displayRange：
+   * - 两端都不是有限数时视为未启用过滤
+   * - 将 ±Infinity / 非法值替换为 ±FLT_MAX，避免向 uniform 传入 inf（部分移动端 GPU 对 inf 比较行为不可靠）
+   */
+  #resolveDisplayRange(): { useDisplayRange: boolean; displayRange: [number, number] } {
+    const FLT_MAX = 3.4e38;
+    const range = this.options.displayRange;
+    const min = Array.isArray(range) ? range[0] : undefined;
+    const max = Array.isArray(range) ? range[1] : undefined;
+    const minFinite = Number.isFinite(min);
+    const maxFinite = Number.isFinite(max);
+    return {
+      useDisplayRange: minFinite || maxFinite,
+      displayRange: [minFinite ? (min as number) : -FLT_MAX, maxFinite ? (max as number) : FLT_MAX],
+    };
   }
 
   prerender(cameras, renderTarget?: any) {
     if (this.renderPipeline) {
+      const { useDisplayRange, displayRange } = this.#resolveDisplayRange();
       this.renderPipeline.prerender(
         {
           scene: this.scene,
@@ -732,6 +759,8 @@ export default class BaseLayer {
           numParticles: this.#numParticles,
           colorRange: this.#colorRange,
           colorRampTexture: this.#colorRampTexture,
+          displayRange,
+          useDisplayRange,
           sharedState: this.sharedState,
           u_drop_rate: this.#dropRate,
           u_drop_rate_bump: this.#dropRateBump,
@@ -749,6 +778,7 @@ export default class BaseLayer {
 
   render(cameras, renderTarget?: any) {
     if (this.renderPipeline) {
+      const { useDisplayRange, displayRange } = this.#resolveDisplayRange();
       const state: any = {
         zoom: this.options?.getZoom?.() ?? 0,
         extent: this.options?.getExtent?.(),
@@ -757,8 +787,8 @@ export default class BaseLayer {
         numParticles: this.#numParticles,
         colorRange: this.#colorRange,
         colorRampTexture: this.#colorRampTexture,
-        displayRange: this.options.displayRange,
-        useDisplayRange: Boolean(this.options.displayRange),
+        displayRange,
+        useDisplayRange,
         sharedState: this.sharedState,
         u_drop_rate: this.#dropRate,
         u_drop_rate_bump: this.#dropRateBump,

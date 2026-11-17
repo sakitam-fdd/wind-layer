@@ -138,6 +138,10 @@ export default class UpdatePass extends Pass<UpdatePassOptions> {
       stencil: false,
     };
 
+    this.#current?.destroy();
+    this.#next?.destroy();
+    this.#initialize = true;
+
     this.#current = new RenderTarget(this.renderer, {
       ...opt,
       name: 'currentUpdateTexture',

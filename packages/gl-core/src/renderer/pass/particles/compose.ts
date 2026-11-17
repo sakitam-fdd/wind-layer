@@ -201,8 +201,9 @@ export default class ParticlesComposePass extends Pass<ParticlesComposePassOptio
         const tileMesh = tile.createMesh(this.#uid, tileBBox, this.renderer, this.#program);
         const mesh = tileMesh.planeMesh;
 
-        const scale = Math.pow(2, zmax - coord.z);
-        mesh.scale.set((1 / w) * scale, (1 / h) * scale, 1);
+        const scaleX = dx > 0 ? (tileBBox.right - tileBBox.left) / dx : 1;
+        const scaleY = dy > 0 ? Math.abs(tileBBox.bottom - tileBBox.top) / dy : 1;
+        mesh.scale.set(scaleX, scaleY, 1);
         if (!rendererState.u_flip_y) {
           mesh.position.set((tileBBox.left - xmin) / dx, (tileBBox.top - ymin) / dy, 0);
         } else {

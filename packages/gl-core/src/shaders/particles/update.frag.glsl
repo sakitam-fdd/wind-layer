@@ -106,13 +106,15 @@ vec2 update(vec2 pos) {
 void main() {
     vec2 pos = texture2D(u_particles, vUv).xy;
 
-    pos = update(pos);
-    // 初始化时为避免粒子随机位置接近，先执行 25 次迭代
+    // 初始化或缩放/平移重置时，使用独立的 [0, 1] 随机种子映射到当前 u_bbox，避免世界坐标二次叠加导致精度坍缩
     if (u_initialize) {
-        pos = randomPosToGlobePos(pos);
+        vec2 seed = vUv + vec2(u_rand_seed, u_rand_seed * 1.6180339);
+        pos = randomPosToGlobePos(vec2(rand(seed + 1.3), rand(seed + 2.1)));
         for (int i = 0; i < 25; i++) {
             pos = update(pos);
         }
+    } else {
+        pos = update(pos);
     }
 
     gl_FragColor = vec4(pos.xy, 0.0, 1.0);

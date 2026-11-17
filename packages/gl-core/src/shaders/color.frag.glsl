@@ -77,7 +77,8 @@ void main () {
         discard;
     }
     float value = getValue(uv);
-    float value_t = (value - colorRange.x) / (colorRange.y - colorRange.x);
+    float rangeSpan = max(colorRange.y - colorRange.x, 1e-6);
+    float value_t = clamp((value - colorRange.x) / rangeSpan, 0.0, 1.0);
     vec2 ramp_pos = vec2(value_t, 0.5);
 
     vec4 color = texture2D(colorRampTexture, ramp_pos);

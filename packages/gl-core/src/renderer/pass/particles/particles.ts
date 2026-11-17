@@ -48,8 +48,14 @@ export default class Particles extends Pass<ParticlesPassOptions> {
         u_fade_t: {
           value: 0,
         },
+        useDisplayRange: {
+          value: false,
+        },
         displayRange: {
           value: new Vector2(-Infinity, Infinity),
+        },
+        u_flip_y: {
+          value: false,
         },
         u_texture: {
           value: this.options.texture,
@@ -238,6 +244,12 @@ export default class Particles extends Pass<ParticlesPassOptions> {
       this.#mesh.program.setUniform('u_flip_y', rendererState.u_flip_y);
       this.#mesh.program.setUniform('u_gl_scale', rendererState.u_gl_scale);
       this.#mesh.program.setUniform('u_dpr', this.renderer.attributes.dpr ?? 1.0);
+      if (rendererState.useDisplayRange !== undefined) {
+        this.#mesh.program.setUniform('useDisplayRange', Boolean(rendererState.useDisplayRange));
+      }
+      if (rendererState.displayRange !== undefined) {
+        this.#mesh.program.setUniform('displayRange', rendererState.displayRange);
+      }
 
       this.#mesh.updateMatrix();
       this.#mesh.worldMatrixNeedsUpdate = false;

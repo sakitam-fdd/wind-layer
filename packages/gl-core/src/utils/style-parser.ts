@@ -75,17 +75,53 @@ export function parseZoomStyle(styleAttrField: any[]) {
   }
 }
 
+const rgbaRegex =
+  /^rgba?\(\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)\s*(?:,\s*([+-]?(?:\d+\.?\d*|\.\d+))\s*)?\)$/i;
+
+/**
+ * 规范化颜色字符串，按标准 CSS Color 规则将 rgba alpha 钳制到 [0, 1]（兼容旧配置中 > 1 的写法）
+ * @param color 颜色字符串
+ */
+export function normalizeColor(color: string): string {
+  if (typeof color !== 'string') {
+    return color;
+  }
+  const trimmed = color.trim();
+  const match = trimmed.match(rgbaRegex);
+  if (!match) {
+    return trimmed;
+  }
+  const r = Math.min(255, Math.max(0, Math.round(Number(match[1]))));
+  const g = Math.min(255, Math.max(0, Math.round(Number(match[2]))));
+  const b = Math.min(255, Math.max(0, Math.round(Number(match[3]))));
+  if (match[4] !== undefined) {
+    let a = Number(match[4]);
+    if (Number.isFinite(a)) {
+      a = Math.min(1, Math.max(0, a));
+      return `rgba(${r}, ${g}, ${b}, ${a})`;
+    }
+  }
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 function createGradient(interpolateColor, min, max, w, h, gradient, ctx) {
+  const span = max - min || 1;
   for (let i = 0; i < interpolateColor.length; i += 1) {
     const key = interpolateColor[i].key;
-    const color = interpolateColor[i].value;
-    gradient.addColorStop((key - min) / (max - min), color);
+    const color = normalizeColor(interpolateColor[i].value);
+    const offset = Math.min(1, Math.max(0, (key - min) / span));
+    try {
+      gradient.addColorStop(offset, color);
+    } catch (e) {
+      console.warn(`[wind-core]: invalid color stop (${key}, ${interpolateColor[i].value})`, e);
+    }
   }
 
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, w, h);
 }
 function createStepGradient(interpolateColor, min, max, w, h, ctx) {
+  const span = max - min || 1;
   for (let i = 0; i < interpolateColor.length; i += 1) {
     const key = interpolateColor[i].key;
     let keyNext = key;
@@ -94,9 +130,9 @@ function createStepGradient(interpolateColor, min, max, w, h, ctx) {
     } else {
       keyNext = max;
     }
-    const color = interpolateColor[i].value;
-    const current = ((key - min) / (max - min)) * w; // 0 - w
-    const next = ((keyNext - min) / (max - min)) * w; // 0 - w
+    const color = normalizeColor(interpolateColor[i].value);
+    const current = ((key - min) / span) * w; // 0 - w
+    const next = ((keyNext - min) / span) * w; // 0 - w
     ctx.fillStyle = color;
     ctx.fillRect(current, 0, next - current, 1);
   }
@@ -116,8 +152,10 @@ export function createLinearGradient(
 
   if (ctx && interpolateColor && Array.isArray(interpolateColor)) {
     const keys = interpolateColor.map((d) => parseFloat(d.key));
-    const colorRange: [number, number] = [Math.min(...keys), Math.max(...keys)];
-    const [min, max] = [range[0] || colorRange[0], range[1] || colorRange[1]];
+    const keyRange: [number, number] = [Math.min(...keys), Math.max(...keys)];
+    const [min, max] = [range[0] ?? keyRange[0], range[1] ?? keyRange[1]];
+    // 色带纹理是在 [min, max] 上生成的，着色器也必须用同一个区间做归一化采样，否则会错位
+    const colorRange: [number, number] = [min, max];
     const w = 256;
     const h = 1;
     canvas.width = w;
@@ -129,14 +167,14 @@ export function createLinearGradient(
       if (interpolation?.base === true || utils.isNumber(interpolation?.base)) {
         const interval = Number(interpolation?.base); // true == 1
         createGradient(interpolateColor, min, max, w, h, gradient, ctx);
-        const len = Math.round((max - min) / interval);
+        const len = Math.max(1, Math.round((max - min) / interval));
         const canvas2 = document.createElement('canvas');
         const ctx2 = canvas2.getContext('2d', {
           willReadFrequently: true,
         }) as CanvasRenderingContext2D;
         canvas2.width = w;
         canvas2.height = h;
-        for (let j = 0; j < len; j++) {
+        for (let j = 0; j < len; j += 1) {
           let keyNext = j;
           if (j < len - 1) {
             keyNext = j + 1;
@@ -144,7 +182,8 @@ export function createLinearGradient(
             keyNext = len;
           }
           const current = Math.round((j / len) * w); // 0 - w
-          const color = ctx.getImageData(current, 0, 1, 1).data;
+          const sampleX = Math.min(w - 1, Math.max(0, current));
+          const color = ctx.getImageData(sampleX, 0, 1, 1).data;
           const next = Math.round((keyNext / len) * w); // 0 - w
           ctx2.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3] / 255})`;
           ctx2.fillRect(current, 0, next - current, h);
