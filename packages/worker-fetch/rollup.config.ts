@@ -101,12 +101,7 @@ const umdBuild: RollupOptions = {
     name: pkg.namespace,
     sourcemap: !MINIFY,
     globals: {},
-    file: MINIFY
-      ? pkg.main
-          .split('.')
-          .splice(pkg.main.split('.').length - 1, 0, 'min')
-          .join('.')
-      : pkg.main,
+    file: MINIFY ? pkg.main.replace(/\.js$/, '.min.js') : pkg.main,
     indent: false,
     intro: fs.readFileSync('./bundle/prelude.js', 'utf8'),
   },

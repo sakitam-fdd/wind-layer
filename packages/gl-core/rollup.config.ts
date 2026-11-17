@@ -81,12 +81,7 @@ const umdBuild: RollupOptions = {
     globals: {
       '@sakitam-gis/vis-engine': 've',
     },
-    file: MINIFY
-      ? pkg.main
-          .split('.')
-          .splice(pkg.main.split('.').length - 1, 0, 'min')
-          .join('.')
-      : pkg.main,
+    file: MINIFY ? pkg.main.replace(/\.js$/, '.min.js') : pkg.main,
   },
   external,
   plugins: [...plugins, ...(MINIFY ? [terser()] : [])],

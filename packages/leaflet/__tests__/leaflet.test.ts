@@ -14,7 +14,7 @@ afterAll(async () => {
   console.log(`[leaflet-wind]: test end`);
 });
 
-describe('leaflet', async () => {
+describe('leaflet', () => {
   test('instance', async () => {
     expect(1).toEqual(1);
   });

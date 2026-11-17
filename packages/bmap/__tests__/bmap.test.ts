@@ -15,7 +15,7 @@ afterAll(async () => {
   console.log(`[bmap-wind]: test end`);
 });
 
-describe('bmap', async () => {
+describe('bmap', () => {
   test('instance', async () => {
     const { WindLayer } = await import('../src');
     const layer = new WindLayer([], {

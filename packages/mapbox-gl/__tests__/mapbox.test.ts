@@ -15,7 +15,7 @@ afterAll(async () => {
   console.log(`[mapbox-wind]: test end`);
 });
 
-describe('mapbox-gl', async () => {
+describe('mapbox-gl', () => {
   test('instance', async () => {
     expect(1).toEqual(1);
   });

@@ -78,7 +78,7 @@
   "devDependencies": {
     "@types/openlayers": "^4.6.17",
     "openlayers": "^4.6.5",
-    "rollup": "^4.14.1"
+    "rollup": "^4.68.6"
   },
   "publishConfig": {
     "access": "public"

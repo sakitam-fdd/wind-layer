@@ -1,17 +1,20 @@
 {
-  "pipeline": {
+  "$schema": "https://turborepo.com/schema.json",
+  "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "build:minify": {
+      "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "lint": {
       "outputs": []
     },
     "dev": {
-      "cache": false
+      "cache": false,
+      "persistent": true
     },
     "test": {
       "cache": false,
@@ -23,9 +26,13 @@
     },
     "coverage": {
       "cache": false,
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"]
     },
     "api": {
+      "cache": false
+    },
+    "clean": {
       "cache": false
     }
   }

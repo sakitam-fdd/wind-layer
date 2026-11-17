@@ -9,7 +9,7 @@ afterAll(async () => {
   console.log(`[ol-wind]: test end`);
 });
 
-describe('ol', async () => {
+describe('ol', () => {
   test('instance', async () => {
     const layer = new WindLayer([], {
       zIndex: 20,

@@ -5,97 +5,135 @@ on:
     branches: [master, dev]
   pull_request:
     branches: [master, dev]
+  workflow_dispatch:
+
+# 同一分支/PR 只保留最新一次运行；master 上的发布不中断，避免发布到一半被取消
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# 默认最小权限，需要写权限的 job 单独声明
+permissions:
+  contents: read
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+  DO_NOT_TRACK: 1
 
 jobs:
   test:
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
-
+    name: Test (Node ${{ matrix.node-version }})
+    if: ${{ !contains(github.event.head_commit.message, 'ci skip') }}
+    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        node-version: [22.x]
-
-    runs-on: ${{ matrix.os }}
+        node-version: [22.x, 24.x]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      # 使用官方 pnpm action 安装 pnpm，替代 npm i -g pnpm（更快且有缓存支持）
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
+      # pnpm 版本从根目录 package.json 的 packageManager 字段读取，保证本地与 CI 一致
+      - uses: pnpm/action-setup@v6
 
-      # setup-node@v4 配合 cache: pnpm 可自动处理 pnpm store 缓存，
-      # 无需再手动使用 actions/cache
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
+          cache: pnpm
 
       - name: Install deps
-        run: pnpm i --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
-      - name: Build and Test
-        run: pnpm test && pnpm coverage
+      # coverage 任务在 turbo 中依赖 build，会先构建再执行测试，无需再单独跑一遍 test
+      - name: Build and test (with coverage)
+        run: pnpm coverage
+
+      # 在 Node 24 上额外验证压缩构建，确保 PR 阶段就能拦截 UMD minify 异常
+      - name: Verify minified builds
+        if: matrix.node-version == '24.x'
+        run: pnpm build:minify
 
   release:
+    name: Release
+    needs: [test]
+    # 只在 master 分支的 push 上发布，dev 分支和 PR 不发布
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/master' &&
+      !contains(github.event.head_commit.message, 'skip-release') &&
+      !contains(github.event.head_commit.message, 'skip-ci')
     runs-on: ubuntu-latest
-    needs: ['test']
-    if: "!contains(github.event.head_commit.message, 'skip-release') && !contains(github.event.head_commit.message, 'skip-ci') && github.event_name != 'pull_request'"
+    permissions:
+      contents: write # 提交版本变更、推送 tag、创建 GitHub Release
+      pull-requests: write # 创建/更新版本 PR
+      id-token: write # npm Trusted Publishing (OIDC)，同时自动生成 provenance
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
+
+      # 注意：不要设置 registry-url，否则 setup-node 会写入 _authToken 配置，导致 npm 跳过 OIDC 认证
+      - uses: actions/setup-node@v7
         with:
-          version: 9
+          node-version: 24.x
+          cache: pnpm
 
-      - uses: actions/setup-node@v4
-        with:
-          # 原 release/docs job 引用了 ${{ matrix.node-version }}，
-          # 但这两个 job 没有 matrix，导致 key 中出现空字符串，此处改为明确指定版本
-          node-version: 22.x
-          cache: 'pnpm'
+      # pnpm publish 内部委托 npm CLI 发布，Trusted Publishing 需要 npm >= 11.5.1；
+      # Node 24.16+ 已自带 npm 11.13+，仅在低于 11.5.1 时才在线升级以节省耗时
+      - name: Ensure npm >= 11.5.1 for trusted publishing
+        run: |
+          node -e "const [M,m,p]=process.argv[1].split('.').map(Number);process.exit(M>11||(M===11&&(m>5||(m===5&&p>=1)))?0:1)" "$(npm -v)" || npm install -g npm@11
+          npm --version
 
-      - run: pnpm i --no-frozen-lockfile
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
-        # changesets/action@master 不固定版本，改用稳定的 v1 tag
         uses: changesets/action@v1
         with:
           publish: pnpm release
           commit: 'chore(release): publish'
-          title: Publish next versions
-        env:
-          GITHUB_TOKEN: ${{ secrets.PKG_DEPLOY_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_PKG_PUBLIC_TOKEN }}
+          title: 'chore(release): publish'
+          createGithubReleases: true
+          # 使用 PAT 创建的版本 PR 才能继续触发 CI（GITHUB_TOKEN 创建的 PR 不会触发 workflow）
+          github-token: ${{ secrets.PKG_DEPLOY_TOKEN }}
+        # 默认不传 NPM_TOKEN：未设置 NPM_TOKEN 且开启 id-token: write 时，changesets/action 会自动走 npm Trusted Publishing (OIDC)，
+        # 避免旧的 NPM_PKG_PUBLIC_TOKEN 覆盖 OIDC 流程。需要先在 npmjs.com 为各包配置 Trusted Publisher（仓库 sakitam-fdd/wind-layer，workflow ci.yml）。
+        # 如仍需使用 Granular Access Token（需勾选 Bypass 2FA），可取消下方注释：
+        # env:
+        #   NPM_TOKEN: ${{ secrets.NPM_PKG_PUBLIC_TOKEN }}
 
   docs:
+    name: Deploy docs
+    needs: [test]
+    if: >-
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/master' &&
+      !contains(github.event.head_commit.message, 'skip-release') &&
+      !contains(github.event.head_commit.message, 'skip-ci')
     runs-on: ubuntu-latest
-    needs: ['test']
-    if: "!contains(github.event.head_commit.message, 'skip-release') && !contains(github.event.head_commit.message, 'skip-ci') && github.event_name != 'pull_request'"
+    permissions:
+      contents: read
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
         with:
-          version: 9
+          node-version: 24.x
+          cache: pnpm
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
-          cache: 'pnpm'
-
-      - run: pnpm i --no-frozen-lockfile
+      - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm run api
       - run: pnpm docs:build
 
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.PKG_DEPLOY_TOKEN }}
           publish_dir: docs/.vitepress/dist

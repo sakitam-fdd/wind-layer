@@ -8,7 +8,7 @@ afterAll(async () => {
   console.log(`[wind-gl-core]: test end`);
 });
 
-describe('utils', async () => {
+describe('utils', () => {
   test('isNumber', async () => {
     expect(1).toBe(1);
   });

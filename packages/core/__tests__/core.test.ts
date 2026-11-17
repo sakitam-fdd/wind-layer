@@ -9,7 +9,7 @@ afterAll(async () => {
   console.log(`[wind-core]: test end`);
 });
 
-describe('utils', async () => {
+describe('utils', () => {
   test('isFunction', async () => {
     expect(isFunction(1)).toBe(false);
   });

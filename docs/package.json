@@ -1,6 +1,7 @@
 {
   "name": "docs",
   "version": "1.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vitepress dev --base /",
@@ -29,19 +30,19 @@
     "tweakpane": "^4.0.0"
   },
   "devDependencies": {
-    "@types/node": "^18.19.26",
+    "@types/node": "^22.19.0",
     "@types/mapbox-gl": "^2.7.19",
     "@types/proj4": "^2.5.5",
-    "@types/markdown-it": "latest",
+    "@types/markdown-it": "^14.1.2",
     "@types/leaflet": "^1.9.9",
-    "@vue/compiler-core": "^3.3.7",
+    "@vue/compiler-core": "^3.5.45",
     "less": "^4.2.0",
     "fs-extra": "^11.2.0",
     "markdown-it": "^14.0.0",
     "markdown-it-container": "^4.0.0",
-    "vitepress": "^1.0.2",
-    "vite": "^5.1.7",
-    "vue": "^3.3.7",
+    "vitepress": "^1.6.4",
+    "vite": "^5.4.21",
+    "vue": "^3.5.45",
     "vite-plugin-external": "^4.3.0"
   }
 }

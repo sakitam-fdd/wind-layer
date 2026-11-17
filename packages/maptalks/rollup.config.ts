@@ -86,7 +86,7 @@ const umdBuild: RollupOptions = {
     dir: undefined,
     name: pkg.namespace,
     sourcemap: !MINIFY,
-    file: MINIFY ? pkg.main.split('.').splice(pkg.main.split('.').length - 1, 0, 'min').join('.') : pkg.main,
+    file: MINIFY ? pkg.main.replace(/\.js$/, '.min.js') : pkg.main,
     globals: {
       maptalks: 'maptalks',
     },

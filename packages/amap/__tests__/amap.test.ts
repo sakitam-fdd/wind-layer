@@ -10,7 +10,7 @@ afterAll(async () => {
   console.log(`[amap-wind]: test end`);
 });
 
-describe('amap', async () => {
+describe('amap', () => {
   test('instance', async () => {
     const { WindLayer } = await import('../src');
     const layer = new WindLayer([], {

@@ -9,7 +9,7 @@ afterAll(async () => {
   console.log(`[maptalks-wind]: test end`);
 });
 
-describe('maptalks', async () => {
+describe('maptalks', () => {
   test('instance', async () => {
     // const layer = new WindLayer('wind-layer', [], {
     //   zIndex: 20,

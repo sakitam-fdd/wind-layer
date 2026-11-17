@@ -1,12 +1,10 @@
-import { UserConfig } from 'vitest';
+import { defineConfig } from 'vitest/config';
 
-const config: { test: UserConfig } = {
+export default defineConfig({
   test: {
     testTimeout: 50000,
     coverage: {
       reporter: ['lcov', 'html'],
-    } as any,
+    },
   },
-}
-
-export default config;
+});

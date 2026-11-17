@@ -15,7 +15,7 @@ afterAll(async () => {
   console.log(`[maplibre-wind]: test end`);
 });
 
-describe('maplibre-gl', async () => {
+describe('maplibre-gl', () => {
   test('instance', async () => {
     expect(1).toEqual(1);
   });
