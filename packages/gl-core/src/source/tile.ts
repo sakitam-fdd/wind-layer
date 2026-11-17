@@ -8,10 +8,12 @@ import type TileID from '../tile/TileID';
 import type Tile from '../tile/Tile';
 import type Layer from '../renderer';
 import { DEFAULT_URL_DATA } from './urlData';
+import type { UrlTemplateData } from './urlData';
 
-const URL_PATTERN = /\{ *([\w_-]+) *\}/g;
+// 变量名支持 `-`，以兼容 mapbox-gl / maplibre-gl 的 `{bbox-epsg-3857}` 写法
+const URL_PATTERN = /\{ *([\w-]+) *\}/g;
 
-function formatUrl(url: string, data: any) {
+function formatUrl(url: string, data: UrlTemplateData) {
   return url.replace(URL_PATTERN, (str, key) => {
     let value = data[key];
 
@@ -186,13 +188,15 @@ export default class TileSource extends EventEmitter {
       domain = subdomains[s];
     }
 
-    const data = {
+    // 优先级：内置变量 < 用户自定义 urlData < 瓦片行列号等基础变量（基础变量不允许被覆盖，避免请求错位）
+    const data: UrlTemplateData = {
+      ...DEFAULT_URL_DATA,
+      ...(this.options?.urlData || {}),
       x,
       y,
       z,
       s: domain,
-      ...DEFAULT_URL_DATA,             // Default url data. Ex : {bbox-epsg-3857} for WMS EPSG:3857 bbox (same name as in the MapLibre library)
-      ...(this.options?.urlData || {}) // Additional url data added using the TileSource constructor options
+      scheme: this.scheme,
     };
 
     if (Array.isArray(this.url)) {

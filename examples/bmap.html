@@ -24,7 +24,7 @@
   map.centerAndZoom(new BMap.Point(116.3964,39.9093), 2);
   map.enableScrollWheelZoom();
   // 地图自定义样式
-  map.setMapStyleV2({
+  var mapStyle = {
     styleJson: [{
       "featureType": "water",
       "elementType": "all",
@@ -161,7 +161,13 @@
         "visibility": "off"
       }
     }]
-  });
+  };
+  // JSAPI 3.0 需要使用 setMapStyleV2（setMapStyle 在 3.0 下不再生效），同时兼容旧版本的 setMapStyle；
+  // 注意需要通过 call 绑定 this，单独取出的方法会丢失 map 上下文
+  var setMapStyle = map.setMapStyleV2 || map.setMapStyle;
+  if (typeof setMapStyle === 'function') {
+    setMapStyle.call(map, mapStyle);
+  }
 
   fetch('https://sakitam.oss-cn-beijing.aliyuncs.com/codepen/wind-layer/json/wind.json')
     .then(res => res.json())

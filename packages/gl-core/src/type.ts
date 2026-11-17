@@ -136,7 +136,16 @@ export type Bounds = [number, number, number, number];
 
 export interface TileSourceOptions {
   url: string | [string, string];
-  urlData?: Record<string, any>;
+  /**
+   * 自定义 url 模板变量，值可以是字符串、数字或函数。
+   * 函数会接收 `{ x, y, z, s, scheme, ... }`（其中 `y` 为写入 url 的行号，tms 下已翻转），返回替换值。
+   * 内置变量：`{bbox-epsg-3857}`（与 mapbox-gl / maplibre-gl 一致，可用于 WMS 的 BBOX 参数）。
+   * 注意：`x` / `y` / `z` / `s` / `scheme` 为保留变量，不能被覆盖。
+   * @example
+   * url: 'https://example.com/wms?BBOX={bbox-epsg-3857}&TIME={time}',
+   * urlData: { time: '2024-01-01T00:00:00Z' }
+   */
+  urlData?: Record<string, string | number | ((data: Record<string, any>) => string | number)>;
   type?: LayerSourceType.tile;
   minZoom?: number;
   maxZoom?: number;

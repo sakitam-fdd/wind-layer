@@ -188,6 +188,9 @@ map.addLayer(layer);
 
 ### Tile WMS
 
+`url` 中可以使用内置模板变量 `{bbox-epsg-3857}`（与 maplibre-gl 原生 raster source 的写法一致），会按瓦片行列号计算出 EPSG:3857 下的 `minX,minY,maxX,maxY`，可直接作为 WMS `GetMap` 请求的 `BBOX` 参数；
+也可以通过 `urlData` 注入自定义模板变量（值支持字符串、数字或函数）。
+
 ```js
 const tileSource = new maplibreWind.TileSource('wind', {
   tileSize: 256,
@@ -196,41 +199,28 @@ const tileSource = new maplibreWind.TileSource('wind', {
   roundZoom: true,
   decodeType: maplibreWind.DecodeType.image,
   dataRange: [
-    [-21.381948471069336,23.992563247680664],
-    [-20.644954681396484,21.251964569091797],
+    [-21.381948471069336, 23.992563247680664],
+    [-20.644954681396484, 21.251964569091797],
   ],
   wrapX: true,
-  url: 'http://myWmsServer/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&TRANSPARENT=true&LAYERS=myWindLayer&STYLES=default&WIDTH=256&HEIGHT=256&FORMAT=image/png&BBOX={bbox-epsg-3857}&CRS=EPSG:3857',
+  url: 'https://my-wms-server/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&TRANSPARENT=true&LAYERS=myWindLayer&STYLES=default&WIDTH=256&HEIGHT=256&FORMAT=image/png&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&TIME={time}',
+  urlData: {
+    // 自定义模板变量，函数形式会接收 { x, y, z, s, scheme }
+    time: '2024-01-01T00:00:00Z',
+  },
 });
 
 const layer = new maplibreWind.Layer('wind', tileSource, {
   styleSpec: {
+    // 粒子颜色同样由 fill-color 色带控制
     'fill-color': [
       'interpolate',
-      ['step', 1],
+      ['linear'],
       ['get', 'value'],
       0, '#fff',
       104, '#fff',
     ],
-    'opacity': [
-      'interpolate',
-      ['exponential', 0.5],
-      ['zoom'],
-      1,
-      1,
-      2,
-      1
-    ],
-    numParticles: [
-      'interpolate',
-      ['exponential', 0.5],
-      ['zoom'],
-      0, // zoom
-      65535 / 8, // numParticles
-      8, // zoom
-      65535 / 16 // numParticles
-    ],
-    ...particlesConfig,
+    numParticles: 65535 / 8,
   },
   renderFrom: maplibreWind.RenderFrom.rg,
   displayRange: [0, 104],
@@ -239,6 +229,8 @@ const layer = new maplibreWind.Layer('wind', tileSource, {
 
 map.addLayer(layer);
 ```
+
+> 注意：WMS 请求的 `WIDTH` / `HEIGHT` 需要与 `tileSize` 保持一致；`{bbox-epsg-3857}` 仅适用于 `CRS=EPSG:3857`（WMS 1.1.1 对应 `SRS=EPSG:3857`）。
 
 ## 数据源
 
