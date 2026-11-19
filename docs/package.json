@@ -41,7 +41,7 @@
     "markdown-it": "^14.0.0",
     "markdown-it-container": "^4.0.0",
     "vitepress": "^1.6.4",
-    "vite": "^5.4.21",
+    "vite": "^6.4.5",
     "vue": "^3.5.45",
     "vite-plugin-external": "^4.3.0"
   }
