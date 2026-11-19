@@ -1,5 +1,11 @@
 # wind-gl-worker
 
+## 2.0.3
+
+### Patch Changes
+
+- [`586f957`](https://github.com/sakitam-fdd/wind-layer/commit/586f957ddfaaab207efb4ccb52f0d13b51ba38e9) Thanks [@sakitam-fdd](https://github.com/sakitam-fdd)! - chore bump workflow
+
 ## 2.0.2
 
 ### Patch Changes

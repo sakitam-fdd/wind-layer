@@ -1,5 +1,16 @@
 # @sakitam-gis/mapbox-wind
 
+## 2.0.6
+
+### Patch Changes
+
+- [`586f957`](https://github.com/sakitam-fdd/wind-layer/commit/586f957ddfaaab207efb4ccb52f0d13b51ba38e9) Thanks [@sakitam-fdd](https://github.com/sakitam-fdd)! - chore bump workflow
+
+- Updated dependencies [[`586f957`](https://github.com/sakitam-fdd/wind-layer/commit/586f957ddfaaab207efb4ccb52f0d13b51ba38e9)]:
+  - wind-gl-core@2.0.4
+  - @sakitam-gis/rbush@3.1.3
+  - wind-core@1.1.9
+
 ## 2.0.5
 
 ### Patch Changes
